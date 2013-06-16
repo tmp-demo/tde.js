@@ -1,0 +1,172 @@
+<meta charset="utf-8">
+<style>
+input[type=range] {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 99%;
+  height: 30px;
+}
+body {
+  padding: 0;
+  margin: 0;
+}
+</style>
+<body>
+<canvas>
+</canvas>
+<input type=range id=seeker>
+<script type="x-shader/fragment" id=fragment-1>
+  precision lowp float;
+  uniform float time;
+
+  void main() {
+    float red = (10000.0 - time) / 10000.0;
+    float green = time / 10000.0;
+    gl_FragColor = vec4(red, green, 0.0, 1.0);
+  }
+</script>
+<script type="x-shader/fragment" id=fragment-2>
+  precision lowp float;
+  uniform float time;
+
+  void main() {
+    float col = (10000.0 - time) / 10000.0;
+    gl_FragColor = vec4(col, col, col, 1.0);
+  }
+</script>
+<script type="x-shader/vertex" id=vertex-1>
+  attribute vec2 position;
+
+  void main() {
+    gl_Position = vec4(position, 0.0, 1.0);
+  }
+</script>
+<script>
+  function updateCurrentTime() {
+    window.currentTime = Date.now() - window.startTime;
+    seeker.value = window.currentTime;
+    gl.uniform1f(gl.getUniformLocation(window.currentProgram, 'time'), window.currentTime);
+  }
+  function setEndTime(endTime) {
+    window.demoEndTime = endTime;
+    seeker.max = endTime;
+  }
+  function seek(time) {
+    console.log("seeking to: " + time);
+    window.startTime = Date.now() - time;
+    window.currentTime = Date.now() - window.startTime;
+    currentScene = findSceneForTime(currentTime);
+    chooseCurrentProgram();
+    if (window.status == "ended") {
+      window.status = "playing";
+      mainloop();
+    }
+  }
+  function loadProgram(vertex, fragment) {
+    var program = gl.createProgram();
+    var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fragmentShader, fragment.textContent);
+    gl.compileShader(fragmentShader);
+    if ( !gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+      alert("Shader compilation failed: " + gl.getShaderInfoLog(fragmentShader));
+    }
+    gl.shaderSource(vertexShader, vertex.textContent);
+    gl.compileShader(vertexShader);
+    if ( !gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+      alert("Shader compilation failed: " + gl.getShaderInfoLog(vertexShader));
+    }
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    gl.deleteShader(vertexShader);
+    gl.deleteShader(fragmentShader);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+       alert("Program link error: " + gl.getProgramParameter(program, gl.VALIDATE_STATUS) + "\nERROR: " + gl.getError());
+    }
+    return program;
+  }
+  function windowResize() {
+    cvs.width = window.innerWidth;
+    cvs.height = window.innerHeight;
+    gl.viewport(0, 0, cvs.width, cvs.height);
+  }
+  function render() {
+    if (!gl) {
+      return;
+    }
+    updateCurrentTime();
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.useProgram(window.currentProgram);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(0);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    gl.disableVertexAttribArray(0);
+  }
+  function findSceneForTime(time) {
+     for(var i = 0; i < window.demo.length; i++) {
+       if (window.demo[i].start <= time &&
+           window.demo[i].start + window.demo[i].duration > time) {
+         return i;
+       }
+     }
+     throw "No scene found for time " + time;
+  }
+  function chooseCurrentProgram() {
+    window.currentProgram = programs[findSceneForTime(currentTime)];
+  }
+  function shouldChangeScene() {
+    return currentTime > demo[currentScene].start + demo[currentScene].duration;
+  }
+  function mainloop() {
+    if (window.status == "playing"){
+      if (window.currentTime <= window.demoEndTime) {
+        chooseCurrentProgram();
+        requestAnimationFrame(mainloop);
+        render();
+        window.status = "playing";
+      } else {
+        window.status = "ended";
+      } 
+    }
+  }
+  window.addEventListener("resize", windowResize);
+  document.addEventListener("DOMContentLoaded", function () {
+    cvs = document.getElementsByTagName("canvas")[0];
+    gl = cvs.getContext("experimental-webgl");
+    buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    quad = new Float32Array([-1, -1, 1, -1, -1, 1, 1, -1, 1, 1, -1, 1]);
+    gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
+    seeker = document.getElementById("seeker");
+    windowResize();
+    document.addEventListener("input", function (e) {
+      seek(e.target.value);
+      seeker.value = e.target.value;
+    });
+    window.startTime = Date.now();
+    window.currentTime = 0;
+    window.status = "playing";
+    window.demo = [
+     { start: 0,
+       duration: 5000,
+       fragment: document.getElementById("fragment-1"),
+       vertex: document.getElementById("vertex-1") },
+     { start: 5001,
+       duration: 10000,
+       fragment: document.getElementById("fragment-2"),
+       vertex: document.getElementById("vertex-1") }
+    ];
+    programs = [];
+    for (var i = 0; i < demo.length; i++) {
+      programs.push(loadProgram(demo[i].vertex, demo[i].fragment));
+    }
+    currentProgram = programs[0];
+    currentScene = 0;
+    requestAnimationFrame(mainloop);
+    setEndTime(10000);
+  });
+</script>
+</body>
