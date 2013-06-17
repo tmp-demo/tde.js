@@ -16,26 +16,57 @@ body {
 <canvas>
 </canvas>
 <input type=range id=seeker>
-<script type="x-shader/fragment" id=fragment-1>
+<script type="x-shader/fragment" id=green-red>
   precision lowp float;
+  /* relative to scene start time */
   uniform float time;
+  /* scene duration */
+  uniform float duration;
+  /* resolution */
+  uniform vec2 res;
+
+  float hash(float n)
+  {
+    return fract(sin(n)*43758.5453);
+  }
+
 
   void main() {
-    float red = (10000.0 - time) / 10000.0;
-    float green = time / 10000.0;
-    gl_FragColor = vec4(red, green, 0.0, 1.0);
+    float speed = 20000.0;
+    float x = gl_FragCoord.x;
+    float y = gl_FragCoord.y;
+    vec2 fc = vec2(gl_FragCoord.x, gl_FragCoord.y);
+    float dist = length(fc - res);
+    vec2 center = vec2(res.x / 2.0, res.y/2.0);
+    float distcenter = abs(length(fc - center));
+    float maxdist = length(res);
+    float darken = 1.0;
+    if (mod(y, 6.0) <= 2.0) {
+      darken = 0.8;
+    }
+    darken = darken * (0.7 - distcenter / maxdist);
+    gl_FragColor = vec4(hash(x / res.x + time / (duration*speed)) * darken,
+                    0.5 * darken,
+                    //    hash(y / res.y + time / (duration*speed)) * darken,
+                        hash(dist / maxdist + time / (duration*speed)) * darken,
+                        1.0);
   }
 </script>
-<script type="x-shader/fragment" id=fragment-2>
+<script type="x-shader/fragment" id=bw>
   precision lowp float;
+  /* relative to scene start time */
   uniform float time;
+  /* scene duration */
+  uniform float duration;
+  /* resolution */
+  uniform vec2 res;
 
   void main() {
-    float col = (10000.0 - time) / 10000.0;
+    float col = (duration - time) / duration;
     gl_FragColor = vec4(col, col, col, 1.0);
   }
 </script>
-<script type="x-shader/vertex" id=vertex-1>
+<script type="x-shader/vertex" id=quad>
   attribute vec2 position;
 
   void main() {
@@ -43,23 +74,44 @@ body {
   }
 </script>
 <script>
+  seeker = null;
+  gl = null;
+  cvs = null;
+  /* vertex buffer for our quad */
+  buffer = null;
+  D = {
+    /* time in ms */
+    currentTime: 0,
+    startTime: 0,
+    endTime: 0,
+    PAUSED: 0,
+    PLAYING: 1,
+    ENDED: 2,
+    playState: null,
+    scenes: [],
+    programs: [],
+    currentScene: null,
+    currentProgram: null
+  };
   function updateCurrentTime() {
-    window.currentTime = Date.now() - window.startTime;
-    seeker.value = window.currentTime;
-    gl.uniform1f(gl.getUniformLocation(window.currentProgram, 'time'), window.currentTime);
-  }
-  function setEndTime(endTime) {
-    window.demoEndTime = endTime;
-    seeker.max = endTime;
+    D.currentTime = Date.now() - D.startTime;
+    seeker.value = D.currentTime;
+    gl.uniform1f(gl.getUniformLocation(D.currentProgram, 'time'),
+                 D.currentTime - D.scenes[D.currentScene].start);
+    console.log("time:" + (D.currentTime - D.scenes[D.currentScene].start));
+    gl.uniform1f(gl.getUniformLocation(D.currentProgram, 'duration'),
+                 D.scenes[D.currentScene].duration);
+    console.log("duration:" + D.scenes[D.currentScene].duration);
+    gl.uniform2f(gl.getUniformLocation(D.currentProgram, 'res'),
+                 cvs.width, cvs.height);
   }
   function seek(time) {
-    console.log("seeking to: " + time);
-    window.startTime = Date.now() - time;
-    window.currentTime = Date.now() - window.startTime;
-    currentScene = findSceneForTime(currentTime);
+    D.startTime = Date.now() - time;
+    D.currentTime = Date.now() - D.startTime;
+    D.currentScene = findSceneForTime(D.currentTime);
     chooseCurrentProgram();
-    if (window.status == "ended") {
-      window.status = "playing";
+    if (D.playState == D.ENDED) {
+      D.playState = D.PLAYING;
       mainloop();
     }
   }
@@ -83,7 +135,9 @@ body {
     gl.deleteShader(vertexShader);
     gl.deleteShader(fragmentShader);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-       alert("Program link error: " + gl.getProgramParameter(program, gl.VALIDATE_STATUS) + "\nERROR: " + gl.getError());
+       alert("Program link error: " +
+             gl.getProgramParameter(program, gl.VALIDATE_STATUS) +
+             "\nERROR: " + gl.getError());
     }
     return program;
   }
@@ -96,9 +150,9 @@ body {
     if (!gl) {
       return;
     }
-    updateCurrentTime();
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.useProgram(window.currentProgram);
+    gl.useProgram(D.currentProgram);
+    updateCurrentTime();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(0);
@@ -106,67 +160,89 @@ body {
     gl.disableVertexAttribArray(0);
   }
   function findSceneForTime(time) {
-     for(var i = 0; i < window.demo.length; i++) {
-       if (window.demo[i].start <= time &&
-           window.demo[i].start + window.demo[i].duration > time) {
+     for(var i = 0; i < D.scenes.length; i++) {
+       if (D.scenes[i].start <= time &&
+           D.scenes[i].start + D.scenes[i].duration > time) {
          return i;
        }
      }
      throw "No scene found for time " + time;
   }
-  function chooseCurrentProgram() {
-    window.currentProgram = programs[findSceneForTime(currentTime)];
-  }
-  function shouldChangeScene() {
-    return currentTime > demo[currentScene].start + demo[currentScene].duration;
+  function updateScene() {
+    D.currentScene = findSceneForTime(D.currentTime);
+    D.currentProgram = D.programs[D.currentScene];
   }
   function mainloop() {
-    if (window.status == "playing"){
-      if (window.currentTime <= window.demoEndTime) {
-        chooseCurrentProgram();
+    if (D.playState == D.PLAYING){
+      if (D.currentTime <= D.endTime) {
+        updateScene();
         requestAnimationFrame(mainloop);
         render();
-        window.status = "playing";
+        D.playState = D.PLAYING;
       } else {
-        window.status = "ended";
-      } 
+        D.playState = D.ENDED;
+      }
+    }
+  }
+
+  function assertScenesSorted() {
+    for (var i = 0; i < D.scenes - 1; i++) {
+      if (!(D.scenes[i].startTime + D.scene[i].duration <= D.scenes[i+1].startTime)) {
+        throw "Scenes not sorted in chronological order, aborting.";
+      }
     }
   }
   window.addEventListener("resize", windowResize);
+
   document.addEventListener("DOMContentLoaded", function () {
     cvs = document.getElementsByTagName("canvas")[0];
     gl = cvs.getContext("experimental-webgl");
     buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    quad = new Float32Array([-1, -1, 1, -1, -1, 1, 1, -1, 1, 1, -1, 1]);
+    quad = new Float32Array([-1, -1,
+                              1, -1,
+                             -1,  1,
+                              1, -1,
+                              1,  1,
+                             -1,  1]);
     gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
-    seeker = document.getElementById("seeker");
+
     windowResize();
+
+    seeker = document.getElementById("seeker");
     document.addEventListener("input", function (e) {
       seek(e.target.value);
       seeker.value = e.target.value;
     });
-    window.startTime = Date.now();
-    window.currentTime = 0;
-    window.status = "playing";
-    window.demo = [
+
+    D.startTime = Date.now();
+    D.currentTime = 0;
+    D.playState = D.PLAYING;
+
+    D.scenes = [
      { start: 0,
        duration: 5000,
-       fragment: document.getElementById("fragment-1"),
-       vertex: document.getElementById("vertex-1") },
-     { start: 5001,
-       duration: 10000,
-       fragment: document.getElementById("fragment-2"),
-       vertex: document.getElementById("vertex-1") }
+       fragment: document.getElementById("green-red"),
+       vertex: document.getElementById("quad") },
+     { start: 5000,
+       duration: 7500,
+       fragment: document.getElementById("bw"),
+       vertex: document.getElementById("quad") }
     ];
-    programs = [];
-    for (var i = 0; i < demo.length; i++) {
-      programs.push(loadProgram(demo[i].vertex, demo[i].fragment));
+
+    assertScenesSorted();
+
+    var lastScene = D.scenes[D.scenes.length - 1];
+    seeker.max = D.endTime = lastScene.start + lastScene.duration;
+
+    D.programs = [];
+    for (var i = 0; i < D.scenes.length; i++) {
+      D.programs.push(loadProgram(D.scenes[i].vertex, D.scenes[i].fragment));
     }
-    currentProgram = programs[0];
-    currentScene = 0;
+
+    D.currentProgram = D.programs[0];
+    D.currentScene = 0;
     requestAnimationFrame(mainloop);
-    setEndTime(10000);
   });
 </script>
 </body>
