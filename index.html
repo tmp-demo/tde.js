@@ -110,6 +110,10 @@ body {
     D.startTime = Date.now() - time;
     D.currentTime = Date.now() - D.startTime;
     D.currentScene = findSceneForTime(D.currentTime);
+    if (D.playState == D.PAUSED) {
+      updateScene();
+      render();
+    }
     if (D.playState == D.ENDED) {
       D.playState = D.PLAYING;
       mainloop();
@@ -216,6 +220,7 @@ body {
     });
 
     document.addEventListener("keypress", function(e) {
+      // play/pause
       if (e.charCode == 32) {
         if (D.playState == D.PLAYING) {
           D.pauseStart = Date.now();
@@ -227,6 +232,10 @@ body {
           D.playState = D.PLAYING;
           mainloop();
         }
+      }
+      // jump to scene
+      else if (e.charCode >= 48 && e.charCode <= 57) {
+        seek(D.scenes[e.charCode - 48].start);
       }
     });
 
