@@ -63,7 +63,10 @@ body {
 
   void main() {
     float col = (duration - time) / duration;
-    gl_FragColor = vec4(col, col, col, 1.0);
+    gl_FragColor = vec4(cos(gl_FragCoord.x * col * 65366.0 * col),
+                        sin(gl_FragCoord.y * col * 65366.0 * col),
+                        tan(gl_FragCoord.x * col * 65366.0),
+                        1.0);
   }
 </script>
 <script type="x-shader/vertex" id=quad>
@@ -98,10 +101,8 @@ body {
     seeker.value = D.currentTime;
     gl.uniform1f(gl.getUniformLocation(D.currentProgram, 'time'),
                  D.currentTime - D.scenes[D.currentScene].start);
-    console.log("time:" + (D.currentTime - D.scenes[D.currentScene].start));
     gl.uniform1f(gl.getUniformLocation(D.currentProgram, 'duration'),
                  D.scenes[D.currentScene].duration);
-    console.log("duration:" + D.scenes[D.currentScene].duration);
     gl.uniform2f(gl.getUniformLocation(D.currentProgram, 'res'),
                  cvs.width, cvs.height);
   }
@@ -109,7 +110,6 @@ body {
     D.startTime = Date.now() - time;
     D.currentTime = Date.now() - D.startTime;
     D.currentScene = findSceneForTime(D.currentTime);
-    chooseCurrentProgram();
     if (D.playState == D.ENDED) {
       D.playState = D.PLAYING;
       mainloop();
@@ -225,7 +225,7 @@ body {
        fragment: document.getElementById("green-red"),
        vertex: document.getElementById("quad") },
      { start: 5000,
-       duration: 7500,
+       duration: 15000,
        fragment: document.getElementById("bw"),
        vertex: document.getElementById("quad") }
     ];
