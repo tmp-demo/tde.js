@@ -215,6 +215,21 @@ body {
       seeker.value = e.target.value;
     });
 
+    document.addEventListener("keypress", function(e) {
+      if (e.charCode == 32) {
+        if (D.playState == D.PLAYING) {
+          D.pauseStart = Date.now();
+          D.playState = D.PAUSED;
+        } else if(D.playState == D.ENDED) {
+          seek(0);
+        } else {
+          D.startTime += Date.now() - D.pauseStart;
+          D.playState = D.PLAYING;
+          mainloop();
+        }
+      }
+    });
+
     D.startTime = Date.now();
     D.currentTime = 0;
     D.playState = D.PLAYING;
