@@ -232,12 +232,12 @@ body {
           D.playState = D.PLAYING;
           mainloop();
         }
-      }
-      else {
+      } else {
   	    // jump to scene
-  		  var s = e.charCode -48 - 1;
-  		  if (s >= 0 && s <=9 && s < D.scenes.length) 
-    	    seek(D.scenes[s].start);
+        var s = e.charCode - 48 - 1;
+        if (s >= 0 && s <= 9 && s < D.scenes.length) {
+          seek(D.scenes[s].start);
+        }
       }
     });
 
