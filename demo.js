@@ -6,9 +6,18 @@ function $$(s) {
   return document.querySelectorAll(s);
 }
 
+function BeatDetector(analyserNode, callback) {
+  this.node = analyserNode;
+}
+
+BeatDetector.prototype.process = function(freq) {
+
+}
+
 seeker = null;
 gl = null;
 cvs = null;
+ac = null;
 /* vertex buffer for our quad */
 buffer = null;
 D = {
@@ -24,7 +33,8 @@ D = {
   programs: [],
   currentScene: null,
   currentProgram: null,
-  shaders: {}
+  shaders: {},
+  sounds: {}
 };
 function updateCurrentTime() {
   D.currentTime = Date.now() - D.startTime;
@@ -169,10 +179,29 @@ ResourceLoader.prototype.loadScript = function(src, type, id) {
   xhr.send(null);
 }
 
+ResourceLoader.prototype.loadAudio = function(src, id) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", src);
+  xhr.responseType = "arraybuffer";
+  var self = this;
+  xhr.onload = function() {
+    ac.decodeAudioData(xhr.response, function(data) {
+      D.sounds[id] = data;
+      self.onLoad();
+    }, function() {
+      alert("error loading " + src + " " + "(" + id + ")");
+    });
+  };
+  this.registerResource();
+  xhr.send(null);
+}
+
+ac = new AudioContext();
 var loader = new ResourceLoader(allLoaded);
 loader.loadScript("green-red.fs", "x-shader/fragment", "green-red");
 loader.loadScript("bw.fs", "x-shader/fragment", "bw");
 loader.loadScript("quad.vs", "x-shader/vertex", "quad");
+loader.loadAudio("think.wav", "think");
 
 cvs = document.getElementsByTagName("canvas")[0];
 gl = cvs.getContext("experimental-webgl");
