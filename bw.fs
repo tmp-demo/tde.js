@@ -3,6 +3,7 @@ precision lowp float;
 uniform float time;
 /* scene duration */
 uniform float duration;
+uniform float beat;
 /* resolution */
 uniform vec2 res;
 
@@ -11,6 +12,6 @@ void main() {
   gl_FragColor = vec4(cos(gl_FragCoord.x * col * 65366.0 * col),
                       sin(gl_FragCoord.y * col * 65366.0 * col),
                       tan(gl_FragCoord.x * col * 65366.0),
-                      1.0);
+                      1.0 - beat * 0.5);
 }
 

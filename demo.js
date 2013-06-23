@@ -6,18 +6,29 @@ function $$(s) {
   return document.querySelectorAll(s);
 }
 
-function BeatDetector(analyserNode, callback) {
+function BeatDetector(analyserNode) {
   this.node = analyserNode;
+  this.array = new Float32Array(analyserNode.fftSize);
 }
 
-BeatDetector.prototype.process = function(freq) {
-
+BeatDetector.prototype.beat = function() {
+  this.node.getFloatFrequencyData(this.array);
+  var avgWidth = 10;
+  var sum = 0;
+  for (var i = 0; i < avgWidth; i++) {
+    sum += this.array[i];
+  }
+  sum /= avgWidth;
+  sum -= this.node.minDecibels;
+  sum /= -(this.node.minDecibels - this.node.maxDecibels);
+  return sum;
 }
 
 seeker = null;
 gl = null;
 cvs = null;
 ac = null;
+bd = null;
 /* vertex buffer for our quad */
 buffer = null;
 D = {
@@ -41,10 +52,12 @@ function updateCurrentTime() {
   seeker.value = D.currentTime;
   gl.uniform1f(gl.getUniformLocation(D.currentProgram, 'time'),
                D.currentTime - D.scenes[D.currentScene].start);
-               gl.uniform1f(gl.getUniformLocation(D.currentProgram, 'duration'),
-                            D.scenes[D.currentScene].duration);
-                            gl.uniform2f(gl.getUniformLocation(D.currentProgram, 'res'),
-                                         cvs.width, cvs.height);
+   gl.uniform1f(gl.getUniformLocation(D.currentProgram, 'duration'),
+                D.scenes[D.currentScene].duration);
+  gl.uniform2f(gl.getUniformLocation(D.currentProgram, 'res'),
+               cvs.width, cvs.height);
+  gl.uniform1f(gl.getUniformLocation(D.currentProgram, 'beat'),
+               bd.beat());
 }
 function seek(time) {
   D.startTime = Date.now() - time;
@@ -164,6 +177,14 @@ function allLoaded() {
   D.currentTime = 0;
   D.currentProgram = D.programs[0];
   D.currentScene = 0;
+  var bs = ac.createBufferSource();
+  var an = ac.createAnalyser();
+  bs.buffer = D.sounds["think"];
+  bs.loop = true;
+  bs.connect(ac.destination);
+  bs.connect(an);
+  bd = new BeatDetector(an);
+  bs.start(0);
   requestAnimationFrame(mainloop);
 }
 

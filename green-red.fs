@@ -3,6 +3,8 @@ precision lowp float;
 uniform float time;
 /* scene duration */
 uniform float duration;
+/* beat */
+uniform float beat;
 /* resolution */
 uniform vec2 res;
 
@@ -25,10 +27,10 @@ void main() {
   if (mod(y, 6.0) <= 2.0) {
     darken = 0.8;
   }
-  darken = darken * (0.7 - distcenter / maxdist);
+  darken = darken * (0.7 - distcenter / maxdist) * beat * 2.0;
   gl_FragColor = vec4(hash(x / res.x + time / (duration*speed)) * darken,
-      0.5 * darken,
-      //    hash(y / res.y + time / (duration*speed)) * darken,
-      hash(dist / maxdist + time / (duration*speed)) * darken,
-      1.0);
+                      0.5 * darken,
+                      //    hash(y / res.y + time / (duration*speed)) * darken,
+                      hash(dist / maxdist + time / (duration*speed)) * darken,
+                      1.0);
 }
