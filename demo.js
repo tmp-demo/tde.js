@@ -59,9 +59,10 @@ D = {
 function updateTimeUniforms() {
   D.currentTime = Date.now() - D.startTime;
   seeker.value = D.currentTime;
+  D.clipTime = D.currentTime - D.scenes[D.currentScene].start;
   gl.uniform1f(gl.getUniformLocation(D.currentProgram, 'time'),
-               D.currentTime - D.scenes[D.currentScene].start);
-   gl.uniform1f(gl.getUniformLocation(D.currentProgram, 'duration'),
+               D.clipTime);
+  gl.uniform1f(gl.getUniformLocation(D.currentProgram, 'duration'),
                 D.scenes[D.currentScene].duration);
   gl.uniform2f(gl.getUniformLocation(D.currentProgram, 'res'),
                cvs.width, cvs.height);
