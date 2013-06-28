@@ -12,6 +12,7 @@ uniform float beat;
 uniform vec2 res;
 
 uniform mat4 mvmat;
+uniform vec3 position;
 
 #define MAX_STEPS 200
 
@@ -77,29 +78,29 @@ void applyFog( in float distance, inout vec3 rgb ){
 }
 
 
-float RedDistance(in vec3 position)
+float RedDistance(in vec3 point_pos)
 {
-    return SphereDistance(position, vec3(0.0, 3.0, 5.0), 5.0);
+    return SphereDistance(point_pos, vec3(0.0, 3.0, 5.0), 5.0);
 }
 
-float BuildingsDistance(in vec3 position)
+float BuildingsDistance(in vec3 point_pos)
 {
     return min(
-      CubeRepetition(position, vec3(17.0, 0.0, 20.0))
-      , CubeRepetition(position+vec3(350.0,-2.0,0.0), vec3(23.0, 0.0, 23.0))
+      CubeRepetition(point_pos, vec3(17.0, 0.0, 20.0))
+      , CubeRepetition(point_pos+vec3(350.0,-2.0,0.0), vec3(23.0, 0.0, 23.0))
     );
 }
 
-float GroundDistance(in vec3 position)
+float GroundDistance(in vec3 point_pos)
 {
-    return PlaneDistance(position, vec3(0.0,1.0,0.0), 0.0);
+    return PlaneDistance(point_pos, vec3(0.0,1.0,0.0), 0.0);
 }
 
-float DistanceField(in vec3 position, out int mtl )
+float DistanceField(in vec3 point_pos, out int mtl )
 {
-    float redDistance = RedDistance(position);
-    float bldDistance = BuildingsDistance(position);
-    float gndDistance = GroundDistance(position);
+    float redDistance = RedDistance(point_pos);
+    float bldDistance = BuildingsDistance(point_pos);
+    float gndDistance = GroundDistance(point_pos);
     float closest = gndDistance;
     mtl = GROUND_MTL;
     if ( bldDistance < closest )
@@ -140,18 +141,18 @@ float Softshadow(in vec3 landPoint, in vec3 lightVector, float mint, float maxt,
 }
 
 
-vec3 RayMarch(in vec3 position, in vec3 direction, out int mtl)
+vec3 RayMarch(in vec3 point_pos, in vec3 direction, out int mtl)
 {
     float nextDistance = 1.0;
     for (int i = 0; i < MAX_STEPS ; ++i)
     {
-        nextDistance = DistanceField(position,mtl);
+        nextDistance = DistanceField(point_pos,mtl);
         
         if ( nextDistance < 0.01)
         {
-            return position;
+            return point_pos;
         }
-        position += direction * nextDistance;
+        point_pos += direction * nextDistance;
     }
     // out of steps
     if (direction.y < 0.0 )
@@ -162,7 +163,7 @@ vec3 RayMarch(in vec3 position, in vec3 direction, out int mtl)
     {
         mtl = SKY_MTL;
     }
-    return position;
+    return point_pos;
 }
 
 vec3 MaterialColor( int mtl )
@@ -187,18 +188,20 @@ vec3 ComputeNormal(vec3 pos, int material)
     );
 }
 
-void FishEyeCamera(vec2 screenPos, float ratio, float fovy, mat4 transform, out vec3 position, out vec3 direction)
+void FishEyeCamera(vec2 screenPos, float ratio, float fovy, mat4 transform, out vec3 direction)
 {
     screenPos.y -= 0.2;
     screenPos *= vec2(PI*0.5,PI*0.5/ratio)/fovy;
     
+    float px = screenPos.x / 2.0;
+    float py = screenPos.y / 2.0;
+
     direction = vec3(
-           sin(screenPos.y+PI*0.5)*sin(screenPos.x)
-        , -cos(screenPos.y+PI*0.5)
-        , sin(screenPos.y+PI*0.5)*cos(screenPos.x)
+           sin(py+PI*0.5)*sin(px)
+        , -cos(py+PI*0.5)
+        , sin(py+PI*0.5)*cos(px)
     );
     direction = (mvmat * vec4(direction,0.0)).xyz;
-    position = vec3(5.0*sin(time*0.001), 15.0, time * 0.2);
 }
 
 
@@ -224,10 +227,9 @@ void main(void)
     screenPos.y = gl_FragCoord.y/res.y - 0.5;
 
     vec3 direction;
-    vec3 position;
-    FishEyeCamera(screenPos, ratio, fovyCoefficient, viewMatrix, position, direction);
+    FishEyeCamera(screenPos, ratio, fovyCoefficient, viewMatrix, direction);
     int material;
-    vec3 hitPosition = RayMarch(position, direction, material);
+    vec3 hitposition = RayMarch(position, direction, material);
 
     if( material == SKY_MTL && direction.y < 0.0 )
     {
@@ -241,25 +243,25 @@ void main(void)
     {
         vec3 lightpos = vec3(50.0 * sin(time*0.001), 10.0 + 40.0 *
         abs(cos(time*0.001)), (time * 0.2) + 100.0 );
-        vec3 lightVector = normalize(lightpos - hitPosition);
+        vec3 lightVector = normalize(lightpos - hitposition);
         // soft shadows
-        float shadow = Softshadow(hitPosition, lightVector, 0.1, 50.0, shadowHardness);
+        float shadow = Softshadow(hitposition, lightVector, 0.1, 50.0, shadowHardness);
         // attenuation due to facing (or not) the light
-        vec3 normal = ComputeNormal(hitPosition, material);
+        vec3 normal = ComputeNormal(hitposition, material);
         float attenuation = clamp(dot(normal, lightVector),0.0,1.0)*0.6 + 0.4;
         shadow = min(shadow, attenuation);
         //material color
         vec3 mtlColor = MaterialColor(material);
         
         if(material == BUILDINGS_MTL){
-          mtlColor = mix(shadowColor, mtlColor, clamp(hitPosition.y/7.0, 0.0, 1.0));
+          mtlColor = mix(shadowColor, mtlColor, clamp(hitposition.y/7.0, 0.0, 1.0));
         }
         hitColor = mix(shadowColor, mtlColor, 0.4+shadow*0.6);
-        vec3 hitNormal = ComputeNormal(hitPosition, 0);
-        float AO = AmbientOcclusion(hitPosition, hitNormal, 0.35, 5.0);
+        vec3 hitNormal = ComputeNormal(hitposition, 0);
+        float AO = AmbientOcclusion(hitposition, hitNormal, 0.35, 5.0);
         hitColor = mix(shadowColor, hitColor, AO);
         
-        applyFog( length(position-hitPosition), hitColor);
+        applyFog( length(position-hitposition), hitColor);
         gl_FragColor = vec4(hitColor, 1.0);
     }
     else // sky
