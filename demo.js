@@ -25,10 +25,18 @@ BeatDetector.prototype.beat = function() {
 }
 
 seeker = null;
+/* gl context */
 gl = null;
+/* canvas */
 cvs = null;
+/* audio context */
 ac = null;
+/* beat detector */
 bd = null;
+/* buffersource */
+bs = null;
+/* analysernode */
+an = null;
 /* vertex buffer for our quad */
 buffer = null;
 D = {
@@ -60,12 +68,22 @@ function updateCurrentTime() {
                bd.beat());
 }
 function seek(time) {
+  console.log("seek " + time);
+  bs.stop(0);
+  bs = ac.createBufferSource();
+  bs.buffer = D.sounds["long"];
+  console.log("len: " + D.sounds["long"].duration);
+  bs.connect(ac.destination);
+  bs.connect(an);
   D.startTime = Date.now() - time;
   D.currentTime = Date.now() - D.startTime;
   D.currentScene = findSceneForTime(D.currentTime);
   if (D.playState == D.PAUSED) {
     updateScene();
     render();
+  } else {
+    console.log(0, D.currentTime / 1000);
+    bs.start(0, D.currentTime / 1000);
   }
   if (D.playState == D.ENDED) {
     D.playState = D.PLAYING;
@@ -138,6 +156,7 @@ function mainloop() {
       D.playState = D.PLAYING;
     } else {
       D.playState = D.ENDED;
+      //bs.stop(0);
     }
   }
 }
@@ -177,10 +196,9 @@ function allLoaded() {
   D.currentTime = 0;
   D.currentProgram = D.programs[0];
   D.currentScene = 0;
-  var bs = ac.createBufferSource();
-  var an = ac.createAnalyser();
-  bs.buffer = D.sounds["think"];
-  bs.loop = true;
+  bs = ac.createBufferSource();
+  an = ac.createAnalyser();
+  bs.buffer = D.sounds["long"];
   bs.connect(ac.destination);
   bs.connect(an);
   bd = new BeatDetector(an);
@@ -217,12 +235,17 @@ ResourceLoader.prototype.loadAudio = function(src, id) {
   xhr.send(null);
 }
 
-ac = new AudioContext();
+if (window.AudioContext) {
+  ac = new AudioContext();
+} else {
+  ac = new webkitAudioContext();
+}
 var loader = new ResourceLoader(allLoaded);
 loader.loadScript("green-red.fs", "x-shader/fragment", "green-red");
 loader.loadScript("bw.fs", "x-shader/fragment", "bw");
 loader.loadScript("quad.vs", "x-shader/vertex", "quad");
 loader.loadAudio("think.wav", "think");
+loader.loadAudio("long.ogg", "long");
 
 cvs = document.getElementsByTagName("canvas")[0];
 gl = cvs.getContext("experimental-webgl");
