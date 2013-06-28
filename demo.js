@@ -46,14 +46,17 @@ D = {
   endTime: 0,
   PAUSED: 0,
   PLAYING: 1,
-  ENDED: 2,
+  ENDED: 2,  
+  looping: false,
   playState: null,
   scenes: [],
   programs: [],
   currentScene: null,
   currentProgram: null,
   shaders: {},
-  sounds: {}
+  sounds: {},
+  scenesShortcuts : {"97":0, "122":1,"101":2, "114":3,"116":4,"116":5,"121":6,"117":7,"105":8,"111":9},
+  scenesLoopShortcuts : {"113":0, "115":1,"100":2, "102":3,"103":4,"104":5,"106":6,"107":7,"108":8,"109":9}
 };
 function updateCurrentTime() {
   D.currentTime = Date.now() - D.startTime;
@@ -138,10 +141,17 @@ function renderScene() {
   D.render();
 }
 function findSceneForTime(time) {
-  for(var i = 0; i < D.scenes.length; i++) {
-    if (D.scenes[i].start <= time &&
-        D.scenes[i].start + D.scenes[i].duration > time) {
-      return i;
+
+  if (D.looping){
+	if(D.scenes[D.currentScene].start + D.scenes[D.currentScene].duration < time)
+		seek(D.scenes[D.currentScene].start);
+	return D.currentScene;
+  }else{
+    for(var i = 0; i < D.scenes.length; i++) {
+      if (D.scenes[i].start <= time &&
+          D.scenes[i].start + D.scenes[i].duration > time) {
+        return i;
+      }
     }
   }
   throw "No scene found for time " + time;
@@ -296,24 +306,36 @@ document.addEventListener("input", function (e) {
   seeker.value = e.target.value;
 });
 
+
+
 document.addEventListener("keypress", function(e) {
   // play/pause
-  if (e.charCode == 32) {
+  console.log(e.keyCode);
+  if (e.charCode == 32) { 
     if (D.playState == D.PLAYING) {
       D.pauseStart = Date.now();
       D.playState = D.PAUSED;
-    } else if(D.playState == D.ENDED) {
-      seek(0);
     } else {
       D.startTime += Date.now() - D.pauseStart;
       D.playState = D.PLAYING;
       mainloop();
-    }
-  } else {
+    } 
+  } else if(e.charCode == 8) { //backspace key
+	console.log("stop looping");
+    D.looping = false;
+  }else if(typeof D.scenesShortcuts[e.charCode]  !== 'undefined' ){
     // jump to scene
-    var s = e.charCode - 48 - 1;
-    if (s >= 0 && s <= 9 && s < D.scenes.length) {
-      seek(D.scenes[s].start);
+    if (D.scenesShortcuts[""+e.charCode] < D.scenes.length){//s >= 0 && s <= 9 && s < D.scenes.length) {
+	  console.log("a jump to scene");
+	  D.looping = false;
+      seek(D.scenes[D.scenesShortcuts[""+e.charCode]].start);
+    }	
+  }else if(typeof D.scenesLoopShortcuts[e.charCode]  !== 'undefined' ){
+    // jump to scene
+	if (D.scenesLoopShortcuts[""+e.charCode] < D.scenes.length){//s >= 0 && s <= 9 && s < D.scenes.length) {
+	  D.looping = true;
+	  console.log("a jump to scene and loop");
+      seek(D.scenes[D.scenesLoopShortcuts[""+e.charCode]].start);
     }
   }
 });
@@ -349,8 +371,6 @@ D.scenes.pushScene( {
   vertex: "quad",
   render: renderDefault
 });
-
-
 
 assertScenesSorted();
 
