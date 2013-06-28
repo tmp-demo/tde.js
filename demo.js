@@ -310,7 +310,6 @@ document.addEventListener("input", function (e) {
 
 document.addEventListener("keypress", function(e) {
   // play/pause
-  console.log(e.keyCode);
   if (e.charCode == 32) { 
     if (D.playState == D.PLAYING) {
       D.pauseStart = Date.now();
@@ -321,12 +320,10 @@ document.addEventListener("keypress", function(e) {
       mainloop();
     } 
   } else if(e.charCode == 8) { //backspace key
-	console.log("stop looping");
-    D.looping = false;
+	D.looping = false;
   }else if(typeof D.scenesShortcuts[e.charCode]  !== 'undefined' ){
     // jump to scene
     if (D.scenesShortcuts[""+e.charCode] < D.scenes.length){//s >= 0 && s <= 9 && s < D.scenes.length) {
-	  console.log("a jump to scene");
 	  D.looping = false;
       seek(D.scenes[D.scenesShortcuts[""+e.charCode]].start);
     }	
@@ -334,8 +331,7 @@ document.addEventListener("keypress", function(e) {
     // jump to scene
 	if (D.scenesLoopShortcuts[""+e.charCode] < D.scenes.length){//s >= 0 && s <= 9 && s < D.scenes.length) {
 	  D.looping = true;
-	  console.log("a jump to scene and loop");
-      seek(D.scenes[D.scenesLoopShortcuts[""+e.charCode]].start);
+	  seek(D.scenes[D.scenesLoopShortcuts[""+e.charCode]].start);
     }
   }
 });
