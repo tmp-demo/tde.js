@@ -172,7 +172,7 @@ function mainloop() {
 
 function assertScenesSorted() {
   for (var i = 0; i < D.scenes - 1; i++) {
-    if (!(D.scenes[i].startTime + D.scene[i].duration <= D.scenes[i+1].startTime)) {
+    if (!(D.scenes[i].startTime + D.scene[i].duration == D.scenes[i+1].startTime)) {
       throw "Scenes not sorted in chronological order, aborting.";
     }
   }
@@ -309,22 +309,36 @@ document.addEventListener("keypress", function(e) {
 D.playState = D.PLAYING;
 D.programs = [];
 
-D.scenes = [
-  { start: 0,
-    duration: 5000,
-    fragment: "green-red",
-    vertex: "quad"},
-  { start: 5000,
-    duration: 15000,
-    fragment: "bw",
-    vertex: "quad",
-    render: renderDefault },
-  { start: 20000,
-    duration: 15000,
-    fragment: "marcher1",
-    vertex: "quad",
-    render: renderDefault }
-];
+D.scenes = [];
+
+D.scenes.pushScene = function(scene) {
+  var lastScene = D.scenes.length == 0 ? {start:0, duration :0} : D.scenes[D.scenes.length -1];
+  scene.start = lastScene.start+lastScene.duration;
+  D.scenes.push(scene);
+}
+
+D.scenes.pushScene( {
+  duration: 5000,
+  fragment: "green-red",
+  vertex: "quad",
+  render: renderDefault
+});
+
+D.scenes.pushScene( {
+ duration: 15000,
+ fragment: "bw",
+ vertex: "quad",
+ render: renderDefault
+});
+
+D.scenes.pushScene( {
+  duration: 15000,
+  fragment: "marcher1",
+  vertex: "quad",
+  render: renderDefault
+});
+
+
 
 assertScenesSorted();
 
