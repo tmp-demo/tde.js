@@ -121,7 +121,6 @@ function windowResize() {
 }
 
 function renderDefault() {
-  //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.useProgram(D.currentProgram);
   updateCurrentTime();
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -194,6 +193,8 @@ ResourceLoader.prototype.registerResource = function(thing) {
 }
 
 function allLoaded() {
+  loadScenes();
+
   for (var i = 0; i < D.scenes.length; i++) {
     var scene = D.scenes[i];
     D.programs.push(loadProgram(D.shaders[scene.vertex].src, D.shaders[scene.fragment].src));
@@ -270,6 +271,8 @@ if (window.AudioContext) {
 }
   var loader = new ResourceLoader(allLoaded);
 loader.loadJS("glmatrix.js");
+loader.loadJS("raymarch.js");
+loader.loadJS("scenes.js");
 loader.loadShader("green-red.fs", "x-shader/fragment", "green-red");
 loader.loadShader("bw.fs", "x-shader/fragment", "bw");
 loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
@@ -321,39 +324,4 @@ document.addEventListener("keypress", function(e) {
 
 D.playState = D.PLAYING;
 D.programs = [];
-
 D.scenes = [];
-
-D.scenes.pushScene = function(scene) {
-  var lastScene = D.scenes.length == 0 ? {start:0, duration :0} : D.scenes[D.scenes.length -1];
-  scene.start = lastScene.start+lastScene.duration;
-  D.scenes.push(scene);
-}
-
-D.scenes.pushScene( {
-  duration: 5000,
-  fragment: "green-red",
-  vertex: "quad",
-  render: renderDefault
-});
-
-D.scenes.pushScene( {
- duration: 15000,
- fragment: "bw",
- vertex: "quad",
- render: renderDefault
-});
-
-D.scenes.pushScene( {
-  duration: 15000,
-  fragment: "marcher1",
-  vertex: "quad",
-  render: renderDefault
-});
-
-
-
-assertScenesSorted();
-
-var lastScene = D.scenes[D.scenes.length - 1];
-seeker.max = D.endTime = lastScene.start + lastScene.duration;
