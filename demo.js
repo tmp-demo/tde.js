@@ -80,7 +80,7 @@ function seek(time) {
   D.currentScene = findSceneForTime(D.currentTime);
   if (D.playState == D.PAUSED) {
     updateScene();
-    render();
+    D.render();
   } else {
     bs.start(0, D.currentTime / 1000);
   }
