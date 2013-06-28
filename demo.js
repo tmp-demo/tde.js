@@ -56,7 +56,7 @@ D = {
   shaders: {},
   sounds: {}
 };
-function updateCurrentTime() {
+function updateTimeUniforms() {
   D.currentTime = Date.now() - D.startTime;
   seeker.value = D.currentTime;
   gl.uniform1f(gl.getUniformLocation(D.currentProgram, 'time'),
@@ -122,7 +122,7 @@ function windowResize() {
 
 function renderDefault() {
   gl.useProgram(D.currentProgram);
-  updateCurrentTime();
+  updateTimeUniforms();
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(0);
