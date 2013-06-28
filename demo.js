@@ -68,11 +68,9 @@ function updateCurrentTime() {
                bd.beat());
 }
 function seek(time) {
-  console.log("seek " + time);
   bs.stop(0);
   bs = ac.createBufferSource();
   bs.buffer = D.sounds["long"];
-  console.log("len: " + D.sounds["long"].duration);
   bs.connect(ac.destination);
   bs.connect(an);
   D.startTime = Date.now() - time;
@@ -123,14 +121,14 @@ function windowResize() {
 }
 
 function renderDefault() {
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.useProgram(D.currentProgram);
   updateCurrentTime();
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(0);
   gl.drawArrays(gl.TRIANGLES, 0, 6);
-  gl.disableVertexAttribArray(0);  
+  gl.disableVertexAttribArray(0);
 }
 
 function renderScene() {
@@ -216,7 +214,7 @@ function allLoaded() {
   requestAnimationFrame(mainloop);
 }
 
-ResourceLoader.prototype.loadScript = function(src, type, id) {
+ResourceLoader.prototype.loadShader = function(src, type, id) {
   var xhr = new XMLHttpRequest();
   xhr.open("GET", src);
   var self = this;
@@ -225,10 +223,24 @@ ResourceLoader.prototype.loadScript = function(src, type, id) {
     self.onLoad();
   };
   xhr.onerror = function() {
-    alert("loadScript error.");
+    alert("loadShader error."+src);
   }
   this.registerResource();
   xhr.send(null);
+}
+
+ResourceLoader.prototype.loadJS = function(url) {
+  var e = document.createElement("script");
+  e.src = url;
+  var self = this;
+  e.addEventListener("load", function() {
+    self.onLoad();
+  });
+  e.addEventListener("error", function() {
+    alert("loadJS error: "+url);
+  });
+  this.registerResource();
+  document.body.appendChild(e);
 }
 
 ResourceLoader.prototype.loadAudio = function(src, id) {
@@ -257,10 +269,10 @@ if (window.AudioContext) {
   ac = new webkitAudioContext();
 }
 var loader = new ResourceLoader(allLoaded);
-loader.loadScript("green-red.fs", "x-shader/fragment", "green-red");
-loader.loadScript("bw.fs", "x-shader/fragment", "bw");
-loader.loadScript("marcher1.fs", "x-shader/fragment", "marcher1");
-loader.loadScript("quad.vs", "x-shader/vertex", "quad");
+loader.loadShader("green-red.fs", "x-shader/fragment", "green-red");
+loader.loadShader("bw.fs", "x-shader/fragment", "bw");
+loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
+loader.loadShader("quad.vs", "x-shader/vertex", "quad");
 loader.loadAudio("think.wav", "think");
 loader.loadAudio("long.ogg", "long");
 

@@ -3,6 +3,7 @@ precision highp float;
 #endif
 
 uniform float time;
+#define time time / 10.0
 
 uniform float duration;
 /* beat */
