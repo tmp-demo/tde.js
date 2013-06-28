@@ -8,7 +8,7 @@ function renderRayMarch() {
 
   mat4.rotate(m2, mat, D.currentTime/100000.0, [0,0,1])
   gl.useProgram(D.currentProgram);
-  updateCurrentTime();
+  updateTimeUniforms();
   gl.uniformMatrix4fv(gl.getUniformLocation(D.currentProgram, 'mvmat'), false, m2);
   gl.uniform3fv(gl.getUniformLocation(D.currentProgram, 'position'), new Float32Array([D.currentTime/1000.0,8.0,15.0]));
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
