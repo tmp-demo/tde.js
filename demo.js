@@ -65,7 +65,7 @@ function seek(time) {
   D.currentScene = findSceneForTime(D.currentTime);
   if (D.playState == D.PAUSED) {
     updateScene();
-    render();
+    renderScene();
   }
   if (D.playState == D.ENDED) {
     D.playState = D.PLAYING;
@@ -103,10 +103,8 @@ function windowResize() {
   cvs.height = window.innerHeight;
   gl.viewport(0, 0, cvs.width, cvs.height);
 }
-function render() {
-  if (!gl) {
-    return;
-  }
+
+function renderDefault() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.useProgram(D.currentProgram);
   updateCurrentTime();
@@ -114,7 +112,14 @@ function render() {
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(0);
   gl.drawArrays(gl.TRIANGLES, 0, 6);
-  gl.disableVertexAttribArray(0);
+  gl.disableVertexAttribArray(0);  
+}
+
+function renderScene() {
+  if (!gl) {
+    return;
+  }
+  D.render();
 }
 function findSceneForTime(time) {
   for(var i = 0; i < D.scenes.length; i++) {
@@ -128,13 +133,17 @@ function findSceneForTime(time) {
 function updateScene() {
   D.currentScene = findSceneForTime(D.currentTime);
   D.currentProgram = D.programs[D.currentScene];
+  D.render = D.scenes[D.currentScene].render;
+  if (D.render === undefined) {
+    D.render = renderDefault;
+  }
 }
 function mainloop() {
   if (D.playState == D.PLAYING){
     if (D.currentTime <= D.endTime) {
       updateScene();
       requestAnimationFrame(mainloop);
-      render();
+      renderScene();
       D.playState = D.PLAYING;
     } else {
       D.playState = D.ENDED;
@@ -176,6 +185,7 @@ function allLoaded() {
   D.startTime = Date.now();
   D.currentTime = 0;
   D.currentProgram = D.programs[0];
+  D.render = renderDefault;
   D.currentScene = 0;
   var bs = ac.createBufferSource();
   var an = ac.createAnalyser();
@@ -273,11 +283,12 @@ D.scenes = [
   { start: 0,
     duration: 5000,
     fragment: "green-red",
-    vertex: "quad" },
+    vertex: "quad"},
   { start: 5000,
     duration: 15000,
     fragment: "bw",
-    vertex: "quad" }
+    vertex: "quad",
+    render: renderDefault }
 ];
 
 assertScenesSorted();
