@@ -304,6 +304,7 @@ seeker = document.getElementById("seeker");
 document.addEventListener("input", function (e) {
   seek(e.target.value);
   seeker.value = e.target.value;
+  D.looping = false;
 });
 
 
