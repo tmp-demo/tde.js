@@ -11,6 +11,8 @@ uniform float beat;
 /* resolution */
 uniform vec2 res;
 
+uniform mat4 mvmat;
+
 #define MAX_STEPS 200
 
 #define shadowColor vec3(0.0,0.3,0.7)
@@ -114,7 +116,7 @@ float DistanceField(in vec3 position, out int mtl )
 }
 
 
-float Softshadow( in vec3 landPoint, in vec3 lightVector, float mint, float maxt, float iterations )
+float Softshadow(in vec3 landPoint, in vec3 lightVector, float mint, float maxt, float iterations)
 {
     float penumbraFactor = 1.0;
     vec3 sphereNormal;
@@ -185,7 +187,7 @@ vec3 ComputeNormal(vec3 pos, int material)
     );
 }
 
-void FishEyeCamera( vec2 screenPos, float ratio, float fovy, mat4 transform, out vec3 position, out vec3 direction )
+void FishEyeCamera(vec2 screenPos, float ratio, float fovy, mat4 transform, out vec3 position, out vec3 direction)
 {
     screenPos.y -= 0.2;
     screenPos *= vec2(PI*0.5,PI*0.5/ratio)/fovy;
@@ -195,11 +197,12 @@ void FishEyeCamera( vec2 screenPos, float ratio, float fovy, mat4 transform, out
         , -cos(screenPos.y+PI*0.5)
         , sin(screenPos.y+PI*0.5)*cos(screenPos.x)
     );
+    direction = (mvmat * vec4(direction,0.0)).xyz;
     position = vec3(5.0*sin(time*0.001), 15.0, time * 0.2);
 }
 
 
-float AmbientOcclusion (vec3 point, vec3 normal, float stepDistance, float samples)
+float AmbientOcclusion(vec3 point, vec3 normal, float stepDistance, float samples)
 {
   float occlusion = 1.0;
   int tempMaterial;

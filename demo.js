@@ -269,7 +269,8 @@ if (window.AudioContext) {
 } else {
   ac = new webkitAudioContext();
 }
-  var loader = new ResourceLoader(allLoaded);
+
+var loader = new ResourceLoader(allLoaded);
 loader.loadJS("glmatrix.js");
 loader.loadJS("raymarch.js");
 loader.loadJS("scenes.js");
