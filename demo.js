@@ -231,6 +231,7 @@ ac = new AudioContext();
 var loader = new ResourceLoader(allLoaded);
 loader.loadScript("green-red.fs", "x-shader/fragment", "green-red");
 loader.loadScript("bw.fs", "x-shader/fragment", "bw");
+loader.loadScript("marcher1.fs", "x-shader/fragment", "marcher1");
 loader.loadScript("quad.vs", "x-shader/vertex", "quad");
 loader.loadAudio("think.wav", "think");
 
@@ -287,6 +288,11 @@ D.scenes = [
   { start: 5000,
     duration: 15000,
     fragment: "bw",
+    vertex: "quad",
+    render: renderDefault },
+  { start: 20000,
+    duration: 15000,
+    fragment: "marcher1",
     vertex: "quad",
     render: renderDefault }
 ];
