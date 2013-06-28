@@ -39,6 +39,7 @@ bs = null;
 an = null;
 /* vertex buffer for our quad */
 buffer = null;
+buffer = null;
 D = {
   /* time in ms */
   currentTime: 0,
@@ -80,7 +81,6 @@ function seek(time) {
     updateScene();
     render();
   } else {
-    console.log(0, D.currentTime / 1000);
     bs.start(0, D.currentTime / 1000);
   }
   if (D.playState == D.ENDED) {
@@ -268,7 +268,8 @@ if (window.AudioContext) {
 } else {
   ac = new webkitAudioContext();
 }
-var loader = new ResourceLoader(allLoaded);
+  var loader = new ResourceLoader(allLoaded);
+loader.loadJS("glmatrix.js");
 loader.loadShader("green-red.fs", "x-shader/fragment", "green-red");
 loader.loadShader("bw.fs", "x-shader/fragment", "bw");
 loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
