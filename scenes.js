@@ -7,9 +7,9 @@ D.scenes.pushScene = function(scene) {
 function loadScenes() {
   D.scenes.pushScene( {
     duration: 15000,
-    fragments: ["marcher1"],
+    fragments: ["marcher1", "blur"],
     vertex: "quad",
-    update: [updateRaymarch]
+    update: [updateRaymarch, updateDefault]
   });
 
   D.scenes.pushScene( {
@@ -18,22 +18,21 @@ function loadScenes() {
     vertex: "quad",
     update: [updateDefault, updateDefault]
   });
-  
+
   D.scenes.pushScene( {
     duration: 5000,
     fragments: ["green-red"],
     vertex: "quad",
     update: [updateDefault]
   });
-  
-  
+
+
   D.scenes.pushScene( {
     duration: 5000,
     fragments: ["bw"],
     vertex: "quad",
     update: [updateDefault]
   });
-  
 
   assertScenesSorted();
   var lastScene = D.scenes[D.scenes.length - 1];
