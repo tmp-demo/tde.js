@@ -39,6 +39,10 @@ bs = null;
 an = null;
 /* vertex buffer for our quad */
 buffer = null;
+/*frame buffer for the post processing*/
+fbo = null;
+texture = null;
+
 D = {
   /* time in ms */
   currentTime: 0,
@@ -61,13 +65,13 @@ D = {
 function updateCurrentTime() {
   D.currentTime = Date.now() - D.startTime;
   seeker.value = D.currentTime;
-  gl.uniform1f(gl.getUniformLocation(D.currentProgram, 'time'),
+  gl.uniform1f(gl.getUniformLocation(D.currentProgram[0], 'time'),
                D.currentTime - D.scenes[D.currentScene].start);
-   gl.uniform1f(gl.getUniformLocation(D.currentProgram, 'duration'),
+   gl.uniform1f(gl.getUniformLocation(D.currentProgram[0], 'duration'),
                 D.scenes[D.currentScene].duration);
-  gl.uniform2f(gl.getUniformLocation(D.currentProgram, 'res'),
+  gl.uniform2f(gl.getUniformLocation(D.currentProgram[0], 'res'),
                cvs.width, cvs.height);
-  gl.uniform1f(gl.getUniformLocation(D.currentProgram, 'beat'),
+  gl.uniform1f(gl.getUniformLocation(D.currentProgram[0], 'beat'),
                bd.beat());
 }
 function seek(time) {
@@ -81,7 +85,7 @@ function seek(time) {
   D.currentScene = findSceneForTime(D.currentTime);
   if (D.playState == D.PAUSED) {
     updateScene();
-    render();
+    D.render();
   } else {
     console.log(0, D.currentTime / 1000);
     bs.start(0, D.currentTime / 1000);
@@ -121,17 +125,77 @@ function windowResize() {
   cvs.width = window.innerWidth;
   cvs.height = window.innerHeight;
   gl.viewport(0, 0, cvs.width, cvs.height);
+  
+  
+	  
 }
 
 function renderDefault() {
-  //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.useProgram(D.currentProgram);
-  updateCurrentTime();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(0);
-  gl.drawArrays(gl.TRIANGLES, 0, 6);
-  gl.disableVertexAttribArray(0);
+
+
+  //first remove any attached texture
+  gl.bindTexture(gl.TEXTURE_2D, null);
+
+  //TODO : test if there is any post processing to do
+  if(D.currentProgram.length > 1){//there is some post process available
+    
+    //bind the temp frame buffer
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    
+    //load the program
+    gl.useProgram(D.currentProgram[0]);
+    
+    // do the job
+    updateCurrentTime();
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0); 
+    gl.enableVertexAttribArray(0);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    
+	
+	//TODO : write logic for several post...
+    // do the post processing
+    gl.useProgram(D.currentProgram[1]);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    
+    //clean up
+    gl.disableVertexAttribArray(0);
+  
+  }else{
+    //bind the final frame buffer
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    
+    //load the program
+    gl.useProgram(D.currentProgram[0]);
+    
+    // do the job
+    updateCurrentTime();
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0); 
+    gl.enableVertexAttribArray(0);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+	
+	//clean up
+    gl.disableVertexAttribArray(0);
+  }
+
+  
+}
+
+function createAndSetupTexture(gl) {
+  var texture = gl.createTexture();
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, texture);//this texture is used to store render output for post process.
+
+  // Set up texture so we can render any size image and so we are
+  // working with pixels.
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+  return texture;
 }
 
 function renderScene() {
@@ -206,7 +270,9 @@ ResourceLoader.prototype.registerResource = function(thing) {
 function allLoaded() {
   for (var i = 0; i < D.scenes.length; i++) {
     var scene = D.scenes[i];
-    D.programs.push(loadProgram(D.shaders[scene.vertex].src, D.shaders[scene.fragment].src));
+	D.programs[i] = [];
+	for(var j = 0; j < D.scenes[i].fragments.length; j++)
+      D.programs[i].push(loadProgram(D.shaders[scene.vertex].src, D.shaders[scene.fragments[j]].src));
   }
 
   D.startTime = Date.now();
@@ -281,13 +347,20 @@ if (window.AudioContext) {
 var loader = new ResourceLoader(allLoaded);
 loader.loadShader("green-red.fs", "x-shader/fragment", "green-red");
 loader.loadShader("bw.fs", "x-shader/fragment", "bw");
+loader.loadShader("blur.fs", "x-shader/fragment", "blur");
 loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
 loader.loadShader("quad.vs", "x-shader/vertex", "quad");
+
 loader.loadAudio("think.wav", "think");
 loader.loadAudio("long.ogg", "long");
 
 cvs = document.getElementsByTagName("canvas")[0];
 gl = cvs.getContext("experimental-webgl");
+
+
+
+windowResize();
+
 buffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 quad = new Float32Array([-1, -1,
@@ -298,7 +371,29 @@ quad = new Float32Array([-1, -1,
                          -1,  1]);
 gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
 
-windowResize();
+
+texture = createAndSetupTexture(gl);
+gl.texImage2D(
+      gl.TEXTURE_2D, 0, gl.RGBA, cvs.width, cvs.height, 0,
+      gl.RGBA, gl.UNSIGNED_BYTE, null);
+	  
+	  
+fbo = gl.createFramebuffer();
+gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+quad = new Float32Array([-1, -1,
+                          1, -1,
+                         -1,  1,
+                          1, -1,
+                          1,  1,
+                         -1,  1]);
+gl.framebufferTexture2D(
+      gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+
+
+
+
+
+
 
 seeker = document.getElementById("seeker");
 document.addEventListener("input", function (e) {
@@ -350,21 +445,29 @@ D.scenes.pushScene = function(scene) {
 
 D.scenes.pushScene( {
   duration: 5000,
-  fragment: "green-red",
+  fragments: ["green-red", "blur"],
   vertex: "quad",
   render: renderDefault
 });
 
 D.scenes.pushScene( {
- duration: 15000,
- fragment: "bw",
- vertex: "quad",
- render: renderDefault
+  duration: 5000,
+  fragments: ["green-red"],
+  vertex: "quad",
+  render: renderDefault
+});
+
+
+D.scenes.pushScene( {
+  duration: 5000,
+  fragments: ["bw"],
+  vertex: "quad",
+  render: renderDefault
 });
 
 D.scenes.pushScene( {
   duration: 15000,
-  fragment: "marcher1",
+  fragments: ["marcher1", "blur"],
   vertex: "quad",
   render: renderDefault
 });
