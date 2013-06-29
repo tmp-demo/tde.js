@@ -14,13 +14,13 @@ function loadScenes() {
 
   D.scenes.pushScene( {
     duration: 15000,
-    fragments: ["city_2"],
+    fragments: ["city_2", "chroma"],
     vertex: "quad",
     update: [updateRaymarch, updateDefault]
   });
 
   D.scenes.pushScene( {
-    duration: 5000,
+    duration: 10000,
     fragments: ["green-red", "gay-flag"],
     vertex: "quad",
     update: [updateDefault, updateDefault]

@@ -19,7 +19,7 @@ vec2 fisheye(vec2 coord, float amt) {
 
 void main(void)
 {
-  float amount = beat * 3.0;
+  float amount = (1.0 + beat) * (1.0 + beat);
 
   vec2 pos = gl_FragCoord.xy;
 

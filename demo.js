@@ -9,11 +9,12 @@ function $$(s) {
 function BeatDetector(analyserNode) {
   this.node = analyserNode;
   this.array = new Float32Array(analyserNode.fftSize);
+  this.node.maxDecibels = 0;
 }
 
 BeatDetector.prototype.beat = function() {
   this.node.getFloatFrequencyData(this.array);
-  var avgWidth = 10;
+  var avgWidth = 100;
   var sum = 0;
   for (var i = 0; i < avgWidth; i++) {
     sum += this.array[i];
@@ -21,7 +22,7 @@ BeatDetector.prototype.beat = function() {
   sum /= avgWidth;
   sum -= this.node.minDecibels;
   sum /= -(this.node.minDecibels - this.node.maxDecibels);
-  return sum;
+  return Math.log(sum + 1) * 2;
 }
 
 seeker = null;
@@ -418,7 +419,8 @@ loader.loadJS("scenes.js");
 loader.loadShader("green-red.fs", "x-shader/fragment", "green-red");
 loader.loadShader("bw.fs", "x-shader/fragment", "bw");
 loader.loadShader("blur.fs", "x-shader/fragment", "blur");
-loader.loadShader("blur.fs", "x-shader/fragment", "gay-flag");
+loader.loadShader("chroma.fs", "x-shader/fragment", "chroma");
+loader.loadShader("gay-flag.fs", "x-shader/fragment", "gay-flag");
 loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
 loader.loadShader("quad.vs", "x-shader/vertex", "quad");
 
