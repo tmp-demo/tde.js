@@ -65,17 +65,6 @@ float CubeRepetition(in vec3 point, in vec3 size, in vec3 repetition ) {
     return CubeDistance2 ( q, size);
 }
 
-void applyFog( in float distance, inout vec3 rgb ){
-
-    float fogAmount = (1.0 - clamp(distance*0.0015,0.0,1.0) );
-    //float fogAmount = exp( -distance* 0.006 );
-    vec3 fogColor = vec3(0.9,0.95,1);
-    //if( fogAmount < 0.6 )
-    // rgb = vec3(1.0,1.0,0.0);
-    //else
-    //rgb = clamp( rgb, 0.0, 1.0);
-    rgb = mix( skyColor, rgb, fogAmount );
-}
 
 
 float RedDistance(in vec3 point_pos) {
@@ -131,9 +120,21 @@ float GroundDistance(in vec3 point_pos)
     return PlaneDistance(point_pos, vec3(0.0,1.0,0.0), 0.0);
 }
 
+void applyFog( in float distance, inout vec3 rgb ){
+
+    float fogAmount = (1.0 - clamp(distance*0.0015,0.0,1.0) );
+    //float fogAmount = exp( -distance* 0.006 );
+    vec3 fogColor = vec3(0.9,0.95,1);
+    //if( fogAmount < 0.6 )
+    // rgb = vec3(1.0,1.0,0.0);
+    //else
+    //rgb = clamp( rgb, 0.0, 1.0);
+    rgb = mix( skyColor, rgb, fogAmount );
+}
+
 float DistanceField(in vec3 point_pos, out int mtl )
 {
-    float redDistance = RedDistance(point_pos);
+    //float redDistance = RedDistance(point_pos);
     float bldDistance = BuildingsDistance(point_pos);
     float gndDistance = GroundDistance(point_pos);
     float closest = gndDistance;
@@ -143,11 +144,13 @@ float DistanceField(in vec3 point_pos, out int mtl )
         closest = bldDistance;
         mtl = BUILDINGS_MTL;
     }
+/*
     if ( redDistance < closest )
     {
         closest = redDistance;
         mtl = RED_MTL;
     }
+*/
     return closest;
 }
 

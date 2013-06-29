@@ -280,8 +280,39 @@ ResourceLoader.prototype.registerResource = function(thing) {
   this.toLoad++;
 }
 
+function concat(names) {
+  var src = "";
+  for (var i in names) {
+    src += D.texts[names[i]];
+  }
+  //alert(src);
+  return src;
+}
+
 function allLoaded() {
   loadScenes();
+
+  D.shaders["city_1"] = {
+    src: concat([
+    "city_uniforms",
+    "city_distance_1",
+    "city_marcher",
+    "city_mtl_1",
+    "city_post_1",
+    "city_main"
+    ])
+  };
+
+  D.shaders["city_2"] = {
+    src: concat([
+    "city_uniforms",
+    "city_distance_1",
+    "city_marcher",
+    "city_mtl_2",
+    "city_post_1",
+    "city_main"
+    ])
+  };
 
   for (var i = 0; i < D.scenes.length; i++) {
     var scene = D.scenes[i];
@@ -316,6 +347,22 @@ ResourceLoader.prototype.loadShader = function(src, type, id) {
   };
   xhr.onerror = function() {
     alert("loadShader error."+src);
+  }
+  this.registerResource();
+  xhr.send(null);
+}
+
+ResourceLoader.prototype.loadText = function(src, id) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", src);
+  var self = this;
+  xhr.onload = function() {
+    D.texts[id] = this.responseText;
+    console.log("loaded: " + src);
+    self.onLoad();
+  };
+  xhr.onerror = function() {
+    alert("loadText error."+src);
   }
   this.registerResource();
   xhr.send(null);
@@ -374,6 +421,14 @@ loader.loadShader("blur.fs", "x-shader/fragment", "blur");
 loader.loadShader("blur.fs", "x-shader/fragment", "gay-flag");
 loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
 loader.loadShader("quad.vs", "x-shader/vertex", "quad");
+
+loader.loadText("city_uniforms.fs", "city_uniforms");
+loader.loadText("city_mtl_1.fs", "city_mtl_1");
+loader.loadText("city_mtl_2.fs", "city_mtl_2");
+loader.loadText("city_distance_1.fs", "city_distance_1");
+loader.loadText("city_marcher.fs", "city_marcher");
+loader.loadText("city_main.fs", "city_main");
+loader.loadText("city_post_1.fs", "city_post_1");
 
 loader.loadAudio("think.wav", "think");
 loader.loadAudio("track.ogg", "track");
@@ -455,6 +510,7 @@ document.addEventListener("keypress", function(e) {
 D.playState = D.PLAYING;
 D.programs = [];
 D.scenes = [];
+D.texts = {};
 
 
 
