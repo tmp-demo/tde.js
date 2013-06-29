@@ -5,27 +5,35 @@ D.scenes.pushScene = function(scene) {
 }
 
 function loadScenes() {
-  D.scenes.pushScene( {
-    duration: 15000,
-    fragment: "marcher1",
-    vertex: "quad",
-    render: renderRayMarch
-  });
 
   D.scenes.pushScene( {
     duration: 5000,
-    fragment: "green-red",
+    fragments: ["green-red", "blur"],
     vertex: "quad",
     render: renderDefault
   });
-
+  
   D.scenes.pushScene( {
-   duration: 15000,
-   fragment: "bw",
-   vertex: "quad",
-   render: renderDefault
+    duration: 5000,
+    fragments: ["green-red"],
+    vertex: "quad",
+    render: renderDefault
   });
-
+  
+  
+  D.scenes.pushScene( {
+    duration: 5000,
+    fragments: ["bw"],
+    vertex: "quad",
+    render: renderDefault
+  });
+  
+  D.scenes.pushScene( {
+    duration: 15000,
+    fragments: ["marcher1"],
+    vertex: "quad",
+    render: renderDefault
+  });
 
   assertScenesSorted();
   var lastScene = D.scenes[D.scenes.length - 1];
