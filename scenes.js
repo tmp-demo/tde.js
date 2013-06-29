@@ -45,9 +45,23 @@ function loadScenes() {
   
   D.scenes.pushScene( {
     duration: 100000,
-    fragments: ["gay-ring", "gay-ring"],
+    fragments: ["gay-ring"],
     vertex: "quad",
-    update: [updateDefault, updateDefault]
+    update: [updateDefault]
+  });
+  
+    D.scenes.pushScene( {
+    duration: 100000,
+    fragments: ["gay-ring2"],
+    vertex: "quad",
+    update: [updateDefault]
+  });
+  
+    D.scenes.pushScene( {
+    duration: 100000,
+    fragments: ["gay-ring3"],
+    vertex: "quad",
+    update: [updateDefault]
   });
 
   // rainbow!
