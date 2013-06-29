@@ -66,10 +66,11 @@ D = {
 };
 
 function updateTimes() {
-  D.currentTime = Date.now() - D.startTime;
+  D.currentTime = ac.currentTime * 1000;
   seeker.value = D.currentTime;
 
-  D.clipTime = D.currentTime - D.scenes[D.currentScene].start;  
+  D.clipTime = D.currentTime - D.scenes[D.currentScene].start;
+  console.log(D.currentTime);
 }
 
 function updateTimeUniforms(program) {
@@ -93,7 +94,7 @@ function seek(time) {
   bs.connect(ac.destination);
   bs.connect(an);
   D.startTime = Date.now() - time;
-  D.currentTime = Date.now() - D.startTime;
+  D.currentTime = ac.currentTime * 1000;
   D.currentScene = findSceneForTime(D.currentTime);
   if (D.playState == D.PAUSED) {
     updateScene();

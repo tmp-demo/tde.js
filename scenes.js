@@ -25,7 +25,7 @@ instance : null},
 function loadScenes() {
   // intro
   D.scenes.pushScene( {
-    duration: 5000,
+    duration: 6857,
     fragments: ["city_intro"],
     vertex: "quad",
     update: [function(prog) {
@@ -35,7 +35,7 @@ function loadScenes() {
 
   // sad
   D.scenes.pushScene( {
-    duration: 3000,
+    duration: 13414,
     fragments: ["city_1"],
     vertex: "quad",
     update: [function(prog) {
@@ -66,7 +66,7 @@ function loadScenes() {
 
   // rainbow!
   D.scenes.pushScene( {
-    duration: 3000,
+    duration: 13714,
     fragments: ["city_rainbow"],
     vertex: "quad",
     update: [function(prog) {
@@ -76,7 +76,7 @@ function loadScenes() {
 
   // traveling right with chroma
   D.scenes.pushScene( {
-    duration: 15000,
+    duration: 13715,
     fragments: ["city_2", "chroma"],
     vertex: "quad",
     update: [function(prog) {
@@ -95,7 +95,7 @@ function loadScenes() {
   });
 
   D.scenes.pushScene( {
-    duration: 5000,
+    duration: 13714,
     fragments: ["city_2", "blur"],
     vertex: "quad",
     update: [function(prog) {
@@ -105,7 +105,7 @@ function loadScenes() {
   });
 
   D.scenes.pushScene( {
-    duration: 50000,
+    duration: 13714,
     fragments: ["city_fancy"],
     vertex: "quad",
     update: [function(prog) {
