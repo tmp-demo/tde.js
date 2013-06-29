@@ -66,10 +66,11 @@ D = {
 };
 
 function updateTimes() {
-  D.currentTime = Date.now() - D.startTime;
+  D.currentTime = ac.currentTime * 1000;
   seeker.value = D.currentTime;
 
-  D.clipTime = D.currentTime - D.scenes[D.currentScene].start;  
+  D.clipTime = D.currentTime - D.scenes[D.currentScene].start;
+  console.log(D.currentTime);
 }
 
 function updateTimeUniforms(program) {
@@ -93,7 +94,7 @@ function seek(time) {
   bs.connect(ac.destination);
   bs.connect(an);
   D.startTime = Date.now() - time;
-  D.currentTime = Date.now() - D.startTime;
+  D.currentTime = ac.currentTime * 1000;
   D.currentScene = findSceneForTime(D.currentTime);
   if (D.playState == D.PAUSED) {
     updateScene();
@@ -245,6 +246,22 @@ function updateScene() {
     D.render = renderDefault;
   }
 }
+function updateText(){
+  //look for existing text that could be out of date
+  //look for curently inexisting text that should be displayed
+  for(var i = 0; i < D.Texts.length; i++){
+    var ct = D.Texts[i];
+    if(ct.instance !== null && ( D.currentTime < ct.start || D.currentTime > ct.end)){
+		//remove it !
+		removeText(ct.instance);
+		ct.instance = null;
+	}else if(ct.instance == null && ( D.currentTime > ct.start && D.currentTime < ct.end)){
+		//add it !
+		ct.instance = addText(ct.text, ct.top, ct.left ,ct.classname);
+	}  
+  }  
+}
+
 function mainloop() {
   if (D.playState == D.PLAYING){
     if (D.currentTime <= D.endTime) {
@@ -252,6 +269,7 @@ function mainloop() {
       requestAnimationFrame(mainloop);
       renderScene();
       D.playState = D.PLAYING;
+	  updateText();
     } else {
       D.playState = D.ENDED;
       //bs.stop(0);
@@ -457,6 +475,7 @@ loader.loadShader("bw.fs", "x-shader/fragment", "bw");
 loader.loadShader("blur.fs", "x-shader/fragment", "blur");
 loader.loadShader("chroma.fs", "x-shader/fragment", "chroma");
 loader.loadShader("gay-flag.fs", "x-shader/fragment", "gay-flag");
+loader.loadShader("gay-ring.fs", "x-shader/fragment", "gay-ring");
 loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
 loader.loadShader("quad.vs", "x-shader/vertex", "quad");
 
@@ -552,6 +571,4 @@ D.playState = D.PLAYING;
 D.programs = [];
 D.scenes = [];
 D.texts = {};
-
-
 
