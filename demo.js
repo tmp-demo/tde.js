@@ -476,6 +476,8 @@ loader.loadShader("blur.fs", "x-shader/fragment", "blur");
 loader.loadShader("chroma.fs", "x-shader/fragment", "chroma");
 loader.loadShader("gay-flag.fs", "x-shader/fragment", "gay-flag");
 loader.loadShader("gay-ring.fs", "x-shader/fragment", "gay-ring");
+loader.loadShader("gay-ring2.fs", "x-shader/fragment", "gay-ring2");
+loader.loadShader("gay-ring3.fs", "x-shader/fragment", "gay-ring3");
 loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
 loader.loadShader("quad.vs", "x-shader/vertex", "quad");
 
