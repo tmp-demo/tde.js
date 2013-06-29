@@ -46,25 +46,22 @@ function loadScenes() {
   });
 
   D.scenes.pushScene( {
+    duration: 5000,
+    fragments: ["city_2", "blur"],
+    vertex: "quad",
+    update: [function(prog) {
+      updateRaymarchTransition(prog, [100, 15.0, 15.0],[100, 15.0, 15.0],
+                                      0, [0,1,0], 1, [0,1,0]);
+    }, updateDefault]
+  });
+
+  D.scenes.pushScene( {
     duration: 10000,
-    fragments: ["green-red", "gay-flag"],
+    fragments: ["city_fancy"],
     vertex: "quad",
-    update: [updateDefault, updateDefault]
-  });
-
-  D.scenes.pushScene( {
-    duration: 5000,
-    fragments: ["green-red"],
-    vertex: "quad",
-    update: [updateDefault]
-  });
-
-
-  D.scenes.pushScene( {
-    duration: 5000,
-    fragments: ["bw"],
-    vertex: "quad",
-    update: [updateDefault]
+    update: [function(prog) {
+      updateRaymarchStatic(prog, [0, 15.0, 15.0]);
+    }]
   });
 
   assertScenesSorted();

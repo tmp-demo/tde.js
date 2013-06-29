@@ -340,6 +340,17 @@ function allLoaded() {
     ])
   };
 
+  D.shaders["city_fancy"] = {
+    src: concat([
+    "city_uniforms",
+    "city_distance_1",
+    "city_marcher",
+    "city_mtl_multicolor",
+    "city_post_1",
+    "city_main"
+    ])
+  };
+
   for (var i = 0; i < D.scenes.length; i++) {
     var scene = D.scenes[i];
     D.programs[i] = [];
@@ -453,6 +464,7 @@ loader.loadText("city_uniforms.fs", "city_uniforms");
 loader.loadText("city_mtl_1.fs", "city_mtl_1");
 loader.loadText("city_mtl_2.fs", "city_mtl_2");
 loader.loadText("city_mtl_rainbowtransition.fs", "city_mtl_rainbowtransition");
+loader.loadText("city_mtl_multicolor.fs", "city_mtl_multicolor");
 loader.loadText("city_mtl_intro.fs", "city_mtl_intro");
 loader.loadText("city_distance_1.fs", "city_distance_1");
 loader.loadText("city_marcher.fs", "city_marcher");
