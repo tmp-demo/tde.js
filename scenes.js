@@ -14,6 +14,13 @@ function loadScenes() {
 
   D.scenes.pushScene( {
     duration: 15000,
+    fragments: ["city_rainbow"],
+    vertex: "quad",
+    update: [updateRaymarch, updateDefault]
+  });
+
+  D.scenes.pushScene( {
+    duration: 15000,
     fragments: ["city_2", "chroma"],
     vertex: "quad",
     update: [updateRaymarch, updateDefault]

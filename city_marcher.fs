@@ -38,7 +38,7 @@ vec3 RayMarch(in vec3 point_pos, in vec3 direction, out int mtl)
     return point_pos;
 }
 
-vec3 ComputeNormal(vec3 pos, int material)
+vec3 ComputeNormal(vec3 pos)
 {
     int dummy;
     return normalize(

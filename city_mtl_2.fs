@@ -64,7 +64,7 @@ vec3 computeColor(vec3 eyePosition, vec3 hitPosition, vec3 direction, int materi
         // soft shadows
         float shadow = Softshadow(hitPosition, lightVector, 0.1, 50.0, shadowHardness);
         // attenuation due to facing (or not) the light
-        vec3 normal = ComputeNormal(hitPosition, material);
+        vec3 normal = ComputeNormal(hitPosition);
         float attenuation = clamp(dot(normal, lightVector),0.0,1.0)*0.6 + 0.4;
         shadow = min(shadow, attenuation);
         //material color
@@ -74,19 +74,9 @@ vec3 computeColor(vec3 eyePosition, vec3 hitPosition, vec3 direction, int materi
           mtlColor = mix(shadowColor, mtlColor, clamp(hitPosition.y/9.0, 0.0, 1.0));
         }
         hitColor = mix(shadowColor, mtlColor, 0.4+shadow*0.6);
-        vec3 hitNormal = ComputeNormal(hitPosition, 0);
-        float AO = AmbientOcclusion(hitPosition, hitNormal, 0.35, 5.0);
+        float AO = AmbientOcclusion(hitPosition, normal, 0.35, 5.0);
         hitColor = mix(shadowColor, hitColor, AO);
 
-        float foo = length(hitPosition - vec3(50.0, 0.0, 150.0));
-        float bar = sin(foo/1000.0 - time/3000.0);
-        if (bar > 0.0 && bar < 0.01) {
-            hitColor = vec3(1.0, 0.0, 0.0);
-        } else if (bar > 0.01 && bar < 0.02) {
-            hitColor = vec3(1.0, 1.0, 0.0);
-        } else if (bar > 0.02 && bar < 0.03) {
-            hitColor = vec3(0.0, 1.0, 1.0);
-        }
         applyFog( length(position-hitPosition)*2.0, hitColor);
     }
     else // sky
