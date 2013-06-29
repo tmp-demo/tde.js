@@ -69,6 +69,16 @@ function loadScenes() {
       updateRaymarchTranslate(prog, [20, 15.0, 15.0],[100, 15.0, 15.0]);
     }, updateDefault]
   });
+  
+  D.scenes.pushScene( {
+    duration: 5000,
+    fragments: ["city_2", "gay-flag"],
+    vertex: "quad",
+    update: [function(prog) {
+      updateRaymarchTransition(prog, [100, 15.0, 15.0],[100, 15.0, 15.0],
+                                      0, [0,1,0], 1, [0,1,0]);
+    }, updateDefault]
+  });
 
   D.scenes.pushScene( {
     duration: 5000,

@@ -30,7 +30,9 @@ float DistanceToFunc(vec2 xy, float time, float phi){
 void main(void)
 {
 	
-	gl_FragColor = texture2D(u_image,v_texCoord ) - vec4 (0.0,0.0,0.0,0.001);
+	
+	
+	gl_FragColor = texture2D(u_image,(vec2(1.0, 1.0) + v_texCoord) / 2.0 ) - vec4 (0.0,0.0,0.0,0.001);
 	
 	float timeInSeconds = time /1000.0;
 	
