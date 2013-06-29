@@ -241,6 +241,22 @@ function updateScene() {
     D.render = renderDefault;
   }
 }
+function updateText(){
+  //look for existing text that could be out of date
+  //look for curently inexisting text that should be displayed
+  for(var i = 0; i < D.Texts.length; i++){
+    var ct = D.Texts[i];
+    if(ct.instance !== null && ( D.currentTime < ct.start || D.currentTime > ct.end)){
+		//remove it !
+		removeText(ct.instance);
+		ct.instance = null;
+	}else if(ct.instance == null && ( D.currentTime > ct.start && D.currentTime < ct.end)){
+		//add it !
+		ct.instance = addText(ct.text, ct.top, ct.left ,ct.classname);
+	}  
+  }  
+}
+
 function mainloop() {
   if (D.playState == D.PLAYING){
     if (D.currentTime <= D.endTime) {
@@ -248,6 +264,7 @@ function mainloop() {
       requestAnimationFrame(mainloop);
       renderScene();
       D.playState = D.PLAYING;
+	  updateText();
     } else {
       D.playState = D.ENDED;
       //bs.stop(0);
@@ -372,6 +389,7 @@ loader.loadShader("green-red.fs", "x-shader/fragment", "green-red");
 loader.loadShader("bw.fs", "x-shader/fragment", "bw");
 loader.loadShader("blur.fs", "x-shader/fragment", "blur");
 loader.loadShader("gay-flag.fs", "x-shader/fragment", "gay-flag");
+loader.loadShader("gay-ring.fs", "x-shader/fragment", "gay-ring");
 loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
 loader.loadShader("quad.vs", "x-shader/vertex", "quad");
 
@@ -455,6 +473,4 @@ document.addEventListener("keypress", function(e) {
 D.playState = D.PLAYING;
 D.programs = [];
 D.scenes = [];
-
-
 
