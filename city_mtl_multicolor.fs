@@ -1,4 +1,5 @@
 #define shadowColor vec3(0.2,0.0,0.0)
+#define shadowColor2 vec3(0.0,0.02,0.001)
 #define buildingsColor vec3(0.09,0.1,0.4)
 #define groundColor vec3(0.19,0.2,0.5)
 #define skyColor vec3(0.066,0.069,0.256)
@@ -86,9 +87,10 @@ vec3 computeColor(vec3 eyePosition, vec3 hitPosition, vec3 direction, int materi
                 }
             }
         }
-        hitColor = mix(shadowColor, mtlColor, 0.4+shadow*0.6);
+        vec3 s = mix(shadowColor, shadowColor2, 0.5 + 0.5*sin(time/100.0));
+        hitColor = mix(s, mtlColor, 0.4+shadow*0.6);
         float AO = AmbientOcclusion(hitPosition, normal, 0.35, 5.0);
-        hitColor = mix(shadowColor, hitColor, AO);
+        hitColor = mix(s, hitColor, AO);
 
         applyFog( length(position-hitPosition)*2.0, hitColor);
     }

@@ -56,11 +56,21 @@ function loadScenes() {
   });
 
   D.scenes.pushScene( {
-    duration: 50000,
+    duration: 5000,
+    fragments: ["city_2"],
+    vertex: "quad",
+    update: [function(prog) {
+      updateRaymarchTransition(prog, [135, 20.0, 15.0],[135, 20.0, 60.0],
+                                      1.57079633, [-1,0,0], 1.57079633, [-1,0,0]);
+    }, updateDefault]
+  });
+
+  D.scenes.pushScene( {
+    duration: 30000,
     fragments: ["city_fancy"],
     vertex: "quad",
     update: [function(prog) {
-      updateRaymarchStatic(prog, [0, 15.0, 15.0]);
+      updateRaymarchStatic(prog, [300, 15.0, 1000.0]);
     }]
   });
 
