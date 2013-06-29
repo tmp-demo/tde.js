@@ -9,14 +9,18 @@ function loadScenes() {
     duration: 5000,
     fragments: ["city_intro"],
     vertex: "quad",
-    update: [updateRaymarch]
+    update: [function(prog) {
+      updateRaymarchStatic(prog, [0, 15.0, 15.0]);
+    }]
   });
 
   D.scenes.pushScene( {
     duration: 5000,
     fragments: ["city_1"],
     vertex: "quad",
-    update: [updateRaymarch]
+    update: [function(prog) {
+      updateRaymarchTranslate(prog, [0, 15.0, 15.0],[10, 10.0, 15.0]);
+    }]
   });
 
   D.scenes.pushScene( {

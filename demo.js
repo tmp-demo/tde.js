@@ -64,12 +64,15 @@ D = {
   scenesShortcuts : {"97":0, "122":1,"101":2, "114":3,"116":4,"116":5,"121":6,"117":7,"105":8,"111":9},
   scenesLoopShortcuts : {"113":0, "115":1,"100":2, "102":3,"103":4,"104":5,"106":6,"107":7,"108":8,"109":9}
 };
-function updateTimeUniforms(program) {
+
+function updateTimes() {
   D.currentTime = Date.now() - D.startTime;
   seeker.value = D.currentTime;
 
-  D.clipTime = D.currentTime - D.scenes[D.currentScene].start;
-  
+  D.clipTime = D.currentTime - D.scenes[D.currentScene].start;  
+}
+
+function updateTimeUniforms(program) {
   gl.uniform1f(gl.getUniformLocation(program, 'time'),
                D.currentTime - D.scenes[D.currentScene].start);
   gl.uniform1f(gl.getUniformLocation(program, 'duration'),
