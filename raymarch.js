@@ -3,7 +3,7 @@ function renderRayMarch() {
   var mat = mat4.create();
   var m2 = mat4.create();
   
-  var position = [D.clipTime/1000.0,8.0,15.0];
+  var position = [D.clipTime/100.0,15.0,15.0];
 
   mat4.rotate(m2, mat, D.currentTime/100000.0, [0,0,1])
   gl.useProgram(D.currentProgram);

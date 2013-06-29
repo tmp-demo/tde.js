@@ -59,10 +59,10 @@ vec3 DistanceRepetition(in vec3 point, in vec3 repetition ) {
 }
 
 
-float CubeRepetition(in vec3 point, in vec3 repetition ) {
+float CubeRepetition(in vec3 point, in vec3 size, in vec3 repetition ) {
     vec3 q = mod(point, repetition)-0.5*repetition;
     q.y = point.y;
-    return CubeDistance2 ( q, vec3 (2.0, 4.0, 2.0));
+    return CubeDistance2 ( q, size);
 }
 
 void applyFog( in float distance, inout vec3 rgb ){
@@ -78,16 +78,49 @@ void applyFog( in float distance, inout vec3 rgb ){
 }
 
 
-float RedDistance(in vec3 point_pos)
-{
+float RedDistance(in vec3 point_pos) {
     return SphereDistance(point_pos, vec3(0.0, 3.0, 5.0), 5.0);
 }
 
+float blocIndex(in float point, in float repetition) {
+    return floor(point / repetition);
+}
+
+float randomize(float co, float seed) {
+    return cos(fract(sin(co * seed * 12.9898)) * 43758.5453);
+}
+
+/*
+float randomize(in float val, in float seed) {
+    return 0.5+ 0.5*sin(exp(mod(val*seed,81.0)));
+}
+*/
+
 float BuildingsDistance(in vec3 point_pos)
 {
+    float rep_x = 15.0;
+    float rep_y = 20.0;
+    float bidx = blocIndex(point_pos.x, rep_x);
+    float bidy = blocIndex(point_pos.y, rep_y);
+    return CubeRepetition(point_pos,
+                       // size
+                       vec3(0.1 + 3.8 * randomize(bidx*bidy, 1.0),
+                            1.0+2.5*randomize(bidx, 1.0)
+                               +2.5*randomize(bidy, 2.0)
+                            , 2.0),
+                       // repeat
+                       vec3(rep_x, 0.0, rep_y));
     return min(
-      CubeRepetition(point_pos, vec3(17.0, 0.0, 20.0))
-      , CubeRepetition(point_pos+vec3(350.0,-2.0,0.0), vec3(23.0, 0.0, 23.0))
+      min(
+        CubeRepetition(point_pos,
+                       vec3 (2.0, 7.0*randomize(blocIndex(point_pos.x, 11.0), 1.0), 2.0),
+                       vec3(11.0, 0.0, 13.0))
+        , CubeRepetition(point_pos+vec3(101.0,-2.0, -100.0),
+                         vec3 (1.0, 5.0, 1.0),
+                         vec3(23.0, 0.0, 23.0)))
+      , CubeRepetition(point_pos+vec3(10.0,-3.0, -10.0),
+                       vec3 (2.0, 10.0, 1.5),
+                       vec3(7.0, 0.0, 16.0))
     );
 }
 
