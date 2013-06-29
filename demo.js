@@ -315,6 +315,17 @@ function allLoaded() {
     ])
   };
 
+  D.shaders["city_intro"] = {
+    src: concat([
+    "city_uniforms",
+    "city_distance_1",
+    "city_marcher",
+    "city_mtl_intro",
+    "city_post_1",
+    "city_main"
+    ])
+  };
+
   D.shaders["city_2"] = {
     src: concat([
     "city_uniforms",
@@ -439,6 +450,7 @@ loader.loadText("city_uniforms.fs", "city_uniforms");
 loader.loadText("city_mtl_1.fs", "city_mtl_1");
 loader.loadText("city_mtl_2.fs", "city_mtl_2");
 loader.loadText("city_mtl_rainbowtransition.fs", "city_mtl_rainbowtransition");
+loader.loadText("city_mtl_intro.fs", "city_mtl_intro");
 loader.loadText("city_distance_1.fs", "city_distance_1");
 loader.loadText("city_marcher.fs", "city_marcher");
 loader.loadText("city_main.fs", "city_main");

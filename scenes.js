@@ -6,17 +6,24 @@ D.scenes.pushScene = function(scene) {
 
 function loadScenes() {
   D.scenes.pushScene( {
-    duration: 15000,
+    duration: 5000,
+    fragments: ["city_intro"],
+    vertex: "quad",
+    update: [updateRaymarch]
+  });
+
+  D.scenes.pushScene( {
+    duration: 5000,
     fragments: ["city_1"],
     vertex: "quad",
-    update: [updateRaymarch, updateDefault]
+    update: [updateRaymarch]
   });
 
   D.scenes.pushScene( {
     duration: 15000,
     fragments: ["city_rainbow"],
     vertex: "quad",
-    update: [updateRaymarch, updateDefault]
+    update: [updateRaymarch]
   });
 
   D.scenes.pushScene( {
