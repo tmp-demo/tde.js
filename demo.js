@@ -218,6 +218,8 @@ function findSceneForTime(time) {
   if (D.looping){
 	if(D.scenes[D.currentScene].start + D.scenes[D.currentScene].duration < time)
 		seek(D.scenes[D.currentScene].start);
+	else if(D.scenes[D.currentScene].start > time)
+		seek(D.scenes[D.currentScene].start);
 	return D.currentScene;
   }else{
     for(var i = 0; i < D.scenes.length; i++) {
@@ -436,7 +438,9 @@ document.addEventListener("keypress", function(e) {
       // jump to scene
       if (D.scenesLoopShortcuts[""+e.charCode] < D.scenes.length){//s >= 0 && s <= 9 && s < D.scenes.length) {
         D.looping = true;
-        seek(D.scenes[D.scenesLoopShortcuts[""+e.charCode]].start);
+		D.currentScene = D.scenesLoopShortcuts[""+e.charCode];
+        seek(D.scenes[D.currentScene].start);
+		
     }
   }
 });
