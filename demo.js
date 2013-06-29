@@ -371,7 +371,7 @@ loader.loadJS("scenes.js");
 loader.loadShader("green-red.fs", "x-shader/fragment", "green-red");
 loader.loadShader("bw.fs", "x-shader/fragment", "bw");
 loader.loadShader("blur.fs", "x-shader/fragment", "blur");
-loader.loadShader("blur.fs", "x-shader/fragment", "gay-flag");
+loader.loadShader("gay-flag.fs", "x-shader/fragment", "gay-flag");
 loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
 loader.loadShader("quad.vs", "x-shader/vertex", "quad");
 

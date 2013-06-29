@@ -13,7 +13,7 @@ function loadScenes() {
   });
 
   D.scenes.pushScene( {
-    duration: 5000,
+    duration: 10000,
     fragments: ["green-red", "gay-flag"],
     vertex: "quad",
     update: [updateDefault, updateDefault]
