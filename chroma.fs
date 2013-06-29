@@ -28,7 +28,7 @@ void main(void)
   }
 
 
-  vec4 redmoved = texture2D(u_image, vec2(uv.x + 18.0 * displaced / res.x, uv.y));
+  vec4 redmoved = texture2D(u_image, vec2(uv.x + 13.0 * displaced / res.x, uv.y));
 
   gl_FragColor = vec4(redmoved.r, narmol.g, narmol.b, 1.0);
 }
