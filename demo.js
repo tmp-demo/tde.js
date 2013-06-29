@@ -76,7 +76,6 @@ function updateTimeUniforms(program) {
                D.scenes[D.currentScene].duration);
   gl.uniform2f(gl.getUniformLocation(program, 'res'),
                cvs.width, cvs.height);
-  console.log(bd.beat());
   gl.uniform1f(gl.getUniformLocation(program, 'beat'),
                bd.beat());
 }
