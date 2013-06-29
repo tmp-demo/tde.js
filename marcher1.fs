@@ -14,7 +14,7 @@ uniform vec2 res;
 uniform mat4 mvmat;
 uniform vec3 position;
 
-#define MAX_STEPS 200
+#define MAX_STEPS 100
 
 #define shadowColor vec3(0.0,0.3,0.7)
 #define buildingsColor vec3(1.0,1.0,1.0)
@@ -87,40 +87,42 @@ float blocIndex(in float point, in float repetition) {
 }
 
 float randomize(float co, float seed) {
-    return cos(fract(sin(co * seed * 12.9898)) * 43758.5453);
+    return 0.5 + 0.5 * cos(fract(co * seed * 12.9898) * 43758.5453);
+//    return mod(fract(co * seed * 12.9898) * 43758.5453, 1.0);
+//    return 0.5 + 0.5 * cos(fract(sin(co * seed * 12.9898)) * 43758.5453);
 }
 
-/*
-float randomize(in float val, in float seed) {
-    return 0.5+ 0.5*sin(exp(mod(val*seed,81.0)));
+float RandomBuildingDistance(in vec3 point_pos, in vec2 repeat, in vec2 offset, float yCoef) {
+    point_pos.x += offset.x;
+    point_pos.z += offset.y;
+    float rep_x = repeat.x;
+    float rep_z = repeat.y;
+    float bidx = blocIndex(point_pos.x, rep_x) + 100.0;
+    float bidz = blocIndex(point_pos.z, rep_z) + 100.0;
+    return CubeRepetition(point_pos,
+                       // size
+                       vec3(0.7 + 2.0 * randomize(bidx * bidz, 1.0)
+                            , (1.0 + 3.2 * randomize(bidx, 11.0)
+                                   + 3.2 * randomize(bidz, 17.0)) * yCoef
+                            , 0.7 + 2.0 * randomize(bidx * bidz, 2.0)),
+                       // repeat
+                       vec3(rep_x, 0.0, rep_z));
 }
-*/
 
 float BuildingsDistance(in vec3 point_pos)
 {
-    float rep_x = 15.0;
-    float rep_y = 20.0;
-    float bidx = blocIndex(point_pos.x, rep_x);
-    float bidy = blocIndex(point_pos.y, rep_y);
-    return CubeRepetition(point_pos,
-                       // size
-                       vec3(0.1 + 3.8 * randomize(bidx*bidy, 1.0),
-                            1.0+2.5*randomize(bidx, 1.0)
-                               +2.5*randomize(bidy, 2.0)
-                            , 2.0),
-                       // repeat
-                       vec3(rep_x, 0.0, rep_y));
     return min(
-      min(
-        CubeRepetition(point_pos,
-                       vec3 (2.0, 7.0*randomize(blocIndex(point_pos.x, 11.0), 1.0), 2.0),
-                       vec3(11.0, 0.0, 13.0))
-        , CubeRepetition(point_pos+vec3(101.0,-2.0, -100.0),
-                         vec3 (1.0, 5.0, 1.0),
-                         vec3(23.0, 0.0, 23.0)))
-      , CubeRepetition(point_pos+vec3(10.0,-3.0, -10.0),
-                       vec3 (2.0, 10.0, 1.5),
-                       vec3(7.0, 0.0, 16.0))
+        min(
+            min(
+                // ------------------- position -- repeat ---------- offset --------- coef
+                RandomBuildingDistance(point_pos, vec2(20.0, 20.0), vec2(0.0,0.0),    0.8),
+                RandomBuildingDistance(point_pos, vec2(20.0, 20.0), vec2(110.0,10.0), 1.0)
+            ), min (
+                RandomBuildingDistance(point_pos, vec2(20.0, 20.0), vec2(105.0,0.0),  0.9),
+                RandomBuildingDistance(point_pos, vec2(20.0, 20.0), vec2(0.0,5.0),    0.9)
+            )
+        ),
+        RandomBuildingDistance(        point_pos, vec2(120.0, 120.0), vec2(2.0,3.0), 1.7)
     );
 }
 
@@ -243,7 +245,7 @@ float AmbientOcclusion(vec3 point, vec3 normal, float stepDistance, float sample
   float occlusion = 1.0;
   int tempMaterial;
   
-  for (int i = 0; i < 20; ++i )
+  for (int i = 0; i < 15; ++i )
   {
     if(--samples < 0.0) break;
     occlusion -= (samples * stepDistance - (DistanceField( point + normal * samples * stepDistance, tempMaterial))) / pow(2.0, samples);
@@ -285,17 +287,27 @@ void main(void)
         shadow = min(shadow, attenuation);
         //material color
         vec3 mtlColor = MaterialColor(material);
-        
+
         if(material == BUILDINGS_MTL){
-          mtlColor = mix(shadowColor, mtlColor, clamp(hitposition.y/7.0, 0.0, 1.0));
+          mtlColor = mix(shadowColor, mtlColor, clamp(hitposition.y/9.0, 0.0, 1.0));
         }
         hitColor = mix(shadowColor, mtlColor, 0.4+shadow*0.6);
         vec3 hitNormal = ComputeNormal(hitposition, 0);
         float AO = AmbientOcclusion(hitposition, hitNormal, 0.35, 5.0);
         hitColor = mix(shadowColor, hitColor, AO);
-        
-        applyFog( length(position-hitposition), hitColor);
+
+        float foo = length(hitposition - vec3(50.0, 0.0, 150.0));
+        float bar = sin(foo/1000.0 - time/3000.0);
+        if (bar > 0.0 && bar < 0.01) {
+            hitColor = vec3(1.0, 0.0, 0.0);
+        } else if (bar > 0.01 && bar < 0.02) {
+            hitColor = vec3(1.0, 1.0, 0.0);
+        } else if (bar > 0.02 && bar < 0.03) {
+            hitColor = vec3(0.0, 1.0, 1.0);
+        }
+        applyFog( length(position-hitposition)*2.0, hitColor);
         gl_FragColor = vec4(hitColor, 1.0);
+
     }
     else // sky
     {
