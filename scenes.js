@@ -59,7 +59,7 @@ function loadScenes() {
   
   // rainbow!
   D.scenes.pushScene( {
-    duration: 1314,
+    duration: 13714,
     fragments: ["city_rainbow"],
     vertex: "quad",
     update: [function(prog) {
@@ -85,7 +85,7 @@ function loadScenes() {
   });
   
   D.scenes.pushScene( {
-    duration: 5000,
+    duration: 13715*2,
     fragments: ["city_2", "gay-flag"],
     vertex: "quad",
     update: [function(prog) {
@@ -145,6 +145,17 @@ function loadScenes() {
       updateRaymarchStatic(prog, [300, 15.0, 1000.0]);
     }]
   });
+
+  // rainbow!
+  D.scenes.pushScene( {
+    duration: 13714,
+    fragments: ["city_rainbow"],
+    vertex: "quad",
+    update: [function(prog) {
+      updateRaymarchTranslate(prog, [20, 10.0, 15.0],[20, 20.0, -120.0]);
+    }]
+  });
+
 
   assertScenesSorted();
   var lastScene = D.scenes[D.scenes.length - 1];
