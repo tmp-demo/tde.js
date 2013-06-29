@@ -15,7 +15,7 @@ BeatDetector.prototype.beat = function() {
   this.node.getFloatFrequencyData(this.array);
   var avgWidth = 10;
   var sum = 0;
-  for (var i = 0; i < avgWidth; i++) {
+  for (var i = 5; i < 5 + avgWidth; i++) {
     sum += this.array[i];
   }
   sum /= avgWidth;
@@ -70,9 +70,11 @@ function updateTimeUniforms() {
                bd.beat());
 }
 function seek(time) {
-  bs.stop(0);
+  if (bs) {
+    bs.stop(0);
+  }
   bs = ac.createBufferSource();
-  bs.buffer = D.sounds["long"];
+  bs.buffer = D.sounds["track"];
   bs.connect(ac.destination);
   bs.connect(an);
   D.startTime = Date.now() - time;
@@ -208,7 +210,7 @@ function allLoaded() {
   D.currentScene = 0;
   bs = ac.createBufferSource();
   an = ac.createAnalyser();
-  bs.buffer = D.sounds["long"];
+  bs.buffer = D.sounds["track"];
   bs.connect(ac.destination);
   bs.connect(an);
   bd = new BeatDetector(an);
@@ -280,7 +282,7 @@ loader.loadShader("bw.fs", "x-shader/fragment", "bw");
 loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
 loader.loadShader("quad.vs", "x-shader/vertex", "quad");
 loader.loadAudio("think.wav", "think");
-loader.loadAudio("long.ogg", "long");
+loader.loadAudio("track.ogg", "track");
 
 cvs = document.getElementsByTagName("canvas")[0];
 gl = cvs.getContext("experimental-webgl");
@@ -308,9 +310,12 @@ document.addEventListener("keypress", function(e) {
     if (D.playState == D.PLAYING) {
       D.pauseStart = Date.now();
       D.playState = D.PAUSED;
+      bs.stop(0);
+      bs = null;
     } else if(D.playState == D.ENDED) {
       seek(0);
     } else {
+      seek(D.currentTime);
       D.startTime += Date.now() - D.pauseStart;
       D.playState = D.PLAYING;
       mainloop();
