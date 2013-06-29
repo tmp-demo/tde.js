@@ -3,15 +3,22 @@ precision lowp float;
 uniform float time;
 /* scene duration */
 uniform float duration;
-uniform float beat;
 /* resolution */
 uniform vec2 res;
 
+uniform sampler2D u_image;
+uniform vec2 u_textureSize;
+
+varying vec2 v_texCoord;
+
 void main() {
+
   float col = (duration - time) / duration;
-  gl_FragColor = vec4(beat * cos(gl_FragCoord.x * col * 65366.0 * col),
-                      beat * sin(gl_FragCoord.y * col * 65366.0 * col),
-                      beat * tan(gl_FragCoord.x * col * 65366.0),
-                      1.0 - beat * 0.5);
+  float coef = 4.0;
+  vec4 result = vec4(0.0,0.0,0.0,0.0);
+  result = result + texture2D(u_image,v_texCoord );
+  gl_FragColor= result / coef; 
+	
+  
 }
 
