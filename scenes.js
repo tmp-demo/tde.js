@@ -119,7 +119,7 @@ function loadScenes() {
   });
 
   D.scenes.pushScene( {
-    duration: 5000,
+    duration: 13714,
     fragments: ["city_2"],
     vertex: "quad",
     update: [function(prog) {
@@ -128,7 +128,7 @@ function loadScenes() {
     }, updateDefault]
   });
   D.scenes.pushScene( {
-    duration: 13714*2,
+    duration: 13714,
     fragments: ["city_2", "gay-ring"],
     vertex: "quad",
     update: [function(prog) {
@@ -154,6 +154,16 @@ function loadScenes() {
     update: [function(prog) {
       updateRaymarchTranslate(prog, [20, 10.0, 15.0],[20, 20.0, -120.0]);
     }]
+  });
+
+  // traveling right with chroma
+  D.scenes.pushScene( {
+    duration: 13715,
+    fragments: ["city_2", "chroma"],
+    vertex: "quad",
+    update: [function(prog) {
+      updateRaymarchTranslate(prog, [100, 15.0, 15.0],[100, 15.0, 115.0]);
+    }, updateDefault]
   });
 
 
