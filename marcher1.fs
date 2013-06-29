@@ -315,5 +315,4 @@ void main(void)
         vec3 hitColor = mix(skyColor, vec3(0.3,0.3,0.7), shade);
         gl_FragColor = vec4(hitColor, 1.0);
     }
-
 }

@@ -15,7 +15,7 @@ BeatDetector.prototype.beat = function() {
   this.node.getFloatFrequencyData(this.array);
   var avgWidth = 10;
   var sum = 0;
-  for (var i = 5; i < 5 + avgWidth; i++) {
+  for (var i = 0; i < avgWidth; i++) {
     sum += this.array[i];
   }
   sum /= avgWidth;
@@ -63,24 +63,26 @@ D = {
   scenesShortcuts : {"97":0, "122":1,"101":2, "114":3,"116":4,"116":5,"121":6,"117":7,"105":8,"111":9},
   scenesLoopShortcuts : {"113":0, "115":1,"100":2, "102":3,"103":4,"104":5,"106":6,"107":7,"108":8,"109":9}
 };
-function updateTimeUniforms() {
+function updateTimeUniforms(program) {
   D.currentTime = Date.now() - D.startTime;
   seeker.value = D.currentTime;
 
   D.clipTime = D.currentTime - D.scenes[D.currentScene].start;
   
-  gl.uniform1f(gl.getUniformLocation(D.currentProgram[0], 'time'),
+  gl.uniform1f(gl.getUniformLocation(program, 'time'),
                D.currentTime - D.scenes[D.currentScene].start);
-  gl.uniform1f(gl.getUniformLocation(D.currentProgram[0], 'duration'),
+  gl.uniform1f(gl.getUniformLocation(program, 'duration'),
                D.scenes[D.currentScene].duration);
-  gl.uniform2f(gl.getUniformLocation(D.currentProgram[0], 'res'),
+  gl.uniform2f(gl.getUniformLocation(program, 'res'),
                cvs.width, cvs.height);
-  gl.uniform1f(gl.getUniformLocation(D.currentProgram[0], 'beat'),
+  gl.uniform1f(gl.getUniformLocation(program, 'beat'),
                bd.beat());
 }
+
 function seek(time) {
   if (bs) {
     bs.stop(0);
+    bs.null;
   }
   bs = ac.createBufferSource();
   bs.buffer = D.sounds["track"];
@@ -135,8 +137,8 @@ function windowResize() {
 	  
 }
 
-function updateDefault() {
-  updateTimeUniforms();
+function updateDefault(program) {
+  updateTimeUniforms(program);
 }
 
 function renderDefault() {
@@ -155,15 +157,15 @@ function renderDefault() {
     
     // do the job
     // updateTimeUniforms();
-    D.scenes[D.currentScene].update[0]();
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0); 
+    D.scenes[D.currentScene].update[0](D.currentProgram[0]);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-    
-	
-	//TODO : write logic for several post...
+
+    //TODO : write logic for several post...
     // do the post processing
     gl.useProgram(D.currentProgram[1]);
+    D.scenes[D.currentScene].update[1](D.currentProgram[1]);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -180,7 +182,7 @@ function renderDefault() {
     gl.useProgram(D.currentProgram[0]);
     
     // do the job
-    D.scenes[D.currentScene].update[0]();
+    D.scenes[D.currentScene].update[0](D.currentProgram[0]);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0); 
     gl.enableVertexAttribArray(0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -217,6 +219,8 @@ function findSceneForTime(time) {
 
   if (D.looping){
 	if(D.scenes[D.currentScene].start + D.scenes[D.currentScene].duration < time)
+		seek(D.scenes[D.currentScene].start);
+	else if(D.scenes[D.currentScene].start > time)
 		seek(D.scenes[D.currentScene].start);
 	return D.currentScene;
   }else{
@@ -307,6 +311,7 @@ ResourceLoader.prototype.loadShader = function(src, type, id) {
   var self = this;
   xhr.onload = function() {
     D.shaders[id] = { src: this.responseText, type: type};
+    console.log("loaded: " + src);
     self.onLoad();
   };
   xhr.onerror = function() {
@@ -321,6 +326,7 @@ ResourceLoader.prototype.loadJS = function(url) {
   e.src = url;
   var self = this;
   e.addEventListener("load", function() {
+    console.log("loaded: " + url);
     self.onLoad();
   });
   e.addEventListener("error", function() {
@@ -336,7 +342,9 @@ ResourceLoader.prototype.loadAudio = function(src, id) {
   xhr.responseType = "arraybuffer";
   var self = this;
   xhr.onload = function() {
+    console.log("loaded: " + src);
     ac.decodeAudioData(xhr.response, function(data) {
+      console.log("decoded: " + src);
       D.sounds[id] = data;
       self.onLoad();
     }, function() {
@@ -363,6 +371,7 @@ loader.loadJS("scenes.js");
 loader.loadShader("green-red.fs", "x-shader/fragment", "green-red");
 loader.loadShader("bw.fs", "x-shader/fragment", "bw");
 loader.loadShader("blur.fs", "x-shader/fragment", "blur");
+loader.loadShader("blur.fs", "x-shader/fragment", "gay-flag");
 loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
 loader.loadShader("quad.vs", "x-shader/vertex", "quad");
 
@@ -436,7 +445,9 @@ document.addEventListener("keypress", function(e) {
       // jump to scene
       if (D.scenesLoopShortcuts[""+e.charCode] < D.scenes.length){//s >= 0 && s <= 9 && s < D.scenes.length) {
         D.looping = true;
-        seek(D.scenes[D.scenesLoopShortcuts[""+e.charCode]].start);
+		D.currentScene = D.scenesLoopShortcuts[""+e.charCode];
+        seek(D.scenes[D.currentScene].start);
+		
     }
   }
 });

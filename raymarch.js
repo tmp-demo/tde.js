@@ -1,5 +1,4 @@
-
-function updateRaymarch() {
+function updateRaymarch(program) {
   var mat = mat4.create();
   var m2 = mat4.create();
   
@@ -10,4 +9,4 @@ function updateRaymarch() {
   gl.uniformMatrix4fv(gl.getUniformLocation(D.currentProgram[0], 'mvmat'), false, m2);
 gl.uniform3fv(gl.getUniformLocation(D.currentProgram[0], 'position'),
                 new Float32Array(position));
-}currentProgram
+}
