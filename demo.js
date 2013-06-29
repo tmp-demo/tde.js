@@ -135,6 +135,10 @@ function windowResize() {
 	  
 }
 
+function updateDefault() {
+  updateTimeUniforms();
+}
+
 function renderDefault() {
 
   //first remove any attached texture
@@ -150,7 +154,8 @@ function renderDefault() {
     gl.useProgram(D.currentProgram[0]);
     
     // do the job
-    updateTimeUniforms();
+    // updateTimeUniforms();
+    D.scenes[D.currentScene].update[0]();
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0); 
     gl.enableVertexAttribArray(0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -175,7 +180,7 @@ function renderDefault() {
     gl.useProgram(D.currentProgram[0]);
     
     // do the job
-    updateTimeUniforms();
+    D.scenes[D.currentScene].update[0]();
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0); 
     gl.enableVertexAttribArray(0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -227,7 +232,7 @@ function findSceneForTime(time) {
 function updateScene() {
   D.currentScene = findSceneForTime(D.currentTime);
   D.currentProgram = D.programs[D.currentScene];
-  D.render = D.scenes[D.currentScene].render;
+  D.render = renderDefault; // TODO[nical]
   if (D.render === undefined) {
     D.render = renderDefault;
   }
