@@ -7,7 +7,7 @@ D.scenes.pushScene = function(scene) {
 function loadScenes() {
   D.scenes.pushScene( {
     duration: 15000,
-    fragments: ["marcher1", "blur"],
+    fragments: ["marcher1", "chroma"],
     vertex: "quad",
     update: [updateRaymarch, updateDefault]
   });
