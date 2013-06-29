@@ -26,5 +26,6 @@ uniform vec3 position;
 #define SKY_MTL 0
 #define GROUND_MTL 1
 #define BUILDINGS_MTL 2
-#define RED_MTL 3
+#define DEFAULT_MTL 3
+#define RED_MTL 273812
 

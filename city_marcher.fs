@@ -27,12 +27,9 @@ vec3 RayMarch(in vec3 point_pos, in vec3 direction, out int mtl)
         point_pos += direction * nextDistance;
     }
     // out of steps
-    if (direction.y < 0.0 )
-    {
-        mtl = GROUND_MTL;
-    }
-    else
-    {
+    if (direction.y < 0.0 ) {
+        mtl = DEFAULT_MTL;
+    } else {
         mtl = SKY_MTL;
     }
     return point_pos;

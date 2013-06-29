@@ -5,6 +5,8 @@
 #define viewMatrix mat4(0.0)
 #define fovyCoefficient 1.0
 #define shadowHardness 7.0
+#define defaultColor vec3(0.45,0.6,0.8)
+
 
 void applyFog( in float distance, inout vec3 rgb ){
 
@@ -58,6 +60,12 @@ vec3 computeColor(vec3 eyePosition, vec3 hitPosition, vec3 direction, int materi
     vec3 hitColor;
     if( material != SKY_MTL ) // has hit something
     {
+        if(material == DEFAULT_MTL) {
+            hitColor = defaultColor;
+            applyFog(length(position-hitPosition)*2.0, hitColor);
+            return hitColor;
+        }
+
         vec3 lightpos = vec3(50.0 * sin(time*0.001), 10.0 + 40.0 *
         abs(cos(time*0.001)), (time * 0.2) + 100.0 );
         vec3 lightVector = normalize(lightpos - hitPosition);

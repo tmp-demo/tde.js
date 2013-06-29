@@ -8,6 +8,8 @@
 #define viewMatrix mat4(0.0)
 #define fovyCoefficient 1.0
 #define shadowHardness 7.0
+#define defaultColor vec3(0.45,0.6,0.8)
+#define sadDefaultColor vec3(0.3,0.3,0.3)
 
 void applyFog( in float distance, inout vec3 rgb ){
 
@@ -70,8 +72,6 @@ vec3 computeColor(vec3 eyePosition, vec3 hitPosition, vec3 direction, int materi
     vec3 hitColor;
     if( material != SKY_MTL ) // has hit something
     {
-
-
         float foo = length(hitPosition - vec3(50.0, 0.0, 150.0));
         float bar = sin(foo/1000.0 - time/3000.0);
         vec3 lightpos = vec3(50.0 * sin(time*0.001)
@@ -83,6 +83,11 @@ vec3 computeColor(vec3 eyePosition, vec3 hitPosition, vec3 direction, int materi
 
         if (bar < 0.0) {
             // joyful blue
+            if(material == DEFAULT_MTL) {
+                hitColor = defaultColor;
+                applyFog(length(position-hitPosition)*2.0, hitColor);
+                return hitColor;
+            }
             // soft shadows
             float shadow = Softshadow(hitPosition, lightVector, 0.1, 50.0, shadowHardness);
             float attenuation = clamp(dot(normal, lightVector),0.0,1.0)*0.6 + 0.4;
@@ -110,6 +115,11 @@ vec3 computeColor(vec3 eyePosition, vec3 hitPosition, vec3 direction, int materi
             hitColor = vec3(0.62, 0.0, 0.75);
         } else {
             // sad gray
+            if(material == DEFAULT_MTL) {
+                hitColor = sadDefaultColor;
+                applyFog(length(position-hitPosition)*2.0, hitColor);
+                return hitColor;
+            }
             float shadow = clamp(dot(normal, lightVector),0.0,1.0)*0.6 + 0.4;
             //material color
             vec3 mtlColor = SadMaterialColor(material);

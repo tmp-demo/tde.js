@@ -32,11 +32,6 @@ void main(void)
     int material;
     vec3 hitposition = RayMarch(position, direction, material);
 
-    if( material == SKY_MTL && direction.y < 0.0 ) {
-       material = GROUND_MTL;
-       gl_FragColor = vec4(1.0,0.0,0.0,1.0); // TODO[nical] debug color ?
-    }
-
     // see city_mtl_*.fs
     vec3 hitColor = computeColor(position, hitposition, direction, material);
     // see city_post_*.fs
