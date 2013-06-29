@@ -81,6 +81,7 @@ function updateTimeUniforms() {
 function seek(time) {
   if (bs) {
     bs.stop(0);
+    bs.null;
   }
   bs = ac.createBufferSource();
   bs.buffer = D.sounds["track"];
@@ -302,6 +303,7 @@ ResourceLoader.prototype.loadShader = function(src, type, id) {
   var self = this;
   xhr.onload = function() {
     D.shaders[id] = { src: this.responseText, type: type};
+    console.log("loaded: " + src);
     self.onLoad();
   };
   xhr.onerror = function() {
@@ -316,6 +318,7 @@ ResourceLoader.prototype.loadJS = function(url) {
   e.src = url;
   var self = this;
   e.addEventListener("load", function() {
+    console.log("loaded: " + url);
     self.onLoad();
   });
   e.addEventListener("error", function() {
@@ -331,7 +334,9 @@ ResourceLoader.prototype.loadAudio = function(src, id) {
   xhr.responseType = "arraybuffer";
   var self = this;
   xhr.onload = function() {
+    console.log("loaded: " + src);
     ac.decodeAudioData(xhr.response, function(data) {
+      console.log("decoded: " + src);
       D.sounds[id] = data;
       self.onLoad();
     }, function() {

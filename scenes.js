@@ -5,29 +5,28 @@ D.scenes.pushScene = function(scene) {
 }
 
 function loadScenes() {
-
   D.scenes.pushScene( {
     duration: 5000,
     fragments: ["green-red", "blur"],
     vertex: "quad",
     render: renderDefault
   });
-  
+
   D.scenes.pushScene( {
     duration: 5000,
     fragments: ["green-red"],
     vertex: "quad",
     render: renderDefault
   });
-  
-  
+
+
   D.scenes.pushScene( {
     duration: 5000,
     fragments: ["bw"],
     vertex: "quad",
     render: renderDefault
   });
-  
+
   D.scenes.pushScene( {
     duration: 15000,
     fragments: ["marcher1"],
