@@ -80,9 +80,9 @@ vec3 computeColor(vec3 eyePosition, vec3 hitPosition, vec3 direction, int materi
             if (mod(hitPosition.y, 1.1) < 0.4) {
                 float b = beat * abs(sin(time/10.0));
                 if (hitPosition.y > b * 22.0 - 14.0) {
-                    return vec3(0.0, 0.0, 0.0);
+                    mtlColor = vec3(0.0, 0.0, 0.0);
                 } else {
-                    return vec3(1.0, 0.9, 0.8)* (1.0 - (length(hitPosition - position)/4000.0));
+                    mtlColor = vec3(1.0, 0.9, 0.8)* (1.0 - (length(hitPosition - position)/100.0));
                 }
             }
         }

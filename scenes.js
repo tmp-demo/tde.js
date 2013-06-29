@@ -56,7 +56,7 @@ function loadScenes() {
   });
 
   D.scenes.pushScene( {
-    duration: 10000,
+    duration: 50000,
     fragments: ["city_fancy"],
     vertex: "quad",
     update: [function(prog) {
