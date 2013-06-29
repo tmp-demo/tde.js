@@ -35,7 +35,7 @@ function loadScenes() {
 
   // sad
   D.scenes.pushScene( {
-    duration: 13414,
+    duration: 5414,
     fragments: ["city_1"],
     vertex: "quad",
     update: [function(prog) {
@@ -43,37 +43,24 @@ function loadScenes() {
     }]
   });
   
+
+  // rainbow!
   D.scenes.pushScene( {
-    duration: 100000,
+    duration: 1314,
+    fragments: ["city_rainbow"],
+    vertex: "quad",
+    update: [function(prog) {
+      updateRaymarchTranslate(prog, [20, 10.0, 15.0],[20, 20.0, -120.0]);
+    }]
+  });
+
+  D.scenes.pushScene( {
+    duration: 1000,
     fragments: ["gay-ring"],
     vertex: "quad",
     update: [updateDefault]
   });
   
-    D.scenes.pushScene( {
-    duration: 100000,
-    fragments: ["gay-ring2"],
-    vertex: "quad",
-    update: [updateDefault]
-  });
-  
-    D.scenes.pushScene( {
-    duration: 100000,
-    fragments: ["gay-ring3"],
-    vertex: "quad",
-    update: [updateDefault]
-  });
-
-  // rainbow!
-  D.scenes.pushScene( {
-    duration: 13714,
-    fragments: ["city_rainbow"],
-    vertex: "quad",
-    update: [function(prog) {
-      updateRaymarchTranslate(prog, [20, 10.0, 15.0],[20, 20.0, -100.0]);
-    }]
-  });
-
   // traveling right with chroma
   D.scenes.pushScene( {
     duration: 13715,
@@ -92,6 +79,20 @@ function loadScenes() {
       updateRaymarchTransition(prog, [100, 15.0, 15.0],[100, 15.0, 15.0],
                                       0, [0,1,0], 1, [0,1,0]);
     }, updateDefault]
+  });
+
+  D.scenes.pushScene( {
+    duration: 100000,
+    fragments: ["gay-ring2"],
+    vertex: "quad",
+    update: [updateDefault]
+  });
+  
+    D.scenes.pushScene( {
+    duration: 100000,
+    fragments: ["gay-ring3"],
+    vertex: "quad",
+    update: [updateDefault]
   });
 
   D.scenes.pushScene( {
