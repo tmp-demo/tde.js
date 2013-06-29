@@ -93,7 +93,7 @@ function seek(time) {
   bs.buffer = D.sounds["track"];
   bs.connect(ac.destination);
   bs.connect(an);
-  D.startTime = Date.now() - time;
+  D.startTime = 0;
   D.currentTime = ac.currentTime * 1000;
   D.currentScene = findSceneForTime(D.currentTime);
   if (D.playState == D.PAUSED) {
@@ -143,6 +143,7 @@ function windowResize() {
 }
 
 function updateDefault(program) {
+  updateTimes();
   updateTimeUniforms(program);
 }
 
@@ -376,7 +377,12 @@ function allLoaded() {
       D.programs[i].push(loadProgram(D.shaders[scene.vertex].src, D.shaders[scene.fragments[j]].src));
   }
 
-  D.startTime = Date.now();
+  if (window.AudioContext) {
+    ac = new AudioContext();
+  } else {
+    ac = new webkitAudioContext();
+  }
+  D.startTime = 0;
   D.currentTime = 0;
   D.currentProgram = D.programs[0];
   D.render = renderDefault;
@@ -546,7 +552,7 @@ document.addEventListener("keypress", function(e) {
       seek(0);
     } else {
       seek(D.currentTime);
-      D.startTime += Date.now() - D.pauseStart;
+      D.startTime = 0;
       D.playState = D.PLAYING;
       mainloop();
     } 
