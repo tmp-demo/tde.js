@@ -9,11 +9,12 @@ function $$(s) {
 function BeatDetector(analyserNode) {
   this.node = analyserNode;
   this.array = new Float32Array(analyserNode.fftSize);
+  this.node.maxDecibels = 0;
 }
 
 BeatDetector.prototype.beat = function() {
   this.node.getFloatFrequencyData(this.array);
-  var avgWidth = 10;
+  var avgWidth = 100;
   var sum = 0;
   for (var i = 0; i < avgWidth; i++) {
     sum += this.array[i];
@@ -21,7 +22,7 @@ BeatDetector.prototype.beat = function() {
   sum /= avgWidth;
   sum -= this.node.minDecibels;
   sum /= -(this.node.minDecibels - this.node.maxDecibels);
-  return sum;
+  return Math.log(sum + 1) * 2;
 }
 
 seeker = null;
@@ -63,12 +64,15 @@ D = {
   scenesShortcuts : {"97":0, "122":1,"101":2, "114":3,"116":4,"116":5,"121":6,"117":7,"105":8,"111":9},
   scenesLoopShortcuts : {"113":0, "115":1,"100":2, "102":3,"103":4,"104":5,"106":6,"107":7,"108":8,"109":9}
 };
-function updateTimeUniforms(program) {
+
+function updateTimes() {
   D.currentTime = Date.now() - D.startTime;
   seeker.value = D.currentTime;
 
-  D.clipTime = D.currentTime - D.scenes[D.currentScene].start;
-  
+  D.clipTime = D.currentTime - D.scenes[D.currentScene].start;  
+}
+
+function updateTimeUniforms(program) {
   gl.uniform1f(gl.getUniformLocation(program, 'time'),
                D.currentTime - D.scenes[D.currentScene].start);
   gl.uniform1f(gl.getUniformLocation(program, 'duration'),
@@ -297,8 +301,72 @@ ResourceLoader.prototype.registerResource = function(thing) {
   this.toLoad++;
 }
 
+function concat(names) {
+  var src = "";
+  for (var i in names) {
+    src += D.texts[names[i]];
+  }
+  //alert(src);
+  return src;
+}
+
 function allLoaded() {
   loadScenes();
+
+  D.shaders["city_1"] = {
+    src: concat([
+    "city_uniforms",
+    "city_distance_1",
+    "city_marcher",
+    "city_mtl_1",
+    "city_post_1",
+    "city_main"
+    ])
+  };
+
+  D.shaders["city_rainbow"] = {
+    src: concat([
+    "city_uniforms",
+    "city_distance_1",
+    "city_marcher",
+    "city_mtl_rainbowtransition",
+    "city_post_1",
+    "city_main"
+    ])
+  };
+
+  D.shaders["city_intro"] = {
+    src: concat([
+    "city_uniforms",
+    "city_distance_1",
+    "city_marcher",
+    "city_mtl_intro",
+    "city_post_1",
+    "city_main"
+    ])
+  };
+
+  D.shaders["city_2"] = {
+    src: concat([
+    "city_uniforms",
+    "city_distance_1",
+    "city_marcher",
+    "city_mtl_2",
+    "city_post_1",
+    "city_main"
+    ])
+  };
+
+  D.shaders["city_fancy"] = {
+    src: concat([
+    "city_uniforms",
+    "city_distance_1",
+    "city_marcher",
+    "city_mtl_multicolor",
+    "city_post_1",
+    "city_main"
+    ])
+  };
 
   for (var i = 0; i < D.scenes.length; i++) {
     var scene = D.scenes[i];
@@ -333,6 +401,22 @@ ResourceLoader.prototype.loadShader = function(src, type, id) {
   };
   xhr.onerror = function() {
     alert("loadShader error."+src);
+  }
+  this.registerResource();
+  xhr.send(null);
+}
+
+ResourceLoader.prototype.loadText = function(src, id) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", src);
+  var self = this;
+  xhr.onload = function() {
+    D.texts[id] = this.responseText;
+    console.log("loaded: " + src);
+    self.onLoad();
+  };
+  xhr.onerror = function() {
+    alert("loadText error."+src);
   }
   this.registerResource();
   xhr.send(null);
@@ -388,10 +472,22 @@ loader.loadJS("scenes.js");
 loader.loadShader("green-red.fs", "x-shader/fragment", "green-red");
 loader.loadShader("bw.fs", "x-shader/fragment", "bw");
 loader.loadShader("blur.fs", "x-shader/fragment", "blur");
+loader.loadShader("chroma.fs", "x-shader/fragment", "chroma");
 loader.loadShader("gay-flag.fs", "x-shader/fragment", "gay-flag");
 loader.loadShader("gay-ring.fs", "x-shader/fragment", "gay-ring");
 loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
 loader.loadShader("quad.vs", "x-shader/vertex", "quad");
+
+loader.loadText("city_uniforms.fs", "city_uniforms");
+loader.loadText("city_mtl_1.fs", "city_mtl_1");
+loader.loadText("city_mtl_2.fs", "city_mtl_2");
+loader.loadText("city_mtl_rainbowtransition.fs", "city_mtl_rainbowtransition");
+loader.loadText("city_mtl_multicolor.fs", "city_mtl_multicolor");
+loader.loadText("city_mtl_intro.fs", "city_mtl_intro");
+loader.loadText("city_distance_1.fs", "city_distance_1");
+loader.loadText("city_marcher.fs", "city_marcher");
+loader.loadText("city_main.fs", "city_main");
+loader.loadText("city_post_1.fs", "city_post_1");
 
 loader.loadAudio("think.wav", "think");
 loader.loadAudio("track.ogg", "track");
@@ -473,4 +569,5 @@ document.addEventListener("keypress", function(e) {
 D.playState = D.PLAYING;
 D.programs = [];
 D.scenes = [];
+D.texts = {};
 

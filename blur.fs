@@ -19,7 +19,7 @@ vec2 fisheye(vec2 coord, float amt) {
 
 void main(void)
 {
-  float amount = beat * 3.0;
+  float amount = (1.0 + beat) * (1.0 + beat);
 
   vec2 pos = gl_FragCoord.xy;
 
@@ -30,11 +30,11 @@ void main(void)
   float distcenter = abs(length(fc - center));
   float maxdist = length(res) / 2.0;
   float darken = 1.0;
-  if (mod(y, 6.0) <= 2.0) {
+  if (mod(y, 6.0) <= 1.0) {
     darken = 0.8;
   }
 
-  darken = darken * (1.0 - distcenter / maxdist);
+  darken = darken * (1.0 - distcenter / maxdist) + 0.1;
 
   gl_FragColor = texture2D(u_image, fisheye(v_texCoord * 0.7 + 0.15, amount)) * darken;
 }
