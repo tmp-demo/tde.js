@@ -15,7 +15,7 @@ BeatDetector.prototype.beat = function() {
   this.node.getFloatFrequencyData(this.array);
   var avgWidth = 10;
   var sum = 0;
-  for (var i = 5; i < 5 + avgWidth; i++) {
+  for (var i = 0; i < avgWidth; i++) {
     sum += this.array[i];
   }
   sum /= avgWidth;
@@ -63,21 +63,22 @@ D = {
   scenesShortcuts : {"97":0, "122":1,"101":2, "114":3,"116":4,"116":5,"121":6,"117":7,"105":8,"111":9},
   scenesLoopShortcuts : {"113":0, "115":1,"100":2, "102":3,"103":4,"104":5,"106":6,"107":7,"108":8,"109":9}
 };
-function updateTimeUniforms() {
+function updateTimeUniforms(program) {
   D.currentTime = Date.now() - D.startTime;
   seeker.value = D.currentTime;
 
   D.clipTime = D.currentTime - D.scenes[D.currentScene].start;
   
-  gl.uniform1f(gl.getUniformLocation(D.currentProgram[0], 'time'),
+  gl.uniform1f(gl.getUniformLocation(program, 'time'),
                D.currentTime - D.scenes[D.currentScene].start);
-  gl.uniform1f(gl.getUniformLocation(D.currentProgram[0], 'duration'),
+  gl.uniform1f(gl.getUniformLocation(program, 'duration'),
                D.scenes[D.currentScene].duration);
-  gl.uniform2f(gl.getUniformLocation(D.currentProgram[0], 'res'),
+  gl.uniform2f(gl.getUniformLocation(program, 'res'),
                cvs.width, cvs.height);
-  gl.uniform1f(gl.getUniformLocation(D.currentProgram[0], 'beat'),
+  gl.uniform1f(gl.getUniformLocation(program, 'beat'),
                bd.beat());
 }
+
 function seek(time) {
   if (bs) {
     bs.stop(0);
@@ -136,8 +137,8 @@ function windowResize() {
 	  
 }
 
-function updateDefault() {
-  updateTimeUniforms();
+function updateDefault(program) {
+  updateTimeUniforms(program);
 }
 
 function renderDefault() {
@@ -156,15 +157,15 @@ function renderDefault() {
     
     // do the job
     // updateTimeUniforms();
-    D.scenes[D.currentScene].update[0]();
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0); 
+    D.scenes[D.currentScene].update[0](D.currentProgram[0]);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-    
-	
-	//TODO : write logic for several post...
+
+    //TODO : write logic for several post...
     // do the post processing
     gl.useProgram(D.currentProgram[1]);
+    D.scenes[D.currentScene].update[1](D.currentProgram[1]);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -181,7 +182,7 @@ function renderDefault() {
     gl.useProgram(D.currentProgram[0]);
     
     // do the job
-    D.scenes[D.currentScene].update[0]();
+    D.scenes[D.currentScene].update[0](D.currentProgram[0]);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0); 
     gl.enableVertexAttribArray(0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
