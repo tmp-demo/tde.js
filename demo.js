@@ -39,6 +39,7 @@ bs = null;
 an = null;
 /* vertex buffer for our quad */
 buffer = null;
+
 /*frame buffer for the post processing*/
 fbo = null;
 texture = null;
@@ -62,13 +63,16 @@ D = {
   scenesShortcuts : {"97":0, "122":1,"101":2, "114":3,"116":4,"116":5,"121":6,"117":7,"105":8,"111":9},
   scenesLoopShortcuts : {"113":0, "115":1,"100":2, "102":3,"103":4,"104":5,"106":6,"107":7,"108":8,"109":9}
 };
-function updateCurrentTime() {
+function updateTimeUniforms() {
   D.currentTime = Date.now() - D.startTime;
   seeker.value = D.currentTime;
+
+  D.clipTime = D.currentTime - D.scenes[D.currentScene].start;
+  
   gl.uniform1f(gl.getUniformLocation(D.currentProgram[0], 'time'),
                D.currentTime - D.scenes[D.currentScene].start);
-   gl.uniform1f(gl.getUniformLocation(D.currentProgram[0], 'duration'),
-                D.scenes[D.currentScene].duration);
+  gl.uniform1f(gl.getUniformLocation(D.currentProgram[0], 'duration'),
+               D.scenes[D.currentScene].duration);
   gl.uniform2f(gl.getUniformLocation(D.currentProgram[0], 'res'),
                cvs.width, cvs.height);
   gl.uniform1f(gl.getUniformLocation(D.currentProgram[0], 'beat'),
@@ -87,7 +91,6 @@ function seek(time) {
     updateScene();
     D.render();
   } else {
-    console.log(0, D.currentTime / 1000);
     bs.start(0, D.currentTime / 1000);
   }
   if (D.playState == D.ENDED) {
@@ -132,7 +135,6 @@ function windowResize() {
 
 function renderDefault() {
 
-
   //first remove any attached texture
   gl.bindTexture(gl.TEXTURE_2D, null);
 
@@ -146,7 +148,7 @@ function renderDefault() {
     gl.useProgram(D.currentProgram[0]);
     
     // do the job
-    updateCurrentTime();
+    updateTimeUniforms();
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0); 
     gl.enableVertexAttribArray(0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -171,7 +173,7 @@ function renderDefault() {
     gl.useProgram(D.currentProgram[0]);
     
     // do the job
-    updateCurrentTime();
+    updateTimeUniforms();
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0); 
     gl.enableVertexAttribArray(0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -268,6 +270,8 @@ ResourceLoader.prototype.registerResource = function(thing) {
 }
 
 function allLoaded() {
+  loadScenes();
+
   for (var i = 0; i < D.scenes.length; i++) {
     var scene = D.scenes[i];
 	D.programs[i] = [];
@@ -344,7 +348,11 @@ if (window.AudioContext) {
 } else {
   ac = new webkitAudioContext();
 }
+
 var loader = new ResourceLoader(allLoaded);
+loader.loadJS("glmatrix.js");
+loader.loadJS("raymarch.js");
+loader.loadJS("scenes.js");
 loader.loadShader("green-red.fs", "x-shader/fragment", "green-red");
 loader.loadShader("bw.fs", "x-shader/fragment", "bw");
 loader.loadShader("blur.fs", "x-shader/fragment", "blur");
@@ -434,45 +442,7 @@ document.addEventListener("keypress", function(e) {
 
 D.playState = D.PLAYING;
 D.programs = [];
-
 D.scenes = [];
 
-D.scenes.pushScene = function(scene) {
-  var lastScene = D.scenes.length == 0 ? {start:0, duration :0} : D.scenes[D.scenes.length -1];
-  scene.start = lastScene.start+lastScene.duration;
-  D.scenes.push(scene);
-}
-
-D.scenes.pushScene( {
-  duration: 5000,
-  fragments: ["green-red", "blur"],
-  vertex: "quad",
-  render: renderDefault
-});
-
-D.scenes.pushScene( {
-  duration: 5000,
-  fragments: ["green-red"],
-  vertex: "quad",
-  render: renderDefault
-});
 
 
-D.scenes.pushScene( {
-  duration: 5000,
-  fragments: ["bw"],
-  vertex: "quad",
-  render: renderDefault
-});
-
-D.scenes.pushScene( {
-  duration: 15000,
-  fragments: ["marcher1", "blur"],
-  vertex: "quad",
-  render: renderDefault
-});
-
-assertScenesSorted();
-
-var lastScene = D.scenes[D.scenes.length - 1];
-seeker.max = D.endTime = lastScene.start + lastScene.duration;
