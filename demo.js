@@ -498,7 +498,6 @@ loader.loadText("city_marcher.fs", "city_marcher");
 loader.loadText("city_main.fs", "city_main");
 loader.loadText("city_post_1.fs", "city_post_1");
 
-loader.loadAudio("think.wav", "think");
 loader.loadAudio("track.ogg", "track");
 
 cvs = document.getElementsByTagName("canvas")[0];
