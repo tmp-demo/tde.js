@@ -393,7 +393,7 @@ function allLoaded() {
   bs.connect(ac.destination);
   bs.connect(an);
   bd = new BeatDetector(an);
-  bs.start(0);
+  bs.start(0.2);
   requestAnimationFrame(mainloop);
 }
 

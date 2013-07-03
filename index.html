@@ -7,6 +7,7 @@ input[type=range]:-moz-focusring {
   outline: none;
 }
 input[type=range] {
+  display: none;
   border: none;
   background: none;
   position: absolute;
@@ -20,10 +21,18 @@ body {
   margin: 0;
   background: black;
 }
-.container{
+.container {
+  opacity: 0;
+  font-family: helvetica, arial;
+  text-shadow: 4px 4px 4px gray;
   position:fixed;
   color:white;
   font-size:250%;
+  transition: opacity 1s linear 1s;
+}
+
+.fadein {
+  opacity: 1.0;
 }
 
 </style>

@@ -4,8 +4,11 @@ D.scenes.pushScene = function(scene) {
   D.scenes.push(scene);
 }
 
+// duration of two
+var THIRTYTWOBARS = 10647;
+
 D.Texts = [
-{text: "Padenot",
+{text: "padenot",
 start:2000,
 end:5000,
 classname:"",
@@ -26,7 +29,7 @@ classname:"",
 top:500,
 left:300,
 instance : null},
-{text: "DemoJS 2k13",
+{text: "DemoJS'13",
 start:6000,
 end:10000,
 classname:"",
@@ -39,7 +42,7 @@ instance : null}
 function loadScenes() {
   // intro
   D.scenes.pushScene( {
-    duration: 6857,
+    duration: 5323,
     fragments: ["city_intro"],
     vertex: "quad",
     update: [function(prog) {
@@ -49,7 +52,7 @@ function loadScenes() {
 
   // sad
   D.scenes.pushScene( {
-    duration: 5414,
+    duration: THIRTYTWOBARS,
     fragments: ["city_1"],
     vertex: "quad",
     update: [function(prog) {
@@ -59,7 +62,7 @@ function loadScenes() {
   
   // rainbow!
   D.scenes.pushScene( {
-    duration: 13714,
+    duration: THIRTYTWOBARS,
     fragments: ["city_rainbow"],
     vertex: "quad",
     update: [function(prog) {
@@ -68,7 +71,7 @@ function loadScenes() {
   });
 /*
   D.scenes.pushScene( {
-    duration: 13714,
+    duration: THIRTYTWOBARS,
     fragments: ["gay-ring"],
     vertex: "quad",
     update: [updateDefault]
@@ -76,7 +79,7 @@ function loadScenes() {
 */
   // traveling right with chroma
   D.scenes.pushScene( {
-    duration: 13715,
+    duration: THIRTYTWOBARS,
     fragments: ["city_2", "chroma"],
     vertex: "quad",
     update: [function(prog) {
@@ -85,7 +88,7 @@ function loadScenes() {
   });
   
   D.scenes.pushScene( {
-    duration: 13715*2,
+    duration: THIRTYTWOBARS*2,
     fragments: ["city_2", "gay-flag"],
     vertex: "quad",
     update: [function(prog) {
@@ -95,21 +98,21 @@ function loadScenes() {
   });
 
   D.scenes.pushScene( {
-    duration: 13714,
+    duration: THIRTYTWOBARS,
     fragments: ["gay-ring2"],
     vertex: "quad",
     update: [updateDefault]
   });
   
     D.scenes.pushScene( {
-    duration: 13714,
+    duration: THIRTYTWOBARS,
     fragments: ["gay-ring3"],
     vertex: "quad",
     update: [updateDefault]
   });
 
   D.scenes.pushScene( {
-    duration: 13714,
+    duration: THIRTYTWOBARS,
     fragments: ["city_2", "blur"],
     vertex: "quad",
     update: [function(prog) {
@@ -119,7 +122,7 @@ function loadScenes() {
   });
 
   D.scenes.pushScene( {
-    duration: 13714,
+    duration: THIRTYTWOBARS,
     fragments: ["city_2"],
     vertex: "quad",
     update: [function(prog) {
@@ -127,18 +130,18 @@ function loadScenes() {
                                       1.57079633, [-1,0,0], 1.57079633, [-1,0,0]);
     }, updateDefault]
   });
-  D.scenes.pushScene( {
-    duration: 13714,
-    fragments: ["city_2", "gay-ring"],
-    vertex: "quad",
-    update: [function(prog) {
-      updateRaymarchTransition(prog, [135, 20.0, 60.0],[135, 20.0, 105.0],
-                                      1.57079633, [-1,0,0], 1.57079633, [-1,0,0]);
-    }, updateDefault]
-  });
+  //D.scenes.pushScene( {
+    //duration: THIRTYTWOBARS,
+    //fragments: ["city_2", "gay-ring"],
+    //vertex: "quad",
+    //update: [function(prog) {
+      //updateRaymarchTransition(prog, [135, 20.0, 60.0],[135, 20.0, 105.0],
+                                      //1.57079633, [-1,0,0], 1.57079633, [-1,0,0]);
+    //}, updateDefault]
+  //});
 
   D.scenes.pushScene( {
-    duration: 13714,
+    duration: THIRTYTWOBARS,
     fragments: ["city_fancy"],
     vertex: "quad",
     update: [function(prog) {
@@ -148,7 +151,7 @@ function loadScenes() {
 
   // rainbow!
   D.scenes.pushScene( {
-    duration: 13714,
+    duration: THIRTYTWOBARS,
     fragments: ["city_rainbow"],
     vertex: "quad",
     update: [function(prog) {
@@ -158,7 +161,7 @@ function loadScenes() {
 
   // traveling right with chroma
   D.scenes.pushScene( {
-    duration: 13715,
+    duration: THIRTYTWOBARS,
     fragments: ["city_2", "chroma"],
     vertex: "quad",
     update: [function(prog) {
