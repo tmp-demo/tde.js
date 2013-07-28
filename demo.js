@@ -8,21 +8,45 @@ function $$(s) {
 
 function BeatDetector(analyserNode) {
   this.node = analyserNode;
-  this.array = new Float32Array(analyserNode.fftSize);
   this.node.maxDecibels = 0;
+  this.array = new Float32Array(analyserNode.fftSize);
+  this.debug = false;
+  if (this.debug) {
+    this.canvas = document.createElement("canvas");
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = 300;
+    document.body.appendChild(this.canvas);
+    this.canvas.className = "visualizer";
+    this.c = this.canvas.getContext("2d");
+  }
 }
 
-BeatDetector.prototype.beat = function() {
+BeatDetector.prototype.beat = function(a) {
   this.node.getFloatFrequencyData(this.array);
-  var avgWidth = 100;
+  var avgRange = [0, 5];
   var sum = 0;
-  for (var i = 0; i < avgWidth; i++) {
+  for (var i = avgRange[0]; i < avgRange[0] + avgRange[1]; i++) {
     sum += this.array[i];
   }
-  sum /= avgWidth;
+  sum /= avgRange[1] - avgRange[0];
   sum -= this.node.minDecibels;
   sum /= -(this.node.minDecibels - this.node.maxDecibels);
-  return Math.log(sum + 1) * 2;
+  if (this.debug) {
+    this.c.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    var binW = Math.ceil(this.canvas.width / this.array.length);
+    for (var i = 0; i < this.array.length; i++) {
+      if (i >= avgRange[0] && i < avgRange[1]) {
+        this.c.fillStyle = "#0f0";
+      } else {
+        this.c.fillStyle = "#f00";
+      }
+      if (this.array[i] == 0) {
+        break;
+      }
+      this.c.fillRect(i * binW, this.canvas.height, binW, ( -this.array[i] - 100 ) * 4);
+    }
+  }
+  return sum;
 }
 
 seeker = null;
@@ -35,11 +59,13 @@ ac = null;
 /* beat detector */
 bd = null;
 /* buffersource */
-bs = null;
+drumsTrack = null;
+otherTrack = null;
 /* analysernode */
 an = null;
 /* vertex buffer for our quad */
 buffer = null;
+vizbeats = null;
 
 /*frame buffer for the post processing*/
 fbo = null;
@@ -66,11 +92,10 @@ D = {
 };
 
 function updateTimes() {
-  D.currentTime = ac.currentTime * 1000;
+  D.currentTime = ac.currentTime * 1000 - D.startTime;
   seeker.value = D.currentTime;
 
   D.clipTime = D.currentTime - D.scenes[D.currentScene].start;
-  //console.log(D.currentTime);
 }
 
 function updateTimeUniforms(program) {
@@ -80,27 +105,34 @@ function updateTimeUniforms(program) {
                D.scenes[D.currentScene].duration);
   gl.uniform2f(gl.getUniformLocation(program, 'res'),
                cvs.width, cvs.height);
+               var a;
   gl.uniform1f(gl.getUniformLocation(program, 'beat'),
                bd.beat());
 }
 
 function seek(time) {
-  if (bs) {
-    bs.stop(0);
-    bs.null;
+  if (drumsTrack) {
+    drumsTrack.stop(0);
+    drumsTrack = null;
+    otherTrack.stop(0);
+    otherTrack = null;
   }
-  bs = ac.createBufferSource();
-  bs.buffer = D.sounds["track"];
-  bs.connect(ac.destination);
-  bs.connect(an);
-  D.startTime = 0;
-  D.currentTime = ac.currentTime * 1000;
+  drumsTrack = ac.createBufferSource();
+  drumsTrack.buffer = D.sounds["drums"];
+  drumsTrack.connect(ac.destination);
+  drumsTrack.connect(an);
+  otherTrack = ac.createBufferSource();
+  otherTrack.buffer = D.sounds["synths"];
+  otherTrack.connect(ac.destination);
+  D.startTime = ac.currentTime * 1000 - time;
+  D.currentTime = time;
   D.currentScene = findSceneForTime(D.currentTime);
   if (D.playState == D.PAUSED) {
     updateScene();
     D.render();
   } else {
-    bs.start(0, D.currentTime / 1000);
+    drumsTrack.start(0, D.currentTime / 1000);
+    otherTrack.start(0, D.currentTime / 1000);
   }
   if (D.playState == D.ENDED) {
     D.playState = D.PLAYING;
@@ -137,9 +169,6 @@ function windowResize() {
   cvs.width = window.innerWidth;
   cvs.height = window.innerHeight;
   gl.viewport(0, 0, cvs.width, cvs.height);
-  
-  
-	  
 }
 
 function updateDefault(program) {
@@ -221,15 +250,16 @@ function renderScene() {
   }
   D.render();
 }
-function findSceneForTime(time) {
 
+function findSceneForTime(time) {
   if (D.looping){
-	if(D.scenes[D.currentScene].start + D.scenes[D.currentScene].duration < time)
-		seek(D.scenes[D.currentScene].start);
-	else if(D.scenes[D.currentScene].start > time)
-		seek(D.scenes[D.currentScene].start);
-	return D.currentScene;
-  }else{
+    if(D.scenes[D.currentScene].start + D.scenes[D.currentScene].duration < time) {
+      seek(D.scenes[D.currentScene].start);
+    } else if(D.scenes[D.currentScene].start > time) {
+      seek(D.scenes[D.currentScene].start);
+    }
+    return D.currentScene;
+  } else {
     for(var i = 0; i < D.scenes.length; i++) {
       if (D.scenes[i].start <= time &&
           D.scenes[i].start + D.scenes[i].duration > time) {
@@ -253,14 +283,14 @@ function updateText(){
   for(var i = 0; i < D.Texts.length; i++){
     var ct = D.Texts[i];
     if(ct.instance !== null && ( D.currentTime < ct.start || D.currentTime > ct.end)){
-		//remove it !
-		removeText(ct.instance);
-		ct.instance = null;
-	}else if(ct.instance == null && ( D.currentTime > ct.start && D.currentTime < ct.end)){
-		//add it !
-		ct.instance = addText(ct.text, ct.top, ct.left ,ct.classname);
-	}  
-  }  
+      //remove it !
+      removeText(ct.instance);
+      ct.instance = null;
+    } else if(ct.instance == null && ( D.currentTime > ct.start && D.currentTime < ct.end)) {
+      //add it !
+      ct.instance = addText(ct.text, ct.top, ct.left ,ct.classname);
+    }
+  }
 }
 
 function mainloop() {
@@ -270,7 +300,7 @@ function mainloop() {
       requestAnimationFrame(mainloop);
       renderScene();
       D.playState = D.PLAYING;
-	  updateText();
+      updateText();
     } else {
       D.playState = D.ENDED;
       //bs.stop(0);
@@ -453,13 +483,18 @@ function allLoaded() {
   D.currentProgram = D.programs[0];
   D.render = renderDefault;
   D.currentScene = 0;
-  bs = ac.createBufferSource();
+  drumsTrack = ac.createBufferSource();
+  otherTrack = ac.createBufferSource();
   an = ac.createAnalyser();
-  bs.buffer = D.sounds["track"];
-  bs.connect(ac.destination);
-  bs.connect(an);
+  an.fftSize = 512;
+  drumsTrack.buffer = D.sounds["drums"];
+  drumsTrack.connect(ac.destination);
+  drumsTrack.connect(an);
+  otherTrack.buffer = D.sounds["synths"];
+  otherTrack.connect(ac.destination);
   bd = new BeatDetector(an);
-  bs.start(0.2);
+  drumsTrack.start(0);
+  otherTrack.start(0);
   requestAnimationFrame(mainloop);
 }
 
@@ -568,7 +603,8 @@ loader.loadText("city_marcher.fs", "city_marcher");
 loader.loadText("city_main.fs", "city_main");
 loader.loadText("city_post_1.fs", "city_post_1");
 
-loader.loadAudio("track.ogg", "track");
+loader.loadAudio("drums.ogg", "drums");
+loader.loadAudio("synths.ogg", "synths");
 
 cvs = document.getElementsByTagName("canvas")[0];
 gl = cvs.getContext("experimental-webgl");
@@ -603,7 +639,8 @@ quad = new Float32Array([-1, -1,
 gl.framebufferTexture2D( gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
 
 seeker = document.getElementById("seeker");
-document.addEventListener("input", function (e) {
+seeker.addEventListener("input", function (e) {
+  console.log("seek to " + e.target.value);
   seek(e.target.value);
   seeker.value = e.target.value;
   D.looping = false;
@@ -611,35 +648,32 @@ document.addEventListener("input", function (e) {
 
 document.addEventListener("keypress", function(e) {
   // play/pause
-  if (e.charCode == 32) { 
+  if (e.charCode == 32) {
     if (D.playState == D.PLAYING) {
-      D.pauseStart = Date.now();
       D.playState = D.PAUSED;
-      bs.stop(0);
-      bs = null;
+      drumsTrack.stop(0);
+      otherTrack.stop(0);
     } else if(D.playState == D.ENDED) {
       seek(0);
     } else {
-      seek(D.currentTime);
-      D.startTime = 0;
       D.playState = D.PLAYING;
+      seek(D.currentTime);
       mainloop();
-    } 
+    }
   } else if(e.charCode == 8) { //backspace key
     D.looping = false;
-  }else if(typeof D.scenesShortcuts[e.charCode]  !== 'undefined' ){
+  } else if(typeof D.scenesShortcuts[e.charCode]  !== 'undefined' ) {
     // jump to scene
     if (D.scenesShortcuts[""+e.charCode] < D.scenes.length){//s >= 0 && s <= 9 && s < D.scenes.length) {
       D.looping = false;
       seek(D.scenes[D.scenesShortcuts[""+e.charCode]].start);
-    }	
-    }else if(typeof D.scenesLoopShortcuts[e.charCode]  !== 'undefined' ){
-      // jump to scene
-      if (D.scenesLoopShortcuts[""+e.charCode] < D.scenes.length){//s >= 0 && s <= 9 && s < D.scenes.length) {
-        D.looping = true;
-		D.currentScene = D.scenesLoopShortcuts[""+e.charCode];
-        seek(D.scenes[D.currentScene].start);
-		
+    }
+  } else if (typeof D.scenesLoopShortcuts[e.charCode]  !== 'undefined' ) {
+    // jump to scene
+    if (D.scenesLoopShortcuts[""+e.charCode] < D.scenes.length){//s >= 0 && s <= 9 && s < D.scenes.length) {
+      D.looping = true;
+      D.currentScene = D.scenesLoopShortcuts[""+e.charCode];
+      seek(D.scenes[D.currentScene].start);
     }
   }
 });

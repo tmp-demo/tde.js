@@ -7,7 +7,6 @@ input[type=range]:-moz-focusring {
   outline: none;
 }
 input[type=range] {
-  display: none;
   border: none;
   background: none;
   position: absolute;
@@ -35,10 +34,22 @@ body {
   opacity: 1.0;
 }
 
+.visualizer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.8;
+}
+
 </style>
 <body>
+<<<<<<< HEAD
 <canvas></canvas>
 <!--<div id="textContainer" class="container">-->
+=======
+<canvas>
+</canvas>
+>>>>>>> 534ae3a7afacca31d0c2e959f3511be245db9012
 <input type=range id=seeker>
 <script src=text.js></script>
 <script src=demo.js></script>
