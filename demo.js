@@ -66,11 +66,10 @@ D = {
 };
 
 function updateTimes() {
-  D.currentTime = ac.currentTime * 1000;
+  D.currentTime = ac.currentTime * 1000 - D.startTime;
   seeker.value = D.currentTime;
 
   D.clipTime = D.currentTime - D.scenes[D.currentScene].start;
-  console.log(D.currentTime);
 }
 
 function updateTimeUniforms(program) {
@@ -87,14 +86,14 @@ function updateTimeUniforms(program) {
 function seek(time) {
   if (bs) {
     bs.stop(0);
-    bs.null;
+    bs = null;
   }
   bs = ac.createBufferSource();
   bs.buffer = D.sounds["track"];
   bs.connect(ac.destination);
   bs.connect(an);
-  D.startTime = 0;
-  D.currentTime = ac.currentTime * 1000;
+  D.startTime = ac.currentTime * 1000 - time;
+  D.currentTime = time;
   D.currentScene = findSceneForTime(D.currentTime);
   if (D.playState == D.PAUSED) {
     updateScene();
@@ -221,15 +220,16 @@ function renderScene() {
   }
   D.render();
 }
-function findSceneForTime(time) {
 
+function findSceneForTime(time) {
   if (D.looping){
-	if(D.scenes[D.currentScene].start + D.scenes[D.currentScene].duration < time)
-		seek(D.scenes[D.currentScene].start);
-	else if(D.scenes[D.currentScene].start > time)
-		seek(D.scenes[D.currentScene].start);
-	return D.currentScene;
-  }else{
+    if(D.scenes[D.currentScene].start + D.scenes[D.currentScene].duration < time) {
+      seek(D.scenes[D.currentScene].start);
+    } else if(D.scenes[D.currentScene].start > time) {
+      seek(D.scenes[D.currentScene].start);
+    }
+    return D.currentScene;
+  } else {
     for(var i = 0; i < D.scenes.length; i++) {
       if (D.scenes[i].start <= time &&
           D.scenes[i].start + D.scenes[i].duration > time) {
@@ -253,14 +253,14 @@ function updateText(){
   for(var i = 0; i < D.Texts.length; i++){
     var ct = D.Texts[i];
     if(ct.instance !== null && ( D.currentTime < ct.start || D.currentTime > ct.end)){
-		//remove it !
-		removeText(ct.instance);
-		ct.instance = null;
-	}else if(ct.instance == null && ( D.currentTime > ct.start && D.currentTime < ct.end)){
-		//add it !
-		ct.instance = addText(ct.text, ct.top, ct.left ,ct.classname);
-	}  
-  }  
+      //remove it !
+      removeText(ct.instance);
+      ct.instance = null;
+    } else if(ct.instance == null && ( D.currentTime > ct.start && D.currentTime < ct.end)) {
+      //add it !
+      ct.instance = addText(ct.text, ct.top, ct.left ,ct.classname);
+    }
+  }
 }
 
 function mainloop() {
@@ -270,7 +270,7 @@ function mainloop() {
       requestAnimationFrame(mainloop);
       renderScene();
       D.playState = D.PLAYING;
-	  updateText();
+      updateText();
     } else {
       D.playState = D.ENDED;
       //bs.stop(0);
@@ -308,7 +308,6 @@ function concat(names) {
   for (var i in names) {
     src += D.texts[names[i]];
   }
-  //alert(src);
   return src;
 }
 
@@ -393,7 +392,7 @@ function allLoaded() {
   bs.connect(ac.destination);
   bs.connect(an);
   bd = new BeatDetector(an);
-  bs.start(0.2);
+  bs.start(0);
   requestAnimationFrame(mainloop);
 }
 
@@ -533,7 +532,8 @@ quad = new Float32Array([-1, -1,
 gl.framebufferTexture2D( gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
 
 seeker = document.getElementById("seeker");
-document.addEventListener("input", function (e) {
+seeker.addEventListener("input", function (e) {
+  console.log("seek to " + e.target.value);
   seek(e.target.value);
   seeker.value = e.target.value;
   D.looping = false;
@@ -541,35 +541,31 @@ document.addEventListener("input", function (e) {
 
 document.addEventListener("keypress", function(e) {
   // play/pause
-  if (e.charCode == 32) { 
+  if (e.charCode == 32) {
     if (D.playState == D.PLAYING) {
-      D.pauseStart = Date.now();
       D.playState = D.PAUSED;
       bs.stop(0);
-      bs = null;
     } else if(D.playState == D.ENDED) {
       seek(0);
     } else {
-      seek(D.currentTime);
-      D.startTime = 0;
       D.playState = D.PLAYING;
+      seek(D.currentTime);
       mainloop();
-    } 
+    }
   } else if(e.charCode == 8) { //backspace key
     D.looping = false;
-  }else if(typeof D.scenesShortcuts[e.charCode]  !== 'undefined' ){
+  } else if(typeof D.scenesShortcuts[e.charCode]  !== 'undefined' ) {
     // jump to scene
     if (D.scenesShortcuts[""+e.charCode] < D.scenes.length){//s >= 0 && s <= 9 && s < D.scenes.length) {
       D.looping = false;
       seek(D.scenes[D.scenesShortcuts[""+e.charCode]].start);
-    }	
-    }else if(typeof D.scenesLoopShortcuts[e.charCode]  !== 'undefined' ){
-      // jump to scene
-      if (D.scenesLoopShortcuts[""+e.charCode] < D.scenes.length){//s >= 0 && s <= 9 && s < D.scenes.length) {
-        D.looping = true;
-		D.currentScene = D.scenesLoopShortcuts[""+e.charCode];
-        seek(D.scenes[D.currentScene].start);
-		
+    }
+  } else if (typeof D.scenesLoopShortcuts[e.charCode]  !== 'undefined' ) {
+    // jump to scene
+    if (D.scenesLoopShortcuts[""+e.charCode] < D.scenes.length){//s >= 0 && s <= 9 && s < D.scenes.length) {
+      D.looping = true;
+      D.currentScene = D.scenesLoopShortcuts[""+e.charCode];
+      seek(D.scenes[D.currentScene].start);
     }
   }
 });
