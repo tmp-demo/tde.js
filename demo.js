@@ -8,21 +8,45 @@ function $$(s) {
 
 function BeatDetector(analyserNode) {
   this.node = analyserNode;
-  this.array = new Float32Array(analyserNode.fftSize);
   this.node.maxDecibels = 0;
+  this.array = new Float32Array(analyserNode.fftSize);
+  this.debug = false;
+  if (this.debug) {
+    this.canvas = document.createElement("canvas");
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = 300;
+    document.body.appendChild(this.canvas);
+    this.canvas.className = "visualizer";
+    this.c = this.canvas.getContext("2d");
+  }
 }
 
-BeatDetector.prototype.beat = function() {
+BeatDetector.prototype.beat = function(a) {
   this.node.getFloatFrequencyData(this.array);
-  var avgWidth = 100;
+  var avgRange = [0, 5];
   var sum = 0;
-  for (var i = 0; i < avgWidth; i++) {
+  for (var i = avgRange[0]; i < avgRange[0] + avgRange[1]; i++) {
     sum += this.array[i];
   }
-  sum /= avgWidth;
+  sum /= avgRange[1] - avgRange[0];
   sum -= this.node.minDecibels;
   sum /= -(this.node.minDecibels - this.node.maxDecibels);
-  return Math.log(sum + 1) * 2;
+  if (this.debug) {
+    this.c.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    var binW = Math.ceil(this.canvas.width / this.array.length);
+    for (var i = 0; i < this.array.length; i++) {
+      if (i >= avgRange[0] && i < avgRange[1]) {
+        this.c.fillStyle = "#0f0";
+      } else {
+        this.c.fillStyle = "#f00";
+      }
+      if (this.array[i] == 0) {
+        break;
+      }
+      this.c.fillRect(i * binW, this.canvas.height, binW, ( -this.array[i] - 100 ) * 4);
+    }
+  }
+  return sum;
 }
 
 seeker = null;
@@ -35,11 +59,13 @@ ac = null;
 /* beat detector */
 bd = null;
 /* buffersource */
-bs = null;
+drumsTrack = null;
+otherTrack = null;
 /* analysernode */
 an = null;
 /* vertex buffer for our quad */
 buffer = null;
+vizbeats = null;
 
 /*frame buffer for the post processing*/
 fbo = null;
@@ -79,19 +105,25 @@ function updateTimeUniforms(program) {
                D.scenes[D.currentScene].duration);
   gl.uniform2f(gl.getUniformLocation(program, 'res'),
                cvs.width, cvs.height);
+               var a;
   gl.uniform1f(gl.getUniformLocation(program, 'beat'),
                bd.beat());
 }
 
 function seek(time) {
-  if (bs) {
-    bs.stop(0);
-    bs = null;
+  if (drumsTrack) {
+    drumsTrack.stop(0);
+    drumsTrack = null;
+    otherTrack.stop(0);
+    otherTrack = null;
   }
-  bs = ac.createBufferSource();
-  bs.buffer = D.sounds["track"];
-  bs.connect(ac.destination);
-  bs.connect(an);
+  drumsTrack = ac.createBufferSource();
+  drumsTrack.buffer = D.sounds["drums"];
+  drumsTrack.connect(ac.destination);
+  drumsTrack.connect(an);
+  otherTrack = ac.createBufferSource();
+  otherTrack.buffer = D.sounds["synths"];
+  otherTrack.connect(ac.destination);
   D.startTime = ac.currentTime * 1000 - time;
   D.currentTime = time;
   D.currentScene = findSceneForTime(D.currentTime);
@@ -99,7 +131,8 @@ function seek(time) {
     updateScene();
     D.render();
   } else {
-    bs.start(0, D.currentTime / 1000);
+    drumsTrack.start(0, D.currentTime / 1000);
+    otherTrack.start(0, D.currentTime / 1000);
   }
   if (D.playState == D.ENDED) {
     D.playState = D.PLAYING;
@@ -136,9 +169,6 @@ function windowResize() {
   cvs.width = window.innerWidth;
   cvs.height = window.innerHeight;
   gl.viewport(0, 0, cvs.width, cvs.height);
-  
-  
-	  
 }
 
 function updateDefault(program) {
@@ -386,13 +416,18 @@ function allLoaded() {
   D.currentProgram = D.programs[0];
   D.render = renderDefault;
   D.currentScene = 0;
-  bs = ac.createBufferSource();
+  drumsTrack = ac.createBufferSource();
+  otherTrack = ac.createBufferSource();
   an = ac.createAnalyser();
-  bs.buffer = D.sounds["track"];
-  bs.connect(ac.destination);
-  bs.connect(an);
+  an.fftSize = 512;
+  drumsTrack.buffer = D.sounds["drums"];
+  drumsTrack.connect(ac.destination);
+  drumsTrack.connect(an);
+  otherTrack.buffer = D.sounds["synths"];
+  otherTrack.connect(ac.destination);
   bd = new BeatDetector(an);
-  bs.start(0);
+  drumsTrack.start(0);
+  otherTrack.start(0);
   requestAnimationFrame(mainloop);
 }
 
@@ -497,7 +532,8 @@ loader.loadText("city_marcher.fs", "city_marcher");
 loader.loadText("city_main.fs", "city_main");
 loader.loadText("city_post_1.fs", "city_post_1");
 
-loader.loadAudio("track.ogg", "track");
+loader.loadAudio("drums.ogg", "drums");
+loader.loadAudio("synths.ogg", "synths");
 
 cvs = document.getElementsByTagName("canvas")[0];
 gl = cvs.getContext("experimental-webgl");
@@ -544,7 +580,8 @@ document.addEventListener("keypress", function(e) {
   if (e.charCode == 32) {
     if (D.playState == D.PLAYING) {
       D.playState = D.PAUSED;
-      bs.stop(0);
+      drumsTrack.stop(0);
+      otherTrack.stop(0);
     } else if(D.playState == D.ENDED) {
       seek(0);
     } else {
