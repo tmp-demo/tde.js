@@ -6,6 +6,21 @@ function $$(s) {
   return document.querySelectorAll(s);
 }
 
+var frames = [];
+
+function recordFrame(cvs) {
+  cvs.toBlob(function(blob) {
+    frames.push(blob);
+  });
+}
+
+function stichFramesForDownload()
+{
+  var blob = new Blob(frames,  {type: "application/octet-binary"});
+  var url = URL.createObjectURL(blob);
+  location.href = url;
+}
+
 function BeatDetector(analyserNode) {
   this.node = analyserNode;
   this.node.maxDecibels = 0;
@@ -88,7 +103,8 @@ D = {
   shaders: {},
   sounds: {},
   scenesShortcuts : {"97":0, "122":1,"101":2, "114":3,"116":4,"116":5,"121":6,"117":7,"105":8,"111":9},
-  scenesLoopShortcuts : {"113":0, "115":1,"100":2, "102":3,"103":4,"104":5,"106":6,"107":7,"108":8,"109":9}
+  scenesLoopShortcuts : {"113":0, "115":1,"100":2, "102":3,"103":4,"104":5,"106":6,"107":7,"108":8,"109":9},
+  recoding: false,
 };
 
 function updateTimes() {
@@ -293,16 +309,24 @@ function updateText(){
   }
 }
 
+var render_index = 0;
+
 function mainloop() {
   if (D.playState == D.PLAYING){
     if (D.currentTime <= D.endTime) {
       updateScene();
       requestAnimationFrame(mainloop);
       renderScene();
+      if (D.recording && render_index++ != 0) {
+        recordFrame(cvs);
+      }
       D.playState = D.PLAYING;
       updateText();
     } else {
       D.playState = D.ENDED;
+      if (D.recording) {
+        stichFramesForDownload();
+      }
       //bs.stop(0);
     }
   }
@@ -428,6 +452,11 @@ function allLoaded() {
   bd = new BeatDetector(an);
   drumsTrack.start(0);
   otherTrack.start(0);
+  if (D.recording) {
+    var r = document.createElement("div");
+    r.className = "recording";
+    document.body.appendChild(r);
+  }
   requestAnimationFrame(mainloop);
 }
 
@@ -506,6 +535,10 @@ if (window.AudioContext) {
   ac = new webkitAudioContext();
 }
 
+if (window.location.search.startsWith("?recording")) {
+  D.recording = true;
+}
+
 var loader = new ResourceLoader(allLoaded);
 loader.loadJS("glmatrix.js");
 loader.loadJS("raymarch.js");
@@ -536,7 +569,7 @@ loader.loadAudio("drums.ogg", "drums");
 loader.loadAudio("synths.ogg", "synths");
 
 cvs = document.getElementsByTagName("canvas")[0];
-gl = cvs.getContext("experimental-webgl");
+gl = cvs.getContext("experimental-webgl", {preserveDrawingBuffer: true});
 
 
 

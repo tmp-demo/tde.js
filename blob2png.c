@@ -5,6 +5,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+/**
+ * From a blob composed of png images stiched togeter (arg[1]), create a
+ * directory, and split the blob to individual images.
+ *
+ * First line of output on stdout is the name of the directory created.
+ */
+
 void usage(char * path)
 {
   fprintf(stderr, "Usage: %s blob\n", path);

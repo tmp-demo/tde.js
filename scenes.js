@@ -59,7 +59,7 @@ function loadScenes() {
       updateRaymarchTranslate(prog, [0, 15.0, 15.0],[20, 10.0, 15.0]);
     }]
   });
-  
+
   // rainbow!
   D.scenes.pushScene( {
     duration: THIRTYTWOBARS,
