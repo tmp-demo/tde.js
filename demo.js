@@ -296,8 +296,8 @@ function updateScene() {
 function updateText(){
   //look for existing text that could be out of date
   //look for curently inexisting text that should be displayed
-  for(var i = 0; i < D.Texts.length; i++){
-    var ct = D.Texts[i];
+  for(var i = 0; i < D.texts.length; i++){
+    var ct = D.texts[i];
     if(ct.instance !== null && ( D.currentTime < ct.start || D.currentTime > ct.end)){
       //remove it !
       removeText(ct.instance);
@@ -357,6 +357,36 @@ ResourceLoader.prototype.registerResource = function(thing) {
   this.toLoad++;
 }
 
+function txt(id) {
+  return D.texts[id];
+}
+
+function build_raymarcher(scene, colors, camera, const_max, effects) {
+  var shader_src = txt("marcher_base.fs");
+  shader_src = shader_src.replace("$scene", scene);
+  shader_src = shader_src.replace("$define_max", const_max);
+  shader_src = shader_src.replace("$define_colors", colors);
+  shader_src = shader_src.replace("$camera", camera);
+  var effects_cat = "";
+  for (var i in effects) {
+    effects_cat += effects[i] + "\n  ";
+  }
+  shader_src = shader_src.replace("// $post_processing", effects_cat);
+  return shader_src;
+}
+
+function build_shader(base, subs) {
+  var shader_src = base;
+  for (var pat in subs) {
+    var txt_cat = "";
+    for (var j in subs[pat]) {
+      txt_cat += subs[pat][j] + "\n";
+    }
+    shader_src = shader_src.replace(pat, txt_cat);
+  }
+  return shader_src;
+}
+
 function concat(names) {
   var src = "";
   for (var i in names) {
@@ -368,58 +398,95 @@ function concat(names) {
 function allLoaded() {
   loadScenes();
 
-  D.shaders["city_1"] = {
-    src: concat([
-    "city_uniforms",
-    "city_distance_1",
-    "city_marcher",
-    "city_mtl_1",
-    "city_post_1",
-    "city_main"
-    ])
-  };
+  var default_colors = "#define default_color vec3(1.0,1.0,1.0)\n" +
+                       "#define shadowColor vec3(0.0,0.3,0.7)\n" +
+                       "#define skyColor vec3(0.9,1.0,1.0) \n";
+
+  var default_max = "#define MAX_STEPS 200\n" +
+                    "#define MAX_DISTANCE 600.0\n";
+
+
+  var foo = build_raymarcher(
+    txt("default_scene.fs"),
+    default_colors,
+    txt("fisheye_camera.fs"),
+    [
+      "debug_steps(num_steps, color);",
+      "debug_coords(hitPosition, 20.0, depth, color);"
+    ]
+  );
+
+  var test = build_shader(
+    txt("marcher_base.fs"),
+    {
+      "$define_colors": [default_colors],
+      "$define_max": [default_max],
+      "$scene": [txt("default_scene.fs")],
+      "$camera": [txt("fisheye_camera.fs")],
+      "$shading": [
+        "debug_steps(num_steps, color);"
+      ]
+    }
+  );
+
+  var pre = document.createElement("pre");
+  pre.innerHTML = test;
+  document.body.appendChild(pre);
+
+  D.shaders["city_1"] = { src: test }
+
+  //D.shaders["city_1"] = {
+  //  src: concat([
+  //  "city_uniforms.fs",
+  //  "city_distance_1.fs",
+  //  "city_marcher.fs",
+  //  "city_mtl_1.fs",
+  //  "city_post_1.fs",
+  //  "city_main.fs"
+  //  ])
+  //};
 
   D.shaders["city_rainbow"] = {
     src: concat([
-    "city_uniforms",
-    "city_distance_1",
-    "city_marcher",
-    "city_mtl_rainbowtransition",
-    "city_post_1",
-    "city_main"
+    "city_uniforms.fs",
+    "city_distance_1.fs",
+    "city_marcher.fs",
+    "city_mtl_rainbowtransition.fs",
+    "city_post_1.fs",
+    "city_main.fs"
     ])
   };
 
   D.shaders["city_intro"] = {
     src: concat([
-    "city_uniforms",
-    "city_distance_1",
-    "city_marcher",
-    "city_mtl_intro",
-    "city_post_1",
-    "city_main"
+    "city_uniforms.fs",
+    "city_distance_1.fs",
+    "city_marcher.fs",
+    "city_mtl_intro.fs",
+    "city_post_1.fs",
+    "city_main.fs"
     ])
   };
 
   D.shaders["city_2"] = {
     src: concat([
-    "city_uniforms",
-    "city_distance_1",
-    "city_marcher",
-    "city_mtl_2",
-    "city_post_1",
-    "city_main"
+    "city_uniforms.fs",
+    "city_distance_1.fs",
+    "city_marcher.fs",
+    "city_mtl_2.fs",
+    "city_post_1.fs",
+    "city_main.fs"
     ])
   };
 
   D.shaders["city_fancy"] = {
     src: concat([
-    "city_uniforms",
-    "city_distance_1",
-    "city_marcher",
-    "city_mtl_multicolor",
-    "city_post_1",
-    "city_main"
+    "city_uniforms.fs",
+    "city_distance_1.fs",
+    "city_marcher.fs",
+    "city_mtl_multicolor.fs",
+    "city_post_1.fs",
+    "city_main.fs"
     ])
   };
 
@@ -481,7 +548,7 @@ ResourceLoader.prototype.loadText = function(src, id) {
   xhr.open("GET", src);
   var self = this;
   xhr.onload = function() {
-    D.texts[id] = this.responseText;
+    D.texts[src] = this.responseText;
     console.log("loaded: " + src);
     self.onLoad();
   };
@@ -554,7 +621,11 @@ loader.loadShader("gay-ring3.fs", "x-shader/fragment", "gay-ring3");
 loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
 loader.loadShader("quad.vs", "x-shader/vertex", "quad");
 
-loader.loadText("city_uniforms.fs", "city_uniforms");
+loader.loadText("marcher_base.fs");
+loader.loadText("default_scene.fs");
+loader.loadText("fisheye_camera.fs");
+
+loader.loadText("city_uniforms.fs", "city_uniforms.fs");
 loader.loadText("city_mtl_1.fs", "city_mtl_1");
 loader.loadText("city_mtl_2.fs", "city_mtl_2");
 loader.loadText("city_mtl_rainbowtransition.fs", "city_mtl_rainbowtransition");
@@ -570,8 +641,6 @@ loader.loadAudio("synths.ogg", "synths");
 
 cvs = document.getElementsByTagName("canvas")[0];
 gl = cvs.getContext("experimental-webgl", {preserveDrawingBuffer: true});
-
-
 
 windowResize();
 
@@ -602,7 +671,6 @@ gl.framebufferTexture2D( gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, te
 
 seeker = document.getElementById("seeker");
 seeker.addEventListener("input", function (e) {
-  console.log("seek to " + e.target.value);
   seek(e.target.value);
   seeker.value = e.target.value;
   D.looping = false;
