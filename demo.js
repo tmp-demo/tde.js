@@ -280,8 +280,8 @@ function updateScene() {
 function updateText(){
   //look for existing text that could be out of date
   //look for curently inexisting text that should be displayed
-  for(var i = 0; i < D.Texts.length; i++){
-    var ct = D.Texts[i];
+  for(var i = 0; i < D.texts.length; i++){
+    var ct = D.texts[i];
     if(ct.instance !== null && ( D.currentTime < ct.start || D.currentTime > ct.end)){
       //remove it !
       removeText(ct.instance);
@@ -609,8 +609,6 @@ loader.loadAudio("synths.ogg", "synths");
 cvs = document.getElementsByTagName("canvas")[0];
 gl = cvs.getContext("experimental-webgl");
 
-
-
 windowResize();
 
 buffer = gl.createBuffer();
@@ -640,7 +638,6 @@ gl.framebufferTexture2D( gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, te
 
 seeker = document.getElementById("seeker");
 seeker.addEventListener("input", function (e) {
-  console.log("seek to " + e.target.value);
   seek(e.target.value);
   seeker.value = e.target.value;
   D.looping = false;

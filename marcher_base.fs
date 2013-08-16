@@ -26,9 +26,7 @@ $define_colors
 #define epsilon 0.01
 #define PI 3.14159265
 
-
 $scene
-
 
 // ------------------------ post processing
 
@@ -49,6 +47,7 @@ float soft_shadow(in vec3 landPoint,
     float t = mint; //(mint + rand(gl_FragCoord.xy) * 0.01);
     for( int s = 0; s < 100; ++s )
     {
+      // TODO[nical] use DistanceField instead
         if(t > maxt) break;
         float nextDist = min(
             BuildingsDistance(landPoint + light_direction * t )
@@ -123,8 +122,6 @@ vec3 ray_march(in vec3 position, in vec3 direction, out float steps)
   return position;
 }
 
-// ---------------- normals
-
 vec3 compute_normal(vec3 pos)
 {
     int dummy;
@@ -137,57 +134,34 @@ vec3 compute_normal(vec3 pos)
     );
 }
 
-// ------- camera
-
-void fisheye_camera( vec2 screen_position, float ratio, float fovy, mat4 transform, out vec3 position, out vec3 direction )
-{
-    screen_position.y -= 0.2;
-    screen_position *= vec2(PI*0.5,PI*0.5/ratio)/fovy;
-    
-    direction = vec3(
-           sin(screen_position.y+PI*0.5)*sin(screen_position.x)
-        , -cos(screen_position.y+PI*0.5)
-        , sin(screen_position.y+PI*0.5)*cos(screen_position.x)
-    );
-    position = vec3(5.0*sin(time*0.01), 15.0, time);
-}
-
 // ----- main
 
 void main(void)
 {
-  float ratio = res.x / res.y;
-  // position on the screen
-  vec2 screen_position;
-  screen_position.x = (gl_FragCoord.x/res.x - 0.5);
-  screen_position.y = gl_FragCoord.y/res.y - 0.5;
 
-  vec3 direction;
-  vec3 position;
+float ratio = res.x / res.y;
+vec2 screen_position;
+screen_position.x = (gl_FragCoord.x/res.x - 0.5);
+screen_position.y = gl_FragCoord.y/res.y - 0.5;
 
-  $camera
+vec3 direction;
+vec3 position;
 
-  float num_steps;
-  vec3 hitPosition = ray_march(position, direction, num_steps);
+$camera
 
-  vec3 light_position = vec3(50.0 * sin(time*0.01), 10.0 + 40.0 * abs(cos(time*0.01)), (time) + 100.0 );
-  vec3 light_direction = normalize(light_position - hitPosition);
-  vec3 normal = compute_normal(hitPosition);
-  vec3 color = default_color;
-  float depth = length(position-hitPosition);
+float num_steps;
+vec3 hitPosition = ray_march(position, direction, num_steps);
 
-  $shading
+vec3 light_position = vec3(50.0 * sin(time*0.01), 10.0 + 40.0 * abs(cos(time*0.01)), (time) + 100.0 );
+vec3 light_direction = normalize(light_position - hitPosition);
+vec3 normal = compute_normal(hitPosition);
+vec3 color = default_color;
+float depth = length(position-hitPosition);
 
-  // float attenuation = clamp(dot(normal, light_direction),0.0,1.0)*0.6 + 0.4;
-  // color = mix(shadowColor, color, clamp(hitPosition.y/7.0, 0.3, 1.0));
-  // apply_fog(length(position-hitPosition), color);
-  // debug_steps(num_steps, color);
-  // debug_coords(hitPosition, 20.0, depth, color);
-  // float shadow = soft_shadow(hitPosition, light_direction, 0.1, 50.0, shadowHardness);
-  // color = mix(shadowColor, color, 0.5+shadow*0.5);
-  // ambient_occlusion(hitPosition, normal, 0.35, 5.0, color);
+$shading
 
-  // end
-  gl_FragColor = vec4(color, 1.0);
+// end
+gl_FragColor = vec4(color, 1.0);
+
 }
 
