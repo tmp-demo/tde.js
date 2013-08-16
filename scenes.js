@@ -38,19 +38,33 @@ left:300,
 instance : null}
 ];
 
+function gen_shaders() {
+  var default_colors = "#define default_color vec3(1.0,1.0,1.0)\n" +
+                       "#define shadowColor vec3(0.0,0.3,0.7)\n" +
+                       "#define skyColor vec3(0.9,1.0,1.0) \n";
+
+  var default_max = "#define MAX_STEPS 200\n" +
+                    "#define MAX_DISTANCE 600.0\n";
+
+
+  D.shaders["city_1"] = build_shader_src(
+    resource("marcher_base.fs"),
+    {
+      "$define_colors": [default_colors],
+      "$define_max": [default_max],
+      "$scene": [resource("default_scene.fs")],
+      "$camera": [resource("fisheye_camera.fs")],
+      "$shading": [
+        "debug_steps(num_steps, color);"
+      ]
+    }
+  );
+
+  //dump(D.shaders["city_1"].src);
+}
 
 function loadScenes() {
-  // intro
-  D.scenes.pushScene( {
-    duration: 5323,
-    fragments: ["city_intro"],
-    vertex: "quad",
-    update: [function(prog) {
-      updateRaymarchStatic(prog, [0, 15.0, 15.0]);
-    }]
-  });
 
-  // sad
   D.scenes.pushScene( {
     duration: THIRTYTWOBARS,
     fragments: ["city_1"],
@@ -59,116 +73,6 @@ function loadScenes() {
       updateRaymarchTranslate(prog, [0, 15.0, 15.0],[20, 10.0, 15.0]);
     }]
   });
-  
-  // rainbow!
-  D.scenes.pushScene( {
-    duration: THIRTYTWOBARS,
-    fragments: ["city_rainbow"],
-    vertex: "quad",
-    update: [function(prog) {
-      updateRaymarchTranslate(prog, [20, 10.0, 15.0],[20, 20.0, -120.0]);
-    }]
-  });
-/*
-  D.scenes.pushScene( {
-    duration: THIRTYTWOBARS,
-    fragments: ["gay-ring"],
-    vertex: "quad",
-    update: [updateDefault]
-  });
-*/
-  // traveling right with chroma
-  D.scenes.pushScene( {
-    duration: THIRTYTWOBARS,
-    fragments: ["city_2", "chroma"],
-    vertex: "quad",
-    update: [function(prog) {
-      updateRaymarchTranslate(prog, [20, 15.0, 15.0],[100, 15.0, 15.0]);
-    }, updateDefault]
-  });
-  
-  D.scenes.pushScene( {
-    duration: THIRTYTWOBARS*2,
-    fragments: ["city_2", "gay-flag"],
-    vertex: "quad",
-    update: [function(prog) {
-      updateRaymarchTransition(prog, [100, 15.0, 15.0],[100, 15.0, 15.0],
-                                      0, [0,1,0], 1, [0,1,0]);
-    }, updateDefault]
-  });
-
-  D.scenes.pushScene( {
-    duration: THIRTYTWOBARS,
-    fragments: ["gay-ring2"],
-    vertex: "quad",
-    update: [updateDefault]
-  });
-  
-    D.scenes.pushScene( {
-    duration: THIRTYTWOBARS,
-    fragments: ["gay-ring3"],
-    vertex: "quad",
-    update: [updateDefault]
-  });
-
-  D.scenes.pushScene( {
-    duration: THIRTYTWOBARS,
-    fragments: ["city_2", "blur"],
-    vertex: "quad",
-    update: [function(prog) {
-      updateRaymarchTransition(prog, [100, 15.0, 15.0],[100, 15.0, 15.0],
-                                      0, [0,1,0], 1, [0,1,0]);
-    }, updateDefault]
-  });
-
-  D.scenes.pushScene( {
-    duration: THIRTYTWOBARS,
-    fragments: ["city_2"],
-    vertex: "quad",
-    update: [function(prog) {
-      updateRaymarchTransition(prog, [135, 20.0, 15.0],[135, 20.0, 60.0],
-                                      1.57079633, [-1,0,0], 1.57079633, [-1,0,0]);
-    }, updateDefault]
-  });
-  //D.scenes.pushScene( {
-    //duration: THIRTYTWOBARS,
-    //fragments: ["city_2", "gay-ring"],
-    //vertex: "quad",
-    //update: [function(prog) {
-      //updateRaymarchTransition(prog, [135, 20.0, 60.0],[135, 20.0, 105.0],
-                                      //1.57079633, [-1,0,0], 1.57079633, [-1,0,0]);
-    //}, updateDefault]
-  //});
-
-  D.scenes.pushScene( {
-    duration: THIRTYTWOBARS,
-    fragments: ["city_fancy"],
-    vertex: "quad",
-    update: [function(prog) {
-      updateRaymarchStatic(prog, [300, 15.0, 1000.0]);
-    }]
-  });
-
-  // rainbow!
-  D.scenes.pushScene( {
-    duration: THIRTYTWOBARS,
-    fragments: ["city_rainbow"],
-    vertex: "quad",
-    update: [function(prog) {
-      updateRaymarchTranslate(prog, [20, 10.0, 15.0],[20, 20.0, -120.0]);
-    }]
-  });
-
-  // traveling right with chroma
-  D.scenes.pushScene( {
-    duration: THIRTYTWOBARS,
-    fragments: ["city_2", "chroma"],
-    vertex: "quad",
-    update: [function(prog) {
-      updateRaymarchTranslate(prog, [100, 15.0, 15.0],[100, 15.0, 115.0]);
-    }, updateDefault]
-  });
-
 
   assertScenesSorted();
   var lastScene = D.scenes[D.scenes.length - 1];

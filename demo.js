@@ -280,8 +280,8 @@ function updateScene() {
 function updateText(){
   //look for existing text that could be out of date
   //look for curently inexisting text that should be displayed
-  for(var i = 0; i < D.texts.length; i++){
-    var ct = D.texts[i];
+  for(var i = 0; i < D.Texts.length; i++){
+    var ct = D.Texts[i];
     if(ct.instance !== null && ( D.currentTime < ct.start || D.currentTime > ct.end)){
       //remove it !
       removeText(ct.instance);
@@ -333,25 +333,11 @@ ResourceLoader.prototype.registerResource = function(thing) {
   this.toLoad++;
 }
 
-function txt(id) {
-  return D.texts[id];
+function resource(id) {
+  return D.src_fragments[id];
 }
 
-function build_raymarcher(scene, colors, camera, const_max, effects) {
-  var shader_src = txt("marcher_base.fs");
-  shader_src = shader_src.replace("$scene", scene);
-  shader_src = shader_src.replace("$define_max", const_max);
-  shader_src = shader_src.replace("$define_colors", colors);
-  shader_src = shader_src.replace("$camera", camera);
-  var effects_cat = "";
-  for (var i in effects) {
-    effects_cat += effects[i] + "\n  ";
-  }
-  shader_src = shader_src.replace("// $post_processing", effects_cat);
-  return shader_src;
-}
-
-function build_shader(base, subs) {
+function build_shader_src(base, subs) {
   var shader_src = base;
   for (var pat in subs) {
     var txt_cat = "";
@@ -360,117 +346,18 @@ function build_shader(base, subs) {
     }
     shader_src = shader_src.replace(pat, txt_cat);
   }
-  return shader_src;
+  return { src: shader_src };
 }
 
-function concat(names) {
-  var src = "";
-  for (var i in names) {
-    src += D.texts[names[i]];
-  }
-  return src;
-}
-
-function allLoaded() {
-  loadScenes();
-
-  var default_colors = "#define default_color vec3(1.0,1.0,1.0)\n" +
-                       "#define shadowColor vec3(0.0,0.3,0.7)\n" +
-                       "#define skyColor vec3(0.9,1.0,1.0) \n";
-
-  var default_max = "#define MAX_STEPS 200\n" +
-                    "#define MAX_DISTANCE 600.0\n";
-
-
-  var foo = build_raymarcher(
-    txt("default_scene.fs"),
-    default_colors,
-    txt("fisheye_camera.fs"),
-    [
-      "debug_steps(num_steps, color);",
-      "debug_coords(hitPosition, 20.0, depth, color);"
-    ]
-  );
-
-  var test = build_shader(
-    txt("marcher_base.fs"),
-    {
-      "$define_colors": [default_colors],
-      "$define_max": [default_max],
-      "$scene": [txt("default_scene.fs")],
-      "$camera": [txt("fisheye_camera.fs")],
-      "$shading": [
-        "debug_steps(num_steps, color);"
-      ]
-    }
-  );
-
-  var pre = document.createElement("pre");
-  pre.innerHTML = test;
-  document.body.appendChild(pre);
-
-  D.shaders["city_1"] = { src: test }
-
-  //D.shaders["city_1"] = {
-  //  src: concat([
-  //  "city_uniforms.fs",
-  //  "city_distance_1.fs",
-  //  "city_marcher.fs",
-  //  "city_mtl_1.fs",
-  //  "city_post_1.fs",
-  //  "city_main.fs"
-  //  ])
-  //};
-
-  D.shaders["city_rainbow"] = {
-    src: concat([
-    "city_uniforms.fs",
-    "city_distance_1.fs",
-    "city_marcher.fs",
-    "city_mtl_rainbowtransition.fs",
-    "city_post_1.fs",
-    "city_main.fs"
-    ])
-  };
-
-  D.shaders["city_intro"] = {
-    src: concat([
-    "city_uniforms.fs",
-    "city_distance_1.fs",
-    "city_marcher.fs",
-    "city_mtl_intro.fs",
-    "city_post_1.fs",
-    "city_main.fs"
-    ])
-  };
-
-  D.shaders["city_2"] = {
-    src: concat([
-    "city_uniforms.fs",
-    "city_distance_1.fs",
-    "city_marcher.fs",
-    "city_mtl_2.fs",
-    "city_post_1.fs",
-    "city_main.fs"
-    ])
-  };
-
-  D.shaders["city_fancy"] = {
-    src: concat([
-    "city_uniforms.fs",
-    "city_distance_1.fs",
-    "city_marcher.fs",
-    "city_mtl_multicolor.fs",
-    "city_post_1.fs",
-    "city_main.fs"
-    ])
-  };
-
+function compile_shaders() {
   for (var i = 0; i < D.scenes.length; i++) {
     var scene = D.scenes[i];
     D.programs[i] = [];
-    for(var j = 0; j < D.scenes[i].fragments.length; j++)
+    for(var j = 0; j < D.scenes[i].fragments.length; j++) {
+      console.log("compiling program " + i + ": "+scene.vertex+", "+scene.fragments[j]);
       D.programs[i].push(loadProgram(D.shaders[scene.vertex].src, D.shaders[scene.fragments[j]].src));
+      console.log("---");
+    }
   }
 
   if (window.AudioContext) {
@@ -478,6 +365,25 @@ function allLoaded() {
   } else {
     ac = new webkitAudioContext();
   }
+}
+
+function dump(something) {
+  var pre = document.createElement("pre");
+  pre.innerHTML = something;
+  document.body.appendChild(pre); 
+}
+
+function allLoaded() {
+  console.log(" -- loadScenes");
+  loadScenes();
+
+  console.log(" -- gen_shaders");
+  gen_shaders();
+
+  console.log(" -- compile_shaders");
+  compile_shaders();
+
+  console.log(" -- setup time");
   D.startTime = 0;
   D.currentTime = 0;
   D.currentProgram = D.programs[0];
@@ -519,7 +425,7 @@ ResourceLoader.prototype.loadText = function(src, id) {
   xhr.open("GET", src);
   var self = this;
   xhr.onload = function() {
-    D.texts[src] = this.responseText;
+    D.src_fragments[src] = this.responseText;
     console.log("loaded: " + src);
     self.onLoad();
   };
@@ -577,15 +483,15 @@ var loader = new ResourceLoader(allLoaded);
 loader.loadJS("glmatrix.js");
 loader.loadJS("raymarch.js");
 loader.loadJS("scenes.js");
-loader.loadShader("green-red.fs", "x-shader/fragment", "green-red");
-loader.loadShader("bw.fs", "x-shader/fragment", "bw");
-loader.loadShader("blur.fs", "x-shader/fragment", "blur");
-loader.loadShader("chroma.fs", "x-shader/fragment", "chroma");
-loader.loadShader("gay-flag.fs", "x-shader/fragment", "gay-flag");
-loader.loadShader("gay-ring.fs", "x-shader/fragment", "gay-ring");
-loader.loadShader("gay-ring2.fs", "x-shader/fragment", "gay-ring2");
-loader.loadShader("gay-ring3.fs", "x-shader/fragment", "gay-ring3");
-loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
+//loader.loadShader("green-red.fs", "x-shader/fragment", "green-red");
+//loader.loadShader("bw.fs", "x-shader/fragment", "bw");
+//loader.loadShader("blur.fs", "x-shader/fragment", "blur");
+//loader.loadShader("chroma.fs", "x-shader/fragment", "chroma");
+//loader.loadShader("gay-flag.fs", "x-shader/fragment", "gay-flag");
+//loader.loadShader("gay-ring.fs", "x-shader/fragment", "gay-ring");
+//loader.loadShader("gay-ring2.fs", "x-shader/fragment", "gay-ring2");
+//loader.loadShader("gay-ring3.fs", "x-shader/fragment", "gay-ring3");
+//loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
 loader.loadShader("quad.vs", "x-shader/vertex", "quad");
 
 loader.loadText("marcher_base.fs");
@@ -678,5 +584,5 @@ document.addEventListener("keypress", function(e) {
 D.playState = D.PLAYING;
 D.programs = [];
 D.scenes = [];
-D.texts = {};
+D.src_fragments = {};
 
