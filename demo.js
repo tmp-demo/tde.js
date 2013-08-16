@@ -516,31 +516,14 @@ var loader = new ResourceLoader(allLoaded);
 loader.loadJS("glmatrix.js");
 loader.loadJS("raymarch.js");
 loader.loadJS("scenes.js");
-//loader.loadShader("green-red.fs", "x-shader/fragment", "green-red");
-//loader.loadShader("bw.fs", "x-shader/fragment", "bw");
-//loader.loadShader("blur.fs", "x-shader/fragment", "blur");
-//loader.loadShader("chroma.fs", "x-shader/fragment", "chroma");
-//loader.loadShader("gay-flag.fs", "x-shader/fragment", "gay-flag");
-//loader.loadShader("gay-ring.fs", "x-shader/fragment", "gay-ring");
-//loader.loadShader("gay-ring2.fs", "x-shader/fragment", "gay-ring2");
-//loader.loadShader("gay-ring3.fs", "x-shader/fragment", "gay-ring3");
-//loader.loadShader("marcher1.fs", "x-shader/fragment", "marcher1");
 loader.loadShader("quad.vs", "x-shader/vertex", "quad");
 
 loader.loadText("marcher_base.fs");
+loader.loadText("debug.fs");
+loader.loadText("ambient_occlusion.fs");
+loader.loadText("soft_shadow.fs");
 loader.loadText("default_scene.fs");
 loader.loadText("fisheye_camera.fs");
-
-loader.loadText("city_uniforms.fs", "city_uniforms.fs");
-loader.loadText("city_mtl_1.fs", "city_mtl_1");
-loader.loadText("city_mtl_2.fs", "city_mtl_2");
-loader.loadText("city_mtl_rainbowtransition.fs", "city_mtl_rainbowtransition");
-loader.loadText("city_mtl_multicolor.fs", "city_mtl_multicolor");
-loader.loadText("city_mtl_intro.fs", "city_mtl_intro");
-loader.loadText("city_distance_1.fs", "city_distance_1");
-loader.loadText("city_marcher.fs", "city_marcher");
-loader.loadText("city_main.fs", "city_main");
-loader.loadText("city_post_1.fs", "city_post_1");
 
 loader.loadAudio("drums.ogg", "drums");
 loader.loadAudio("synths.ogg", "synths");

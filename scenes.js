@@ -53,8 +53,14 @@ function gen_shaders() {
       "$define_max": [default_max],
       "$scene": [resource("default_scene.fs")],
       "$camera": [resource("fisheye_camera.fs")],
+      "$functions" : [
+        resource("debug.fs"),
+        ""
+      ],
       "$shading": [
-        "debug_steps(num_steps, color);"
+        "debug_steps(num_steps, color);",
+        "alpha = 1.0 - depth/MAX_DISTANCE;",
+        ""
       ]
     }
   );

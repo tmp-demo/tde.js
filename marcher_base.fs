@@ -28,7 +28,7 @@ $define_colors
 
 $scene
 
-// ------------------------ post processing
+// ------------------------ post processing functions
 
 void apply_fog( in float distance, inout vec3 rgb ){
 
@@ -37,69 +37,13 @@ void apply_fog( in float distance, inout vec3 rgb ){
     rgb = mix( skyColor, rgb, fogAmount );
 }
 
-float soft_shadow(in vec3 landPoint,
-                  in vec3 light_direction,
-                  float mint, float maxt,
-                  float iterations)
-{
-    float penumbraFactor = 1.0;
-    vec3 sphereNormal;
-    float t = mint; //(mint + rand(gl_FragCoord.xy) * 0.01);
-    for( int s = 0; s < 100; ++s )
-    {
-      // TODO[nical] use DistanceField instead
-        if(t > maxt) break;
-        float nextDist = min(
-            BuildingsDistance(landPoint + light_direction * t )
-            , RedDistance(landPoint + light_direction * t )
-        );
-
-        if( nextDist < 0.001 ){
-            return 0.0;
-        }
-        //float penuAttenuation = mix (1.0, 0.0, t/maxt);
-        penumbraFactor = min( penumbraFactor, iterations * nextDist / t );
-        t += nextDist;
-    }
-    return penumbraFactor;
-}
 
 void basic_lighting(in vec3 normal, in vec3 light_dir, inout vec3 color) {
     float attenuation = clamp(dot(normal, light_dir),0.0,1.0)*0.6 + 0.4;
 }
 
-void ambient_occlusion (vec3 point, vec3 normal, float stepDistance, float samples, inout vec3 color) 
-{
-  float occlusion = 1.0;
-  
-  for (int i = 0; i < 20; ++i ) 
-  {
-    if(--samples < 0.0) break;
-    occlusion -= (samples * stepDistance - (distance_field( point + normal * samples * stepDistance))) / pow(2.0, samples);
-  }
-  color = mix(shadowColor, color, occlusion);
-}
 
-void debug_depth(float d, inout vec3 color) {
-  float val = min(d, MAX_DISTANCE) / MAX_DISTANCE;
-  color.r = val;
-  color.g = val;
-  color.b = val;
-}
-
-void debug_steps(float steps, inout vec3 color) {
-  float val = steps / float(MAX_STEPS);
-  color.r = val;
-  color.g = val;
-  color.b = val;
-}
-
-void debug_coords(in vec3 position, in float size, in float dist, inout vec3 color) {
-  if (dist < MAX_DISTANCE &&
-      (mod(position.x, size) < 0.4 || mod(position.z, size) < 0.4)) {
-    color = vec3(1.0,0.0,0.0);
-  }
-}
+$functions
 
 // -------------------- marcher
 
@@ -150,10 +94,13 @@ vec3 position;
 $camera
 
 float num_steps;
+float alpha= 1.0;
 vec3 hitPosition = ray_march(position, direction, num_steps);
 
+// TODO light is somewhat arbitrary
 vec3 light_position = vec3(50.0 * sin(time*0.01), 10.0 + 40.0 * abs(cos(time*0.01)), (time) + 100.0 );
 vec3 light_direction = normalize(light_position - hitPosition);
+
 vec3 normal = compute_normal(hitPosition);
 vec3 color = default_color;
 float depth = length(position-hitPosition);
@@ -161,7 +108,7 @@ float depth = length(position-hitPosition);
 $shading
 
 // end
-gl_FragColor = vec4(color, 1.0);
+gl_FragColor = vec4(color, alpha);
 
 }
 
