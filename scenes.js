@@ -65,7 +65,27 @@ function gen_shaders() {
     }
   );
 
-  //dump(D.shaders["city_1"].src);
+  D.shaders["iss_1"] = build_shader_src(
+    resource("marcher_base.fs"),
+    {
+      "$define_colors": [default_colors],
+      "$define_max": [default_max],
+      "$scene": [resource("scene_iss.fs")],
+      "$camera": [resource("camera_fixedTowardsX.fs")],
+      "$functions" : [
+        resource("debug.fs"),
+        ""
+      ],
+      "$shading": [
+        "debug_steps(num_steps, color);",
+		//"debug_coords(hitPosition,1.0, depth, color);",
+        "alpha = 1.0 - depth/MAX_DISTANCE;",
+        ""
+      ]
+    }
+  );
+  
+  dump(D.shaders["iss_1"].src);
 }
 
 function load_scenes() {
@@ -79,6 +99,16 @@ function load_scenes() {
     }]
   });
 
+  add_scene({
+    duration: THIRTYTWOBARS,
+    fragments: ["iss_1"],
+    vertex: "quad",
+    update: [function(prog) {
+      updateRaymarchTranslate(prog, [0, 15.0, 15.0],[20, 10.0, 15.0]);
+    }]
+  });
+  
+  
   assertScenesSorted();
   var lastScene = D.scenes[D.scenes.length - 1];
   seeker.max = D.endTime = lastScene.start + lastScene.duration;

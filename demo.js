@@ -523,7 +523,9 @@ loader.loadText("debug.fs");
 loader.loadText("ambient_occlusion.fs");
 loader.loadText("soft_shadow.fs");
 loader.loadText("default_scene.fs");
+loader.loadText("scene_iss.fs");
 loader.loadText("fisheye_camera.fs");
+loader.loadText("camera_fixedTowardsX.fs");
 
 loader.loadAudio("drums.ogg", "drums");
 loader.loadAudio("synths.ogg", "synths");
