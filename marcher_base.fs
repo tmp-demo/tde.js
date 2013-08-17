@@ -83,32 +83,50 @@ vec3 compute_normal(vec3 pos)
 void main(void)
 {
 
+vec3 color = default_color;
+
+
+
+
+
 float ratio = res.x / res.y;
 vec2 screen_position;
 screen_position.x = (gl_FragCoord.x/res.x - 0.5);
 screen_position.y = gl_FragCoord.y/res.y - 0.5;
 
 vec3 direction;
-vec3 position;
+vec3 iposition = position;
+
 
 $camera
 
+
+
 float num_steps;
 float alpha= 1.0;
-vec3 hitPosition = ray_march(position, direction, num_steps);
+vec3 hitPosition = ray_march(iposition, direction, num_steps);
+
+
 
 // TODO light is somewhat arbitrary
 vec3 light_position = vec3(50.0 * sin(time*0.01), 10.0 + 40.0 * abs(cos(time*0.01)), (time) + 100.0 );
 vec3 light_direction = normalize(light_position - hitPosition);
 
+
+
+
+
 vec3 normal = compute_normal(hitPosition);
-vec3 color = default_color;
-float depth = length(position-hitPosition);
+
+float depth = length(iposition-hitPosition);
+
+
 
 $shading
 
+
 // end
-gl_FragColor = vec4(color, alpha);
+gl_FragColor = vec4(color, 1.);
 
 }
 
