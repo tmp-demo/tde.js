@@ -508,10 +508,10 @@ if (window.AudioContext) {
   ac = new webkitAudioContext();
 }
 
-if (window.location.search.startsWith("?recording")) {
-  D.recording = true;
-}
-
+//if (window.location.search.startsWith("?recording")) {
+//  D.recording = true;
+//}
+ 
 var loader = new ResourceLoader(allLoaded);
 loader.loadJS("glmatrix.js");
 loader.loadJS("raymarch.js");
@@ -520,6 +520,7 @@ loader.loadShader("quad.vs", "x-shader/vertex", "quad");
 
 loader.loadText("marcher_base.fs");
 loader.loadText("debug.fs");
+loader.loadText("drawstars.fs");
 loader.loadText("ambient_occlusion.fs");
 loader.loadText("soft_shadow.fs");
 loader.loadText("default_scene.fs");

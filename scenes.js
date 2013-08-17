@@ -74,13 +74,20 @@ function gen_shaders() {
       "$camera": [resource("camera_fixedTowardsX.fs")],
       "$functions" : [
         resource("debug.fs"),
+		resource("drawstars.fs"),
         ""
       ],
       "$shading": [
         "debug_steps(num_steps, color);",
 		//"debug_coords(hitPosition,1.0, depth, color);",
-        "alpha = 1.0 - depth/MAX_DISTANCE;",
-        ""
+        "stars_drawemptysky( num_steps, vec3(0.,0.,0.),color);",
+        "stars_drawstar(direction, vec3(0.,0.,1.), num_steps, 0.99998, vec3(0.6,.2,.1), vec3(0.,0.,0.), color);",
+        "stars_drawstar(direction, vec3(0.1,0.2,1.), num_steps, 0.99998, vec3(0.6,.2,.1), vec3(0.,0.,0.), color);",
+        "stars_drawstar(direction, vec3(-0.2,0.4,1.), num_steps, 0.99998, vec3(0.6,.2,.1), vec3(0.,0.,0.), color);",
+        "stars_drawstar(direction, vec3(0.3,-0.3,1.), num_steps, 0.99998, vec3(0.6,.2,.1), vec3(0.,0.,0.), color);",
+        "stars_drawstar(direction, vec3(-0.4,0.3,1.), num_steps, 0.99998, vec3(0.6,.2,.1), vec3(0.,0.,0.), color);",
+        "stars_drawstar(direction, vec3(0.02,-0.01,1.), num_steps, 0.99998, vec3(0.6,.2,.1), vec3(0.,0.,0.), color);",
+		"stars_drawreticule(direction, vec3(0.,0.,1.), vec3(0.6,.2,.1),0.9+ 0.09*(cos(time/100.)/2. +0.5), color);"
       ]
     }
   );

@@ -17,7 +17,7 @@
       , -cos(cam_sp.y+PI*0.5)
       , sin(cam_sp.y+PI*0.5)*cos(cam_sp.x)
   );
-  position = vec3(-6.,10.,-30.); 
+  iposition = vec3(-6.,10.,-30.); 
   //vec3(5.0*sin(time*0.01), 15.0, time);
 
   // fisheye_camera
