@@ -74,8 +74,8 @@ ac = null;
 /* beat detector */
 bd = null;
 /* buffersource */
-drumsTrack = null;
-otherTrack = null;
+//drumsTrack = null;
+//otherTrack = null;
 /* analysernode */
 an = null;
 /* vertex buffer for our quad */
@@ -528,8 +528,8 @@ loader.loadText("scene_iss.fs");
 loader.loadText("fisheye_camera.fs");
 loader.loadText("camera_fixedTowardsX.fs");
 
-loader.loadAudio("drums.ogg", "drums");
-loader.loadAudio("synths.ogg", "synths");
+//loader.loadAudio("drums.ogg", "drums");
+//loader.loadAudio("synths.ogg", "synths");
 
 cvs = document.getElementsByTagName("canvas")[0];
 gl = cvs.getContext("experimental-webgl", {preserveDrawingBuffer: true});
@@ -573,8 +573,8 @@ document.addEventListener("keypress", function(e) {
   if (e.charCode == 32) {
     if (D.playState == D.PLAYING) {
       D.playState = D.PAUSED;
-      drumsTrack.stop(0);
-      otherTrack.stop(0);
+      //drumsTrack.stop(0);
+      //otherTrack.stop(0);
     } else if(D.playState == D.ENDED) {
       seek(0);
     } else {
