@@ -120,3 +120,43 @@ function load_scenes() {
   var lastScene = D.scenes[D.scenes.length - 1];
   seeker.max = D.endTime = lastScene.start + lastScene.duration;
 }
+
+function prepare_scenes(scenes) {
+  for (var s in scenes) {
+    for (var p in scenes[s].passes) {
+      if (p.outputs) {
+        for (var o in scenes[s].passes[p].outputs[o]) {
+          // TODO create texture
+        }
+        // TODO create a FBO
+      }
+    }
+  }
+}
+
+function set_basic_uniforms() {
+  // TODO
+  // set time, resolution, etc.
+}
+
+function update_scene(scenes, scene) {
+  if (scene.update) {
+    scene.update(scenes, scene);
+  }
+  for (var p in scene.passes) {
+    var pass = scene.passes[p];
+    var shader = D.shaders[pass.shader];
+    // TODO bind the shader
+    set_basic_uniforms();
+    if (pass.outputs) {
+      // TODO bind FBO
+    }
+    if (pass.update) {
+      pass.update(scenes, scene, pass);
+    }
+    if (pass.quad) {
+      // TODO draw quad
+    }
+  }
+}
+
