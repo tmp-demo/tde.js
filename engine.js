@@ -1,6 +1,21 @@
 
 var render_index = 0;
 
+demo = {
+  scenes: null,
+  current_scene: null,
+  current_time: 0,
+  start_time: 0,
+  end_time: 0,
+  PAUSED: 0,
+  PLAYING: 1,
+  ENDED: 2,
+  play_state: 1,
+  looping: false,
+  recording: false,
+};
+
+
 function main_loop() {
   if (demo.play_state == demo.PLAYING){
     if (demo.current_time <= demo.end_time) {

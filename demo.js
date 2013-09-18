@@ -5,17 +5,6 @@ base_uniforms = "precision lowp float;"+
                 "uniform float beat;"+
                 "uniform vec2  resolution;";
 
-quad_vs = "attribute vec2 position;"+
-          "varying vec2 v_texCoord;"+
-          "void main() {"+
-          "  gl_Position = vec4(position, 0.0, 1.0);"+
-          "  v_texCoord = (vec2(1.0, 1.0) + position) / 2.0;"+
-          "}";
-
-basic_fs =  base_uniforms +
-            "void main() {"+
-            "    gl_FragColor = vec4(1.0,0.0,0.0,1.0);"+
-            "}";
 basic2_fs = base_uniforms +
             "uniform sampler2D texture_0;"+
             "void main() {"+
@@ -25,9 +14,10 @@ basic2_fs = base_uniforms +
             "}";
 
 function prepare() {
-  load_text("blur.fs", function(data) { fs_blur_src = data; } );
-  load_text("chroma.fs", function(data) { fs_chroma_src = data; } );
   // here goes the code that declares the resources to load
+  load_text("quad.vs", function(data) { vs_quad_src = data; } );
+  load_text("red.fs", function(data) { fs_red_src = data; } );
+  load_text("chroma.fs", function(data) { fs_chroma_src = data; } );
 }
 
 function demo_init() {
@@ -36,10 +26,10 @@ function demo_init() {
   VS = gl.VERTEX_SHADER;
   FS = gl.FRAGMENT_SHADER;
 
-  vs_basic = compile_shader(quad_vs, VS);
-  fs_intro1 = compile_shader(basic_fs, FS);
+  vs_basic = compile_shader(vs_quad_src, VS);
+  fs_intro1 = compile_shader(fs_red_src, FS);
   fs_intro2 = compile_shader(basic2_fs, FS);
-  fs_blur = compile_shader(fs_blur_src, FS);
+  fs_blur = compile_shader(fs_chroma_src, FS);
 
   scene_1_1 = shader_program(vs_basic, fs_intro1);
   scene_1_2 = shader_program(vs_basic, fs_intro2);
@@ -70,19 +60,4 @@ function demo_init() {
       ]
     },
   ];
-
 }
-
-demo = {
-  scenes: null,
-  current_scene: null,
-  current_time: 0,
-  start_time: 0,
-  end_time: 0,
-  PAUSED: 0,
-  PLAYING: 1,
-  ENDED: 2,
-  play_state: 1,
-  looping: false,
-  recording: false,
-};
