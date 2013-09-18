@@ -563,9 +563,9 @@ gl.framebufferTexture2D( gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, te
 
 seeker = document.getElementById("seeker");
 seeker.addEventListener("input", function (e) {
-  seek(e.target.value);
-  seeker.value = e.target.value;
-  D.looping = false;
+seek(e.target.value);
+seeker.value = e.target.value;
+D.looping = false;
 });
 
 document.addEventListener("keypress", function(e) {

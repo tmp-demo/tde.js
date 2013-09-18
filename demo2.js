@@ -25,7 +25,9 @@ basic2_fs = base_uniforms +
             "}";
 
 function prepare() {
-  // here goes the code that declares the renderesources to load
+  load_text("blur.fs", function(data) { fs_blur_src = data; } );
+  load_text("chroma.fs", function(data) { fs_chroma_src = data; } );
+  // here goes the code that declares the resources to load
 }
 
 function demo_init() {
@@ -37,6 +39,7 @@ function demo_init() {
   vs_basic = compile_shader(quad_vs, VS);
   fs_intro1 = compile_shader(basic_fs, FS);
   fs_intro2 = compile_shader(basic2_fs, FS);
+  fs_blur = compile_shader(fs_blur_src, FS);
 
   scene_1_1 = shader_program(vs_basic, fs_intro1);
   scene_1_2 = shader_program(vs_basic, fs_intro2);

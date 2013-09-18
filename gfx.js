@@ -40,7 +40,7 @@ function gfx_init() {
 }
 
 function draw_quad() {
-  console.log("draw_quad");
+  //console.log("draw_quad");
   gl.disable(gl.DEPTH_TEST);
   gl.bindBuffer(gl.ARRAY_BUFFER, _quad_vbo);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
@@ -130,7 +130,7 @@ function frame_buffer(textures) {
 
 function set_basic_uniforms(scene, program) {
   var current = demo.current_time - scene.start_time;
-  console.log("current_time:"+demo.current_time+" scene time:"+current+" "+"duration:"+scene.duration);
+  //console.log("current_time:"+demo.current_time+" scene time:"+current+" "+"duration:"+scene.duration);
   gl.uniform1f(gl.getUniformLocation(program, 'time'), current);
   gl.uniform1f(gl.getUniformLocation(program, 'duration'), scene.duration);
   gl.uniform2f(gl.getUniformLocation(program, 'resolution'), canvas.width, canvas.height);
@@ -139,7 +139,7 @@ function set_basic_uniforms(scene, program) {
 }
 
 function render_scene(scene) {
-  console.log("render_scene "+scene.name+" "+demo.current_time);
+  //console.log("render_scene "+scene.name+" "+demo.current_time);
   if (scene.update) {
     console.log("scene.update");
     scene.update(demo.scenes, scene);
