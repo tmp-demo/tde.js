@@ -34,6 +34,7 @@ function edition_init() {
     document.addEventListener("keypress", function(e) {
       // play/pause
       if (e.charCode == 32) {
+        console.log("space bar pressed");
         if (demo.playState == demo.PLAYING) {
           demo.playState = demo.PAUSED;
           //drumsTrack.stop(0);
@@ -46,19 +47,21 @@ function edition_init() {
           mainloop();
         }
       } else if(e.charCode == 8) { //backspace key
+        console.log("backspace pressed");
         demo.looping = false;
       } else if(typeof scenesShortcuts[e.charCode]  !== 'undefined' ) {
+        console.log("jump to scene "+scenesShortcuts[e.charCode]);
         // jump to scene
         if (scenesShortcuts[""+e.charCode] < demo.scenes.length){//s >= 0 && s <= 9 && s < demo.scenes.length) {
           demo.looping = false;
-          seek(demo.scenes[scenesShortcuts[""+e.charCode]].start);
+          seek(demo.scenes[scenesShortcuts[""+e.charCode]].start_time);
         }
       } else if (typeof scenesLoopShortcuts[e.charCode]  !== 'undefined' ) {
         // jump to scene
         if (scenesLoopShortcuts[""+e.charCode] < demo.scenes.length){//s >= 0 && s <= 9 && s < demo.scenes.length) {
           demo.looping = true;
           demo.current_scene = scenesLoopShortcuts[""+e.charCode];
-          seek(demo.scenes[demo.current_scene].start);
+          seek(demo.scenes[demo.current_scene].start_time);
         }
       }
     });
