@@ -1,14 +1,8 @@
 <meta charset="utf-8">
-<script src=loader.js></script>
-<script src=gfx.js></script>
-<script src=demo2.js></script>
-<script src=audio.js></script>
-<script src=seek.js></script>
-<script src=engine.js></script>
-<script src=edition.js></script>
-<script src=templating.js></script>
-
 <style>
+/*
+https://github.com/mozilla-b2g/gaia/blob/master/apps/settings/style/lists.css#L172
+*/
 input[type=range]:-moz-focusring {
   outline: none;
 }
@@ -67,8 +61,10 @@ body {
 }
 
 </style>
+<body>
+<canvas></canvas>
+<input type=range id=seeker>
+<script src=text.js></script>
+<script src=demo.js></script>
 
-<body onload="main()">
-  <canvas></canvas>
-  <input type=range id=seeker>
 </body>
