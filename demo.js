@@ -17,6 +17,7 @@ function prepare() {
   // here goes the code that declares the resources to load
   load_text("quad.vs", function(data) { vs_quad_src = data; } );
   load_text("red.fs", function(data) { fs_red_src = data; } );
+  load_text("blue.fs", function(data) { fs_blue_src = data; } );
   load_text("chroma.fs", function(data) { fs_chroma_src = data; } );
 }
 
@@ -28,19 +29,21 @@ function demo_init() {
 
   vs_basic = compile_shader(vs_quad_src, VS);
   fs_intro1 = compile_shader(fs_red_src, FS);
+  fs_blue = compile_shader(fs_blue_src, FS);
   fs_intro2 = compile_shader(basic2_fs, FS);
   fs_blur = compile_shader(fs_chroma_src, FS);
 
   scene_1_1 = shader_program(vs_basic, fs_intro1);
   scene_1_2 = shader_program(vs_basic, fs_intro2);
+  scene_blue = shader_program(vs_basic, fs_blue);
 
   tex1 = create_texture();
   tex2 = create_texture();
 
   demo.scenes = [
+    // scene 1
     {
       name:"intro", //#opt
-      // scene 1
       duration: 10000,
       update: null,
       passes: [
@@ -57,6 +60,17 @@ function demo_init() {
           program: scene_1_2,
           // no outputs, means render to screen
         }
+      ]
+    },
+    // scene 2
+    {
+      name:"blue", //#opt
+      duration: 10000,
+      passes: [
+        {
+          program: scene_blue,
+          render: draw_quad,
+        },
       ]
     },
   ];

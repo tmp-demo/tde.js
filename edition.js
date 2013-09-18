@@ -9,16 +9,27 @@ function $$(s) {
   return document.querySelectorAll(s);
 }
 
-scenesShortcuts = {"97":0, "122":1,"101":2, "114":3,"116":4,"116":5,"121":6,"117":7,"105":8,"111":9},
-scenesLoopShortcuts = {"113":0, "115":1,"100":2, "102":3,"103":4,"104":5,"106":6,"107":7,"108":8,"109":9},
+scenesShortcuts = {"97":0, "122":1,"101":2, "114":3,"116":4,"116":5,"121":6,"117":7,"105":8,"111":9};
+scenesLoopShortcuts = {"113":0, "115":1,"100":2, "102":3,"103":4,"104":5,"106":6,"107":7,"108":8,"109":9};
 
 function edition_init() {
+  console.log("edition_init");
     seeker = document.getElementById("seeker");
     seeker.addEventListener("input", function (e) {
       seek(e.target.value);
       seeker.value = e.target.value;
       demo.looping = false;
     });
+
+    var split = document.URL.split('?');
+    for (var i=0; i<split.length; ++i) {
+      var item = split[i];
+      if (item.indexOf("scene=") >= 0) {
+        var scene = parseInt(item.slice(6), 10);
+        console.log("skipt to scene " + scene);
+        seek(demo.scenes[scene].start_time);
+      }
+    }
 
     document.addEventListener("keypress", function(e) {
       // play/pause

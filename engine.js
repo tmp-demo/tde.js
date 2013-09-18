@@ -49,6 +49,9 @@ function main() {
     gfx_init();
     audio_init();
     time_init();
+
+    edition_init();
+
     main_loop();
   });
 }
