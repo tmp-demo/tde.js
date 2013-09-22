@@ -6,25 +6,12 @@
 <script src=seek.js></script>
 <script src=engine.js></script>
 <script src=templating.js></script>
-<script src=edition.js></script>
 
 <style>
-input[type=range]:-moz-focusring {
-  outline: none;
-}
-input[type=range] {
-  border: none;
-  background: none;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 99%;
-  height: 30px;
-}
 body {
   padding: 0;
   margin: 0;
-  background: white;
+  background: rgb(244, 245, 245);
 }
 .container {
   opacity: 0;
@@ -58,6 +45,11 @@ body {
   animation: blink 1.5s steps(4, start) infinite; ;
 }
 
+#renderer {
+  display: block;
+  margin:auto;
+}
+
 .blink {
 }
 @keyframes blink {
@@ -69,6 +61,5 @@ body {
 </style>
 
 <body onload="main()">
-  <canvas></canvas>
-  <input type=range id=seeker>
+  <canvas id="renderer"></canvas>
 </body>

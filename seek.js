@@ -64,11 +64,13 @@ function time_init() {
   console.log("time_init");
 
   seeker = document.getElementById("seeker");
-  seeker.addEventListener("input", function (e) {
-    seek(e.target.value);
-    seeker.value = e.target.value;
-    demo.looping = false;
-  });
+  if (seeker) {
+    seeker.addEventListener("input", function (e) {
+      seek(e.target.value);
+      seeker.value = e.target.value;
+      demo.looping = false;
+    });
+  }
 
   // compute start tinme for each scene
   var time_sum = 0;

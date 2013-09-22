@@ -1,8 +1,8 @@
 
 function on_resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  gl.viewport(0, 0, canvas.width, canvas.height);
+  canvas.width = demo.w;
+  canvas.height = demo.h;
+  gl.viewport(0, 0, demo.w, demo.h);
 }
 
 function gl_init() {

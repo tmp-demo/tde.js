@@ -12,7 +12,9 @@ function $$(s) {
 scenesShortcuts = {"97":0, "122":1,"101":2, "114":3,"116":4,"116":5,"121":6,"117":7,"105":8,"111":9};
 scenesLoopShortcuts = {"113":0, "115":1,"100":2, "102":3,"103":4,"104":5,"106":6,"107":7,"108":8,"109":9};
 
-function edition_init() {
+demo.editor = true;
+
+function editior_init() {
   console.log("edition_init");
     seeker = document.getElementById("seeker");
     seeker.addEventListener("input", function (e) {
@@ -30,6 +32,40 @@ function edition_init() {
         seek(demo.scenes[scene].start_time);
       }
     }
+
+    var timeline_canvas = document.getElementById("timeline");
+    var timeline = timeline_canvas.getContext("2d");
+    timeline_canvas.width = timeline_canvas.clientWidth;
+    timeline_canvas.height = timeline_canvas.clientHeight;
+    timeline.fillStyle = "white";
+    timeline.fillRect(0, 0, timeline_canvas.width, timeline_canvas.height);
+
+    timeline.translate(0.5,0.5);
+    timeline.lineWidth = 1;
+
+    var time_sum = 0;
+    var times = [0];
+    for (var s=0;s<demo.scenes.length;++s) {
+        time_sum += demo.scenes[s].duration;
+        times = times.concat([time_sum]);
+        console.log("scene at "+ time_sum);
+    }
+
+    timeline.strokeStyle = "rgb(160,160,160)";
+
+    for (var t=0; t<times.length; ++t) {
+      var factor = timeline_canvas.width / time_sum;
+      var v = Math.floor(times[t] * factor);
+      console.log("line at "+v);
+      timeline.moveTo(v, 0);
+      timeline.lineTo(v, timeline_canvas.height);
+      timeline.stroke();
+    }
+    timeline.strokeStyle = "rgb(100,100,100)";
+    timeline.moveTo(0,0);
+    timeline.lineTo(timeline_canvas.width,0);
+    timeline.stroke();
+
 
     document.addEventListener("keypress", function(e) {
       // play/pause
