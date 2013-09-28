@@ -29,6 +29,9 @@ function edition_init() {
         console.log("skipt to scene " + scene);
         seek(demo.scenes[scene].start_time);
       }
+      if (item.indexOf("looping") >= 0) {
+        demo.looping = true;
+      }
     }
 
     document.addEventListener("keypress", function(e) {
