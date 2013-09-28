@@ -14,6 +14,8 @@ basic2_fs = base_uniforms +
             "}";
 
 function prepare() {
+  demo.w = 800;
+  demo.h = 600;
   // here goes the code that declares the resources to load
   load_text("quad.vs", function(data) { vs_quad_src = data; } );
   load_text("red.fs", function(data) { fs_red_src = data; } );
@@ -62,6 +64,11 @@ function demo_init() {
         }
       ]
     },
+    // scene 2, render nothing for 700ms 
+    {
+      duration: 700,
+      passes: []
+    },
     // scene 2
     {
       name:"blue", //#opt
@@ -73,5 +80,10 @@ function demo_init() {
         },
       ]
     },
+    {
+      duration: 1000,
+      passes: []
+    },
+
   ];
 }

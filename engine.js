@@ -13,6 +13,7 @@ demo = {
   play_state: 1,
   looping: false,
   recording: false,
+  editor:false,
 };
 
 
@@ -50,7 +51,7 @@ function main() {
     audio_init();
     time_init();
 
-    edition_init();
+    if (demo.editor) { editior_init(); }
 
     main_loop();
   });
