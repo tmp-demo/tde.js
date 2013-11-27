@@ -1,21 +1,15 @@
 
-function on_resize() {
+function gl_init() {
+  canvas = document.getElementsByTagName("canvas")[0];
+  gl = canvas.getContext("experimental-webgl");
   canvas.width = demo.w;
   canvas.height = demo.h;
   gl.viewport(0, 0, demo.w, demo.h);
 }
 
-function gl_init() {
-  canvas = document.getElementsByTagName("canvas")[0];
-  gl = canvas.getContext("experimental-webgl");
-  on_resize();
-}
-
 _quad_vbo = null;
 
 function gfx_init() {
-  console.log("gfx_init");
-
   var buffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   var quad = new Float32Array([-1, -1,
@@ -40,7 +34,6 @@ function gfx_init() {
 }
 
 function draw_quad() {
-  //console.log("draw_quad");
   gl.disable(gl.DEPTH_TEST);
   gl.bindBuffer(gl.ARRAY_BUFFER, _quad_vbo);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
@@ -48,14 +41,31 @@ function draw_quad() {
   gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
 
+// actually renders
+// data is of the form { vbo, num_components, num_vertice }
+function draw_geom(data) {
+  gl.enable(gl.DEPTH_TEST);
+  gl.bindBuffer(gl.ARRAY_BUFFER, data.vbo);
+  gl.vertexAttribPointer(0, data.num_components, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(0);
+  gl.drawArrays(gl.TRIANGLES, 0, data.num_vertice);
+}
+
+// to use with the timeline
+function draw_mesh(data) {
+  return function() {
+    draw_mesh(data);
+  }
+}
+
 // type: gl.VERTEX_PROGRAM or gl.FRAGMENT_PROGRAM
 function compile_shader(txt_src, type) {
   var shader = gl.createShader(type);
   gl.shaderSource(shader, txt_src);
   gl.compileShader(shader);
-  if ( !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    alert("Shader compilation failed: " + gl.getShaderInfoLog(shader));
-  }
+  if ( !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {             //#opt
+    alert("Shader compilation failed: " + gl.getShaderInfoLog(shader)); //#opt
+  }                                                                     //#opt
   return shader;
 }
 
@@ -64,11 +74,11 @@ function shader_program(vs, fs) {
   gl.attachShader(program, vs);
   gl.attachShader(program, fs);
   gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    alert("Program link error: " +
-          gl.getProgramParameter(program, gl.VALIDATE_STATUS) +
-          "\nERROR: " + gl.getError());
-  }
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {       //#opt
+    alert("Program link error: " +                              //#opt
+          gl.getProgramParameter(program, gl.VALIDATE_STATUS) + //#opt
+          "\nERROR: " + gl.getError());                         //#opt
+  }                                                             //#opt
   return program;
 }
 
@@ -87,6 +97,7 @@ function create_texture() {
   return texture;
 }
 
+// TODO does gl.TEXTURE0+i works like in C?
 function texture_unit(i) {
   if (i==0) return gl.TEXTURE0;
   if (i==1) return gl.TEXTURE1;
@@ -95,6 +106,7 @@ function texture_unit(i) {
   alert("asked for unsupported texture unit " + i); //#opt  
 }
 
+// TODO does gl.COLOR_ATTACHMENT0+i works like in C?
 function color_attachment(i) {
   if (i==0) return gl.COLOR_ATTACHMENT0;
   if (i==1) return gl.COLOR_ATTACHMENT1;
@@ -103,16 +115,19 @@ function color_attachment(i) {
   alert("asked for unsupported color attachment " + i); //#opt
 }
 
-function frame_buffer_error(e) {
-  if (e == gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT) {return "FRAMEBUFFER_INCOMPLETE_ATTACHMENT";}
-  if (e == gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) {return "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";}
-  if (e == gl.FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER) {return "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";}
-  if (e == gl.FRAMEBUFFER_UNSUPPORTED) {return "FRAMEBUFFER_UNSUPPORTED";}
-  if (e == gl.FRAMEBUFFER_INCOMPLETE_MULTISAMPLE) {return "FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";}
-  //if (e == gl.FRAMEBUFFER_INCOMPLETE_READ_BUFFER​) {return "FRAMEBUFFER_INCOMPLETE_READ_BUFFER​";}
-  //if (e == gl.FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS​) {return "FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS​";}
-  return "unknown framebuffer error";
-}
+/*#opt*/function frame_buffer_error(e) {
+/*#opt*/  if (e == gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT) {
+/*#opt*/      return "FRAMEBUFFER_INCOMPLETE_ATTACHMENT";}
+/*#opt*/  if (e == gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) {
+/*#opt*/      return "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";}
+/*#opt*/  if (e == gl.FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER) {
+/*#opt*/      return "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";}
+/*#opt*/  if (e == gl.FRAMEBUFFER_UNSUPPORTED) {
+/*#opt*/      return "FRAMEBUFFER_UNSUPPORTED";}
+/*#opt*/  if (e == gl.FRAMEBUFFER_INCOMPLETE_MULTISAMPLE) {
+/*#opt*/      return "FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";}
+/*#opt*/  return "unknown framebuffer error";
+/*#opt*/}
 
 function frame_buffer(textures) {
   var fbo = gl.createFramebuffer();
@@ -120,10 +135,10 @@ function frame_buffer(textures) {
   for (var t=0; t<textures.length;++t) {
       gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(t), gl.TEXTURE_2D, textures[t], 0);
   }
-  var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-  if (status != gl.FRAMEBUFFER_COMPLETE) {
-    alert("incomplete framebuffer "+frame_buffer_error(status));
-  }
+  var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);         //#opt
+  if (status != gl.FRAMEBUFFER_COMPLETE) {                        //#opt
+    alert("incomplete framebuffer "+frame_buffer_error(status));  //#opt
+  }                                                               //#opt
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   return fbo;
 }

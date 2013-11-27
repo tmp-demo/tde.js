@@ -3,7 +3,7 @@ var _loader_all_loaded = null;
 
 function loader_init(on_load) {
   if (_loader_resource_count==0) {
-    console.log("nothing to load");
+    console.log("nothing to load");    // #opt
     on_load();
   } else {
     _loader_all_loaded = on_load;
@@ -14,12 +14,12 @@ function load_resource(src, cb) {
   var xhr = new XMLHttpRequest();
   xhr.open("GET", src);
   xhr.onload = function() {
-    console.log("loaded: " + src);
+    console.log("loaded: " + src);     // #opt
     cb(xhr);
   };
-  xhr.onerror = function() {
-    alert("load_resource error "+src);
-  }
+  xhr.onerror = function() {           // #opt
+    alert("load_resource error "+src); // #opt
+  }                                    // #opt
   _loader_resource_count++
   xhr.send(null);
 }

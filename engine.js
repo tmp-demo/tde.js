@@ -31,7 +31,7 @@ function main_loop() {
       demo.playState = demo.PLAYING;
       update_text();
     } else {
-      console.log("demo ended");
+      console.log("demo ended"); //#opt
       demo.play_state = demo.ENDED;
       if (demo.recording) {
         stichFramesForDownload();
