@@ -54,7 +54,7 @@ function draw_geom(data) {
 // to use with the timeline
 function draw_mesh(data) {
   return function() {
-    draw_mesh(data);
+    draw_geom(data);
   }
 }
 
