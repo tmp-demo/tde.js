@@ -5,6 +5,12 @@ function gl_init() {
   canvas.width = demo.w;
   canvas.height = demo.h;
   gl.viewport(0, 0, demo.w, demo.h);
+  ext = {
+    draw_buffers: gl.getExtension("WEBGL_draw_buffers"),
+  };
+  /*#opt*/if (!ext.draw_buffers) {
+  /*#opt*/  alert("Multiple render targets not supported :(");
+  /*#opt*/}
 }
 
 _quad_vbo = null;
@@ -98,21 +104,10 @@ function create_texture() {
 }
 
 // TODO does gl.TEXTURE0+i works like in C?
-function texture_unit(i) {
-  if (i==0) return gl.TEXTURE0;
-  if (i==1) return gl.TEXTURE1;
-  if (i==2) return gl.TEXTURE2;
-  if (i==3) return gl.TEXTURE3;
-  alert("asked for unsupported texture unit " + i); //#opt  
-}
+function texture_unit(i) { return gl.TEXTURE0+i; }
 
-// TODO does gl.COLOR_ATTACHMENT0+i works like in C?
 function color_attachment(i) {
-  if (i==0) return gl.COLOR_ATTACHMENT0;
-  if (i==1) return gl.COLOR_ATTACHMENT1;
-  if (i==2) return gl.COLOR_ATTACHMENT2;
-  if (i==3) return gl.COLOR_ATTACHMENT3;
-  alert("asked for unsupported color attachment " + i); //#opt
+  return ext.draw_buffers.COLOR_ATTACHMENT0_WEBGL+i;
 }
 
 /*#opt*/function frame_buffer_error(e) {
@@ -132,9 +127,13 @@ function color_attachment(i) {
 function frame_buffer(textures) {
   var fbo = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  var buffers = [];
   for (var t=0; t<textures.length;++t) {
       gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(t), gl.TEXTURE_2D, textures[t], 0);
+      buffers.push(ext.draw_buffers.COLOR_ATTACHMENT0_WEBGL+t)
   }
+
+  ext.draw_buffers.drawBuffersWEBGL(buffers);
   var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);         //#opt
   if (status != gl.FRAMEBUFFER_COMPLETE) {                        //#opt
     alert("incomplete framebuffer "+frame_buffer_error(status));  //#opt
@@ -179,7 +178,6 @@ function render_scene(scene) {
       }
     }
     pass.render();
-
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 }
