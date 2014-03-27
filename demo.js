@@ -18,6 +18,7 @@ function prepare() {
   demo.h = 600;
   // here goes the code that declares the resources to load
   load_text("quad.vs", function(data) { vs_quad_src = data; } );
+  load_text("basic3d.vs", function(data) { vs_basic3d_src = data; } );
   load_text("red.fs", function(data) { fs_red_src = data; } );
   load_text("blue.fs", function(data) { fs_blue_src = data; } );
   load_text("chroma.fs", function(data) { fs_chroma_src = data; } );
@@ -32,6 +33,7 @@ function demo_init() {
   FS = gl.FRAGMENT_SHADER;
 
   vs_basic = compile_shader(vs_quad_src, VS);
+  vs_basic3d = compile_shader(vs_basic3d_src, VS);
   fs_intro1 = compile_shader(fs_red_src, FS);
   fs_blue = compile_shader(fs_blue_src, FS);
   fs_intro2 = compile_shader(basic2_fs, FS);
@@ -39,6 +41,7 @@ function demo_init() {
   mrt_fs_1 = compile_shader(mrt_1_src, FS);
   mrt_fs_2 = compile_shader(mrt_2_src, FS);
 
+  cube_prog = shader_program(vs_basic3d, fs_intro1);
   scene_1_1 = shader_program(vs_basic, fs_intro1);
   scene_1_2 = shader_program(vs_basic, fs_intro2);
   scene_blue = shader_program(vs_basic, fs_blue);
@@ -50,6 +53,16 @@ function demo_init() {
 
   demo.scenes = [
     // scene 1
+    {
+      duration: 10000,
+      update: null,
+      passes: [
+        {
+          render: draw_mesh(_cube),
+          program: cube_prog,
+        }
+      ]
+    },
     {
       name:"intro", //#opt
       duration: 10000,
