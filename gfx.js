@@ -130,6 +130,20 @@ function init_cube() {
   };
 }
 
+// TODO[nical]
+//function look_at(eye, at, up mat) {
+//  zaxis = normal(At - Eye)
+//  xaxis = normal(cross(Up, zaxis))
+//  yaxis = cross(zaxis, xaxis)
+//
+//  mat[0] = 
+//   xaxis.x           yaxis.x           zaxis.x          0
+//   xaxis.y           yaxis.y           zaxis.y          0
+//   xaxis.z           yaxis.z           zaxis.z          0
+//  -dot(xaxis, eye)  -dot(yaxis, eye)  -dot(zaxis, eye)  l
+//
+//}
+
 function draw_quad() {
   gl.disable(gl.DEPTH_TEST);
   gl.bindBuffer(gl.ARRAY_BUFFER, _quad_vbo);
