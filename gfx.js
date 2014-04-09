@@ -101,7 +101,7 @@ function init_cube() {
       -1.0,  1.0, -1.0,   0.0, 1.0
   ]);
   for (var i = 0; i<cube.length; ++i) {
-    cube[i] = cube[i]*0.5;
+    cube[i] = cube[i];
   }
   var vbo = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
@@ -125,7 +125,7 @@ function init_cube() {
     components_per_vertex: 5,
     attribs: [
       { location: POS, components: 3, stride: 20, offset: 0 },
-      { location: TEX_COORDS, components: 2, stride: 20, offset: 16 }
+      { location: TEX_COORDS, components: 2, stride: 20, offset: 12 }
     ]
   };
 }
@@ -157,10 +157,9 @@ function draw_geom(data, prog) {
   gl.enable(gl.DEPTH_TEST);
   gl.bindBuffer(gl.ARRAY_BUFFER, data.vbo);
   for (var c in data.attribs) {
-  gl.enableVertexAttribArray(c);
+    gl.enableVertexAttribArray(c);
     var a = data.attribs[c];
-    gl.vertexAttribPointer(a.location, a.components, gl.FLOAT,
-      false, a.stride, a.offset);
+    gl.vertexAttribPointer(a.location, a.components, gl.FLOAT, false, a.stride, a.offset);
   }
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, data.ibo);
   gl.drawElements(gl.TRIANGLES, data.num_indices, gl.UNSIGNED_SHORT, 0);
@@ -200,17 +199,26 @@ function shader_program(vs, fs) {
   return program;
 }
 
-function create_texture() {
+function create_texture(image, width, height) {
+  var image = image || null;
+  width = width || canvas.width;
+  height = height || canvas.height;
+  if (image) {
+    image = Uint8Array(image, 0, 0);
+  }
   var texture = gl.createTexture();
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, texture);//this texture is used to store render output for post process.
+
 
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0,
-                gl.RGBA, gl.UNSIGNED_BYTE, null);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0,
+                gl.RGBA, gl.UNSIGNED_BYTE, image);
+
+                console.log(gl.getError());
 
   return texture;
 }

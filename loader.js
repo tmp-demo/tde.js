@@ -46,3 +46,24 @@ function load_text(url, cb) {
     resource_loaded();
   });
 }
+
+function load_image(url, cb) {
+  var image = new Image();
+  _loader_resource_count++;
+  image.src = url;
+  image.onload = function() {
+    var cvs = document.createElement("canvas");
+    cvs.width = image.width;
+    cvs.height = image.height;
+    var c = cvs.getContext("2d");
+    c.drawImage(image, 0, 0, image.width, image.height);
+
+    var b = c.getImageData(0, 0, image.width, image.height);
+
+    cb(b);
+    resource_loaded();
+  }
+  image.onerror = function() {
+    alert("chatte");
+  }
+}

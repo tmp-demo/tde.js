@@ -24,6 +24,9 @@ function prepare() {
   load_text("chroma.fs", function(data) { fs_chroma_src = data; } );
   load_text("mrt_test_1.fs", function(data) { mrt_1_src = data; } );
   load_text("mrt_test_2.fs", function(data) { mrt_2_src = data; } );
+  load_text("textured.fs", function(data) { texturing = data; } );
+
+  load_image("paul.jpg", function(data) { image_paul = data; });
 }
 
 function demo_init() {
@@ -40,8 +43,9 @@ function demo_init() {
   fs_blur = compile_shader(fs_chroma_src, FS);
   mrt_fs_1 = compile_shader(mrt_1_src, FS);
   mrt_fs_2 = compile_shader(mrt_2_src, FS);
+  texturing_fs = compile_shader(texturing, FS);
 
-  cube_prog = shader_program(vs_basic3d, fs_intro1);
+  cube_prog = shader_program(vs_basic3d, texturing_fs);
   scene_1_1 = shader_program(vs_basic, fs_intro1);
   scene_1_2 = shader_program(vs_basic, fs_intro2);
   scene_blue = shader_program(vs_basic, fs_blue);
@@ -50,6 +54,7 @@ function demo_init() {
 
   tex1 = create_texture();
   tex2 = create_texture();
+  tex_image = create_texture(image_paul.data, image_paul.width, image_paul.height);
 
   demo.scenes = [
     // scene 1
@@ -58,6 +63,7 @@ function demo_init() {
       update: null,
       passes: [
         {
+          texture_inputs: [tex_image],
           render: draw_mesh(_cube),
           program: cube_prog,
         }
