@@ -1,9 +1,6 @@
 precision lowp float;
-/* relative to scene start time */
 uniform float time;
-/* scene duration */
 uniform float duration;
-/* resolution */
 uniform vec2 res;
 uniform float beat;
 

@@ -25,7 +25,7 @@ function prepare() {
   load_text("mrt_test_1.fs", function(data) { mrt_1_src = data; } );
   load_text("mrt_test_2.fs", function(data) { mrt_2_src = data; } );
   load_text("textured.fs", function(data) { texturing = data; } );
-
+  load_text("dblur.fs", function(data) { dblur_src = data; } );
   load_image("paul.jpg", function(data) { image_paul = data; });
 }
 
@@ -51,18 +51,20 @@ function demo_init() {
   fs_intro1 = compile_shader(fs_red_src, FS);
   fs_blue = compile_shader(fs_blue_src, FS);
   fs_intro2 = compile_shader(basic2_fs, FS);
-  fs_blur = compile_shader(fs_chroma_src, FS);
   mrt_fs_1 = compile_shader(mrt_1_src, FS);
   mrt_fs_2 = compile_shader(mrt_2_src, FS);
   texturing_fs = compile_shader(texturing, FS);
+  dblur_fs = compile_shader(dblur_src, FS);
 
   cube_prog = shader_program(vs_basic3d, texturing_fs);
+  dblur = shader_program(vs_basic, dblur_fs);
   scene_1_1 = shader_program(vs_basic, fs_intro1);
   scene_1_2 = shader_program(vs_basic, fs_intro2);
   scene_blue = shader_program(vs_basic, fs_blue);
   mrt_1 = shader_program(vs_basic, mrt_fs_1);
   mrt_2 = shader_program(vs_basic, mrt_fs_2);
 
+  depth_rb = create_depth_buffer(canvas.width, canvas.height);
   tex1 = create_texture();
   tex2 = create_texture();
   tex_image = create_texture(image_paul.data, image_paul.width, image_paul.height);
@@ -117,16 +119,30 @@ function demo_init() {
       update: null,
       passes: [
         {
+          render_to: {color: [tex1], depth: depth_rb}, render: clear
+        },
+        {
           texture_inputs: [tex_image],
+          render_to: {color: [tex1], depth: depth_rb},
           update: function(scenes, scene, time) {
-            var mv = view([0.0,0.0,-5.0], [0.0,0.0,0.0], [0.0, -1.0,0.0],
+            var mv = view([0.0,0.0, -5.0], [0.0,0.0,0.0], [0.0, -1.0,0.0],
                           [6.0, 0.0, 0.0], [0.0,0.0,0.0], [0.0, -1.0,0.0])(time.scene_norm);
-            var proj = perspective(75, 1.5, 1.0, 100.0)
+            var proj = perspective(75, 1.5, 1.0, 100.0);
             var mat = mat4_multiply(proj, mv);
             camera(scene.program, proj);
           },
           render: draw_mesh(cube),
           program: cube_prog,
+        },
+        {
+          texture_inputs: [tex1],
+          update: function(_, pass, time) {
+            var dx = 1.0*Math.cos(time.scene_norm*10.0)/canvas.width;
+            var dy = 1.0*Math.sin(time.scene_norm*10.0)/canvas.height;
+            gl.uniform2f(gl.getUniformLocation(pass.program, "direction"), dx, dy);
+          },
+          render: draw_quad,
+          program: dblur,
         }
       ]
     },
@@ -139,14 +155,14 @@ function demo_init() {
           update: null,
           program: scene_1_1,
           render: draw_quad,
-          outputs: [tex1],
+          render_to: {color: [tex1]},
         },
         {
           texture_inputs: [tex1],
           update: function() {},
           render: draw_quad,
           program: scene_1_2,
-          // no outputs, means render to screen
+          // no render_to, means render to screen
         }
       ]
     },
@@ -157,13 +173,13 @@ function demo_init() {
         {
           program: mrt_1,
           render: draw_quad,
-          outputs: [tex1, tex2],
+          render_to: {color: [tex1, tex2]},
         },
         {
           texture_inputs: [tex2, tex1],
           render: draw_quad,
           program: mrt_2,
-          // no outputs, means render to screen
+          // no render_to, means render to screen
         }
       ]
     },

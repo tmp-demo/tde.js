@@ -7,9 +7,13 @@ function gl_init() {
   gl.viewport(0, 0, demo.w, demo.h);
   ext = {
     draw_buffers: gl.getExtension("WEBGL_draw_buffers"),
+    depth_textures: gl.getExtension("WEBGL_depth_texture"),
   };
   /*#opt*/if (!ext.draw_buffers) {
-  /*#opt*/  alert("Multiple render targets not supported :(");
+  /*#opt*/  alert("WEBGL_draw_buffers not supported :(");
+  /*#opt*/}
+  /*#opt*/if (!ext.depth_textures) {
+  /*#opt*/  alert("WEBGL_depth_texture not supported :(");
   /*#opt*/}
 
   var buffer = gl.createBuffer();
@@ -22,7 +26,6 @@ function gl_init() {
                                -1,  1]);
   gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
   _quad_vbo = buffer;
- 
   // get readable strings for error enum values
   for (var propertyName in gl) {               //#opt
     if (typeof gl[propertyName] == 'number') { //#opt
@@ -57,8 +60,8 @@ function gfx_init() {
     var scene = demo.scenes[s];
     for (var p=0; p<scene.passes.length; ++p) {
       var pass = scene.passes[p];
-      if (pass.outputs) {
-        pass.outputs = frame_buffer(pass.outputs);
+      if (pass.render_to) {
+        pass.fbo = frame_buffer(pass.render_to);
       }
     }
   }
@@ -137,8 +140,9 @@ function shader_program(vs, fs) {
   return program;
 }
 
-function create_texture(image, width, height) {
+function create_texture(image, width, height, format) {
   var image = image || null;
+  var format = format || gl.RGBA;
   width = width || canvas.width;
   height = height || canvas.height;
   if (image) {
@@ -153,12 +157,18 @@ function create_texture(image, width, height) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0,
-                gl.RGBA, gl.UNSIGNED_BYTE, image);
-
-                console.log(gl.getError());
-
+  gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0,
+                format, gl.UNSIGNED_BYTE, image);
+  console.log(gl.getError());
   return texture;
+}
+
+function create_depth_buffer(w,h) {
+  var depth_rb = gl.createRenderbuffer();
+  gl.bindRenderbuffer(gl.RENDERBUFFER, depth_rb);
+  gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, w, h);
+  gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+  return depth_rb;
 }
 
 function texture_unit(i) { return gl.TEXTURE0+i; }
@@ -181,16 +191,26 @@ function color_attachment(i) {
 /*#opt*/  return "unknown framebuffer error";
 /*#opt*/}
 
-function frame_buffer(textures) {
+function frame_buffer(target) {
   var fbo = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
   var buffers = [];
-  for (var t=0; t<textures.length;++t) {
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(t), gl.TEXTURE_2D, textures[t], 0);
-      buffers.push(ext.draw_buffers.COLOR_ATTACHMENT0_WEBGL+t)
+
+
+  if (target.depth) {
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, target.depth);
   }
 
+  for (var t=0; t<target.color.length;++t) {
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(t), gl.TEXTURE_2D, target.color[t], 0);
+    buffers.push(ext.draw_buffers.COLOR_ATTACHMENT0_WEBGL+t)
+  }
+  //for (var t=0; t<target.color.length;++t) {
+  //  buffers.push(ext.draw_buffers.COLOR_ATTACHMENT0_WEBGL+t)
+  //}
+
   ext.draw_buffers.drawBuffersWEBGL(buffers);
+
   var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);         //#opt
   if (status != gl.FRAMEBUFFER_COMPLETE) {                        //#opt
     alert("incomplete framebuffer "+frame_buffer_error(status));  //#opt
@@ -213,6 +233,11 @@ function camera(prog, mat) {
   gl.uniformMatrix4fv(gl.getUniformLocation(prog, "mv_mat"), gl.FALSE, mat);
 }
 
+function clear() {
+  gl.enable(gl.DEPTH_TEST);
+  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+}
+
 function render_scene(scene) {
   //console.log("render_scene "+scene.name+" "+demo.current_time);
   var td = demo.current_time;
@@ -224,18 +249,18 @@ function render_scene(scene) {
     demo: td,
     scene: ts,
   };
-
   if (scene.update) {
     console.log("scene.update");
     scene.update(demo.scenes, scene, t);
   }
   for (var p in scene.passes) {
     var pass = scene.passes[p];
-    gl.useProgram(pass.program);
-
-    set_basic_uniforms(scene, pass.program);
-    if (pass.outputs) {
-      gl.bindFramebuffer(gl.FRAMEBUFFER, pass.outputs);
+    if (pass.program) {
+      gl.useProgram(pass.program);
+      set_basic_uniforms(scene, pass.program);
+    }
+    if (pass.fbo) {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
     }
     if (pass.update) {
       pass.update(scene, pass, t);
