@@ -14,6 +14,7 @@ basic2_fs = base_uniforms +
             "}";
 
 function prepare() {
+
   demo.w = 800;
   demo.h = 600;
   // here goes the code that declares the resources to load
@@ -26,6 +27,8 @@ function prepare() {
   load_text("mrt_test_2.fs", function(data) { mrt_2_src = data; } );
   load_text("textured.fs", function(data) { texturing = data; } );
   load_text("dblur.fs", function(data) { dblur_src = data; } );
+  load_audio("z.ogg", function(data) { zogg = data });
+
   load_image("paul.jpg", function(data) { image_paul = data; });
 }
 
@@ -127,9 +130,9 @@ function demo_init() {
           texture_inputs: [tex_image],
           render_to: {color: [tex1], depth: depth_rb},
           update: function(scenes, scene, time) {
-            var mv = view([0.0,0.0, -5.0], [0.0,0.0,0.0], [0.0, -1.0,0.0],
-                          [6.0, 0.0, 0.0], [0.0,0.0,0.0], [0.0, -1.0,0.0])(time.scene_norm);
-            var proj = perspective(75, 1.5, 1.0, 100.0);
+            var mv = view([0.0,0.0,-5.0], [0.0,0.0,0.0], [0.0, -1.0,0.0],
+                          [6.0, 0.0, 0.0], [0.0,0.0,0.0], [0.0, -1.0,0.0])(exp(time.scene_norm));
+            var proj = perspective(75, 1.5, 1.0, 100.0)
             var mat = mat4_multiply(proj, mv);
             camera(scene.program, proj);
           },
@@ -218,4 +221,8 @@ function demo_init() {
     },
 
   ];
+
+  demo.audio_source = demo.ac.createBufferSource();
+  demo.audio_source.buffer = zogg;
+  demo.audio_source.connect(demo.audio_sink);
 }

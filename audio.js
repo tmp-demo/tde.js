@@ -1,5 +1,5 @@
 
-function BeatDetector(analyserNode) {
+function AudioAnalyser(analyserNode) {
   this.node = analyserNode;
   this.node.maxDecibels = 0;
   this.array = new Float32Array(analyserNode.fftSize);
@@ -14,8 +14,12 @@ function BeatDetector(analyserNode) {
   }
 }
 
-BeatDetector.prototype.beat = function(a) {
+
+AudioAnalyser.prototype.doFFT = function() {
   this.node.getFloatFrequencyData(this.array);
+}
+
+AudioAnalyser.prototype.beat = function(a) {
   var avgRange = [0, 5];
   var sum = 0;
   for (var i = avgRange[0]; i < avgRange[0] + avgRange[1]; i++) {
@@ -42,13 +46,31 @@ BeatDetector.prototype.beat = function(a) {
   return sum;
 }
 
-function audio_init() {
-  audio = {};
-  if (window.AudioContext) {
-    audio.context = new AudioContext();
-  } else {
-    try {
-      audio.context = new webkitAudioContext();
-    } catch (e) { console.log("no audio context"); }
+AudioAnalyser.prototype.getFFT = function() {
+  return this.array;
+}
+
+AudioAnalyser.prototype.getRMS = function() {
+  var rms = 0;
+
+  for (var i = 0; i < this.array.length; i++) {
+    rms += Math.sqrt(this.array[i] * this.array[i]);
   }
+
+  rms /= this.array.length;
+
+  return rms;
+}
+
+function init_audio(demo) {
+  if (window.AudioContext) {
+    demo.ac = new AudioContext();
+  } else {
+    demo.ac = new webkitAudioContext();
+  }
+
+  // everything gets connected to the AnayserNode for obvious reasons
+  demo.audio_sink = demo.ac.createAnalyser();
+  demo.audio_sink.connect(demo.ac.destination);
+  demo.an = new AudioAnalyser(demo.audio_sink);
 }
