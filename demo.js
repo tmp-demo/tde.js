@@ -14,6 +14,7 @@ basic2_fs = base_uniforms +
             "}";
 
 function prepare() {
+
   demo.w = 800;
   demo.h = 600;
   // here goes the code that declares the resources to load
@@ -25,6 +26,8 @@ function prepare() {
   load_text("mrt_test_1.fs", function(data) { mrt_1_src = data; } );
   load_text("mrt_test_2.fs", function(data) { mrt_2_src = data; } );
   load_text("textured.fs", function(data) { texturing = data; } );
+
+  load_audio("z.ogg", function(data) { zogg = data });
 
   load_image("paul.jpg", function(data) { image_paul = data; });
 }
@@ -189,4 +192,8 @@ function demo_init() {
     },
 
   ];
+
+  demo.audio_source = demo.ac.createBufferSource();
+  demo.audio_source.buffer = zogg;
+  demo.audio_source.connect(demo.audio_sink);
 }

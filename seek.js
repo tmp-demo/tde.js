@@ -15,7 +15,7 @@ function seek(time) {
   otherTrack.buffer = D.sounds["synths"];
   otherTrack.connect(ac.destination);
 */
-  demo.start_time = audio.context.currentTime * 1000 - time;
+  demo.start_time = demo.ac.currentTime * 1000 - time;
   demo.current_time = time;
   demo.current_scene = find_scene_for_time(time);
   if (demo.play_state == demo.PAUSED) {
@@ -54,7 +54,7 @@ function find_scene_for_time(time) {
 
 
 function update_time() {
-  demo.current_time = audio.context.currentTime * 1000 - demo.start_time;
+  demo.current_time = demo.ac.currentTime * 1000 - demo.start_time;
   if (seeker) { seeker.value = demo.current_time; } //#OPT
   demo.clip_time = demo.current_time - demo.current_scene.start;
 }

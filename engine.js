@@ -14,6 +14,7 @@ demo = {
   looping: false,
   recording: false,
   editor:false,
+  audiocontext: null
 };
 
 
@@ -21,6 +22,7 @@ function main_loop() {
   if (demo.play_state == demo.PLAYING){
     if (demo.current_time <= demo.end_time) {
       demo.current_scene = find_scene_for_time(demo.current_time);
+      demo.an.doFFT();
       update_time()
       render_scene(demo.current_scene);
       requestAnimationFrame(main_loop);
@@ -43,16 +45,17 @@ function main_loop() {
 
 function main() {
   console.log("main");
+  init_audio(demo);
   prepare();
   loader_init(function(){
     gl_init();
     demo_init();
     gfx_init();
-    audio_init();
     time_init();
 
     if (demo.editor) { editior_init(); }
 
+    demo.audio_source.start(0);
     main_loop();
   });
 }

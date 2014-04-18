@@ -32,12 +32,21 @@ function resource_loaded() {
 }
 
 function load_audio(url, cb) {
-  load_resource(url, function(xhr) {
-    audio.context.decodeAudioData(xhr.response, function(data) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", url);
+  xhr.onload = function() {
+    console.log("loaded: " + url);     // #opt
+    demo.ac.decodeAudioData(xhr.response, function(data) {
       cb(data);
       resource_loaded();
-    })
-  });
+    });
+  };
+  xhr.onerror = function() {           // #opt
+    alert("load_resource error "+src); // #opt
+  }                                    // #opt
+  _loader_resource_count++
+  xhr.responseType = "arraybuffer";
+  xhr.send(null);
 }
 
 function load_text(url, cb) {
