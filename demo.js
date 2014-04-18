@@ -65,9 +65,11 @@ function demo_init() {
   mrt_2 = shader_program(vs_basic, mrt_fs_2);
 
   depth_rb = create_depth_buffer(canvas.width, canvas.height);
+  tex_half = create_texture(canvas.width/2, canvas.height/2);
+  depth_half = create_depth_buffer(canvas.width/2,canvas.height/2);
   tex1 = create_texture();
   tex2 = create_texture();
-  tex_image = create_texture(image_paul.data, image_paul.width, image_paul.height);
+  tex_image = create_texture(image_paul.width, image_paul.height, gl.RGBA, image_paul.data);
 
   cube = create_geom([
     // Front face     | tex coords
@@ -136,9 +138,20 @@ function demo_init() {
         },
         {
           texture_inputs: [tex1],
+          render_to: {color: [tex_half], w:400, h: 300},
           update: function(_, pass, time) {
-            var dx = 1.0*Math.cos(time.scene_norm*10.0)/canvas.width;
-            var dy = 1.0*Math.sin(time.scene_norm*10.0)/canvas.height;
+            var dx = 1.0/canvas.width;
+            var dy = 0.0;
+            gl.uniform2f(gl.getUniformLocation(pass.program, "direction"), dx, dy);
+          },
+          render: draw_quad,
+          program: dblur,
+        },
+        {
+          texture_inputs: [tex_half],
+          update: function(_, pass, time) {
+            var dx = 0.0;
+            var dy = 1.0/canvas.height;
             gl.uniform2f(gl.getUniformLocation(pass.program, "direction"), dx, dy);
           },
           render: draw_quad,

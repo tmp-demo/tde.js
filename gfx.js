@@ -140,7 +140,7 @@ function shader_program(vs, fs) {
   return program;
 }
 
-function create_texture(image, width, height, format) {
+function create_texture(width, height, format, image) {
   var image = image || null;
   var format = format || gl.RGBA;
   width = width || canvas.width;
@@ -196,7 +196,6 @@ function frame_buffer(target) {
   gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
   var buffers = [];
 
-
   if (target.depth) {
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, target.depth);
   }
@@ -205,9 +204,6 @@ function frame_buffer(target) {
     gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(t), gl.TEXTURE_2D, target.color[t], 0);
     buffers.push(ext.draw_buffers.COLOR_ATTACHMENT0_WEBGL+t)
   }
-  //for (var t=0; t<target.color.length;++t) {
-  //  buffers.push(ext.draw_buffers.COLOR_ATTACHMENT0_WEBGL+t)
-  //}
 
   ext.draw_buffers.drawBuffersWEBGL(buffers);
 
@@ -219,12 +215,12 @@ function frame_buffer(target) {
   return fbo;
 }
 
-function set_basic_uniforms(scene, program) {
+function set_basic_uniforms(scene, program, rx, ry) {
   var current = demo.current_time - scene.start_time;
   //console.log("current_time:"+demo.current_time+" scene time:"+current+" "+"duration:"+scene.duration);
   gl.uniform1f(gl.getUniformLocation(program, 'time'), current);
   gl.uniform1f(gl.getUniformLocation(program, 'duration'), scene.duration);
-  gl.uniform2f(gl.getUniformLocation(program, 'resolution'), canvas.width, canvas.height);
+  gl.uniform2f(gl.getUniformLocation(program, 'resolution'), rx, ry);
   // TODO beat detector
   gl.uniform1f(gl.getUniformLocation(program, 'beat'), 0.0/*bd.beat()*/);
 }
@@ -257,7 +253,14 @@ function render_scene(scene) {
     var pass = scene.passes[p];
     if (pass.program) {
       gl.useProgram(pass.program);
-      set_basic_uniforms(scene, pass.program);
+      var rx = canvas.width;
+      var ry = canvas.height;
+      if (pass.render_to) {
+        rx = pass.render_to.w || rx;
+        ry = pass.render_to.h || ry;
+      }
+      set_basic_uniforms(scene, pass.program, rx, ry);
+      gl.viewport(0, 0, rx, ry);
     }
     if (pass.fbo) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
