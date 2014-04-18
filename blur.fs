@@ -7,9 +7,9 @@ uniform float duration;
 uniform vec2 res;
 uniform float beat;
 
-uniform sampler2D u_image;
+uniform sampler2D texture_0;
 uniform vec2 u_textureSize;
-varying vec2 v_texCoord;
+varying vec2 v_tex_coords;
 
 vec2 fisheye(vec2 coord, float amt) {
   vec2 cc = coord - 0.5;
@@ -36,5 +36,5 @@ void main(void)
 
   darken = darken * (1.0 - distcenter / maxdist) + 0.1;
 
-  gl_FragColor = texture2D(u_image, fisheye(v_texCoord * 0.7 + 0.15, amount)) * darken;
+  gl_FragColor = texture2D(texture_0, fisheye(v_tex_coords * 0.7 + 0.15, amount)) * darken;
 }

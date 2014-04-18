@@ -10,11 +10,11 @@ uniform vec2 res;
 
 uniform sampler2D u_image;
 uniform vec2 u_textureSize;
-varying vec2 v_texCoord;
+varying vec2 v_tex_coords;
 
 void main(void)
 {
-  vec2 uv = v_texCoord.xy;
+  vec2 uv = v_tex_coords;
 
   vec4 narmol = texture2D(u_image,vec2(uv.x, uv.y));
 
