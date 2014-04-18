@@ -120,7 +120,7 @@ function demo_init() {
           texture_inputs: [tex_image],
           update: function(scenes, scene, time) {
             var mv = view([0.0,0.0,-5.0], [0.0,0.0,0.0], [0.0, -1.0,0.0],
-                          [6.0, 0.0, 0.0], [0.0,0.0,0.0], [0.0, -1.0,0.0])(time.scene_norm);
+                          [6.0, 0.0, 0.0], [0.0,0.0,0.0], [0.0, -1.0,0.0])(exp(time.scene_norm));
             var proj = perspective(75, 1.5, 1.0, 100.0)
             var mat = mat4_multiply(proj, mv);
             camera(scene.program, proj);

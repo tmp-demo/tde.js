@@ -195,3 +195,15 @@ function mix3(a,b,t) {
     a[2]*(1.0-t)+b[2]*t,
   ]
 }
+
+function quadratic(t) {
+  return t * t;
+}
+
+function sqrt(t) {
+  return Math.sqrt(t);
+}
+
+function exp(t) {
+  return Math.expm1(t * Math.LN2);
+}
