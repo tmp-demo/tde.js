@@ -12,8 +12,6 @@ function gl_init() {
   /*#opt*/  alert("Multiple render targets not supported :(");
   /*#opt*/}
 
-  _cube = init_cube();
-
   var buffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   var quad = new Float32Array([-1, -1,
@@ -33,7 +31,6 @@ function gl_init() {
   }                                            //#opt
 }
 
-_cube = null;
 _quad_vbo = null;
 _enums = _enums = { }; //#opt
 
@@ -67,82 +64,23 @@ function gfx_init() {
   }
 }
 
-function init_cube() {
-  var cube = new Float32Array([
-      // Front face     | tex coords
-      -1.0, -1.0,  1.0,   0.0, 0.0,
-       1.0, -1.0,  1.0,   1.0, 0.0,
-       1.0,  1.0,  1.0,   1.0, 1.0,
-      -1.0,  1.0,  1.0,   0.0, 1.0,
-      // Back face
-      -1.0, -1.0, -1.0,   0.0, 0.0,
-      -1.0,  1.0, -1.0,   1.0, 0.0,
-       1.0,  1.0, -1.0,   1.0, 1.0,
-       1.0, -1.0, -1.0,   0.0, 1.0,
-      // Top face
-      -1.0,  1.0, -1.0,   0.0, 0.0,
-      -1.0,  1.0,  1.0,   1.0, 0.0,
-       1.0,  1.0,  1.0,   1.0, 1.0,
-       1.0,  1.0, -1.0,   0.0, 1.0,
-      // Bottom face
-      -1.0, -1.0, -1.0,   0.0, 0.0,
-       1.0, -1.0, -1.0,   1.0, 0.0,
-       1.0, -1.0,  1.0,   1.0, 1.0,
-      -1.0, -1.0,  1.0,   0.0, 1.0,
-      // Right face
-       1.0, -1.0, -1.0,   0.0, 0.0,
-       1.0,  1.0, -1.0,   1.0, 0.0,
-       1.0,  1.0,  1.0,   1.0, 1.0,
-       1.0, -1.0,  1.0,   0.0, 1.0,
-      // Left face
-      -1.0, -1.0, -1.0,   0.0, 0.0,
-      -1.0, -1.0,  1.0,   1.0, 0.0,
-      -1.0,  1.0,  1.0,   1.0, 1.0,
-      -1.0,  1.0, -1.0,   0.0, 1.0
-  ]);
-  for (var i = 0; i<cube.length; ++i) {
-    cube[i] = cube[i];
-  }
+function create_geom(vertices, indices, comp_per_vertex, attrib_list) {
   var vbo = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-  gl.bufferData(gl.ARRAY_BUFFER, cube, gl.STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
-  var idx = new Uint16Array([
-    0,  1,  2,    0,  2,  3,  // Front face
-    4,  5,  6,    4,  6,  7,  // Back face
-    8,  9,  10,   8,  10, 11, // Top face
-    12, 13, 14,   12, 14, 15, // Bottom face
-    16, 17, 18,   16, 18, 19, // Right face
-    20, 21, 22,   20, 22, 23  // Left face
-  ]);
   var ibo = gl.createBuffer();
+  var idx = new Uint16Array(indices);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.STATIC_DRAW);
   return {
     vbo: vbo,
     ibo: ibo,
     num_indices: idx.length,
-    components_per_vertex: 5,
-    attribs: [
-      { location: POS, components: 3, stride: 20, offset: 0 },
-      { location: TEX_COORDS, components: 2, stride: 20, offset: 12 }
-    ]
+    components_per_vertex: comp_per_vertex,
+    attribs: attrib_list,
   };
 }
-
-// TODO[nical]
-//function look_at(eye, at, up mat) {
-//  zaxis = normal(At - Eye)
-//  xaxis = normal(cross(Up, zaxis))
-//  yaxis = cross(zaxis, xaxis)
-//
-//  mat[0] = 
-//   xaxis.x           yaxis.x           zaxis.x          0
-//   xaxis.y           yaxis.y           zaxis.y          0
-//   xaxis.z           yaxis.z           zaxis.z          0
-//  -dot(xaxis, eye)  -dot(yaxis, eye)  -dot(zaxis, eye)  l
-//
-//}
 
 function draw_quad() {
   gl.disable(gl.DEPTH_TEST);
@@ -271,11 +209,25 @@ function set_basic_uniforms(scene, program) {
   gl.uniform1f(gl.getUniformLocation(program, 'beat'), 0.0/*bd.beat()*/);
 }
 
+function camera(prog, mat) {
+  gl.uniformMatrix4fv(gl.getUniformLocation(prog, "mv_mat"), gl.FALSE, mat);
+}
+
 function render_scene(scene) {
   //console.log("render_scene "+scene.name+" "+demo.current_time);
+  var td = demo.current_time;
+  var ts = td - scene.start_time;
+  var tsn = td/scene.duration;
+
+  var t = {
+    scene_norm: tsn,
+    demo: td,
+    scene: ts,
+  };
+
   if (scene.update) {
     console.log("scene.update");
-    scene.update(demo.scenes, scene);
+    scene.update(demo.scenes, scene, t);
   }
   for (var p in scene.passes) {
     var pass = scene.passes[p];
@@ -286,7 +238,7 @@ function render_scene(scene) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, pass.outputs);
     }
     if (pass.update) {
-      pass.update(scene, pass);
+      pass.update(scene, pass, t);
     }
     if (pass.texture_inputs) {
       for (var i=0; i<pass.texture_inputs.length; ++i) {
