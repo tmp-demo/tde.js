@@ -1,9 +1,4 @@
 precision lowp float;
-uniform float time;
-uniform float duration;
-uniform float beat;
-uniform vec2  resolution;
-
 uniform sampler2D texture_0;
 uniform sampler2D texture_1;
 varying vec2 v_tex_coords;

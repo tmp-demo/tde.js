@@ -72,7 +72,7 @@ function load_image(url, cb) {
     cb(b);
     resource_loaded();
   }
-  image.onerror = function() {
-    alert("chatte");
-  }
+  /*#opt*/image.onerror = function() {
+  /*#opt*/  alert("failed to load the image");
+  /*#opt*/}
 }

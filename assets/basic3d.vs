@@ -5,9 +5,11 @@ uniform mat4 mv_mat;
 
 varying vec2 v_tex_coords;
 varying vec3 v_normals;
+varying vec3 v_position;
 
 void main() {
   gl_Position = mv_mat * vec4(position, 1.0);
-  v_normals = normals; //(mv_mat * vec4(normals, 1.0)).xyz;
+  v_position = gl_Position.xyz;
+  v_normals = normals;
   v_tex_coords = tex_coords;
 }

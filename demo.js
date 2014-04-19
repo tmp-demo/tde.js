@@ -30,9 +30,12 @@ function prepare() {
   load_text("show_tex_coords.fs", function(data) { fs_texcoords_src = data; } );
   load_text("dblur.fs", function(data) { dblur_src = data; } );
   load_text("select4.fs", function(data) { select_src = data; } );
+  load_text("deferred.fs", function(data) { deferred_src = data; } );
+  load_text("show_deferred.fs", function(data) { show_deferred_src = data; } );
   load_audio("z.ogg", function(data) { zogg = data });
 
   load_image("paul.jpg", function(data) { image_paul = data; });
+  load_image("bricks.png", function(data) { image_bricks = data; });
 }
 
 function view(eye1, target1, up1,  eye2, target2, up2) {
@@ -56,7 +59,7 @@ function blur_pass(in_tex, out_tex, vec, res) {
       gl.uniform2f(gl.getUniformLocation(pass.program, "step"), dx, dy);
     },
     render: draw_quad,
-    program: dblur,
+    program: dblur
   }
   if (out_tex) {
     p.render_to = {color: [out_tex], w: res[0], h: res[1]};
@@ -72,18 +75,23 @@ function demo_init() {
 
   vs_basic = compile_shader(vs_quad_src, VS);
   vs_basic3d = compile_shader(vs_basic3d_src, VS);
+
   fs_intro1 = compile_shader(fs_red_src, FS);
   fs_blue = compile_shader(fs_blue_src, FS);
   fs_intro2 = compile_shader(basic2_fs, FS);
   mrt_fs_1 = compile_shader(mrt_1_src, FS);
   mrt_fs_2 = compile_shader(mrt_2_src, FS);
   texturing_fs = compile_shader(texturing, FS);
+  deferred_fs = compile_shader(deferred_src, FS);
+  show_deferred_fs = compile_shader(show_deferred_src, FS);
   normals_fs = compile_shader(fs_normals_src, FS);
   texcoords_fs = compile_shader(fs_texcoords_src, FS);
   dblur_fs = compile_shader(dblur_src, FS);
   select_fs = compile_shader(select_src, FS);
 
-  texture_prog = shader_program(vs_basic3d, texturing_fs);
+  deferred_prog = shader_program(vs_basic3d, deferred_fs);
+  show_deferred_prog = shader_program(vs_basic, show_deferred_fs);
+  textured_prog = shader_program(vs_basic3d, texturing_fs);
   normals_prog = shader_program(vs_basic3d, normals_fs);
   texcoords_prog = shader_program(vs_basic3d, texcoords_fs);
   dblur = shader_program(vs_basic, dblur_fs);
@@ -102,7 +110,8 @@ function demo_init() {
   depth_half = create_depth_buffer(canvas.width/2,canvas.height/2);
   tex1 = create_texture();
   tex2 = create_texture();
-  tex_image = create_texture(image_paul.width, image_paul.height, gl.RGBA, image_paul.data);
+  tex_bricks = create_texture(image_bricks.width, image_bricks.height, gl.RGBA, image_bricks.data, true);
+  tex_paul = create_texture(image_paul.width, image_paul.height, gl.RGBA, image_paul.data);
 
   cube = create_geom([
     // Front face     | normals        | tex coords
@@ -145,8 +154,12 @@ function demo_init() {
   ], 5, [
     { location: POS, components: 3, stride: 32, offset: 0 },
     { location: NORMALS, components: 3, stride: 32, offset: 12 },
-    { location: TEX_COORDS, components: 2, stride: 32, offset: 24 },
+    { location: TEX_COORDS, components: 2, stride: 32, offset: 24 }
   ]);
+
+  if (window.scene_model) {
+    cube = scene_model();
+  }
 
   demo.scenes = [
     // scene 1
@@ -155,20 +168,47 @@ function demo_init() {
       update: null,
       passes: [
         {
-          render_to: {color: [tex1], depth: depth_rb}, render: clear
+          render_to: {color: [tex1, tex2], depth: depth_rb}, render: clear
         },
         {
-          texture_inputs: [tex_image],
-          render_to: {color: [tex1], depth: depth_rb},
+          texture_inputs: [tex_bricks],
+          render_to: {color: [tex1, tex2], depth: depth_rb},
           update: function(scenes, scene, time) {
-            var mv = view([0.0, 0.0,-4.0], [0.0,0.0,0.0], [0.0, -1.0,0.0],
-                          [3.0, 0.0, 0.0], [0.0,0.0,0.0], [0.0, -1.0,0.0])(exp(time.scene_norm));
+            var mv = view([0.0, -10.0, 10.0], [0.0,0.0,0.0], [0.0, 0.0, 1.0],
+                          [10.0, 0.0, 3.0], [0.0,0.0,0.0], [0.0, 0.0, 1.0])(exp(time.scene_norm));
             var proj = perspective(75, 1.5, 0.5, 100.0)
             var mat = mat4_multiply(proj, mv);
             camera(scene.program, proj);
           },
           render: draw_mesh(cube),
-          program: texture_prog,
+          program: deferred_prog
+        },
+        {
+          texture_inputs: [tex1, tex2],
+          render: draw_quad,
+          program: show_deferred_prog
+        }
+      ]
+    },
+    {
+      duration: 10000,
+      update: null,
+      passes: [
+        {
+          render_to: {color: [tex1], depth: depth_rb}, render: clear
+        },
+        {
+          texture_inputs: [tex_paul],
+          render_to: {color: [tex1], depth: depth_rb},
+          update: function(scenes, scene, time) {
+            var mv = view([0.0, -10.0, 10.0], [0.0,0.0,0.0], [0.0, 0.0, 1.0],
+                          [10.0, 0.0, 3.0], [0.0,0.0,0.0], [0.0, 0.0, 1.0])(exp(time.scene_norm));
+            var proj = perspective(75, 1.5, 0.5, 100.0)
+            var mat = mat4_multiply(proj, mv);
+            camera(scene.program, proj);
+          },
+          render: draw_mesh(cube),
+          program: normals_prog
         },
         blur_pass(
           tex1, tex_half1,
@@ -203,7 +243,7 @@ function demo_init() {
         {
           texture_inputs: [tex1, blur1, blur2, blur3],
           render: draw_quad,
-          program: select4,
+          program: select4
         }
       ]
     },
@@ -215,13 +255,13 @@ function demo_init() {
           update: null,
           program: scene_1_1,
           render: draw_quad,
-          render_to: {color: [tex1]},
+          render_to: {color: [tex1]}
         },
         {
           texture_inputs: [tex1],
           update: function() {},
           render: draw_quad,
-          program: scene_1_2,
+          program: scene_1_2
           // no render_to, means render to screen
         }
       ]
@@ -233,12 +273,12 @@ function demo_init() {
         {
           program: mrt_1,
           render: draw_quad,
-          render_to: {color: [tex1, tex2]},
+          render_to: {color: [tex1, tex2]}
         },
         {
           texture_inputs: [tex2, tex1],
           render: draw_quad,
-          program: mrt_2,
+          program: mrt_2
           // no render_to, means render to screen
         }
       ]
@@ -255,15 +295,14 @@ function demo_init() {
       passes: [
         {
           program: scene_blue,
-          render: draw_quad,
-        },
+          render: draw_quad
+        }
       ]
     },
     {
       duration: 1000,
       passes: []
-    },
-
+    }
   ];
 
   demo.audio_source = demo.ac.createBufferSource();
