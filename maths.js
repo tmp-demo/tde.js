@@ -205,5 +205,5 @@ function sqrt(t) {
 }
 
 function exp(t) {
-  return Math.expm1(t * Math.LN2);
+  return Math.exp(t * Math.LN2) - 1;
 }
