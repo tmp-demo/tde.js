@@ -40,12 +40,14 @@ _enums = _enums = { }; //#opt
 _locations = [
   "position",
   "tex_coords",
+  "normals",
   "color",
 ];
 
 POS = 0;
 TEX_COORDS = 1;
-COLOR = 2;
+NORMALS = 2;
+COLOR = 3;
 
 function gl_error() {                                      //#opt
   var v = gl.getError();                                   //#opt
