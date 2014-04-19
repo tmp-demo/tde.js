@@ -67,9 +67,7 @@ function blur_pass(in_tex, out_tex, vec, res, duration) {
 }
 
 function demo_init() {
-  if (DEBUG) {
-    console.log("demo_init");
-  }
+  console.log("demo_init"); // #opt
 
   VS = gl.VERTEX_SHADER;
   FS = gl.FRAGMENT_SHADER;

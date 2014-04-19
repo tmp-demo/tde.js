@@ -3,9 +3,7 @@ var _loader_all_loaded = null;
 
 function loader_init(on_load) {
   if (_loader_resource_count==0) {
-    if (DEBUG) {
-      console.log("nothing to load");
-    }
+    console.log("nothing to load");    // #opt
     on_load();
   } else {
     _loader_all_loaded = on_load;
@@ -16,16 +14,12 @@ function load_resource(src, cb) {
   var xhr = new XMLHttpRequest();
   xhr.open("GET", src);
   xhr.onload = function() {
-    if (DEBUG) {
-      console.log("loaded: " + src);
-    }
+    console.log("loaded: " + src);     // #opt
     cb(xhr);
   };
-  if (DEBUG) {
-    xhr.onerror = function() {
-      alert("load_resource error "+src);
-    }
-  }
+  xhr.onerror = function() {           // #opt
+    alert("load_resource error "+src); // #opt
+  }                                    // #opt
   _loader_resource_count++
   xhr.send(null);
 }
@@ -41,19 +35,15 @@ function load_audio(url, cb) {
   var xhr = new XMLHttpRequest();
   xhr.open("GET", url);
   xhr.onload = function() {
-    if (DEBUG) {
-      console.log("loaded: " + url);
-    }
+    console.log("loaded: " + url);     // #opt
     demo.ac.decodeAudioData(xhr.response, function(data) {
       cb(data);
       resource_loaded();
     });
   };
-  if (DEBUG) {
-    xhr.onerror = function() {
-      alert("load_resource error "+src);
-    }
-  }
+  xhr.onerror = function() {           // #opt
+    alert("load_resource error "+src); // #opt
+  }                                    // #opt
   _loader_resource_count++
   xhr.responseType = "arraybuffer";
   xhr.send(null);
@@ -82,9 +72,7 @@ function load_image(url, cb) {
     cb(b);
     resource_loaded();
   }
-  if (DEBUG) {
-    image.onerror = function() {
-      alert("failed to load the image");
-    }
-  }
+  /*#opt*/image.onerror = function() {
+  /*#opt*/  alert("failed to load the image");
+  /*#opt*/}
 }
