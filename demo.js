@@ -58,7 +58,7 @@ function blur_pass(in_tex, out_tex, vec, res, duration) {
       gl.uniform2f(gl.getUniformLocation(pass.program, "direction"), dx, dy);
     },
     render: draw_quad,
-    program: dblur,
+    program: dblur
   }
   if (out_tex) {
     p.render_to = {color: [out_tex], w: res[0], h: res[1]};
@@ -153,7 +153,7 @@ function demo_init() {
   ], 5, [
     { location: POS, components: 3, stride: 32, offset: 0 },
     { location: NORMALS, components: 3, stride: 32, offset: 12 },
-    { location: TEX_COORDS, components: 2, stride: 32, offset: 24 },
+    { location: TEX_COORDS, components: 2, stride: 32, offset: 24 }
   ]);
 
   if (window.scene_model) {
@@ -180,12 +180,12 @@ function demo_init() {
             camera(scene.program, proj);
           },
           render: draw_mesh(cube),
-          program: deferred_prog,
+          program: deferred_prog
         },
         {
           texture_inputs: [tex1, tex2],
           render: draw_quad,
-          program: show_deferred_prog,
+          program: show_deferred_prog
         }
       ]
     },
@@ -207,7 +207,7 @@ function demo_init() {
             camera(scene.program, proj);
           },
           render: draw_mesh(cube),
-          program: normals_prog,
+          program: normals_prog
         },
         blur_pass(
           tex1, tex_half1,
@@ -242,7 +242,7 @@ function demo_init() {
         {
           texture_inputs: [tex1, blur1, blur2, blur3],
           render: draw_quad,
-          program: select4,
+          program: select4
         }
       ]
     },
@@ -254,13 +254,13 @@ function demo_init() {
           update: null,
           program: scene_1_1,
           render: draw_quad,
-          render_to: {color: [tex1]},
+          render_to: {color: [tex1]}
         },
         {
           texture_inputs: [tex1],
           update: function() {},
           render: draw_quad,
-          program: scene_1_2,
+          program: scene_1_2
           // no render_to, means render to screen
         }
       ]
@@ -272,12 +272,12 @@ function demo_init() {
         {
           program: mrt_1,
           render: draw_quad,
-          render_to: {color: [tex1, tex2]},
+          render_to: {color: [tex1, tex2]}
         },
         {
           texture_inputs: [tex2, tex1],
           render: draw_quad,
-          program: mrt_2,
+          program: mrt_2
           // no render_to, means render to screen
         }
       ]
@@ -294,15 +294,14 @@ function demo_init() {
       passes: [
         {
           program: scene_blue,
-          render: draw_quad,
-        },
+          render: draw_quad
+        }
       ]
     },
     {
       duration: 1000,
       passes: []
-    },
-
+    }
   ];
 
   demo.audio_source = demo.ac.createBufferSource();

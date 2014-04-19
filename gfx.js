@@ -7,7 +7,7 @@ function gl_init() {
   gl.viewport(0, 0, demo.w, demo.h);
   ext = {
     draw_buffers: gl.getExtension("WEBGL_draw_buffers"),
-    depth_textures: gl.getExtension("WEBGL_depth_texture"),
+    depth_textures: gl.getExtension("WEBGL_depth_texture")
   };
   /*#opt*/if (!ext.draw_buffers) {
   /*#opt*/  alert("WEBGL_draw_buffers not supported :(");
@@ -41,7 +41,7 @@ _locations = [
   "position",
   "tex_coords",
   "normals",
-  "color",
+  "color"
 ];
 
 POS = 0;
@@ -83,7 +83,7 @@ function create_geom(vertices, indices, comp_per_vertex, attrib_list) {
     ibo: ibo,
     num_indices: idx.length,
     components_per_vertex: comp_per_vertex,
-    attribs: attrib_list,
+    attribs: attrib_list
   };
 }
 
@@ -247,7 +247,7 @@ function render_scene(scene) {
   var t = {
     scene_norm: tsn,
     demo: td,
-    scene: ts,
+    scene: ts
   };
   if (scene.update) {
     console.log("scene.update");
