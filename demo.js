@@ -156,7 +156,9 @@ function demo_init() {
     { location: TEX_COORDS, components: 2, stride: 32, offset: 24 },
   ]);
 
-  cube = scene_model();
+  if (window.scene_model) {
+    cube = scene_model();
+  }
 
   demo.scenes = [
     // scene 1
