@@ -142,7 +142,7 @@ function shader_program(vs, fs) {
   return program;
 }
 
-function create_texture(width, height, format, image) {
+function create_texture(width, height, format, image, allow_repeat) {
   var image = image || null;
   var format = format || gl.RGBA;
   width = width || canvas.width;
@@ -154,14 +154,16 @@ function create_texture(width, height, format, image) {
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, texture);//this texture is used to store render output for post process.
 
+  var wrap = gl.CLAMP_TO_EDGE;
+  if (allow_repeat) { wrap = gl.REPEAT; }
 
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0,
                 format, gl.UNSIGNED_BYTE, image);
-  console.log(gl.getError());
+  console.log(gl.getError()); //#opt
   return texture;
 }
 
