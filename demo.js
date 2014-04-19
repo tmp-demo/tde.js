@@ -46,13 +46,14 @@ function view(eye1, target1, up1,  eye2, target2, up2) {
   }
 }
 
-function blur_pass(in_tex, out_tex, vec, res, duration) {
+function blur_pass(in_tex, out_tex, vec, res) {
   var p = {
     texture_inputs: [in_tex],
     update: function(_, pass, time) {
-      var dx = vec[0]/res[0];
-      var dy = vec[1]/res[1];
-      gl.uniform2f(gl.getUniformLocation(pass.program, "direction"), dx, dy);
+      var NB_TAPS = 10
+      var dx = vec[0] / NB_TAPS / res[0];
+      var dy = vec[1] / NB_TAPS / res[1];
+      gl.uniform2f(gl.getUniformLocation(pass.program, "step"), dx, dy);
     },
     render: draw_quad,
     program: dblur,
@@ -171,32 +172,32 @@ function demo_init() {
         },
         blur_pass(
           tex1, tex_half1,
-          [1.0, 0.0],
+          [10.0, 0.0],
           [400, 300]
         ),
         blur_pass(
           tex_half1, blur1,
-          [0.0, 1.0],
+          [0.0, 10.0],
           [400, 300]
         ),
         blur_pass(
           blur1, tex_half1,
-          [1.0, 0.0],
+          [10.0, 0.0],
           [400, 300]
         ),
         blur_pass(
           tex_half1, blur2,
-          [0.0, 1.0],
+          [0.0, 10.0],
           [400, 300]
         ),
         blur_pass(
           blur2, tex_half1,
-          [1.0, 0.0],
+          [10.0, 0.0],
           [400, 300]
         ),
         blur_pass(
           tex_half1, blur3,
-          [0.0, 1.0],
+          [0.0, 10.0],
           [400, 300]
         ),
         {
