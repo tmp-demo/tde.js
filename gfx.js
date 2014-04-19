@@ -148,7 +148,7 @@ function create_texture(width, height, format, image) {
   width = width || canvas.width;
   height = height || canvas.height;
   if (image) {
-    image = Uint8Array(image, 0, 0);
+    image = new Uint8Array(image, 0, 0);
   }
   var texture = gl.createTexture();
   gl.activeTexture(gl.TEXTURE0);
