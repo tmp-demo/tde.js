@@ -26,6 +26,8 @@ function prepare() {
   load_text("mrt_test_1.fs", function(data) { mrt_1_src = data; } );
   load_text("mrt_test_2.fs", function(data) { mrt_2_src = data; } );
   load_text("textured.fs", function(data) { texturing = data; } );
+  load_text("show_normals.fs", function(data) { fs_normals_src = data; } );
+  load_text("show_tex_coords.fs", function(data) { fs_texcoords_src = data; } );
   load_text("dblur.fs", function(data) { dblur_src = data; } );
   load_text("select4.fs", function(data) { select_src = data; } );
   load_audio("z.ogg", function(data) { zogg = data });
@@ -75,10 +77,14 @@ function demo_init() {
   mrt_fs_1 = compile_shader(mrt_1_src, FS);
   mrt_fs_2 = compile_shader(mrt_2_src, FS);
   texturing_fs = compile_shader(texturing, FS);
+  normals_fs = compile_shader(fs_normals_src, FS);
+  texcoords_fs = compile_shader(fs_texcoords_src, FS);
   dblur_fs = compile_shader(dblur_src, FS);
   select_fs = compile_shader(select_src, FS);
 
-  cube_prog = shader_program(vs_basic3d, texturing_fs);
+  texture_prog = shader_program(vs_basic3d, texturing_fs);
+  normals_prog = shader_program(vs_basic3d, normals_fs);
+  texcoords_prog = shader_program(vs_basic3d, texcoords_fs);
   dblur = shader_program(vs_basic, dblur_fs);
   select4 = shader_program(vs_basic, select_fs);
   scene_1_1 = shader_program(vs_basic, fs_intro1);
@@ -98,36 +104,36 @@ function demo_init() {
   tex_image = create_texture(image_paul.width, image_paul.height, gl.RGBA, image_paul.data);
 
   cube = create_geom([
-    // Front face     | tex coords
-    -1.0, -1.0,  1.0,   1.0, 0.0,
-     1.0, -1.0,  1.0,   1.0, 1.0,
-     1.0,  1.0,  1.0,   0.0, 1.0,
-    -1.0,  1.0,  1.0,   0.0, 0.0,
+    // Front face     | normals        | tex coords
+    -1.0, -1.0,  1.0,   0.0, 0.0, 1.0,   1.0, 0.0,
+     1.0, -1.0,  1.0,   0.0, 0.0, 1.0,   1.0, 1.0,
+     1.0,  1.0,  1.0,   0.0, 0.0, 1.0,   0.0, 1.0,
+    -1.0,  1.0,  1.0,   0.0, 0.0, 1.0,   0.0, 0.0,
     // Back face
-    -1.0, -1.0, -1.0,   1.0, 0.0,
-    -1.0,  1.0, -1.0,   1.0, 1.0,
-     1.0,  1.0, -1.0,   0.0, 1.0,
-     1.0, -1.0, -1.0,   0.0, 0.0,
+    -1.0, -1.0, -1.0,   0.0, 0.0, -1.0,  1.0, 0.0,
+    -1.0,  1.0, -1.0,   0.0, 0.0, -1.0,  1.0, 1.0,
+     1.0,  1.0, -1.0,   0.0, 0.0, -1.0,  0.0, 1.0,
+     1.0, -1.0, -1.0,   0.0, 0.0, -1.0,  0.0, 0.0,
     // Top face
-    -1.0,  1.0, -1.0,   1.0, 0.0,
-    -1.0,  1.0,  1.0,   1.0, 1.0,
-     1.0,  1.0,  1.0,   0.0, 1.0,
-     1.0,  1.0, -1.0,   0.0, 0.0,
+    -1.0,  1.0, -1.0,   0.0, 1.0, 1.0,   1.0, 0.0,
+    -1.0,  1.0,  1.0,   0.0, 1.0, 1.0,   1.0, 1.0,
+     1.0,  1.0,  1.0,   0.0, 1.0, 1.0,   0.0, 1.0,
+     1.0,  1.0, -1.0,   0.0, 1.0, 1.0,   0.0, 0.0,
     // Bottom face
-    -1.0, -1.0, -1.0,   1.0, 0.0,
-     1.0, -1.0, -1.0,   1.0, 1.0,
-     1.0, -1.0,  1.0,   0.0, 1.0,
-    -1.0, -1.0,  1.0,   0.0, 0.0,
+    -1.0, -1.0, -1.0,   0.0, -1.0, 1.0,  1.0, 0.0,
+     1.0, -1.0, -1.0,   0.0, -1.0, 1.0,  1.0, 1.0,
+     1.0, -1.0,  1.0,   0.0, -1.0, 1.0,  0.0, 1.0,
+    -1.0, -1.0,  1.0,   0.0, -1.0, 1.0,  0.0, 0.0,
     // Right face
-     1.0, -1.0, -1.0,   1.0, 0.0,
-     1.0,  1.0, -1.0,   1.0, 1.0,
-     1.0,  1.0,  1.0,   0.0, 1.0,
-     1.0, -1.0,  1.0,   0.0, 0.0,
+     1.0, -1.0, -1.0,   1.0, 0.0, 1.0,   1.0, 0.0,
+     1.0,  1.0, -1.0,   1.0, 0.0, 1.0,   1.0, 1.0,
+     1.0,  1.0,  1.0,   1.0, 0.0, 1.0,   0.0, 1.0,
+     1.0, -1.0,  1.0,   1.0, 0.0, 1.0,   0.0, 0.0,
     // Left face
-    -1.0, -1.0, -1.0,   1.0, 0.0,
-    -1.0, -1.0,  1.0,   1.0, 1.0,
-    -1.0,  1.0,  1.0,   0.0, 1.0,
-    -1.0,  1.0, -1.0,   0.0, 0.0
+    -1.0, -1.0, -1.0,  -1.0, 0.0, 1.0,   1.0, 0.0,
+    -1.0, -1.0,  1.0,  -1.0, 0.0, 1.0,   1.0, 1.0,
+    -1.0,  1.0,  1.0,  -1.0, 0.0, 1.0,   0.0, 1.0,
+    -1.0,  1.0, -1.0,  -1.0, 0.0, 1.0,   0.0, 0.0
   ],[
     0,  1,  2,    0,  2,  3,  // Front face
     4,  5,  6,    4,  6,  7,  // Back face
@@ -136,8 +142,9 @@ function demo_init() {
     16, 17, 18,   16, 18, 19, // Right face
     20, 21, 22,   20, 22, 23  // Left face
   ], 5, [
-    { location: POS, components: 3, stride: 20, offset: 0 },
-    { location: TEX_COORDS, components: 2, stride: 20, offset: 12 }
+    { location: POS, components: 3, stride: 32, offset: 0 },
+    { location: NORMALS, components: 3, stride: 32, offset: 12 },
+    { location: TEX_COORDS, components: 2, stride: 32, offset: 24 },
   ]);
 
   demo.scenes = [
@@ -160,7 +167,7 @@ function demo_init() {
             camera(scene.program, proj);
           },
           render: draw_mesh(cube),
-          program: cube_prog,
+          program: texture_prog,
         },
         blur_pass(
           tex1, tex_half1,
