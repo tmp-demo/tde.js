@@ -27,6 +27,7 @@ function prepare() {
   load_text("mrt_test_2.fs", function(data) { mrt_2_src = data; } );
   load_text("textured.fs", function(data) { texturing = data; } );
   load_text("dblur.fs", function(data) { dblur_src = data; } );
+  load_text("select4.fs", function(data) { select_src = data; } );
   load_audio("z.ogg", function(data) { zogg = data });
 
   load_image("paul.jpg", function(data) { image_paul = data; });
@@ -41,6 +42,23 @@ function view(eye1, target1, up1,  eye2, target2, up2) {
     look_at(eye, target, up, mat);
     return mat;
   }
+}
+
+function blur_pass(in_tex, out_tex, vec, res, duration) {
+  var p = {
+    texture_inputs: [in_tex],
+    update: function(_, pass, time) {
+      var dx = vec[0]/res[0];
+      var dy = vec[1]/res[1];
+      gl.uniform2f(gl.getUniformLocation(pass.program, "direction"), dx, dy);
+    },
+    render: draw_quad,
+    program: dblur,
+  }
+  if (out_tex) {
+    p.render_to = {color: [out_tex], w: res[0], h: res[1]};
+  }
+  return p;
 }
 
 function demo_init() {
@@ -58,9 +76,11 @@ function demo_init() {
   mrt_fs_2 = compile_shader(mrt_2_src, FS);
   texturing_fs = compile_shader(texturing, FS);
   dblur_fs = compile_shader(dblur_src, FS);
+  select_fs = compile_shader(select_src, FS);
 
   cube_prog = shader_program(vs_basic3d, texturing_fs);
   dblur = shader_program(vs_basic, dblur_fs);
+  select4 = shader_program(vs_basic, select_fs);
   scene_1_1 = shader_program(vs_basic, fs_intro1);
   scene_1_2 = shader_program(vs_basic, fs_intro2);
   scene_blue = shader_program(vs_basic, fs_blue);
@@ -68,7 +88,10 @@ function demo_init() {
   mrt_2 = shader_program(vs_basic, mrt_fs_2);
 
   depth_rb = create_depth_buffer(canvas.width, canvas.height);
-  tex_half = create_texture(canvas.width/2, canvas.height/2);
+  blur1 = create_texture(canvas.width/2, canvas.height/2);
+  blur2 = create_texture(canvas.width/2, canvas.height/2);
+  blur3 = create_texture(canvas.width/2, canvas.height/2);
+  tex_half1 = create_texture(canvas.width/2, canvas.height/2);
   depth_half = create_depth_buffer(canvas.width/2,canvas.height/2);
   tex1 = create_texture();
   tex2 = create_texture();
@@ -130,40 +153,53 @@ function demo_init() {
           texture_inputs: [tex_image],
           render_to: {color: [tex1], depth: depth_rb},
           update: function(scenes, scene, time) {
-            var mv = view([0.0,0.0,-5.0], [0.0,0.0,0.0], [0.0, -1.0,0.0],
-                          [6.0, 0.0, 0.0], [0.0,0.0,0.0], [0.0, -1.0,0.0])(exp(time.scene_norm));
-            var proj = perspective(75, 1.5, 1.0, 100.0)
+            var mv = view([0.0, 0.0,-4.0], [0.0,0.0,0.0], [0.0, -1.0,0.0],
+                          [3.0, 0.0, 0.0], [0.0,0.0,0.0], [0.0, -1.0,0.0])(exp(time.scene_norm));
+            var proj = perspective(75, 1.5, 0.5, 100.0)
             var mat = mat4_multiply(proj, mv);
             camera(scene.program, proj);
           },
           render: draw_mesh(cube),
           program: cube_prog,
         },
+        blur_pass(
+          tex1, tex_half1,
+          [1.0, 0.0],
+          [400, 300]
+        ),
+        blur_pass(
+          tex_half1, blur1,
+          [0.0, 1.0],
+          [400, 300]
+        ),
+        blur_pass(
+          blur1, tex_half1,
+          [1.0, 0.0],
+          [400, 300]
+        ),
+        blur_pass(
+          tex_half1, blur2,
+          [0.0, 1.0],
+          [400, 300]
+        ),
+        blur_pass(
+          blur2, tex_half1,
+          [1.0, 0.0],
+          [400, 300]
+        ),
+        blur_pass(
+          tex_half1, blur3,
+          [0.0, 1.0],
+          [400, 300]
+        ),
         {
-          texture_inputs: [tex1],
-          render_to: {color: [tex_half], w:400, h: 300},
-          update: function(_, pass, time) {
-            var dx = 1.0/canvas.width;
-            var dy = 0.0;
-            gl.uniform2f(gl.getUniformLocation(pass.program, "direction"), dx, dy);
-          },
+          texture_inputs: [tex1, blur1, blur2, blur3],
           render: draw_quad,
-          program: dblur,
-        },
-        {
-          texture_inputs: [tex_half],
-          update: function(_, pass, time) {
-            var dx = 0.0;
-            var dy = 1.0/canvas.height;
-            gl.uniform2f(gl.getUniformLocation(pass.program, "direction"), dx, dy);
-          },
-          render: draw_quad,
-          program: dblur,
+          program: select4,
         }
       ]
     },
     {
-      name:"intro", //#opt
       duration: 10000,
       update: null,
       passes: [
