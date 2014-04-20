@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # reads the file passed as argument and writes it into stdout
-# omitting lines that contain #opt
+# omitting lines that contain #debug
 
 import sys
 
@@ -16,9 +16,13 @@ else:
 	output_file = sys.stdout
 
 lines = input_file.readlines()
-
+debug = 0
 for line in lines:
-	if not "#opt" in line:
+	if "#debug{{" in line:
+		debug = 1
+	if "#debug}}" in line:
+		debug = 0
+	if debug == 0 and not "#debug" in line:
 		output_file.write(line)
 
 input_file.close()

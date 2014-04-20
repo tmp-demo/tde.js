@@ -9,12 +9,14 @@ function gl_init() {
     draw_buffers: gl.getExtension("WEBGL_draw_buffers"),
     depth_textures: gl.getExtension("WEBGL_depth_texture")
   };
-  /*#opt*/if (!ext.draw_buffers) {
-  /*#opt*/  alert("WEBGL_draw_buffers not supported :(");
-  /*#opt*/}
-  /*#opt*/if (!ext.depth_textures) {
-  /*#opt*/  alert("WEBGL_depth_texture not supported :(");
-  /*#opt*/}
+  // #debug{{
+  if (!ext.draw_buffers) {
+    alert("WEBGL_draw_buffers not supported :(");
+  }
+  if (!ext.depth_textures) {
+    alert("WEBGL_depth_texture not supported :(");
+  }
+  // #debug}}
 
   var buffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -25,15 +27,17 @@ function gl_init() {
   gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
   _quad_vbo = buffer;
   // get readable strings for error enum values
-  for (var propertyName in gl) {               //#opt
-    if (typeof gl[propertyName] == 'number') { //#opt
-      _enums[gl[propertyName]] = propertyName; //#opt
-    }                                          //#opt
-  }                                            //#opt
+  // #debug{{
+  for (var propertyName in gl) {
+    if (typeof gl[propertyName] == 'number') {
+      _enums[gl[propertyName]] = propertyName;
+    }
+  }
+  // #debug{{
 }
 
 _quad_vbo = null;
-_enums = _enums = { }; //#opt
+_enums = _enums = { }; // #debug
 
 _locations = [
   "position",
@@ -47,12 +51,14 @@ TEX_COORDS = 1;
 NORMALS = 2;
 COLOR = 3;
 
-function gl_error() {                                      //#opt
-  var v = gl.getError();                                   //#opt
-  var name = _enums[v];                                    //#opt
-  return (name !== undefined) ? ("gl." + name) :           //#opt
-      ("/*UNKNOWN WebGL ENUM*/ 0x" + v.toString(16) + ""); //#opt
-}                                                          //#opt
+// #debug{{
+function gl_error() {
+  var v = gl.getError();
+  var name = _enums[v];
+  return (name !== undefined) ? ("gl." + name) :
+      ("/*UNKNOWN WebGL ENUM*/ 0x" + v.toString(16) + "");
+}
+// #debug}}
 
 function gfx_init() {
   // replace the render passes' texture arrays by actual frame buffer objects
@@ -118,9 +124,11 @@ function compile_shader(txt_src, type) {
   var shader = gl.createShader(type);
   gl.shaderSource(shader, txt_src);
   gl.compileShader(shader);
-  if ( !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {             //#opt
-    alert("Shader compilation failed: " + gl.getShaderInfoLog(shader)); //#opt
-  }                                                                     //#opt
+  // #debug{{
+  if ( !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    alert("Shader compilation failed: " + gl.getShaderInfoLog(shader));
+  }
+  // #debug}}
   return shader;
 }
 
@@ -132,11 +140,13 @@ function shader_program(vs, fs) {
     gl.bindAttribLocation(program, i, _locations[i]);
   }
   gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {       //#opt
-    alert("Program link error: " +                              //#opt
-          gl.getProgramParameter(program, gl.VALIDATE_STATUS) + //#opt
-          "\nERROR: " + gl_error());                            //#opt
-  }                                                             //#opt
+  // #debug{{
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    alert("Program link error: " +
+          gl.getProgramParameter(program, gl.VALIDATE_STATUS) +
+          "\nERROR: " + gl_error());
+  }
+  // #debug}}
   return program;
 }
 
@@ -150,7 +160,7 @@ function create_texture(width, height, format, image, allow_repeat) {
   }
   var texture = gl.createTexture();
   gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D, texture);//this texture is used to store render output for post process.
+  gl.bindTexture(gl.TEXTURE_2D, texture);
 
   var wrap = gl.CLAMP_TO_EDGE;
   if (allow_repeat) { wrap = gl.REPEAT; }
@@ -161,7 +171,7 @@ function create_texture(width, height, format, image, allow_repeat) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0,
                 format, gl.UNSIGNED_BYTE, image);
-  console.log(gl.getError()); //#opt
+  console.log(gl.getError()); // #debug
   return texture;
 }
 
@@ -179,19 +189,21 @@ function color_attachment(i) {
   return ext.draw_buffers.COLOR_ATTACHMENT0_WEBGL+i;
 }
 
-/*#opt*/function frame_buffer_error(e) {
-/*#opt*/  if (e == gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT) {
-/*#opt*/      return "FRAMEBUFFER_INCOMPLETE_ATTACHMENT";}
-/*#opt*/  if (e == gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) {
-/*#opt*/      return "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";}
-/*#opt*/  if (e == gl.FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER) {
-/*#opt*/      return "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";}
-/*#opt*/  if (e == gl.FRAMEBUFFER_UNSUPPORTED) {
-/*#opt*/      return "FRAMEBUFFER_UNSUPPORTED";}
-/*#opt*/  if (e == gl.FRAMEBUFFER_INCOMPLETE_MULTISAMPLE) {
-/*#opt*/      return "FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";}
-/*#opt*/  return "unknown framebuffer error";
-/*#opt*/}
+// #debug{{
+function frame_buffer_error(e) {
+  if (e == gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT) {
+      return "FRAMEBUFFER_INCOMPLETE_ATTACHMENT";}
+  if (e == gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) {
+      return "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";}
+  if (e == gl.FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER) {
+      return "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";}
+  if (e == gl.FRAMEBUFFER_UNSUPPORTED) {
+      return "FRAMEBUFFER_UNSUPPORTED";}
+  if (e == gl.FRAMEBUFFER_INCOMPLETE_MULTISAMPLE) {
+      return "FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";}
+  return "unknown framebuffer error";
+}
+// #debug}}
 
 function frame_buffer(target) {
   var fbo = gl.createFramebuffer();
@@ -209,10 +221,12 @@ function frame_buffer(target) {
 
   ext.draw_buffers.drawBuffersWEBGL(buffers);
 
-  var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);         //#opt
-  if (status != gl.FRAMEBUFFER_COMPLETE) {                        //#opt
-    alert("incomplete framebuffer "+frame_buffer_error(status));  //#opt
-  }                                                               //#opt
+  // #debug{{
+  var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+  if (status != gl.FRAMEBUFFER_COMPLETE) {
+    alert("incomplete framebuffer "+frame_buffer_error(status));
+  }
+  // #debug}}
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   return fbo;
 }

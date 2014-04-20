@@ -17,7 +17,6 @@ demo = {
   audiocontext: null
 };
 
-
 function main_loop() {
   if (demo.play_state == demo.PLAYING){
     if (demo.current_time <= demo.end_time) {
@@ -27,18 +26,19 @@ function main_loop() {
       render_scene(demo.current_scene);
       requestAnimationFrame(main_loop);
 
+      // #debug{{
       if (demo.recording && render_index++ != 0) {
         recordFrame(cvs);
       }
+      // #debug}}
       demo.playState = demo.PLAYING;
       update_text();
     } else {
-      console.log("demo ended"); //#opt
+      console.log("demo ended"); //#debug
       demo.play_state = demo.ENDED;
       if (demo.recording) {
         stichFramesForDownload();
       }
-      //bs.stop(0);
     }
   }
 }
@@ -74,6 +74,6 @@ function update_text() {
         //add it !
         ct.instance = addText(ct.text, ct.top, ct.left, ct.classname);
       }
-    }    
+    }
   }
 }

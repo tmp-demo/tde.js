@@ -58,7 +58,7 @@ function blur_pass(in_tex, out_tex, vec, res) {
 }
 
 function demo_init() {
-  console.log("demo_init"); // #opt
+  console.log("demo_init"); // #debug
 
   VS = gl.VERTEX_SHADER;
   FS = gl.FRAGMENT_SHADER;
@@ -264,7 +264,7 @@ function demo_init() {
       ]
     },
     {
-      name:"mrt", //#opt
+      name:"mrt", //#debug
       duration: 1000,
       passes: [
         {
@@ -287,7 +287,7 @@ function demo_init() {
     },
     // scene 2
     {
-      name:"blue", //#opt
+      name:"blue", //#debug
       duration: 10000,
       passes: [
         {
