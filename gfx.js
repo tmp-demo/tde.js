@@ -33,7 +33,7 @@ function gl_init() {
       _enums[gl[propertyName]] = propertyName;
     }
   }
-  // #debug{{
+  // #debug}}
 }
 
 _quad_vbo = null;

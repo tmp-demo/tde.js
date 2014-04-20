@@ -35,7 +35,7 @@ function resource_loaded() {
 
 function load_audio(url, cb) {
   var xhr = new XMLHttpRequest();
-  xhr.open("GET", url);
+  xhr.open("GET", "assets/"+url);
   xhr.onload = function() {
     console.log("loaded: " + url); // #debug
     demo.ac.decodeAudioData(xhr.response, function(data) {
@@ -63,7 +63,7 @@ function load_text(url, cb) {
 function load_image(url, cb) {
   var image = new Image();
   _loader_resource_count++;
-  image.src = url;
+  image.src = "assets/"+url;
   image.onload = function() {
     var cvs = document.createElement("canvas");
     cvs.width = image.width;
