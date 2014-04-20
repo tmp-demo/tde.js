@@ -63,7 +63,7 @@ AudioAnalyser.prototype.getRMS = function() {
 }
 
 function init_audio(demo) {
-  if (window.AudioContext) {
+  if (AudioContext) {
     demo.ac = new AudioContext();
   } else {
     demo.ac = new webkitAudioContext();
