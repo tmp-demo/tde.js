@@ -1,6 +1,11 @@
 
 function gl_init() {
-  canvas = document.getElementsByTagName("canvas")[0];
+  var blah = document.createElement("canvas");
+  blah.width = 800;
+  blah.width = 600;
+  var blah = document.body.appendChild(blah);
+  canvas = blah;// document.getElementsByTagName("canvas")[0];
+  blah.id = "renderer";
   gl = canvas.getContext("experimental-webgl");
   canvas.width = demo.w;
   canvas.height = demo.h;

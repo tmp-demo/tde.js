@@ -12,8 +12,6 @@ function $$(s) {
 scenesShortcuts = {"97":0, "122":1,"101":2, "114":3,"116":4,"116":5,"121":6,"117":7,"105":8,"111":9};
 scenesLoopShortcuts = {"113":0, "115":1,"100":2, "102":3,"103":4,"104":5,"106":6,"107":7,"108":8,"109":9};
 
-demo.editor = true;
-
 function editior_init() {
   console.log("edition_init");
     seeker = document.getElementById("seeker");
@@ -22,6 +20,10 @@ function editior_init() {
       seeker.value = e.target.value;
       demo.looping = false;
     });
+
+    var canvas_tag = document.getElementById("renderer");
+    canvas_tag.parentNode.removeChild(canvas_tag);
+    document.querySelector(".wrapper").appendChild(canvas_tag);
 
     var split = document.URL.split('?');
     for (var i=0; i<split.length; ++i) {

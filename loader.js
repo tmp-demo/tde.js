@@ -1,5 +1,5 @@
-var _loader_resource_count = 0;
-var _loader_all_loaded = null;
+_loader_resource_count = 0;
+_loader_all_loaded = null;
 
 function loader_init(on_load) {
   if (_loader_resource_count==0) {

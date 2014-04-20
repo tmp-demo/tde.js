@@ -53,7 +53,9 @@ function main() {
     gfx_init();
     time_init();
 
-    if (demo.editor) { editior_init(); }
+    // #debug{{
+    if (window.editior_init) { editior_init(); }
+    // #debug}}
 
     demo.audio_source.start(0);
     main_loop();

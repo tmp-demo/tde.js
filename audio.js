@@ -63,11 +63,11 @@ AudioAnalyser.prototype.getRMS = function() {
 }
 
 function init_audio(demo) {
-  if (window.AudioContext) {
+  //if (window.AudioContext) {
     demo.ac = new AudioContext();
-  } else {
-    demo.ac = new webkitAudioContext();
-  }
+  //} else {
+  //  demo.ac = new webkitAudioContext();
+  //}
 
   // everything gets connected to the AnayserNode for obvious reasons
   demo.audio_sink = demo.ac.createAnalyser();
