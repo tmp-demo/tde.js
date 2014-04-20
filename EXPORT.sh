@@ -29,7 +29,8 @@ if [ ! -f tools/compiler.jar ]; then
 fi
 
 echo " -- running the clojure compiler..."
-java -jar tools/compiler.jar --js=./export/demo.js --js_output_file=./export/demo_min.js --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./export/externs
+#java -jar tools/compiler.jar --js=./export/demo.js --js_output_file=./export/demo_min.js --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./export/externs
+java -jar tools/compiler.jar --js=./export/demo.js --js_output_file=./export/demo_min.js --externs ./export/externs
 
 if [ ! -f tools/pnginator.rb ]; then
     echo " -- tools/pnginator.rb not found, now downloading it..."
