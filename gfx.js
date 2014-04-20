@@ -1,12 +1,12 @@
 
 function gl_init() {
-  document.firstChild.remove();
-  var c = document.createElement("canvas");
-  document.body.appendChild(c);
-  c.id = "renderer";
-  gl = c.getContext("experimental-webgl");
-  c.width = demo.w;
-  c.height = demo.h;
+  document.body.innerHTML = "";
+  canvas = document.createElement("canvas");
+  document.body.appendChild(canvas);
+  canvas.id = "renderer";
+  gl = canvas.getContext("experimental-webgl");
+  canvas.width = demo.w;
+  canvas.height = demo.h;
 
   gl.viewport(0, 0, demo.w, demo.h);
   ext = {
