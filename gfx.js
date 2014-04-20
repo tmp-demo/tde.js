@@ -1,14 +1,13 @@
 
 function gl_init() {
-  var blah = document.createElement("canvas");
-  blah.width = 800;
-  blah.width = 600;
-  var blah = document.body.appendChild(blah);
-  canvas = blah;// document.getElementsByTagName("canvas")[0];
-  blah.id = "renderer";
-  gl = canvas.getContext("experimental-webgl");
-  canvas.width = demo.w;
-  canvas.height = demo.h;
+  document.firstChild.remove();
+  var c = document.createElement("canvas");
+  document.body.appendChild(c);
+  c.id = "renderer";
+  gl = c.getContext("experimental-webgl");
+  c.width = demo.w;
+  c.height = demo.h;
+
   gl.viewport(0, 0, demo.w, demo.h);
   ext = {
     draw_buffers: gl.getExtension("WEBGL_draw_buffers"),
