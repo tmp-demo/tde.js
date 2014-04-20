@@ -32,6 +32,7 @@ function prepare() {
   load_text("select4.fs", function(data) { select_src = data; } );
   load_text("deferred.fs", function(data) { deferred_src = data; } );
   load_text("show_deferred.fs", function(data) { show_deferred_src = data; } );
+  load_text("post_test.fs", function(data) { post_test_src = data; } );
   load_audio("z.ogg", function(data) { zogg = data });
 
   load_image("paul.jpg", function(data) { image_paul = data; });
@@ -87,9 +88,11 @@ function demo_init() {
   texcoords_fs = compile_shader(fs_texcoords_src, FS);
   dblur_fs = compile_shader(dblur_src, FS);
   select_fs = compile_shader(select_src, FS);
+  post_fs = compile_shader(post_test_src, FS);
 
   deferred_prog = shader_program(vs_basic3d, deferred_fs);
   show_deferred_prog = shader_program(vs_basic, show_deferred_fs);
+  post_misc_prog = shader_program(vs_basic, post_fs);
   textured_prog = shader_program(vs_basic3d, texturing_fs);
   normals_prog = shader_program(vs_basic3d, normals_fs);
   texcoords_prog = shader_program(vs_basic3d, texcoords_fs);
