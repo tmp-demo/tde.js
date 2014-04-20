@@ -1,0 +1,52 @@
+function AudioContext() {}
+
+AudioContext.prototype.destination = 1;
+AudioContext.prototype.sampleRate = 1;
+AudioContext.prototype.currentTime = 1;
+AudioContext.prototype.listener = 1;
+
+AudioContext.prototype.createBuffer = function (numberOfChannels, length, sampleRate) {}
+AudioContext.prototype.decodeAudioData = function (audioData, successCallback, errorCallback) {}
+AudioContext.prototype.createBufferSource = function () {}
+AudioContext.prototype.createMediaElementSource = function (mediaElement) {}
+AudioContext.prototype.createMediaStreamSource = function (mediaStream) {}
+AudioContext.prototype.createMediaStreamDestination = function () {}
+AudioContext.prototype.createScriptProcessor = function (bufferSize, numberOfInputChannels, numberOfOutputChannels) {}
+AudioContext.prototype.createAnalyser = function () {}
+AudioContext.prototype.createGain = function () {}
+AudioContext.prototype.createDelay = function (maxDelayTime) {}
+AudioContext.prototype.createBiquadFilter = function () {}
+AudioContext.prototype.createWaveShaper = function () {}
+AudioContext.prototype.createPanner = function () {}
+AudioContext.prototype.createConvolver = function () {}
+AudioContext.prototype.createChannelSplitter = function (numberOfOutputs) {}
+AudioContext.prototype.createChannelMerger = function (numberOfInputs) {}
+AudioContext.prototype.createDynamicsCompressor = function () {}
+AudioContext.prototype.createOscillator = function () {}
+AudioContext.prototype.createPeriodicWave = function (real, imag) {}
+
+function AnalyserNode() {}
+
+AnalyserNode.prototype.connect = function (foo) {};
+AnalyserNode.prototype.getFloatFrequencyData = function (array) {};
+AnalyserNode.prototype.getByteFrequencyData = function (array) {};
+AnalyserNode.prototype.getFloatTimeDomainData = function (array) {};
+AnalyserNode.prototype.getByteTimeDomainData = function (array) {};
+AnalyserNode.prototype.fftSize = 1;
+AnalyserNode.prototype.frequencyBinCount = 1;
+AnalyserNode.prototype.minDecibels = 1;
+AnalyserNode.prototype.maxDecibels = 1;
+AnalyserNode.prototype.smoothingTimeConstant = 1;
+
+function AudioBufferSourceNode() {}
+
+AudioBufferSourceNode.prototype.connect = function (foo) {};
+AudioBufferSourceNode.prototype.buffer = 1;
+AudioBufferSourceNode.prototype.playbackRate = 1;
+AudioBufferSourceNode.prototype.loop = 1;
+AudioBufferSourceNode.prototype.loopStart = 1;
+AudioBufferSourceNode.prototype.loopEnd = 1;
+AudioBufferSourceNode.start = function(when,offset,duration) {};
+AudioBufferSourceNode.stop = function(when) {};
+AudioBufferSourceNode.onended = 1;
+
