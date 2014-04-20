@@ -39,24 +39,14 @@ function prepare() {
   load_image("bricks.png", function(data) { image_bricks = data; });
 }
 
-function view(eye1, target1, up1,  eye2, target2, up2) {
-  return function(t) {
-    var eye = mix3(eye1, eye2, t);
-    var target = mix3(target1, target2, t);
-    var up = mix3(up1, up2, t);
-    var mat = new Float32Array(16);
-    look_at(eye, target, up, mat);
-    return mat;
-  }
-}
-
-function blur_pass(in_tex, out_tex, vec, res, duration) {
+function blur_pass(in_tex, out_tex, vec, res) {
   var p = {
     texture_inputs: [in_tex],
     update: function(_, pass, time) {
-      var dx = vec[0]/res[0];
-      var dy = vec[1]/res[1];
-      gl.uniform2f(gl.getUniformLocation(pass.program, "direction"), dx, dy);
+      var NB_TAPS = 10
+      var dx = vec[0] / NB_TAPS / res[0];
+      var dy = vec[1] / NB_TAPS / res[1];
+      gl.uniform2f(gl.getUniformLocation(pass.program, "step"), dx, dy);
     },
     render: draw_quad,
     program: dblur
@@ -163,6 +153,11 @@ function demo_init() {
     cube = scene_model();
   }
 
+  var cameraPosition = vec3.create()
+  var viewMatrix = mat4.create()
+  var projectionMatrix = mat4.create()
+  var viewProjectionMatrix = mat4.create()
+  
   demo.scenes = [
     // scene 1
     {
@@ -176,11 +171,11 @@ function demo_init() {
           texture_inputs: [tex_bricks],
           render_to: {color: [tex1, tex2], depth: depth_rb},
           update: function(scenes, scene, time) {
-            var mv = view([0.0, -10.0, 10.0], [0.0,0.0,0.0], [0.0, 0.0, 1.0],
-                          [10.0, 0.0, 3.0], [0.0,0.0,0.0], [0.0, 0.0, 1.0])(exp(time.scene_norm));
-            var proj = perspective(75, 1.5, 0.5, 100.0)
-            var mat = mat4_multiply(proj, mv);
-            camera(scene.program, proj);
+			vec3.lerp(cameraPosition, [5.0, -2.0, 5.0], [20.0, 0.0, 3.0], time.scene_norm);
+			mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
+            mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
+            mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
+            camera(scene.program, viewProjectionMatrix);
           },
           render: draw_mesh(cube),
           program: deferred_prog
@@ -203,43 +198,43 @@ function demo_init() {
           texture_inputs: [tex_paul],
           render_to: {color: [tex1], depth: depth_rb},
           update: function(scenes, scene, time) {
-            var mv = view([0.0, -10.0, 10.0], [0.0,0.0,0.0], [0.0, 0.0, 1.0],
-                          [10.0, 0.0, 3.0], [0.0,0.0,0.0], [0.0, 0.0, 1.0])(exp(time.scene_norm));
-            var proj = perspective(75, 1.5, 0.5, 100.0)
-            var mat = mat4_multiply(proj, mv);
-            camera(scene.program, proj);
+			vec3.lerp(cameraPosition, [0.0, -10.0, 10.0], [10.0, 0.0, 3.0], time.scene_norm);
+			mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
+            mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
+            mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
+            camera(scene.program, viewProjectionMatrix);
           },
           render: draw_mesh(cube),
           program: normals_prog
         },
         blur_pass(
           tex1, tex_half1,
-          [1.0, 0.0],
+          [10.0, 0.0],
           [400, 300]
         ),
         blur_pass(
           tex_half1, blur1,
-          [0.0, 1.0],
+          [0.0, 10.0],
           [400, 300]
         ),
         blur_pass(
           blur1, tex_half1,
-          [1.0, 0.0],
+          [10.0, 0.0],
           [400, 300]
         ),
         blur_pass(
           tex_half1, blur2,
-          [0.0, 1.0],
+          [0.0, 10.0],
           [400, 300]
         ),
         blur_pass(
           blur2, tex_half1,
-          [1.0, 0.0],
+          [10.0, 0.0],
           [400, 300]
         ),
         blur_pass(
           tex_half1, blur3,
-          [0.0, 1.0],
+          [0.0, 10.0],
           [400, 300]
         ),
         {

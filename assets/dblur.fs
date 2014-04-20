@@ -1,15 +1,15 @@
 precision lowp float;
-uniform vec2  direction;
+uniform vec2 step;
 uniform sampler2D texture_0;
 varying vec2 v_tex_coords;
 
-#define radius 10.0
+#define NB_TAPS 10.0
 
 void main() {
-  vec2 p = v_tex_coords - direction * radius / 2.0;
+  vec2 p = v_tex_coords - step * NB_TAPS / 2.0;
   vec4 c = vec4(0.0, 0.0, 0.0, 0.0);
-  for (int i = 0; i < int(radius); ++i) {
-  	c = c + texture2D(texture_0, p + float(i) * direction);
+  for (int i = 0; i < int(NB_TAPS); ++i) {
+  	c = c + texture2D(texture_0, p + float(i) * step);
   }
-  gl_FragColor = c / radius;
+  gl_FragColor = c / NB_TAPS;
 }
