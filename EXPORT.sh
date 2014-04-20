@@ -1,10 +1,8 @@
 #!/bin/sh
 
 echo " -- preparing..."
+rm -rf ./export
 mkdir -p ./export/assets
-rm -rf ./export/*.js
-rm -rf ./export/*.fs
-rm -rf ./export/*.vs
 mkdir -p tools
 
 echo " -- concatenating js files and stripping debug code..."
@@ -16,11 +14,7 @@ done
 echo "window.onload=main;" >> ./export/demo.js
 
 echo " -- copying assets..."
-cp -r ./assets/*.fs ./export/assets/
-cp -r ./assets/*.vs ./export/assets/
-cp -r ./assets/*.png ./export/assets/
-cp -r ./assets/*.jpg ./export/assets/
-cp -r ./assets/*.ogg ./export/assets/
+cp -r ./assets/*.* ./export/assets/
 
 if [ ! -f tools/compiler.jar ]; then
     echo " -- tools/compiler.jar not found, now downloading it..."
@@ -28,9 +22,8 @@ if [ ! -f tools/compiler.jar ]; then
     cd tools && unzip compiler-latest.zip
 fi
 
-echo " -- running the clojure compiler..."
-#java -jar tools/compiler.jar --js=./export/demo.js --js_output_file=./export/demo_min.js --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./export/externs
-java -jar tools/compiler.jar --js=./export/demo.js --js_output_file=./export/demo_min.js --externs ./export/externs
+echo " -- running the closure compiler..."
+java -jar tools/compiler.jar --js=./export/demo.js --js_output_file=./export/demo_min.js --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./externs/w3c_audio.js
 
 if [ ! -f tools/pnginator.rb ]; then
     echo " -- tools/pnginator.rb not found, now downloading it..."

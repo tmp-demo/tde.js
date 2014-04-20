@@ -190,7 +190,7 @@ function create_depth_buffer(w,h) {
 function texture_unit(i) { return gl.TEXTURE0+i; }
 
 function color_attachment(i) {
-  return ext.draw_buffers.COLOR_ATTACHMENT0_WEBGL+i;
+  return ext.draw_buffers["COLOR_ATTACHMENT0_WEBGL"]+i;
 }
 
 // #debug{{
@@ -220,10 +220,10 @@ function frame_buffer(target) {
 
   for (var t=0; t<target.color.length;++t) {
     gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(t), gl.TEXTURE_2D, target.color[t], 0);
-    buffers.push(ext.draw_buffers.COLOR_ATTACHMENT0_WEBGL+t)
+    buffers.push(ext.draw_buffers["COLOR_ATTACHMENT0_WEBGL"]+t)
   }
 
-  ext.draw_buffers.drawBuffersWEBGL(buffers);
+  ext.draw_buffers["drawBuffersWEBGL"](buffers);
 
   // #debug{{
   var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
