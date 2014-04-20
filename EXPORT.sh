@@ -22,7 +22,8 @@ cp -r ./assets/*.jpg ./export/assets/
 cp -r ./assets/*.ogg ./export/assets/
 
 echo " -- running the clojure compiler..."
-java -jar compiler.jar --js=./export/demo.js --js_output_file=./export/demo_min.js --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./export/externs
+#java -jar compiler.jar --js=./export/demo.js --js_output_file=./export/demo_min.js --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./export/externs
+java -jar compiler.jar --js=./export/demo.js --js_output_file=./export/demo_min.js --externs ./export/externs
 
 echo " -- packing in a png..."
 ruby pnginator.rb export/demo_min.js export/demo.png.html
