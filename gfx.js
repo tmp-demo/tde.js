@@ -1,6 +1,11 @@
 
 function gl_init() {
-  document.body.innerHTML = "";
+  // #debug{{
+  var keepInnerHTML = true
+  // #debug}}
+  
+  if (typeof keepInnerHTML === "undefined")
+	document.body.innerHTML = "";
   canvas = document.createElement("canvas");
   document.body.appendChild(canvas);
   canvas.id = "renderer";
