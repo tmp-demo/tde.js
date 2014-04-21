@@ -12,7 +12,7 @@ function $$(s) {
 scenesShortcuts = {"97":0, "122":1,"101":2, "114":3,"116":4,"116":5,"121":6,"117":7,"105":8,"111":9};
 scenesLoopShortcuts = {"113":0, "115":1,"100":2, "102":3,"103":4,"104":5,"106":6,"107":7,"108":8,"109":9};
 
-function editior_init() {
+function editor_init() {
   console.log("edition_init");
     seeker = document.getElementById("seeker");
     seeker.addEventListener("input", function (e) {

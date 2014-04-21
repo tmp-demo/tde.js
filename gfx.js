@@ -1,14 +1,18 @@
 
 function gl_init() {
-  var blah = document.createElement("canvas");
-  blah.width = 800;
-  blah.width = 600;
-  var blah = document.body.appendChild(blah);
-  canvas = blah;// document.getElementsByTagName("canvas")[0];
-  blah.id = "renderer";
+  // #debug{{
+  var keepInnerHTML = true
+  // #debug}}
+  
+  if (typeof keepInnerHTML === "undefined")
+	document.body.innerHTML = "";
+  canvas = document.createElement("canvas");
+  document.body.appendChild(canvas);
+  canvas.id = "renderer";
   gl = canvas.getContext("experimental-webgl");
   canvas.width = demo.w;
   canvas.height = demo.h;
+
   gl.viewport(0, 0, demo.w, demo.h);
   ext = {
     draw_buffers: gl.getExtension("WEBGL_draw_buffers"),
@@ -191,7 +195,7 @@ function create_depth_buffer(w,h) {
 function texture_unit(i) { return gl.TEXTURE0+i; }
 
 function color_attachment(i) {
-  return ext.draw_buffers.COLOR_ATTACHMENT0_WEBGL+i;
+  return ext.draw_buffers["COLOR_ATTACHMENT0_WEBGL"]+i;
 }
 
 // #debug{{
@@ -221,10 +225,10 @@ function frame_buffer(target) {
 
   for (var t=0; t<target.color.length;++t) {
     gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(t), gl.TEXTURE_2D, target.color[t], 0);
-    buffers.push(ext.draw_buffers.COLOR_ATTACHMENT0_WEBGL+t)
+    buffers.push(ext.draw_buffers["COLOR_ATTACHMENT0_WEBGL"]+t)
   }
 
-  ext.draw_buffers.drawBuffersWEBGL(buffers);
+  ext.draw_buffers["drawBuffersWEBGL"](buffers);
 
   // #debug{{
   var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);

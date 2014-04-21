@@ -187,6 +187,34 @@ function demo_init() {
   var viewProjectionMatrix = mat4.create()
 
   demo.scenes = [
+    // scene 1
+    {
+      duration: 10000,
+      update: null,
+      passes: [
+        {
+          render_to: {color: [tex1, tex2], depth: depth_rb}, render: clear
+        },
+        {
+          texture_inputs: [tex_bricks],
+          render_to: {color: [tex1, tex2], depth: depth_rb},
+          update: function(scenes, scene, time) {
+            vec3.lerp(cameraPosition, [5.0, -2.0, 5.0], [20.0, 0.0, 3.0], time.scene_norm);
+            mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,-5.0], [0.0, 0.0, 1.0]);
+            mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
+            mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
+            camera(scene.program, viewProjectionMatrix);
+          },
+          render: draw_mesh(cube),
+          program: deferred_prog
+        },
+        {
+          texture_inputs: [tex1, tex2],
+          render: draw_quad,
+          program: show_deferred_prog
+        }
+      ]
+    },
     {
       duration: 10000,
       update: null,

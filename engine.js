@@ -54,7 +54,7 @@ function main() {
     time_init();
 
     // #debug{{
-    if (window.editior_init) { editior_init(); }
+    if (window.editor_init) { editor_init(); }
     // #debug}}
 
     demo.audio_source.start(0);
