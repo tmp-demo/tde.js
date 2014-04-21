@@ -54,7 +54,7 @@ function load_audio(url, cb) {
 }
 
 function load_text(url, cb) {
-  load_resource("assets/"+url, function(xhr) {
+  load_resource("shaders/"+url, function(xhr) {
     cb(xhr.responseText);
     resource_loaded();
   });
