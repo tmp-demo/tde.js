@@ -143,7 +143,35 @@ function demo_init() {
     12, 13, 14,   12, 14, 15, // Bottom face
     16, 17, 18,   16, 18, 19, // Right face
     20, 21, 22,   20, 22, 23  // Left face
-  ], 5, [
+  ], 8, [
+    { location: POS, components: 3, stride: 32, offset: 0 },
+    { location: NORMALS, components: 3, stride: 32, offset: 12 },
+    { location: TEX_COORDS, components: 2, stride: 32, offset: 24 }
+  ]);
+
+  var r1 = [
+    [0.0, 0.0, -1.0],  [5.0, 0.0, -1.0],
+    [5.0, 0.0, -1.0],  [5.0, 5.0, -1.0],
+    [5.0, 5.0, -1.0],  [0.0, 5.0, -1.0]
+  ];
+  var r2 = [
+    [0.0, 0.0, 10.0], [5.0, 0.0, 10.0],
+    [5.0, 0.0, 10.0], [5.0, 5.0, 10.0],
+    [5.0, 5.0, 10.0], [0.0, 5.0, 10.0]
+  ];
+
+  var extruded_geom = {
+    vbo: new Float32Array(1024),
+    ibo: new Uint16Array(18),
+    v_stride: 8,
+    v_cursor: 0,
+    i_cursor: 0
+  }
+
+  join_rings(extruded_geom, r1, r2);
+  compute_normals(extruded_geom, 3, 0, 18);
+
+  var extruded = create_geom(extruded_geom.vbo, extruded_geom.ibo, 8, [
     { location: POS, components: 3, stride: 32, offset: 0 },
     { location: NORMALS, components: 3, stride: 32, offset: 12 },
     { location: TEX_COORDS, components: 2, stride: 32, offset: 24 }
@@ -157,36 +185,8 @@ function demo_init() {
   var viewMatrix = mat4.create()
   var projectionMatrix = mat4.create()
   var viewProjectionMatrix = mat4.create()
-  
+
   demo.scenes = [
-    // scene 1
-    {
-      duration: 10000,
-      update: null,
-      passes: [
-        {
-          render_to: {color: [tex1, tex2], depth: depth_rb}, render: clear
-        },
-        {
-          texture_inputs: [tex_bricks],
-          render_to: {color: [tex1, tex2], depth: depth_rb},
-          update: function(scenes, scene, time) {
-			vec3.lerp(cameraPosition, [5.0, -2.0, 5.0], [20.0, 0.0, 3.0], time.scene_norm);
-			mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
-            mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
-            mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-            camera(scene.program, viewProjectionMatrix);
-          },
-          render: draw_mesh(cube),
-          program: deferred_prog
-        },
-        {
-          texture_inputs: [tex1, tex2],
-          render: draw_quad,
-          program: show_deferred_prog
-        }
-      ]
-    },
     {
       duration: 10000,
       update: null,
@@ -198,8 +198,8 @@ function demo_init() {
           texture_inputs: [tex_paul],
           render_to: {color: [tex1], depth: depth_rb},
           update: function(scenes, scene, time) {
-			vec3.lerp(cameraPosition, [0.0, -10.0, 10.0], [10.0, 0.0, 3.0], time.scene_norm);
-			mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
+            vec3.lerp(cameraPosition, [0.0, -10.0, 10.0], [10.0, 0.0, 3.0], time.scene_norm);
+            mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
             mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
             camera(scene.program, viewProjectionMatrix);
@@ -241,6 +241,25 @@ function demo_init() {
           texture_inputs: [tex1, blur1, blur2, blur3],
           render: draw_quad,
           program: select4
+        }
+      ]
+    },
+    {
+      duration: 10000,
+      passes: [
+        {
+          render: clear
+        },
+        {
+          update: function(scenes, scene, time) {
+            vec3.lerp(cameraPosition, [10.0, -20.0, 10.0], [10.0, 0.0, 3.0], time.scene_norm);
+            mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
+            mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
+            mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
+            camera(scene.program, viewProjectionMatrix);
+          },
+          render: draw_mesh(extruded),
+          program: normals_prog
         }
       ]
     },

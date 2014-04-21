@@ -108,7 +108,7 @@ function draw_quad() {
 function draw_geom(data) {
   gl.enable(gl.DEPTH_TEST);
   gl.bindBuffer(gl.ARRAY_BUFFER, data.vbo);
-  for (var c in data.attribs) {
+  for (var c = 0; c < data.attribs.length;++c) {
     gl.enableVertexAttribArray(c);
     var a = data.attribs[c];
     gl.vertexAttribPointer(a.location, a.components, gl.FLOAT, false, a.stride, a.offset);
@@ -259,7 +259,7 @@ function render_scene(scene) {
   //console.log("render_scene "+scene.name+" "+demo.current_time);
   var td = demo.current_time;
   var ts = td - scene.start_time;
-  var tsn = td/scene.duration;
+  var tsn = ts/scene.duration;
 
   var t = {
     scene_norm: tsn,
@@ -267,7 +267,6 @@ function render_scene(scene) {
     scene: ts
   };
   if (scene.update) {
-    console.log("scene.update");
     scene.update(demo.scenes, scene, t);
   }
   for (var p in scene.passes) {
