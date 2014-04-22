@@ -23,8 +23,6 @@ function prepare() {
   load_text("red.fs", function(data) { fs_red_src = data; } );
   load_text("blue.fs", function(data) { fs_blue_src = data; } );
   load_text("chroma.fs", function(data) { fs_chroma_src = data; } );
-  load_text("mrt_test_1.fs", function(data) { mrt_1_src = data; } );
-  load_text("mrt_test_2.fs", function(data) { mrt_2_src = data; } );
   load_text("textured.fs", function(data) { texturing = data; } );
   load_text("show_normals.fs", function(data) { fs_normals_src = data; } );
   load_text("show_tex_coords.fs", function(data) { fs_texcoords_src = data; } );
@@ -69,9 +67,8 @@ function demo_init() {
   fs_intro1 = compile_shader(fs_red_src, FS);
   fs_blue = compile_shader(fs_blue_src, FS);
   fs_intro2 = compile_shader(basic2_fs, FS);
-  mrt_fs_1 = compile_shader(mrt_1_src, FS);
-  mrt_fs_2 = compile_shader(mrt_2_src, FS);
   texturing_fs = compile_shader(texturing, FS);
+  // comment out the line below if you don't have support for WEBGL_draw_buffers
   deferred_fs = compile_shader(deferred_src, FS);
   show_deferred_fs = compile_shader(show_deferred_src, FS);
   normals_fs = compile_shader(fs_normals_src, FS);
@@ -80,6 +77,8 @@ function demo_init() {
   select_fs = compile_shader(select_src, FS);
   post_fs = compile_shader(post_test_src, FS);
 
+
+  // comment out the line below if you don't have support for WEBGL_draw_buffers
   deferred_prog = shader_program(vs_basic3d, deferred_fs);
   show_deferred_prog = shader_program(vs_basic, show_deferred_fs);
   post_misc_prog = shader_program(vs_basic, post_fs);
@@ -91,8 +90,6 @@ function demo_init() {
   scene_1_1 = shader_program(vs_basic, fs_intro1);
   scene_1_2 = shader_program(vs_basic, fs_intro2);
   scene_blue = shader_program(vs_basic, fs_blue);
-  mrt_1 = shader_program(vs_basic, mrt_fs_1);
-  mrt_2 = shader_program(vs_basic, mrt_fs_2);
 
   depth_rb = create_depth_buffer(canvas.width, canvas.height);
   blur1 = create_texture(canvas.width/2, canvas.height/2);
@@ -187,7 +184,7 @@ function demo_init() {
   var viewProjectionMatrix = mat4.create()
 
   demo.scenes = [
-    // scene 1
+    // scene 1 - comment it out if you don't have support for WEBGL_draw_buffers
     {
       duration: 10000,
       update: null,
@@ -306,23 +303,6 @@ function demo_init() {
           update: function() {},
           render: draw_quad,
           program: scene_1_2
-          // no render_to, means render to screen
-        }
-      ]
-    },
-    {
-      name:"mrt", //#debug
-      duration: 1000,
-      passes: [
-        {
-          program: mrt_1,
-          render: draw_quad,
-          render_to: {color: [tex1, tex2]}
-        },
-        {
-          texture_inputs: [tex2, tex1],
-          render: draw_quad,
-          program: mrt_2
           // no render_to, means render to screen
         }
       ]

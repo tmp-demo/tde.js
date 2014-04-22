@@ -16,14 +16,10 @@ function gl_init() {
   gl.viewport(0, 0, demo.w, demo.h);
   ext = {
     draw_buffers: gl.getExtension("WEBGL_draw_buffers"),
-    depth_textures: gl.getExtension("WEBGL_depth_texture")
   };
   // #debug{{
   if (!ext.draw_buffers) {
-    alert("WEBGL_draw_buffers not supported :(");
-  }
-  if (!ext.depth_textures) {
-    alert("WEBGL_depth_texture not supported :(");
+    console.log("WEBGL_draw_buffers not supported :( parts of the demo will not render properly");
   }
   // #debug}}
 
@@ -195,6 +191,11 @@ function create_depth_buffer(w,h) {
 function texture_unit(i) { return gl.TEXTURE0+i; }
 
 function color_attachment(i) {
+  // #debug{{
+  if (!ext.draw_buffers) {
+    return gl.COLOR_ATTACHMENT0+i;
+  }
+  // #debug}}
   return ext.draw_buffers["COLOR_ATTACHMENT0_WEBGL"]+i;
 }
 
@@ -223,12 +224,20 @@ function frame_buffer(target) {
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, target.depth);
   }
 
-  for (var t=0; t<target.color.length;++t) {
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(t), gl.TEXTURE_2D, target.color[t], 0);
-    buffers.push(ext.draw_buffers["COLOR_ATTACHMENT0_WEBGL"]+t)
+  // this branch is *always* taken in release builds
+  if (ext.draw_buffers) { // #debug
+    for (var t=0; t<target.color.length;++t) {
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(t),
+                              gl.TEXTURE_2D, target.color[t], 0);
+      buffers.push(ext.draw_buffers["COLOR_ATTACHMENT0_WEBGL"]+t)
+    }
+    ext.draw_buffers["drawBuffersWEBGL"](buffers);
+  // #debug{{
+  } else if (target.color.length > 0) {
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(0),
+                              gl.TEXTURE_2D, target.color[0], 0);
   }
-
-  ext.draw_buffers["drawBuffersWEBGL"](buffers);
+  // #debug}}
 
   // #debug{{
   var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
