@@ -15,7 +15,7 @@ function gl_init() {
 
   gl.viewport(0, 0, demo.w, demo.h);
   ext = {
-    draw_buffers: gl.getExtension("WEBGL_draw_buffers"),
+    draw_buffers: gl.getExtension("WEBGL_draw_buffers")
   };
   // #debug{{
   if (!ext.draw_buffers) {
@@ -41,6 +41,8 @@ function gl_init() {
   // #debug}}
 }
 
+var uniforms = {}
+
 _quad_vbo = null;
 _enums = _enums = { }; // #debug
 
@@ -55,6 +57,13 @@ POS = 0;
 TEX_COORDS = 1;
 NORMALS = 2;
 COLOR = 3;
+
+var F32  = 0;
+var VEC2 = 2;
+var VEC3 = 3;
+var VEC4 = 4;
+var TEX  = 5;
+var MAT4 = 6;
 
 // #debug{{
 function gl_error() {
@@ -144,6 +153,7 @@ function shader_program(vs, fs) {
   for (var i in _locations) {
     gl.bindAttribLocation(program, i, _locations[i]);
   }
+
   gl.linkProgram(program);
   // #debug{{
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
@@ -249,22 +259,33 @@ function frame_buffer(target) {
   return fbo;
 }
 
-function set_basic_uniforms(scene, program, rx, ry) {
-  var current = demo.current_time - scene.start_time;
-  //console.log("current_time:"+demo.current_time+" scene time:"+current+" "+"duration:"+scene.duration);
-  gl.uniform1f(gl.getUniformLocation(program, 'time'), current);
-  gl.uniform1f(gl.getUniformLocation(program, 'duration'), scene.duration);
-  gl.uniform2f(gl.getUniformLocation(program, 'resolution'), rx, ry);
-  // TODO beat detector
-  gl.uniform1f(gl.getUniformLocation(program, 'beat'), 0.0/*bd.beat()*/);
-}
-
-function camera(prog, mat) {
-  gl.uniformMatrix4fv(gl.getUniformLocation(prog, "mv_mat"), gl.FALSE, mat);
+function set_uniforms(program) {
+  for (var u in uniforms) {
+    var location = gl.getUniformLocation(program, u);
+    var val = uniforms[u].val;
+    if (location == -1 || val === undefined) { continue; }
+    if (uniforms[u].type == F32) {
+      gl.uniform1f(location, uniforms[u].val)
+    }
+    if (uniforms[u].type == VEC2) {
+      gl.uniform1f(location, val[0], val[2]);
+    }
+    if (uniforms[u].type == VEC3) {
+      gl.uniform3f(location, val[0], val[2], val[3]);
+    }
+    if (uniforms[u].type == VEC4) {
+      gl.uniform4f(location, val[0], val[2], val[3], val[4]);
+    }
+    if (uniforms[u].type == TEX) {
+      gl.uniform1i(location, val);
+    }
+    if (uniforms[u].type == MAT4) {
+      gl.uniformMatrix4fv(location, gl.FALSE, val);
+    }
+  }
 }
 
 function clear() {
-  gl.enable(gl.DEPTH_TEST);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 }
 
@@ -273,7 +294,10 @@ function render_scene(scene) {
   var td = demo.current_time;
   var ts = td - scene.start_time;
   var tsn = ts/scene.duration;
-
+  uniforms.demo_time = td;
+  uniforms.clip_time = ts;
+  uniforms.clip_time_norm = tsn;
+  uniforms.clip_duration = td;
   var t = {
     scene_norm: tsn,
     demo: td,
@@ -292,7 +316,8 @@ function render_scene(scene) {
         rx = pass.render_to.w || rx;
         ry = pass.render_to.h || ry;
       }
-      set_basic_uniforms(scene, pass.program, rx, ry);
+      uniforms.resolution.val = [rx,ry];
+      set_uniforms(pass.program);
       gl.viewport(0, 0, rx, ry);
     }
     if (pass.fbo) {

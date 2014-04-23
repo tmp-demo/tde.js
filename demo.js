@@ -15,6 +15,26 @@ basic2_fs = base_uniforms +
 
 function prepare() {
 
+  uniforms = {
+    demo_time: {type: F32},
+    clip_time: {type: F32},
+    clip_time_norm: {type: F32},
+    clip_duration: {type: F32},
+    beat: {type: F32},
+    fade: {type: F32},
+    near_plane: {type: F32},
+    far_plane: {type: F32},
+    resolution: {type: VEC2},
+    texture_0: {type: TEX},
+    texture_1: {type: TEX},
+    texture_2: {type: TEX},
+    texture_3: {type: TEX},
+    model_mat: {type: MAT4},
+    view_mat: {type: MAT4},
+    proj_mat: {type: MAT4},
+    view_proj_mat: {type: MAT4}
+  }
+
   demo.w = 800;
   demo.h = 600;
   // here goes the code that declares the resources to load
@@ -200,7 +220,7 @@ function demo_init() {
             mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,-5.0], [0.0, 0.0, 1.0]);
             mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-            camera(scene.program, viewProjectionMatrix);
+            uniforms.view_proj_mat.val = viewProjectionMatrix;
           },
           render: draw_mesh(cube),
           program: deferred_prog
@@ -227,7 +247,7 @@ function demo_init() {
             mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
             mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-            camera(scene.program, viewProjectionMatrix);
+            uniforms.view_proj_mat.val = viewProjectionMatrix;
           },
           render: draw_mesh(cube),
           program: normals_prog
@@ -281,7 +301,7 @@ function demo_init() {
             mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
             mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-            camera(scene.program, viewProjectionMatrix);
+            uniforms.view_proj_mat.val = viewProjectionMatrix;
           },
           render: draw_mesh(extruded),
           program: normals_prog
