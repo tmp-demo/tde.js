@@ -15,25 +15,25 @@ basic2_fs = base_uniforms +
 
 function prepare() {
 
-  uniforms = {
-    demo_time: {type: F32},
-    clip_time: {type: F32},
-    clip_time_norm: {type: F32},
-    clip_duration: {type: F32},
-    beat: {type: F32},
-    fade: {type: F32},
-    near_plane: {type: F32},
-    far_plane: {type: F32},
-    resolution: {type: VEC2},
-    texture_0: {type: TEX},
-    texture_1: {type: TEX},
-    texture_2: {type: TEX},
-    texture_3: {type: TEX},
-    model_mat: {type: MAT4},
-    view_mat: {type: MAT4},
-    proj_mat: {type: MAT4},
-    view_proj_mat: {type: MAT4}
-  }
+  demo_uniforms = [
+    {name: "demo_time", type: F32},
+    {name: "clip_time", type: F32},
+    {name: "clip_time_norm", type: F32},
+    {name: "clip_duration", type: F32},
+    {name: "beat", type: F32},
+    {name: "fade", type: F32},
+    {name: "near_plane", type: F32},
+    {name: "far_plane", type: F32},
+    {name: "resolution", type: VEC2},
+    {name: "texture_0", type: TEX},
+    {name: "texture_1", type: TEX},
+    {name: "texture_2", type: TEX},
+    {name: "texture_3", type: TEX},
+    {name: "model_mat", type: MAT4},
+    {name: "view_mat", type: MAT4},
+    {name: "proj_mat", type: MAT4},
+    {name: "view_proj_mat", type: MAT4}
+  ]
 
   demo.w = 800;
   demo.h = 600;

@@ -39,9 +39,24 @@ function gl_init() {
     }
   }
   // #debug}}
+
+  F32.func  = gl.uniform1f;
+  VEC2.func = gl.uniform2f;
+  VEC3.func = gl.uniform3f;
+  VEC4.func = gl.uniform4f;
+  TEX.func  = gl.uniform1i;
+  MAT4.func = gl.uniformMatrix4fv;
+  for (var i in demo_uniforms) {
+    var name = demo_uniforms[i].name;
+    uniforms[name] = {
+      name: name,
+      type: demo_uniforms[i].type
+    }
+  }
 }
 
 var uniforms = {}
+var demo_uniforms = []
 
 _quad_vbo = null;
 _enums = _enums = { }; // #debug
@@ -58,12 +73,12 @@ TEX_COORDS = 1;
 NORMALS = 2;
 COLOR = 3;
 
-var F32  = 0;
-var VEC2 = 2;
-var VEC3 = 3;
-var VEC4 = 4;
-var TEX  = 5;
-var MAT4 = 6;
+var F32  = {};
+var VEC2 = {};
+var VEC3 = {};
+var VEC4 = {};
+var TEX  = {};
+var MAT4 = {};
 
 // #debug{{
 function gl_error() {
@@ -261,26 +276,15 @@ function frame_buffer(target) {
 
 function set_uniforms(program) {
   for (var u in uniforms) {
-    var location = gl.getUniformLocation(program, u);
+    var location = gl.getUniformLocation(program, uniforms[u].name);
     var val = uniforms[u].val;
     if (location == -1 || val === undefined) { continue; }
-    if (uniforms[u].type == F32) {
-      gl.uniform1f(location, uniforms[u].val)
-    }
-    if (uniforms[u].type == VEC2) {
-      gl.uniform1f(location, val[0], val[2]);
-    }
-    if (uniforms[u].type == VEC3) {
-      gl.uniform3f(location, val[0], val[2], val[3]);
-    }
-    if (uniforms[u].type == VEC4) {
-      gl.uniform4f(location, val[0], val[2], val[3], val[4]);
-    }
-    if (uniforms[u].type == TEX) {
-      gl.uniform1i(location, val);
-    }
-    if (uniforms[u].type == MAT4) {
+
+    if (uniforms[u].type === MAT4) {
       gl.uniformMatrix4fv(location, gl.FALSE, val);
+    } else {
+      // for example VEC2.func is gl.uniform2f
+      uniforms[u].type.func.bind(gl, location, val[0]||val, val[1], val[2], val[3]);
     }
   }
 }
@@ -294,10 +298,10 @@ function render_scene(scene) {
   var td = demo.current_time;
   var ts = td - scene.start_time;
   var tsn = ts/scene.duration;
-  uniforms.demo_time = td;
-  uniforms.clip_time = ts;
-  uniforms.clip_time_norm = tsn;
-  uniforms.clip_duration = td;
+  uniforms.demo_time.val = td;
+  uniforms.clip_time.val = ts;
+  uniforms.clip_time_norm.val = tsn;
+  uniforms.clip_duration.val = td;
   var t = {
     scene_norm: tsn,
     demo: td,
