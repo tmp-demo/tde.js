@@ -13,6 +13,59 @@ basic2_fs = base_uniforms +
             "    gl_FragColor = vec4(sample.r,f,f,1.0);"+
             "}";
 
+function circle_ring(radius, num_edges, z) {
+  var a = 2 * Math.PI / num_edges;
+  var r = [];
+  for (var i = 0; i < num_edges; ++i) {
+    r.push([radius*Math.cos(i*a), radius*Math.sin(i*a), z]);
+    r.push([radius*Math.cos((i+1)*a), radius*Math.sin((i+1)*a), z]);
+  }
+  return r;
+}
+
+function transform_ring(r, index, mat) {
+  var r2 = [];
+  var rot = 0.03; // completely arbitrary
+  mat4.rotate(mat, mat, rot, [0.0, 0.0, 1.0]);
+  mat4.translate(mat, mat, [0.0, 0.0, 1.0]);
+  mat4.rotate(mat, mat, rot, [0.0, 1.0, 0.0]);
+  //mat4.rotate(mat, mat, rot, [1.0, 0.0, 0.0]);
+  for (var i = 0; i < r.length; ++i) {
+    var p = [];
+    vec3.transformMat4(p, r[i], mat);
+    r2.push(p);
+  }
+  return r2;
+}
+
+function generate_some_geometry() {
+  var num_edges = 10;
+  var num_steps = 20;
+  var geom = {
+    vbo: new Float32Array(num_steps*num_edges*4*8),
+    ibo: new Uint16Array(num_steps*num_edges*12),
+    v_stride: 8,
+    v_cursor: 0,
+    i_cursor: 0
+  }
+
+  var mat = mat4.create();
+  var r1 = circle_ring(4, num_edges, 0);
+  for (var i = 0; i<num_steps; ++i) {
+    var r2 = transform_ring(r1, 0, mat);
+    join_rings(geom, r1, r2);
+    r1 = r2;
+  }
+
+  compute_normals(geom, 3, 0, 6*num_edges*num_steps);
+
+  return create_geom(geom.vbo, geom.ibo, 8, [
+    { location: POS, components: 3, stride: 32, offset: 0 },
+    { location: NORMALS, components: 3, stride: 32, offset: 12 },
+    { location: TEX_COORDS, components: 2, stride: 32, offset: 24 }
+  ]);
+}
+
 function prepare() {
 
   demo_uniforms = [
@@ -166,33 +219,7 @@ function demo_init() {
     { location: TEX_COORDS, components: 2, stride: 32, offset: 24 }
   ]);
 
-  var r1 = [
-    [0.0, 0.0, -1.0],  [5.0, 0.0, -1.0],
-    [5.0, 0.0, -1.0],  [5.0, 5.0, -1.0],
-    [5.0, 5.0, -1.0],  [0.0, 5.0, -1.0]
-  ];
-  var r2 = [
-    [0.0, 0.0, 10.0], [5.0, 0.0, 10.0],
-    [5.0, 0.0, 10.0], [5.0, 5.0, 10.0],
-    [5.0, 5.0, 10.0], [0.0, 5.0, 10.0]
-  ];
-
-  var extruded_geom = {
-    vbo: new Float32Array(1024),
-    ibo: new Uint16Array(18),
-    v_stride: 8,
-    v_cursor: 0,
-    i_cursor: 0
-  }
-
-  join_rings(extruded_geom, r1, r2);
-  compute_normals(extruded_geom, 3, 0, 18);
-
-  var extruded = create_geom(extruded_geom.vbo, extruded_geom.ibo, 8, [
-    { location: POS, components: 3, stride: 32, offset: 0 },
-    { location: NORMALS, components: 3, stride: 32, offset: 12 },
-    { location: TEX_COORDS, components: 2, stride: 32, offset: 24 }
-  ]);
+  var extruded = generate_some_geometry();
 
   if (window.scene_model) {
     cube = scene_model();
@@ -297,8 +324,8 @@ function demo_init() {
         },
         {
           update: function(scenes, scene, time) {
-            vec3.lerp(cameraPosition, [10.0, -20.0, 10.0], [10.0, 0.0, 3.0], time.scene_norm);
-            mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
+            vec3.lerp(cameraPosition, [30.0, -40.0, 10.0], [10.0, 0.0, 100.0], time.scene_norm);
+            mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,50.0], [0.0, 0.0, 1.0]);
             mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
             uniforms.view_proj_mat.val = viewProjectionMatrix;
