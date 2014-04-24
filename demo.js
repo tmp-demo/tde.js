@@ -247,7 +247,7 @@ function demo_init() {
             mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,-5.0], [0.0, 0.0, 1.0]);
             mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-            uniforms.view_proj_mat.val = viewProjectionMatrix;
+            uniforms["view_proj_mat"].val = viewProjectionMatrix;
           },
           render: draw_mesh(cube),
           program: deferred_prog
@@ -274,7 +274,7 @@ function demo_init() {
             mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
             mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-            uniforms.view_proj_mat.val = viewProjectionMatrix;
+            uniforms["view_proj_mat"].val = viewProjectionMatrix;
           },
           render: draw_mesh(cube),
           program: normals_prog
@@ -328,7 +328,7 @@ function demo_init() {
             mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,50.0], [0.0, 0.0, 1.0]);
             mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-            uniforms.view_proj_mat.val = viewProjectionMatrix;
+            uniforms["view_proj_mat"].val = viewProjectionMatrix;
           },
           render: draw_mesh(extruded),
           program: normals_prog

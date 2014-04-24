@@ -298,10 +298,10 @@ function render_scene(scene) {
   var td = demo.current_time;
   var ts = td - scene.start_time;
   var tsn = ts/scene.duration;
-  uniforms.demo_time.val = td;
-  uniforms.clip_time.val = ts;
-  uniforms.clip_time_norm.val = tsn;
-  uniforms.clip_duration.val = td;
+  uniforms["demo_time"].val = td;
+  uniforms["clip_time"].val = ts;
+  uniforms["clip_time_norm"].val = tsn;
+  uniforms["clip_duration"].val = td;
   var t = {
     scene_norm: tsn,
     demo: td,
@@ -320,7 +320,7 @@ function render_scene(scene) {
         rx = pass.render_to.w || rx;
         ry = pass.render_to.h || ry;
       }
-      uniforms.resolution.val = [rx,ry];
+      uniforms["resolution"].val = [rx,ry];
       set_uniforms(pass.program);
       gl.viewport(0, 0, rx, ry);
     }
