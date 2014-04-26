@@ -175,7 +175,7 @@ function demo_init() {
   tex_bricks = create_texture(image_bricks.width, image_bricks.height, gl.RGBA, image_bricks.data, true);
   tex_paul = create_texture(image_paul.width, image_paul.height, gl.RGBA, image_paul.data);
 
-  cube = create_geom([
+  geometries.cube = create_geom([
     // Front face     | normals        | tex coords
     -1.0, -1.0,  1.0,   0.0, 0.0, 1.0,   1.0, 0.0,
      1.0, -1.0,  1.0,   0.0, 0.0, 1.0,   1.0, 1.0,
@@ -219,10 +219,10 @@ function demo_init() {
     { location: TEX_COORDS, components: 2, stride: 32, offset: 24 }
   ]);
 
-  var extruded = generate_some_geometry();
+  geometries.extruded = generate_some_geometry();
 
   if (window.scene_model) {
-    cube = scene_model();
+    geometries.cube = scene_model();
   }
 
   var cameraPosition = vec3.create()
@@ -249,7 +249,7 @@ function demo_init() {
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
             uniforms["view_proj_mat"].val = viewProjectionMatrix;
           },
-          render: draw_mesh(cube),
+          render: draw_mesh(geometries.cube),
           program: deferred_prog
         },
         {
@@ -276,7 +276,7 @@ function demo_init() {
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
             uniforms["view_proj_mat"].val = viewProjectionMatrix;
           },
-          render: draw_mesh(cube),
+          render: draw_mesh(geometries.cube),
           program: normals_prog
         },
         blur_pass(
@@ -330,7 +330,7 @@ function demo_init() {
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
             uniforms["view_proj_mat"].val = viewProjectionMatrix;
           },
-          render: draw_mesh(extruded),
+          render: draw_mesh(geometries.extruded),
           program: normals_prog
         }
       ]
