@@ -15,7 +15,7 @@ basic2_fs = base_uniforms +
 
 function circle_ring(radius, num_edges, z) {
   var a = 2 * Math.PI / num_edges;
-  var r = [];
+  var r = []; 
   for (var i = 0; i < num_edges; ++i) {
     r.push([radius*Math.cos(i*a), radius*Math.sin(i*a), z]);
     r.push([radius*Math.cos((i+1)*a), radius*Math.sin((i+1)*a), z]);
@@ -91,19 +91,29 @@ function prepare() {
   demo.w = 800;
   demo.h = 600;
   // here goes the code that declares the resources to load
-  load_text("quad.vs", function(data) { vs_quad_src = data; } );
-  load_text("basic3d.vs", function(data) { vs_basic3d_src = data; } );
-  load_text("red.fs", function(data) { fs_red_src = data; } );
-  load_text("blue.fs", function(data) { fs_blue_src = data; } );
-  load_text("chroma.fs", function(data) { fs_chroma_src = data; } );
-  load_text("textured.fs", function(data) { texturing = data; } );
-  load_text("show_normals.fs", function(data) { fs_normals_src = data; } );
-  load_text("show_tex_coords.fs", function(data) { fs_texcoords_src = data; } );
-  load_text("dblur.fs", function(data) { dblur_src = data; } );
-  load_text("select4.fs", function(data) { select_src = data; } );
-  load_text("deferred.fs", function(data) { deferred_src = data; } );
-  load_text("show_deferred.fs", function(data) { show_deferred_src = data; } );
-  load_text("post_test.fs", function(data) { post_test_src = data; } );
+  // TODO - proper shader pipeline
+
+  // every object of layout { src:<source code>, ... } in vertex_shaders will
+  // be compiled as a vertex shader in an additional shader member
+  // -> { src: <srouce code>, shader: <shader object>, ... }
+  // see gfx_init
+  load_text("quad.vs", function(data) { vertex_shaders.quad = { src: data} } );
+  load_text("basic3d.vs", function(data) { vertex_shaders.basic_3d = { src: data } } );
+
+  // same for frahment shaders
+  load_text("red.fs", function(data) { fragment_shaders.red = { src: data } } );
+  load_text("blue.fs", function(data) { fragment_shaders.blue = { src: data } } );
+  load_text("chroma.fs", function(data) { fragment_shaders.chroma = { src: data } } );
+  load_text("textured.fs", function(data) { fragment_shaders.textured = { src: data } } );
+  load_text("show_normals.fs", function(data) { fragment_shaders.show_normals = { src: data } } );
+  load_text("show_tex_coords.fs", function(data) { fragment_shaders.show_tex_coords = { src: data } } );
+  load_text("dblur.fs", function(data) { fragment_shaders.directional_blur = { src: data } } );
+  load_text("select4.fs", function(data) { fragment_shaders.select = { src: data } } );
+  // comment out the line below if you don't have support for WEBGL_draw_buffers
+  load_text("deferred.fs", function(data) { fragment_shaders.deferred = { src: data } } );
+  load_text("show_deferred.fs", function(data) { fragment_shaders.show_deferred = { src: data } } );
+  load_text("post_test.fs", function(data) { fragment_shaders.post_test = { src: data } } );
+
   load_audio("z.ogg", function(data) { zogg = data });
 
   load_image("paul.jpg", function(data) { image_paul = data; });
@@ -117,10 +127,10 @@ function blur_pass(in_tex, out_tex, vec, res) {
       var NB_TAPS = 10
       var dx = vec[0] / NB_TAPS / res[0];
       var dy = vec[1] / NB_TAPS / res[1];
-      gl.uniform2f(gl.getUniformLocation(pass.program, "step"), dx, dy);
+      gl.uniform2f(gl.getUniformLocation(programs.dblur.program, "step"), dx, dy);
     },
     render: draw_quad,
-    program: dblur
+    program: programs.dblur
   }
   if (out_tex) {
     p.render_to = {color: [out_tex], w: res[0], h: res[1]};
@@ -131,38 +141,50 @@ function blur_pass(in_tex, out_tex, vec, res) {
 function demo_init() {
   console.log("demo_init"); // #debug
 
-  VS = gl.VERTEX_SHADER;
-  FS = gl.FRAGMENT_SHADER;
+  // all of the objects in programs are compiled at the beginning of the demo
+  // -> programs.<name> = { vs: <shader>, fs:<shader>, program: <program> }
+  // the shaders specified below are the "wrapper" objects that contain also
+  // the source, not just the gl object.
+  // see gfx_init
 
-  vs_basic = compile_shader(vs_quad_src, VS);
-  vs_basic3d = compile_shader(vs_basic3d_src, VS);
-
-  fs_intro1 = compile_shader(fs_red_src, FS);
-  fs_blue = compile_shader(fs_blue_src, FS);
-  fs_intro2 = compile_shader(basic2_fs, FS);
-  texturing_fs = compile_shader(texturing, FS);
-  // comment out the line below if you don't have support for WEBGL_draw_buffers
-  deferred_fs = compile_shader(deferred_src, FS);
-  show_deferred_fs = compile_shader(show_deferred_src, FS);
-  normals_fs = compile_shader(fs_normals_src, FS);
-  texcoords_fs = compile_shader(fs_texcoords_src, FS);
-  dblur_fs = compile_shader(dblur_src, FS);
-  select_fs = compile_shader(select_src, FS);
-  post_fs = compile_shader(post_test_src, FS);
-
-
-  // comment out the line below if you don't have support for WEBGL_draw_buffers
-  deferred_prog = shader_program(vs_basic3d, deferred_fs);
-  show_deferred_prog = shader_program(vs_basic, show_deferred_fs);
-  post_misc_prog = shader_program(vs_basic, post_fs);
-  textured_prog = shader_program(vs_basic3d, texturing_fs);
-  normals_prog = shader_program(vs_basic3d, normals_fs);
-  texcoords_prog = shader_program(vs_basic3d, texcoords_fs);
-  dblur = shader_program(vs_basic, dblur_fs);
-  select4 = shader_program(vs_basic, select_fs);
-  scene_1_1 = shader_program(vs_basic, fs_intro1);
-  scene_1_2 = shader_program(vs_basic, fs_intro2);
-  scene_blue = shader_program(vs_basic, fs_blue);
+  // comment out program.deferred if you don't have support for
+  // WEBGL_draw_buffers
+  programs.deferred = {
+    vs: vertex_shaders.basic_3d,
+    fs: fragment_shaders.deferred
+  };
+  programs.show_deferred = {
+    vs: vertex_shaders.quad,
+    fs: fragment_shaders.show_deferred
+  };
+  programs.post_misc = {
+    vs: vertex_shaders.quad,
+    fs: fragment_shaders.post_test
+  };
+  programs.textured = {
+    vs: vertex_shaders.basic_3d,
+    fs: fragment_shaders.textured
+  };
+  programs.show_normals = {
+    vs: vertex_shaders.basic_3d,
+    fs: fragment_shaders.show_normals
+  };
+  programs.show_tex_coords = {
+    vs: vertex_shaders.basic_3d,
+    fs: fragment_shaders.show_tex_coords
+  };
+  programs.dblur = {
+    vs: vertex_shaders.quad,
+    fs: fragment_shaders.directional_blur
+  };
+  programs.select4 = {
+    vs: vertex_shaders.quad,
+    fs: fragment_shaders.select
+  };
+  programs.blue = {
+    vs: vertex_shaders.quad,
+    fs: fragment_shaders.blue
+  };
 
   depth_rb = create_depth_buffer(canvas.width, canvas.height);
   blur1 = create_texture(canvas.width/2, canvas.height/2);
@@ -250,12 +272,12 @@ function demo_init() {
             uniforms["view_proj_mat"].val = viewProjectionMatrix;
           },
           render: draw_mesh(geometries.cube),
-          program: deferred_prog
+          program: programs.deferred
         },
         {
           texture_inputs: [tex1, tex2],
           render: draw_quad,
-          program: show_deferred_prog
+          program: programs.show_deferred
         }
       ]
     },
@@ -277,7 +299,7 @@ function demo_init() {
             uniforms["view_proj_mat"].val = viewProjectionMatrix;
           },
           render: draw_mesh(geometries.cube),
-          program: normals_prog
+          program: programs.show_normals
         },
         blur_pass(
           tex1, tex_half1,
@@ -312,7 +334,7 @@ function demo_init() {
         {
           texture_inputs: [tex1, blur1, blur2, blur3],
           render: draw_quad,
-          program: select4
+          program: programs.select4
         }
       ]
     },
@@ -331,26 +353,7 @@ function demo_init() {
             uniforms["view_proj_mat"].val = viewProjectionMatrix;
           },
           render: draw_mesh(geometries.extruded),
-          program: normals_prog
-        }
-      ]
-    },
-    {
-      duration: 10000,
-      update: null,
-      passes: [
-        {
-          update: null,
-          program: scene_1_1,
-          render: draw_quad,
-          render_to: {color: [tex1]}
-        },
-        {
-          texture_inputs: [tex1],
-          update: function() {},
-          render: draw_quad,
-          program: scene_1_2
-          // no render_to, means render to screen
+          program: programs.show_normals
         }
       ]
     },
@@ -365,7 +368,7 @@ function demo_init() {
       duration: 10000,
       passes: [
         {
-          program: scene_blue,
+          program: programs.blue,
           render: draw_quad
         }
       ]

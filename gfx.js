@@ -1,7 +1,9 @@
 
 var uniforms = {}
 var geometries = {}
-var progarms = {}
+var programs = {}
+var fragment_shaders = {}
+var vertex_shaders = {}
 
 var GL_TEXTURE_2D;
 var GL_ARRAY_BUFFER;
@@ -115,6 +117,19 @@ function gfx_init() {
       }
     }
   }
+
+  for (var vs in vertex_shaders) {
+    vertex_shaders[vs].shader = compile_shader(vertex_shaders[vs].src,
+      gl.VERTEX_SHADER);
+  }
+  for (var fs in fragment_shaders) {
+    fragment_shaders[fs].shader = compile_shader(fragment_shaders[fs].src,
+      gl.FRAGMENT_SHADER);
+  }
+  for (var p in programs) {
+    var prog = programs[p];
+    prog.program = shader_program(prog.vs, prog.fs);
+  }
 }
 
 function upload_geom(geom) {
@@ -183,8 +198,8 @@ function compile_shader(txt_src, type) {
 
 function shader_program(vs, fs) {
   var program = gl.createProgram();
-  gl.attachShader(program, vs);
-  gl.attachShader(program, fs);
+  gl.attachShader(program, vs.shader);
+  gl.attachShader(program, fs.shader);
   for (var i in _locations) {
     gl.bindAttribLocation(program, i, _locations[i]);
   }
@@ -339,7 +354,8 @@ function render_scene(scene) {
   for (var p in scene.passes) {
     var pass = scene.passes[p];
     if (pass.program) {
-      gl.useProgram(pass.program);
+      var shader_program = pass.program.program;
+      gl.useProgram(shader_program);
       var rx = canvas.width;
       var ry = canvas.height;
       if (pass.render_to) {
@@ -347,7 +363,7 @@ function render_scene(scene) {
         ry = pass.render_to.h || ry;
       }
       uniforms["resolution"].val = [rx,ry];
-      set_uniforms(pass.program);
+      set_uniforms(shader_program);
       gl.viewport(0, 0, rx, ry);
     }
     if (pass.fbo) {
@@ -361,7 +377,7 @@ function render_scene(scene) {
         var tex = pass.texture_inputs[i];
         gl.activeTexture(texture_unit(i));
         gl.bindTexture(GL_TEXTURE_2D, tex);
-        gl.uniform1i(gl.getUniformLocation(pass.program,"texture_"+i), i);
+        gl.uniform1i(gl.getUniformLocation(shader_program,"texture_"+i), i);
       }
     }
     pass.render(pass.program);
