@@ -3,14 +3,17 @@
 <head>
 <title>canvastoy</title>
 <link rel="icon" type="image/png" href="64.png">
-<link rel="stylesheet" href="codemirror/codemirror.css">
-<link rel="stylesheet" href="codemirror/solarized.css">
-<link rel="stylesheet" href="codemirror/monokai.css">
-<script src="codemirror/codemirror.js"></script>
-<script src="canvas2dtoy.js"></script>
-<script src="codemirror/matchbrackets.js"></script>
-<script src="codemirror/closebrackets.js"></script>
-<script src="codemirror/javascript.js"></script>
+
+<link rel="stylesheet" href="editor/codemirror/codemirror.css">
+<link rel="stylesheet" href="editor/codemirror/solarized.css">
+<link rel="stylesheet" href="editor/codemirror/monokai.css">
+
+<script src="editor/canvas2dtoy.js"></script>
+<script src="editor/codemirror/codemirror.js"></script>
+<script src="editor/codemirror/matchbrackets.js"></script>
+<script src="editor/codemirror/closebrackets.js"></script>
+<script src="editor/codemirror/javascript.js"></script>
+<script src="editor/canvastoy.js"></script>
 
 <!-- tde.js -->
 <script src="editor/scene_model.js"></script>
@@ -142,8 +145,6 @@ gaussian_blur(b, 14);
     <canvas id="timeline">
   </div>
 </div>
-<script src="canvastoy.js">
-</script>
 <script>
 
 /* setup a canvas 2d, and shove the 2dcontext and canvas in the context. */
