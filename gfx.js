@@ -224,7 +224,6 @@ function create_texture(width, height, format, image, allow_repeat) {
     image = new Uint8Array(image, 0, 0);
   }
   var texture = gl.createTexture();
-  gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(GL_TEXTURE_2D, texture);
 
   var wrap = gl.CLAMP_TO_EDGE;
@@ -289,7 +288,7 @@ function frame_buffer(target) {
 
     for (var t=0; t<target.color.length;++t) {
       gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(t),
-                              GL_TEXTURE_2D, target.color[t], 0);
+                              GL_TEXTURE_2D, target.color[t].tex, 0);
       buffers.push(ext.draw_buffers["COLOR_ATTACHMENT0_WEBGL"]+t)
     }
     ext.draw_buffers["drawBuffersWEBGL"](buffers);
@@ -297,7 +296,7 @@ function frame_buffer(target) {
   // #debug{{
   } else if (target.color.length > 0) {
       gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(0),
-                              GL_TEXTURE_2D, target.color[0], 0);
+                              GL_TEXTURE_2D, target.color[0].tex, 0);
   }
   var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
   if (status != gl.FRAMEBUFFER_COMPLETE) {
@@ -374,7 +373,7 @@ function render_scene(scene) {
     }
     if (pass.texture_inputs) {
       for (var i=0; i<pass.texture_inputs.length; ++i) {
-        var tex = pass.texture_inputs[i];
+        var tex = pass.texture_inputs[i].tex;
         gl.activeTexture(texture_unit(i));
         gl.bindTexture(GL_TEXTURE_2D, tex);
         gl.uniform1i(gl.getUniformLocation(shader_program,"texture_"+i), i);

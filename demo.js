@@ -186,16 +186,16 @@ function demo_init() {
     fs: fragment_shaders.blue
   };
 
-  depth_rb = create_depth_buffer(canvas.width, canvas.height);
-  blur1 = create_texture(canvas.width/2, canvas.height/2);
-  blur2 = create_texture(canvas.width/2, canvas.height/2);
-  blur3 = create_texture(canvas.width/2, canvas.height/2);
-  tex_half1 = create_texture(canvas.width/2, canvas.height/2);
+  depth_rb   = create_depth_buffer(canvas.width, canvas.height);
   depth_half = create_depth_buffer(canvas.width/2,canvas.height/2);
-  tex1 = create_texture();
-  tex2 = create_texture();
-  tex_bricks = create_texture(image_bricks.width, image_bricks.height, gl.RGBA, image_bricks.data, true);
-  tex_paul = create_texture(image_paul.width, image_paul.height, gl.RGBA, image_paul.data);
+  blur1      = { tex: create_texture(canvas.width/2, canvas.height/2) };
+  blur2      = { tex: create_texture(canvas.width/2, canvas.height/2) };
+  blur3      = { tex: create_texture(canvas.width/2, canvas.height/2) };
+  tex_half1  = { tex: create_texture(canvas.width/2, canvas.height/2) };
+  tex_paul   = { tex: create_texture(image_paul.width, image_paul.height, gl.RGBA, image_paul.data) };
+  tex1       = { tex: create_texture() };
+  tex2       = { tex: create_texture() };
+  tex_bricks = { tex: create_texture(image_bricks.width, image_bricks.height, gl.RGBA, image_bricks.data, true) };
 
   geometries.cube = create_geom([
     // Front face     | normals        | tex coords
