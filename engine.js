@@ -18,6 +18,14 @@ demo = {
 };
 
 function main_loop() {
+  // reload all geometry that has reaload set to true
+  for (var g in geometries) {
+    if (geometries[g].reload === true) {
+      upload_geom(geometries[g]);
+      geometries[g],reload = false;
+    }
+  }
+
   if (demo.play_state == demo.PLAYING){
     if (demo.current_time <= demo.end_time) {
       demo.current_scene = find_scene_for_time(demo.current_time);

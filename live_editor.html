@@ -1,0 +1,176 @@
+<!doctype html>
+<html manifest="canvastoy.appcache">
+<head>
+<title>canvastoy</title>
+<link rel="icon" type="image/png" href="64.png">
+
+<link rel="stylesheet" href="editor/codemirror/codemirror.css">
+<link rel="stylesheet" href="editor/codemirror/solarized.css">
+<link rel="stylesheet" href="editor/codemirror/monokai.css">
+
+<script src="editor/codemirror/codemirror.js"></script>
+<script src="editor/codemirror/matchbrackets.js"></script>
+<script src="editor/codemirror/closebrackets.js"></script>
+<script src="editor/codemirror/javascript.js"></script>
+
+<script src="editor/canvas2d_editor.js"></script>
+<script src="editor/canvas2d_helpers.js"></script>
+<script src="editor/live_editor.js"></script>
+<script src="editor/edition.js"></script>
+
+<!-- tde.js -->
+<script src="editor/scene_model.js"></script>
+
+<script src=gl-matrix-custom.js></script>
+<script src=loader.js></script>
+<script src=gfx.js></script>
+<script src=demo.js></script>
+<script src=audio.js></script>
+<script src=seek.js></script>
+<script src=engine.js></script>
+<script src=geom.js></script>
+
+<meta charset=utf-8>
+<meta name="viewport" content="width=device-width, user-scalable=no">
+<style>
+input[type=range]:-moz-focusring {
+  outline: none;
+}
+input[type=range] {
+  border: none;
+  background: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 99%;
+  height: 30px;
+  z-index: 5;
+}
+
+#timeline {
+  position: relative;
+  width: 100%;
+  height: 40px;
+}
+
+canvas {
+  z-index: 1;
+  position: absolute;
+  right: 0;
+  margin:0;
+  padding:0;
+  top: 0;
+}
+
+#footer {
+   position:absolute;
+   bottom:0;
+   width:50%;
+   height:40px;
+   //background-color:rgb(244, 245, 245);
+   right: 0px;
+   z-index: 4;
+}
+
+.CodeMirror {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0.5em;
+  margin: 0;
+  width: 50%;
+  height: 100%;
+  z-index: 2;
+  transition: box-shadow 0.7s;
+  margin:0;
+  padding:0;
+}
+.text-error {
+  background-color: rgba(255, 0, 0, 0.3);
+}
+.error {
+  box-shadow: 0px 0px 100px red inset;
+}
+
+.ok {
+  box-shadow: 0px 0px 100px green inset;
+}
+
+#versions {
+  position: absolute;
+  bottom:0;
+  right:0;
+  z-index: 4;
+}
+
+#fullscreen {
+  position: absolute;
+  top:0;
+  right:0;
+  z-index: 4;
+}
+
+#install-btn {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 4;
+}
+
+#wrapper {
+  background: white;
+}
+</style>
+</head>
+<body>
+<div id=wrapper>
+  <textarea id=editor placeholder=>
+/* ctrl + enter or touch canvas to render */
+/* cv = document.getElementByTagName("canvas")[0] */
+/* (w, h) = (cv.width, cv.height) */
+/* c = cv.getContext('2d') */
+/* b = c.createImageData(w, h) */
+
+simplex_noise(b, w, h, 10000, 0.1);
+gaussian_blur(b, 14);
+/* noise(b); */
+  </textarea>
+  <canvas>
+  </canvas>
+  <select id=versions>
+  </select>
+  <button id=fullscreen>fullscreen</button>
+  <button id=install-btn>install</button>
+
+  <div id="footer">
+    <input type=range id="seeker">
+    <canvas id="timeline">
+  </div>
+</div>
+<script>
+
+
+
+window.onload = function() {
+  // canvas2d
+  init_audio(demo);
+  prepare();
+  loader_init(function(){
+    gl_init();
+    demo_init();
+    gfx_init();
+    time_init();
+
+    // #debug{{
+    if (window.editor_init) { editor_init(); }
+    // #debug}}
+
+    demo.audio_source.start(0);
+    main_loop();
+    init_editor_all(setup_2d, execute_cb_2d, render_2d);
+  });
+
+}
+</script>
+</body>
+</html>

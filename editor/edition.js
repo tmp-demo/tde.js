@@ -21,9 +21,9 @@ function editor_init() {
       demo.looping = false;
     });
 
-    var canvas_tag = document.getElementById("renderer");
-    canvas_tag.parentNode.removeChild(canvas_tag);
-    document.querySelector(".wrapper").appendChild(canvas_tag);
+    // var canvas_tag = document.getElementById("renderer");
+    // canvas_tag.parentNode.removeChild(canvas_tag);
+    // document.querySelector(".wrapper").appendChild(canvas_tag);
 
     var split = document.URL.split('?');
     for (var i=0; i<split.length; ++i) {
@@ -42,7 +42,7 @@ function editor_init() {
     var timeline = timeline_canvas.getContext("2d");
     timeline_canvas.width = timeline_canvas.clientWidth;
     timeline_canvas.height = timeline_canvas.clientHeight;
-    timeline.fillStyle = "white";
+    timeline.fillStyle = "rgba(255, 255, 255, 0.0)";
     timeline.fillRect(0, 0, timeline_canvas.width, timeline_canvas.height);
 
     timeline.translate(0.5,0.5);

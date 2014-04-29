@@ -29,6 +29,9 @@ echo " -- packing in a png..."
 ruby tools/pnginator.rb export/demo_min.js export/demo.png.html
 
 echo " -- done."
+
+cp minified.html export/minified.html
+
 wc -c *.js
 wc -c ./export/demo.js
 wc -c ./export/demo_min.js
