@@ -71,7 +71,6 @@ function editor_init() {
     timeline.lineTo(timeline_canvas.width,0);
     timeline.stroke();
 
-
     document.addEventListener("keypress", function(e) {
       // play/pause
       if (e.charCode == 32) {

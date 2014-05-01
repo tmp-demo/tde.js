@@ -125,22 +125,26 @@ canvas {
 <body>
 <div id=wrapper>
   <textarea id=editor placeholder=>
-/* ctrl + enter or touch canvas to render */
-/* cv = document.getElementByTagName("canvas")[0] */
-/* (w, h) = (cv.width, cv.height) */
-/* c = cv.getContext('2d') */
-/* b = c.createImageData(w, h) */
+    /* ctrl + enter or touch canvas to render */
+    /* cv = document.getElementByTagName("canvas")[0] */
+    /* (w, h) = (cv.width, cv.height) */
+    /* c = cv.getContext('2d') */
+    /* b = c.createImageData(w, h) */
 
-simplex_noise(b, w, h, 10000, 0.1);
-gaussian_blur(b, 14);
-/* noise(b); */
+    simplex_noise(b, w, h, 10000, 0.1);
+    gaussian_blur(b, 14);
+    /* noise(b); */
   </textarea>
   <canvas>
   </canvas>
+
   <select id=versions>
   </select>
+
+<!--
   <button id=fullscreen>fullscreen</button>
   <button id=install-btn>install</button>
+-->
 
   <div id="footer">
     <input type=range id="seeker">
@@ -161,13 +165,11 @@ window.onload = function() {
     gfx_init();
     time_init();
 
-    // #debug{{
     if (window.editor_init) { editor_init(); }
-    // #debug}}
 
     demo.audio_source.start(0);
     main_loop();
-    init_editor_all(setup_2d, execute_cb_2d, render_2d);
+    init_editor_all(canvas_editor);
   });
 
 }

@@ -49,7 +49,8 @@ function find_scene_for_time(time) {
       }
     }
   }
-  throw "No scene found for time " + time;
+  console.log("No scene found for time " + time);
+  return demo.scenes[demo.scenes.length - 1];
 }
 
 
