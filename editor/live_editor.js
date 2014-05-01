@@ -2,13 +2,12 @@ function $(e) {
   return document.querySelector(e);
 }
 
-function init_ui() {
-  ed = $("#editor");
+function init_ui(text_editor, demo_canvas) {
   keys = [];
   marks = [];
   rendering = false;
 
-  editor = CodeMirror.fromTextArea(ed, {
+  editor = CodeMirror.fromTextArea(text_editor, {
     mode: "text/javascript",
     matchBrackets: true,
     autoCloseBrackets: true,
@@ -19,18 +18,28 @@ function init_ui() {
   document.addEventListener("keypress", function(e) {
     if (e.ctrlKey && (e.keyCode == 13 || e.keyCode == 10)) {
       if (!rendering) {
-        editor_build();
+        editor_build(current_plugin);
       }
     }
   });
 
-  var demo_render = $("#renderer");
-  demo_render.style.border = "1px solid red";
+  demo_canvas.style.border = "1px solid red";
 }
 
-function init_editor_all(plugin) {
-  init_ui();
-  ctx = plugin.init();
+function set_current_plugin(plugin) {
+  if (current_plugin !== plugin) {
+    if (current_plugin && current_plugin.destroy) {
+      current_plugin.destro()
+    }
+    plugin.init();
+    current_plugin = plugin;
+  }
+}
+
+function init_editor(plugin) {
+  init_ui($("#editor"), $("#renderer"));
+  current_plugin = null;
+  set_current_plugin(plugin);
 }
 
 function editor_build(plugin) {
@@ -43,7 +52,7 @@ function editor_build(plugin) {
   rendering = true;
 
   try {
-    plugin.execute(editor.getValue(), ctx);
+    plugin.execute(editor.getValue(), dest_asset);
   } catch(e) {
     err = true;
     var doc = editor.getDoc();
@@ -58,7 +67,7 @@ function editor_build(plugin) {
       )
     );
   }
-  plugin.render(ctx);
+  plugin.render(dest_asset);
   rendering = false;
   textarea = editor.getWrapperElement();
   if (err) {
