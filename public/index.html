@@ -25,10 +25,20 @@
 			{
 				position: absolute;
 				left: 300px;
-				right: 0px;
+				right: 800px;
 				top: 52px;
 				bottom: 0px;
 				background-color: #bbb;
+			}
+			
+			#engine
+			{
+				position: absolute;
+				right: 0px;
+				width: 800px;
+				top: 52px;
+				bottom: 0px;
+				background-color: #000;
 			}
 			
 			#navbar
@@ -87,6 +97,9 @@
 			<tde-asset-list></tde-asset-list>
 		</div>
 		<div id="content" ng-view></div>
+		<div id="engine">
+			<tde-engine-view></tde-engine-view>
+		</div>
 		
 		<div id="connection-overlay" ng-hide="connected">
 			<div class="center">Connecting...</div>
@@ -112,5 +125,15 @@
 		<script src="/js/editor/tde.controllers.js"></script>
 		<script src="/js/editor/tde.directives.js"></script>
 		<script src="/js/editor/tde.services.js"></script>
+		
+		<script src="/js/engine/audio.js"></script>
+		<script src="/js/engine/demo.js"></script>
+		<script src="/js/engine/engine.js"></script>
+		<script src="/js/engine/geom.js"></script>
+		<script src="/js/engine/gfx.js"></script>
+		<script src="/js/engine/gl-matrix-custom.js"></script>
+		<script src="/js/engine/seek.js"></script>
+		
+		<script src="/shaders.js"></script>
 	</body>
 </html>

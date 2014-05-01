@@ -205,6 +205,7 @@ app.get("/data/project/:projectId/asset/:assetId", function(req, res)
 })
 
 app.use(express.static(__dirname + "/public"))
+app.use(express.static(__dirname + "/export/shaders"))
 
 server.listen(8084)
 

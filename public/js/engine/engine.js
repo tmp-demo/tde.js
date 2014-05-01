@@ -50,16 +50,30 @@ function main_loop() {
 }
 
 function main() {
+  document.body.innerHTML = "";
+  canvas = document.createElement("canvas");
+  document.body.appendChild(canvas);
+  
+  init_audio();
+  prepare();
+  canvas.width = demo.w;
+  canvas.height = demo.h;
+  gl_init();
+  demo_init();
+  gfx_init();
+  time_init();
+  
+  main_loop();
+}
+
+function editor_main() {
+  canvas = document.getElementById("engine-view")
   init_audio();
   prepare();
   gl_init();
   demo_init();
   gfx_init();
   time_init();
-  
-  // #debug{{
-  if (window.editor_init) { editor_init(); }
-  // #debug}}
 
   main_loop();
 }
