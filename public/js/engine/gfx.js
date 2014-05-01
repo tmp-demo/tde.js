@@ -12,19 +12,7 @@ var GL_STATIC_DRAW;
 var GL_ELEMENT_ARRAY_BUFFER;
 
 function gl_init() {
-  // #debug{{
-  var keepInnerHTML = true
-  // #debug}}
-
-  if (typeof keepInnerHTML === "undefined")
-	document.body.innerHTML = "";
-  canvas = document.createElement("canvas");
-  document.body.appendChild(canvas);
-  canvas.id = "renderer";
   gl = canvas.getContext("experimental-webgl");
-  canvas.width = demo.w;
-  canvas.height = demo.h;
-
   gl.viewport(0, 0, demo.w, demo.h);
   ext = {
     draw_buffers: gl.getExtension("WEBGL_draw_buffers")
@@ -226,7 +214,6 @@ function create_texture(width, height, format, image, allow_repeat) {
   gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   gl.texImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
                 format, gl.UNSIGNED_BYTE, image);
-  console.log(gl.getError()); // #debug
   return { tex: texture, width: width, height: height };
 }
 
