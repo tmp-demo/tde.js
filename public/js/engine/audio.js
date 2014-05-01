@@ -12,5 +12,5 @@ function init_audio() {
   gain.gain.value = 0
   osc.connect(gain)
   gain.connect(audioContext.destination)
-  osc.start()
+  osc.start(0)
 }
