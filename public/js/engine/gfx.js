@@ -321,7 +321,6 @@ function clear() {
 
 function render_scene(scene) {
   // reload geometries if needed
-
   var td = demo.current_time;
   var ts = td - scene.start_time;
   var tsn = ts/scene.duration;

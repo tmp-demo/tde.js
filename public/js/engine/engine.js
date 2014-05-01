@@ -51,21 +51,18 @@ function main_loop() {
 
 function main() {
   console.log("main");
-  init_audio();
   prepare();
   gl_init();
   demo_init();
   gfx_init();
   time_init();
-  
+
+  render_scene(demo.scenes[0]);
+  init_audio();
+
   // #debug{{
   if (window.editor_init) { editor_init(); }
   // #debug}}
 
-  render_scene({
-    start_time: 0,
-    duration: 0,
-    passes: demo.pre_render
-  });
   main_loop();
 }

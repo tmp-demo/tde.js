@@ -110,6 +110,7 @@ function demo_init() {
   textures.tex_half1  = create_texture(width/2, height/2);
   textures.tex1       = create_texture();
   textures.tex2       = create_texture();
+  textures.noise      = create_texture(256,256, null, null, true);
 
   geometries.cube = create_geom([
     // Front face     | normals        | tex coords
@@ -166,10 +167,17 @@ function demo_init() {
   var projectionMatrix = mat4.create()
   var viewProjectionMatrix = mat4.create()
 
-  demo.pre_render = [
-  ];
-
   demo.scenes = [
+    {
+      duration: 0,
+      passes: [
+        {
+          render_to: {color: [textures.noise], w:256, h:256},
+          render: draw_quad,
+          program: programs.noise
+        },
+      ]
+    },
     {
       duration: 10000,
       update: null,
@@ -178,7 +186,7 @@ function demo_init() {
           render_to: {color: [textures.tex1, textures.tex2], depth: depth_rb}, render: clear
         },
         {
-          texture_inputs: [],
+          texture_inputs: [textures.noise],
           render_to: {color: [textures.tex1, textures.tex2], depth: depth_rb},
           update: function(scenes, scene, time) {
             vec3.lerp(cameraPosition, [5.0, -2.0, 5.0], [20.0, 0.0, 3.0], time.scene_norm);
