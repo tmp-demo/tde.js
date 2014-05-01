@@ -75,7 +75,7 @@ function prepare() {
 
   demo.w = 800;
   demo.h = 600;
- }
+}
 
 function blur_pass(in_tex, out_tex, vec, res) {
   var p = {
@@ -98,13 +98,16 @@ function blur_pass(in_tex, out_tex, vec, res) {
 function demo_init() {
   console.log("demo_init"); // #debug
   
-  depth_rb   = create_depth_buffer(canvas.width, canvas.height);
-  depth_half = create_depth_buffer(canvas.width/2,canvas.height/2);
+  var width = demo.w;
+  var height = demo.h;
 
-  textures.blur1      = create_texture(canvas.width/2, canvas.height/2);
-  textures.blur2      = create_texture(canvas.width/2, canvas.height/2);
-  textures.blur3      = create_texture(canvas.width/2, canvas.height/2);
-  textures.tex_half1  = create_texture(canvas.width/2, canvas.height/2);
+  depth_rb   = create_depth_buffer(width, height);
+  depth_half = create_depth_buffer(width/2,height/2);
+
+  textures.blur1      = create_texture(width/2, height/2);
+  textures.blur2      = create_texture(width/2, height/2);
+  textures.blur3      = create_texture(width/2, height/2);
+  textures.tex_half1  = create_texture(width/2, height/2);
   textures.tex1       = create_texture();
   textures.tex2       = create_texture();
 
@@ -162,6 +165,9 @@ function demo_init() {
   var viewMatrix = mat4.create()
   var projectionMatrix = mat4.create()
   var viewProjectionMatrix = mat4.create()
+
+  demo.pre_render = [
+  ];
 
   demo.scenes = [
     {

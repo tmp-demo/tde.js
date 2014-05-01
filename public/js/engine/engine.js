@@ -75,5 +75,10 @@ function editor_main() {
   gfx_init();
   time_init();
 
+  render_scene({
+    start_time: 0,
+    duration: 0,
+    passes: demo.pre_render
+  });
   main_loop();
 }
