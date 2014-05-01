@@ -53,16 +53,14 @@ function main() {
   console.log("main");
   init_audio();
   prepare();
-  loader_init(function(){
-    gl_init();
-    demo_init();
-    gfx_init();
-    time_init();
+  gl_init();
+  demo_init();
+  gfx_init();
+  time_init();
+  
+  // #debug{{
+  if (window.editor_init) { editor_init(); }
+  // #debug}}
 
-    // #debug{{
-    if (window.editor_init) { editor_init(); }
-    // #debug}}
-
-    main_loop();
-  });
+  main_loop();
 }
