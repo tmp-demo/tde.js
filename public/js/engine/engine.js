@@ -50,7 +50,6 @@ function main_loop() {
 }
 
 function main() {
-  console.log("main");
   init_audio();
   prepare();
   gl_init();

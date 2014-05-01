@@ -49,7 +49,6 @@ function find_scene_for_time(time) {
       }
     }
   }
-  console.log("No scene found for time " + time);
   return demo.scenes[demo.scenes.length - 1];
 }
 
@@ -62,8 +61,6 @@ function update_time() {
 
 
 function time_init() {
-  console.log("time_init");
-
   seeker = document.getElementById("seeker");
   if (seeker) {
     seeker.addEventListener("input", function (e) {

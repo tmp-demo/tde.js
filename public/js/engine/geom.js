@@ -104,6 +104,4 @@ function compute_normals(geom, normal_offset, first_index, n_indices) {
         }
         i+=3;
     }
-    console.log(ibo);
-    console.log(vbo);
 }
