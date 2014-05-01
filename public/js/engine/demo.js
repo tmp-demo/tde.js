@@ -175,7 +175,7 @@ function demo_init() {
           render_to: {color: [textures.noise], w:256, h:256},
           render: draw_quad,
           program: programs.noise
-        },
+        }
       ]
     },
     {
@@ -183,7 +183,8 @@ function demo_init() {
       update: null,
       passes: [
         {
-          render_to: {color: [textures.tex1, textures.tex2], depth: depth_rb}, render: clear
+          render_to: {color: [textures.tex1, textures.tex2], depth: depth_rb},
+          render: clear
         },
         {
           texture_inputs: [textures.noise],
