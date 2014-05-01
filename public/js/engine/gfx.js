@@ -321,12 +321,6 @@ function clear() {
 
 function render_scene(scene) {
   // reload geometries if needed
-  for (var g in geometries) {
-    if (geometries[g].reload === true) {
-      upload_geom(geometries[g]);
-      geometries[g].reload = false;
-    }
-  }
 
   var td = demo.current_time;
   var ts = td - scene.start_time;

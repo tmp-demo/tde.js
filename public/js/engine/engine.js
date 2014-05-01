@@ -62,5 +62,10 @@ function main() {
   if (window.editor_init) { editor_init(); }
   // #debug}}
 
+  render_scene({
+    start_time: 0,
+    duration: 0,
+    passes: demo.pre_render
+  });
   main_loop();
 }
