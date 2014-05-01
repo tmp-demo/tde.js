@@ -75,13 +75,7 @@ function prepare() {
 
   demo.w = 800;
   demo.h = 600;
-  
-  // here goes the code that declares the resources to load
-  load_audio("z.ogg", function(data) { zogg = data });
-
-  load_image("paul.jpg", function(data) { image_paul = data; });
-  load_image("bricks.png", function(data) { image_bricks = data; });
-}
+ }
 
 function blur_pass(in_tex, out_tex, vec, res) {
   var p = {
@@ -111,10 +105,8 @@ function demo_init() {
   textures.blur2      = create_texture(canvas.width/2, canvas.height/2);
   textures.blur3      = create_texture(canvas.width/2, canvas.height/2);
   textures.tex_half1  = create_texture(canvas.width/2, canvas.height/2);
-  textures.tex_paul   = create_texture(image_paul.width, image_paul.height, gl.RGBA, image_paul.data);
   textures.tex1       = create_texture();
   textures.tex2       = create_texture();
-  textures.bricks = create_texture(image_bricks.width, image_bricks.height, gl.RGBA, image_bricks.data, true);
 
   geometries.cube = create_geom([
     // Front face     | normals        | tex coords
@@ -180,7 +172,7 @@ function demo_init() {
           render_to: {color: [textures.tex1, textures.tex2], depth: depth_rb}, render: clear
         },
         {
-          texture_inputs: [textures.bricks],
+          texture_inputs: [],
           render_to: {color: [textures.tex1, textures.tex2], depth: depth_rb},
           update: function(scenes, scene, time) {
             vec3.lerp(cameraPosition, [5.0, -2.0, 5.0], [20.0, 0.0, 3.0], time.scene_norm);
@@ -207,7 +199,7 @@ function demo_init() {
           render_to: {color: [textures.tex1], depth: depth_rb}, render: clear
         },
         {
-          texture_inputs: [textures.tex_paul],
+          texture_inputs: [],
           render_to: {color: [textures.tex1], depth: depth_rb},
           update: function(scenes, scene, time) {
             vec3.lerp(cameraPosition, [0.0, -10.0, 10.0], [10.0, 0.0, 3.0], time.scene_norm);
@@ -276,8 +268,4 @@ function demo_init() {
       ]
     }
   ];
-
-  demo.audio_source = demo.ac.createBufferSource();
-  demo.audio_source.buffer = zogg;
-  demo.audio_source.connect(demo.audio_sink);
 }

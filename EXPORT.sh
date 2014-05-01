@@ -2,7 +2,7 @@
 
 echo " -- preparing..."
 rm -rf ./export
-mkdir -p ./export/assets
+mkdir -p ./export
 mkdir -p tools
 
 echo " -- building shaders"
@@ -16,9 +16,6 @@ do
 done
 cat ./export/shaders/shaders.js >> ./export/demo.js
 echo "window.onload=main;" >> ./export/demo.js
-
-echo " -- copying assets..."
-cp -r ./engine_tde_old/assets/*.* ./export/assets/
 
 if [ ! -f tools/compiler.jar ]; then
     echo " -- tools/compiler.jar not found, now downloading it..."

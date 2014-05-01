@@ -7,19 +7,18 @@ demo = {
   current_time: 0,
   start_time: 0,
   end_time: 0,
-  PAUSED: 0,
-  PLAYING: 1,
-  ENDED: 2,
-  play_state: 1,
-  looping: false,
-  recording: false,
-  editor:false,
-  audiocontext: null
 };
 
 function main_loop() {
+  if (demo.current_time <= demo.end_time) {
+    demo.current_scene = find_scene_for_time(demo.current_time);
+    update_time()
+    render_scene(demo.current_scene);
+    requestAnimationFrame(main_loop);
+  }
+  
   // reload all geometry that has reaload set to true
-  for (var g in geometries) {
+  /*for (var g in geometries) {
     if (geometries[g].reload === true) {
       upload_geom(geometries[g]);
       geometries[g],reload = false;
@@ -40,7 +39,6 @@ function main_loop() {
       }
       // #debug}}
       demo.playState = demo.PLAYING;
-      update_text();
     } else {
       console.log("demo ended"); //#debug
       demo.play_state = demo.ENDED;
@@ -48,12 +46,12 @@ function main_loop() {
         stichFramesForDownload();
       }
     }
-  }
+  }*/
 }
 
 function main() {
   console.log("main");
-  init_audio(demo);
+  init_audio();
   prepare();
   loader_init(function(){
     gl_init();
@@ -65,25 +63,6 @@ function main() {
     if (window.editor_init) { editor_init(); }
     // #debug}}
 
-    demo.audio_source.start(0);
     main_loop();
   });
-}
-
-function update_text() {
-  //look for existing text that could be out of date
-  //look for curently inexisting text that should be displayed
-  if (demo.Texts) {
-    for(var i = 0; i < demo.Texts.length; i++){
-      var ct = demo.Texts[i];
-      if(ct.instance !== null && ( demo.current_time < ct.start || demo.current_time > ct.end)){
-        //remove it !
-        removeText(ct.instance);
-        ct.instance = null;
-      } else if(ct.instance == null && ( demo.currentTime > ct.start && demo.currentTime < ct.end)) {
-        //add it !
-        ct.instance = addText(ct.text, ct.top, ct.left, ct.classname);
-      }
-    }
-  }
 }

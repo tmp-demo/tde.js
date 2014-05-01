@@ -55,7 +55,7 @@ function find_scene_for_time(time) {
 
 
 function update_time() {
-  demo.current_time = demo.ac.currentTime * 1000 - demo.start_time;
+  demo.current_time = audioContext.currentTime * 1000 - demo.start_time;
   if (seeker) { seeker.value = demo.current_time; } //#OPT
   demo.clip_time = demo.current_time - demo.current_scene.start;
 }
