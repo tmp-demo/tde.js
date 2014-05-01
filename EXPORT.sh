@@ -10,15 +10,15 @@ echo " -- building shaders"
 
 echo " -- concatenating js files and stripping debug code..."
 
-for f in  *.js
+for f in  ./public/js/engine/*.js
 do
-    ./opt.py $f >> ./export/demo.js
+    ./tools/opt.py $f >> ./export/demo.js
 done
 cat ./export/shaders/shaders.js >> ./export/demo.js
 echo "window.onload=main;" >> ./export/demo.js
 
 echo " -- copying assets..."
-cp -r ./assets/*.* ./export/assets/
+cp -r ./engine_tde_old/assets/*.* ./export/assets/
 
 if [ ! -f tools/compiler.jar ]; then
     echo " -- tools/compiler.jar not found, now downloading it..."
