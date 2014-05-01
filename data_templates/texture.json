@@ -1,0 +1,3 @@
+{
+	"code": "/* ctrl + enter or touch canvas to render */\n/* cv = document.getElementByTagName("canvas")[0] */\n/* (w, h) = (cv.width, cv.height) */\n/* c = cv.getContext('2d') */\n/* b = c.createImageData(w, h) */\nsimplex_noise(b, w, h, 10000, 0.1);\nhblur(b, 15);\n/* noise(b); */\n"
+}

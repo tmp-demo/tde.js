@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html ng-app="tde">
+	<head>
+		<title>tde</title>
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+		
+		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="lib/jquery/jquery.mCustomScrollbar.css" type="text/css" />
+		<link rel="stylesheet" href="lib/codemirror/codemirror.css" type="text/css" />
+		<link rel="stylesheet" href="lib/codemirror/monokai.css" type="text/css" />
+		
+		<link rel="stylesheet" href="css/asset-list.css" />
+		<link rel="stylesheet" href="css/texture-editor.css" />
+		
+		<style type="text/css">
+			body
+			{
+				margin: 0px;
+				padding: 0px;
+				background-color: #444;
+			}
+			
+			#content
+			{
+				position: absolute;
+				left: 300px;
+				right: 0px;
+				top: 52px;
+				bottom: 0px;
+				background-color: #bbb;
+			}
+			
+			#navbar
+			{
+				margin: 0px;
+				box-shadow: 0px 0px 5px #111;
+				z-index: 102;
+			}
+			
+			#connection-overlay
+			{
+				position: absolute;
+				left: 0px;
+				right: 0px;
+				top: 0px;
+				bottom: 0px;
+				background-color: #fff;
+				opacity: 0.8;
+				z-index: 200;
+			}
+			
+			#connection-overlay .center
+			{
+				text-align: center;
+				height: 100px;
+				line-height: 100px;
+				text-shadow: 3px 3px 3px #aaa;
+				font-size: 50px;
+				position: relative;
+				top: 50%;
+				transform: translateY(-50%);
+			}
+			
+			#connection-overlay.ng-hide-add, #connection-overlay.ng-hide-remove
+			{
+				transition:all linear 0.4s;
+				display:block!important;
+			}
+			
+			#connection-overlay.ng-hide-add.ng-hide-add-active,
+			#connection-overlay.ng-hide-remove
+			{
+				opacity: 0;
+			}
+			
+			#connection-overlay.ng-hide-add,
+			#connection-overlay.ng-hide-remove.ng-hide-remove-active
+			{
+				opacity: 0.8;
+			}
+		</style>
+	</head>
+	<body ng-controller="ApplicationCtrl">
+		<tde-navbar></tde-navbar>
+		<div ng-controller="AssetListCtrl" id="assets">
+			<tde-asset-list></tde-asset-list>
+		</div>
+		<div id="content" ng-view></div>
+		
+		<div id="connection-overlay" ng-hide="connected">
+			<div class="center">Connecting...</div>
+		</div>
+		
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.12/angular.min.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.12/angular-animate.min.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.12/angular-route.min.js"></script>
+		<script src="https://apis.google.com/js/plusone.js"></script>
+		<script src="https://apis.google.com/js/client:plusone.js"></script>
+		<script src="socket.io/socket.io.js"></script>
+		
+		<script src="/lib/jquery/jquery.mousewheel.min.js"></script>
+		<script src="/lib/jquery/jquery.mCustomScrollbar.concat.min.js"></script>
+		
+		<script src="/lib/codemirror/codemirror.js"></script>
+		<script src="/lib/codemirror/clike.js"></script>
+		<script src="/lib/codemirror/javascript.js"></script>
+		
+		<script src="/js/editor/tde.js"></script>
+		<script src="/js/editor/tde.controllers.js"></script>
+		<script src="/js/editor/tde.directives.js"></script>
+		<script src="/js/editor/tde.services.js"></script>
+	</body>
+</html>

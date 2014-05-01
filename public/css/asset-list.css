@@ -1,0 +1,108 @@
+#assets
+{
+	position: absolute;
+	left: 0px;
+	width: 300px;
+	top: 52px;
+	bottom: 0px;
+	background-color: #333;
+	padding: 10px;
+	box-shadow: 0px 0px 5px #111;
+	z-index: 101;
+}
+
+#assets .search-box
+{
+	background-color: #666;
+	color: #fff;
+	border-color: #999;
+}
+
+#assets .search-box::-moz-placeholder
+{
+	color: #ddd;
+}
+
+#assets .search-box::-webkit-input-placeholder
+{
+	color: #ddd;
+}
+
+#assets .search-box:focus
+{
+	background-color: #777;
+}
+
+#assets .scrollable
+{
+	position: absolute;
+	left: 0px;
+	width: 300px;
+	top: 54px;
+	bottom: 54px;
+	overflow: auto;
+	padding: 0px 10px 0px 10px;
+}
+
+#assets .asset-list
+{
+	list-style-type: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+#assets .asset-list li
+{
+	color: #ddd;
+	padding: 5px 8px;
+	border-radius: 4px;
+	text-decoration: none;
+}
+
+#assets .asset-list li:hover
+{
+	color: #fff;
+	background-color: #555;
+	cursor: pointer;
+}
+
+#assets .asset-list li.active
+{
+	color: #fff;
+	background-color: #777;
+}
+
+#assets .asset-list li form
+{
+	display: inline;
+}
+
+#assets .rename-box
+{
+	background-color: #ccc;
+	border-radius: 2px;
+	color: #000;
+	border: 0px;
+	height: 20px;
+	width: 215px;
+}
+
+#assets .rename-box::-moz-placeholder
+{
+	color: #333;
+}
+
+#assets .rename-box::-webkit-input-placeholder
+{
+	color: #333;
+}
+
+#assets .add-button
+{
+	position: absolute;
+	left: 0px;
+	width: 300px;
+	height: 54px;
+	bottom: 0px;
+	padding: 10px;
+}

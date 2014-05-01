@@ -1,0 +1,31 @@
+<div ng-controller="NavbarCtrl" id="navbar" class="navbar navbar-inverse" role="navigation">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<span class="navbar-brand">/<a href="#/">tmp</a>/<a href="#{{projectId}}">{{projectId}}</a>/{{assetId}}</span>
+		</div>
+		<ul class="nav navbar-nav navbar-right">
+			<li class="dropdown">
+				<a href="" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> {{currentUser.name}}</a>
+				<ul class="dropdown-menu">
+					<li><a href="#/" ng-click="logout()"><span class="glyphicon glyphicon-off"></span> Logout</a></li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+		<!--<div class="nav navbar-nav">
+			<ol class="breadcrumb">
+				<li><a href="#/">tmp</a></li>
+				<li><a href="#/{{projectId}}">{{projectId}}</a></li>
+				<li class="active">{{assetId}}</li>
+			</ol>
+		</div>
+	</div>-->
+	<!--<ul class="nav navbar-nav navbar-right">
+		<li class="dropdown">
+			<a href="#" class="dropdown-toggle" data-toggle="dropdown">wsmind <b class="caret"></b></a>
+			<ul class="dropdown-menu">
+				<li><a href="#">Logout</a></li>
+			</ul>
+		</li>
+	</ul>-->
+</div>

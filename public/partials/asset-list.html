@@ -1,0 +1,27 @@
+<div ng-show="projectId">
+	<input type="text" ng-model="query" class="form-control search-box" placeholder="Search assets" />
+	<div class="scrollable">
+		<ul class="asset-list">
+			<li ng-repeat="asset in assets | filter:query | orderBy:'name'" ng-click="selectAsset(asset)" ng-class="getActiveClass(asset)" ng-dblclick="startRename(asset)">
+				<span ng-class="getIconClass(asset)"></span>
+				<span ng-hide="editedAsset == asset">{{asset.name}}</span>
+				<form ng-show="editedAsset == asset" ng-submit="finishRename()">
+					<input ng-show="editedAsset == asset" type="text" ng-model="$parent.tempName" class="rename-box" placeholder="{{asset.type}} name" ng-blur="finishRename()" ng-keypress="checkEscape($event)" />
+				</form>
+			</li>
+		</ul>
+	</div>
+	<div class="add-button">
+		<div class="btn-group btn-block dropup">
+			<button type="button" class="btn btn-block dropdown-toggle" data-toggle="dropdown">
+				<span class="glyphicon glyphicon-plus"></span> Add
+			</button>
+			<ul class="dropdown-menu btn-block" role="menu">
+				<li><a href="" ng-click="createAsset('texture')"><span class="glyphicon glyphicon-picture"></span> Texture</a></li>
+				<li><a href="" ng-click="createAsset('model')"><span class="glyphicon glyphicon-th-large"></span> Model</a></li>
+				<li><a href="" ng-click="createAsset('sequence')"><span class="glyphicon glyphicon-film"></span> Sequence</a></li>
+				<li><a href="" ng-click="createAsset('music')"><span class="glyphicon glyphicon-headphones"></span> Music</a></li>
+			</ul>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,24 @@
+<div id="home" class="jumbotron">
+	<h1>/tmp <small>demo engine</small></h1>
+	<!-- <p>
+		not working :'( 
+		<span id="signinButton">
+			<span
+				class="g-signin"
+				data-callback="signinCallback"
+				data-clientid="229900215779-v49h1oo0bvqunv9vk3njrqoi8np6bbp8.apps.googleusercontent.com"
+				data-cookiepolicy="single_host_origin"
+				data-scope="profile">
+			</span>
+		</span>
+	</p>-->
+	<ul class="list-group">
+		<li ng-repeat="project in projects" class="list-group-item">
+			<a href="#/{{project}}">{{project}}</a>
+		</li>
+	</ul>
+	<form ng-submit="newProject()">
+		<input type="text" ng-model="newProjectName" class="form-control" placeholder="New project" />
+		<div ng-show="error" class="alert alert-danger"><strong>Oops</strong><br />{{error}}</div>
+	</form>
+</div>
