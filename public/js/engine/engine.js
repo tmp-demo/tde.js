@@ -6,7 +6,7 @@ demo = {
   current_scene: null,
   current_time: 0,
   start_time: 0,
-  end_time: 0,
+  end_time: 0
 };
 
 function main_loop() {
