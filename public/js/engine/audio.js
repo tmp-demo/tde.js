@@ -8,6 +8,9 @@ function init_audio() {
   }
   
   var osc = audioContext.createOscillator()
-  osc.connect(audioContext.destination)
+  var gain = audioContext.createGain()
+  gain.gain.value = 0
+  osc.connect(gain)
+  gain.connect(audioContext.destination)
   osc.start()
 }
