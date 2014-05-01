@@ -15,7 +15,7 @@ function gl_init() {
   // #debug{{
   var keepInnerHTML = true
   // #debug}}
-  
+
   if (typeof keepInnerHTML === "undefined")
 	document.body.innerHTML = "";
   canvas = document.createElement("canvas");
@@ -209,8 +209,8 @@ function load_shader_program(vs_entry_point, fs_entry_point) {
 function create_texture(width, height, format, image, allow_repeat) {
   var image = image || null;
   var format = format || gl.RGBA;
-  width = width || canvas.width;
-  height = height || canvas.height;
+  width = width || demo.w;
+  height = height || demo.h;
   if (image) {
     image = new Uint8Array(image, 0, 0);
   }
@@ -342,8 +342,8 @@ function render_scene(scene) {
     if (pass.program) {
       var shader_program = pass.program;
       gl.useProgram(shader_program);
-      var rx = canvas.width;
-      var ry = canvas.height;
+      var rx = demo.w;
+      var ry = demo.h;
       if (pass.render_to) {
         rx = pass.render_to.w || rx;
         ry = pass.render_to.h || ry;
