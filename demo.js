@@ -1,18 +1,3 @@
-
-base_uniforms = "precision lowp float;"+
-                "uniform float time;"+
-                "uniform float duration;"+
-                "uniform float beat;"+
-                "uniform vec2  resolution;";
-
-basic2_fs = base_uniforms +
-            "uniform sampler2D texture_0;"+
-            "void main() {"+
-            "    vec4 sample = texture2D(texture_0, gl_FragCoord.xy);"+
-            "    float f = time/duration;"+
-            "    gl_FragColor = vec4(sample.r,f,f,1.0);"+
-            "}";
-
 function circle_ring(radius, num_edges, z) {
   var a = 2 * Math.PI / num_edges;
   var r = []; 
@@ -90,30 +75,8 @@ function prepare() {
 
   demo.w = 800;
   demo.h = 600;
+  
   // here goes the code that declares the resources to load
-  // TODO - proper shader pipeline
-
-  // every object of layout { src:<source code>, ... } in vertex_shaders will
-  // be compiled as a vertex shader in an additional shader member
-  // -> { src: <srouce code>, shader: <shader object>, ... }
-  // see gfx_init
-  load_text("quad.vs", function(data) { vertex_shaders.quad = { src: data} } );
-  load_text("basic3d.vs", function(data) { vertex_shaders.basic_3d = { src: data } } );
-
-  // same for frahment shaders
-  load_text("red.fs", function(data) { fragment_shaders.red = { src: data } } );
-  load_text("blue.fs", function(data) { fragment_shaders.blue = { src: data } } );
-  load_text("chroma.fs", function(data) { fragment_shaders.chroma = { src: data } } );
-  load_text("textured.fs", function(data) { fragment_shaders.textured = { src: data } } );
-  load_text("show_normals.fs", function(data) { fragment_shaders.show_normals = { src: data } } );
-  load_text("show_tex_coords.fs", function(data) { fragment_shaders.show_tex_coords = { src: data } } );
-  load_text("dblur.fs", function(data) { fragment_shaders.directional_blur = { src: data } } );
-  load_text("select4.fs", function(data) { fragment_shaders.select = { src: data } } );
-  // comment out the line below if you don't have support for WEBGL_draw_buffers
-  load_text("deferred.fs", function(data) { fragment_shaders.deferred = { src: data } } );
-  load_text("show_deferred.fs", function(data) { fragment_shaders.show_deferred = { src: data } } );
-  load_text("post_test.fs", function(data) { fragment_shaders.post_test = { src: data } } );
-
   load_audio("z.ogg", function(data) { zogg = data });
 
   load_image("paul.jpg", function(data) { image_paul = data; });
@@ -127,7 +90,7 @@ function blur_pass(in_tex, out_tex, vec, res) {
       var NB_TAPS = 10
       var dx = vec[0] / NB_TAPS / res[0];
       var dy = vec[1] / NB_TAPS / res[1];
-      gl.uniform2f(gl.getUniformLocation(programs.dblur.program, "step"), dx, dy);
+      gl.uniform2f(gl.getUniformLocation(programs.dblur, "step"), dx, dy);
     },
     render: draw_quad,
     program: programs.dblur
@@ -140,52 +103,7 @@ function blur_pass(in_tex, out_tex, vec, res) {
 
 function demo_init() {
   console.log("demo_init"); // #debug
-
-  // all of the objects in programs are compiled at the beginning of the demo
-  // -> programs.<name> = { vs: <shader>, fs:<shader>, program: <program> }
-  // the shaders specified below are the "wrapper" objects that contain also
-  // the source, not just the gl object.
-  // see gfx_init
-
-  // comment out program.deferred if you don't have support for
-  // WEBGL_draw_buffers
-  programs.deferred = {
-    vs: vertex_shaders.basic_3d,
-    fs: fragment_shaders.deferred
-  };
-  programs.show_deferred = {
-    vs: vertex_shaders.quad,
-    fs: fragment_shaders.show_deferred
-  };
-  programs.post_misc = {
-    vs: vertex_shaders.quad,
-    fs: fragment_shaders.post_test
-  };
-  programs.textured = {
-    vs: vertex_shaders.basic_3d,
-    fs: fragment_shaders.textured
-  };
-  programs.show_normals = {
-    vs: vertex_shaders.basic_3d,
-    fs: fragment_shaders.show_normals
-  };
-  programs.show_tex_coords = {
-    vs: vertex_shaders.basic_3d,
-    fs: fragment_shaders.show_tex_coords
-  };
-  programs.dblur = {
-    vs: vertex_shaders.quad,
-    fs: fragment_shaders.directional_blur
-  };
-  programs.select4 = {
-    vs: vertex_shaders.quad,
-    fs: fragment_shaders.select
-  };
-  programs.blue = {
-    vs: vertex_shaders.quad,
-    fs: fragment_shaders.blue
-  };
-
+  
   depth_rb   = create_depth_buffer(canvas.width, canvas.height);
   depth_half = create_depth_buffer(canvas.width/2,canvas.height/2);
 
@@ -254,7 +172,6 @@ function demo_init() {
   var viewProjectionMatrix = mat4.create()
 
   demo.scenes = [
-    // scene 1 - comment it out if you don't have support for WEBGL_draw_buffers
     {
       duration: 10000,
       update: null,
@@ -340,7 +257,7 @@ function demo_init() {
       ]
     },
     {
-      duration: 10000,
+      duration: 20000,
       passes: [
         {
           render: clear
@@ -357,26 +274,6 @@ function demo_init() {
           program: programs.show_normals
         }
       ]
-    },
-    // scene 2, render nothing for 700ms
-    {
-      duration: 700,
-      passes: []
-    },
-    // scene 2
-    {
-      name:"blue", //#debug
-      duration: 10000,
-      passes: [
-        {
-          program: programs.blue,
-          render: draw_quad
-        }
-      ]
-    },
-    {
-      duration: 1000,
-      passes: []
     }
   ];
 

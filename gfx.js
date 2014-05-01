@@ -73,6 +73,8 @@ function gl_init() {
       type: demo_uniforms[i].type
     }
   }
+  
+  load_shaders();
 }
 
 _quad_vbo = null;
@@ -117,19 +119,6 @@ function gfx_init() {
         pass.fbo = frame_buffer(pass.render_to);
       }
     }
-  }
-
-  for (var vs in vertex_shaders) {
-    vertex_shaders[vs].shader = compile_shader(vertex_shaders[vs].src,
-      gl.VERTEX_SHADER);
-  }
-  for (var fs in fragment_shaders) {
-    fragment_shaders[fs].shader = compile_shader(fragment_shaders[fs].src,
-      gl.FRAGMENT_SHADER);
-  }
-  for (var p in programs) {
-    var prog = programs[p];
-    prog.program = shader_program(prog.vs, prog.fs);
   }
 }
 
@@ -184,7 +173,7 @@ function draw_mesh(data) {
   }
 }
 
-// type: gl.VERTEX_PROGRAM or gl.FRAGMENT_PROGRAM
+// type: gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
 function compile_shader(txt_src, type) {
   var shader = gl.createShader(type);
   gl.shaderSource(shader, txt_src);
@@ -197,20 +186,21 @@ function compile_shader(txt_src, type) {
   return shader;
 }
 
-function shader_program(vs, fs) {
+function load_shader_program(vs_entry_point, fs_entry_point) {
+  var vs = vs_shader_source.replace(vs_entry_point + "()", "main()");
+  var fs = fs_shader_source.replace(fs_entry_point + "()", "main()");
   var program = gl.createProgram();
-  gl.attachShader(program, vs.shader);
-  gl.attachShader(program, fs.shader);
+  gl.attachShader(program, compile_shader(vs, gl.VERTEX_SHADER));
+  gl.attachShader(program, compile_shader(fs, gl.FRAGMENT_SHADER));
+  
   for (var i in _locations) {
     gl.bindAttribLocation(program, i, _locations[i]);
   }
-
+  
   gl.linkProgram(program);
   // #debug{{
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    alert("Program link error: " +
-          gl.getProgramParameter(program, gl.VALIDATE_STATUS) +
-          "\nERROR: " + gl_error());
+    alert("Program link error: " + gl.getProgramInfoLog(program));
   }
   // #debug}}
   return program;
@@ -324,6 +314,8 @@ function set_uniforms(program) {
 }
 
 function clear() {
+  gl.clearColor(1.0, 1.0, 0.0, 1.0);
+  gl.clearDepth(1.0);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 }
 
@@ -354,7 +346,7 @@ function render_scene(scene) {
   for (var p in scene.passes) {
     var pass = scene.passes[p];
     if (pass.program) {
-      var shader_program = pass.program.program;
+      var shader_program = pass.program;
       gl.useProgram(shader_program);
       var rx = canvas.width;
       var ry = canvas.height;

@@ -5,12 +5,16 @@ rm -rf ./export
 mkdir -p ./export/assets
 mkdir -p tools
 
+echo " -- building shaders"
+./BUILD_SHADERS.sh
+
 echo " -- concatenating js files and stripping debug code..."
 
 for f in  *.js
 do
     ./opt.py $f >> ./export/demo.js
 done
+cat ./export/shaders/shaders.js >> ./export/demo.js
 echo "window.onload=main;" >> ./export/demo.js
 
 echo " -- copying assets..."
@@ -32,7 +36,7 @@ echo " -- done."
 
 cp minified.html export/minified.html
 
-wc -c *.js
+wc -c *.js ./export/shaders/shaders.js
 wc -c ./export/demo.js
 wc -c ./export/demo_min.js
 wc -c ./export/demo.png.html
