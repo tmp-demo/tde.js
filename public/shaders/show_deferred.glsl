@@ -22,8 +22,8 @@ void main_fs_show_deferred() {
     vec3 lightDirection = normalize(vec3(1.0, 1.0, 1.0));
     float diffuse = clamp(dot(normal, lightDirection), 0.0, 1.0);
 	float fogFactor = exp(-depth);
-	vec3 fogColor = vec3(0.0, 0.0, 0.0);
-	vec3 color = mix(fogColor, diffuse * albedo, fogFactor);// lerp(a, b, t) = t * a + (1 - t) * b
+	vec3 fogColor = mix(vec3(1.0, 1.0, 0.7), vec3(0.8, 0.9, 1.0), dot(v_tex_coords.xy, vec2(0.707, 0.707)));
+	vec3 color = mix(fogColor, diffuse * albedo, fogFactor);
     gl_FragData[0] = vec4(color, 1.0);
   } else if (v < 0.50) {
     gl_FragData[0] = vec4(normal, 1.0);

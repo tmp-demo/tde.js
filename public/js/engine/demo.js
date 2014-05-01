@@ -190,8 +190,8 @@ function demo_init() {
           texture_inputs: [textures.noise],
           render_to: {color: [textures.tex1, textures.tex2], depth: depth_rb},
           update: function(scenes, scene, time) {
-            vec3.lerp(cameraPosition, [5.0, -2.0, 5.0], [20.0, 0.0, 3.0], time.scene_norm);
-            mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,-5.0], [0.0, 0.0, 1.0]);
+            vec3.lerp(cameraPosition, [2.0, -2.0, 1.0], [3.0, 0.0, 2.0], time.scene_norm);
+            mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
             mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
             uniforms["view_proj_mat"].val = viewProjectionMatrix;
