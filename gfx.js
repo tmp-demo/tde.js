@@ -1,4 +1,5 @@
 
+var textures = {}
 var uniforms = {}
 var geometries = {}
 var programs = {}
@@ -236,7 +237,7 @@ function create_texture(width, height, format, image, allow_repeat) {
   gl.texImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
                 format, gl.UNSIGNED_BYTE, image);
   console.log(gl.getError()); // #debug
-  return texture;
+  return { tex: texture, width: width, height: height };
 }
 
 function create_depth_buffer(w,h) {

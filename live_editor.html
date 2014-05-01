@@ -53,6 +53,11 @@ input[type=range] {
   height: 40px;
 }
 
+document {
+  margin: 0px;
+  padding: 0px;
+}
+
 canvas {
   z-index: 1;
   position: absolute;
@@ -73,9 +78,6 @@ canvas {
 }
 
 .CodeMirror {
-  position: absolute;
-  top: 0;
-  left: 0;
   padding: 0.5em;
   margin: 0;
   width: 50%;
@@ -120,40 +122,46 @@ canvas {
 #wrapper {
   background: white;
 }
+
+#AssetList {
+  z-index: 10000;
+}
+
 </style>
 </head>
 <body>
 <div id=wrapper>
-  <textarea id=editor placeholder=>
-    /* ctrl + enter or touch canvas to render */
-    /* cv = document.getElementByTagName("canvas")[0] */
-    /* (w, h) = (cv.width, cv.height) */
-    /* c = cv.getContext('2d') */
-    /* b = c.createImageData(w, h) */
 
-    simplex_noise(b, w, h, 10000, 0.1);
-    gaussian_blur(b, 14);
-    /* noise(b); */
-  </textarea>
-  <canvas>
+  <div id="edition_area">
+    <select id="AssetList" onchange="select_asset()">
+    </select>
+
+    <button id="apply_button" onclick="editor_build()">Apply</button>
+
+    <textarea id="editor">
+      /* ctrl + enter or touch canvas to render */
+      /* cv = document.getElementByTagName("canvas")[0] */
+      /* (w, h) = (cv.width, cv.height) */
+      /* c = cv.getContext('2d') */
+      /* b = c.createImageData(w, h) */
+
+      simplex_noise(b, w, h, 10000, 0.1);
+      gaussian_blur(b, 14);
+      /* noise(b); */
+    </textarea>
+
+  </div>
+
+  <canvas id="render_area">
   </canvas>
-
-  <select id=versions>
-  </select>
-
-<!--
-  <button id=fullscreen>fullscreen</button>
-  <button id=install-btn>install</button>
--->
 
   <div id="footer">
     <input type=range id="seeker">
     <canvas id="timeline">
   </div>
+
 </div>
 <script>
-
-
 
 window.onload = function() {
   // canvas2d
@@ -164,12 +172,10 @@ window.onload = function() {
     demo_init();
     gfx_init();
     time_init();
-
-    if (window.editor_init) { editor_init(); }
-
-    demo.audio_source.start(0);
+    editor_init();
+    //demo.audio_source.start(0);
+    init_live_editor(canvas_editor_plugin);
     main_loop();
-    init_editor(canvas_editor_plugin);
   });
 
 }

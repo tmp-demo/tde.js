@@ -188,14 +188,15 @@ function demo_init() {
 
   depth_rb   = create_depth_buffer(canvas.width, canvas.height);
   depth_half = create_depth_buffer(canvas.width/2,canvas.height/2);
-  blur1      = { tex: create_texture(canvas.width/2, canvas.height/2) };
-  blur2      = { tex: create_texture(canvas.width/2, canvas.height/2) };
-  blur3      = { tex: create_texture(canvas.width/2, canvas.height/2) };
-  tex_half1  = { tex: create_texture(canvas.width/2, canvas.height/2) };
-  tex_paul   = { tex: create_texture(image_paul.width, image_paul.height, gl.RGBA, image_paul.data) };
-  tex1       = { tex: create_texture() };
-  tex2       = { tex: create_texture() };
-  tex_bricks = { tex: create_texture(image_bricks.width, image_bricks.height, gl.RGBA, image_bricks.data, true) };
+
+  textures.blur1      = create_texture(canvas.width/2, canvas.height/2);
+  textures.blur2      = create_texture(canvas.width/2, canvas.height/2);
+  textures.blur3      = create_texture(canvas.width/2, canvas.height/2);
+  textures.tex_half1  = create_texture(canvas.width/2, canvas.height/2);
+  textures.tex_paul   = create_texture(image_paul.width, image_paul.height, gl.RGBA, image_paul.data);
+  textures.tex1       = create_texture();
+  textures.tex2       = create_texture();
+  textures.bricks = create_texture(image_bricks.width, image_bricks.height, gl.RGBA, image_bricks.data, true);
 
   geometries.cube = create_geom([
     // Front face     | normals        | tex coords
@@ -259,11 +260,11 @@ function demo_init() {
       update: null,
       passes: [
         {
-          render_to: {color: [tex1, tex2], depth: depth_rb}, render: clear
+          render_to: {color: [textures.tex1, textures.tex2], depth: depth_rb}, render: clear
         },
         {
-          texture_inputs: [tex_bricks],
-          render_to: {color: [tex1, tex2], depth: depth_rb},
+          texture_inputs: [textures.bricks],
+          render_to: {color: [textures.tex1, textures.tex2], depth: depth_rb},
           update: function(scenes, scene, time) {
             vec3.lerp(cameraPosition, [5.0, -2.0, 5.0], [20.0, 0.0, 3.0], time.scene_norm);
             mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,-5.0], [0.0, 0.0, 1.0]);
@@ -275,7 +276,7 @@ function demo_init() {
           program: programs.deferred
         },
         {
-          texture_inputs: [tex1, tex2],
+          texture_inputs: [textures.tex1, textures.tex2],
           render: draw_quad,
           program: programs.show_deferred
         }
@@ -286,11 +287,11 @@ function demo_init() {
       update: null,
       passes: [
         {
-          render_to: {color: [tex1], depth: depth_rb}, render: clear
+          render_to: {color: [textures.tex1], depth: depth_rb}, render: clear
         },
         {
-          texture_inputs: [tex_paul],
-          render_to: {color: [tex1], depth: depth_rb},
+          texture_inputs: [textures.tex_paul],
+          render_to: {color: [textures.tex1], depth: depth_rb},
           update: function(scenes, scene, time) {
             vec3.lerp(cameraPosition, [0.0, -10.0, 10.0], [10.0, 0.0, 3.0], time.scene_norm);
             mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
@@ -302,37 +303,37 @@ function demo_init() {
           program: programs.show_normals
         },
         blur_pass(
-          tex1, tex_half1,
+          textures.tex1, textures.tex_half1,
           [10.0, 0.0],
           [400, 300]
         ),
         blur_pass(
-          tex_half1, blur1,
+          textures.tex_half1, textures.blur1,
           [0.0, 10.0],
           [400, 300]
         ),
         blur_pass(
-          blur1, tex_half1,
+          textures.blur1, textures.tex_half1,
           [10.0, 0.0],
           [400, 300]
         ),
         blur_pass(
-          tex_half1, blur2,
+          textures.tex_half1, textures.blur2,
           [0.0, 10.0],
           [400, 300]
         ),
         blur_pass(
-          blur2, tex_half1,
+          textures.blur2, textures.tex_half1,
           [10.0, 0.0],
           [400, 300]
         ),
         blur_pass(
-          tex_half1, blur3,
+          textures.tex_half1, textures.blur3,
           [0.0, 10.0],
           [400, 300]
         ),
         {
-          texture_inputs: [tex1, blur1, blur2, blur3],
+          texture_inputs: [textures.tex1, textures.blur1, textures.blur2, textures.blur3],
           render: draw_quad,
           program: programs.select4
         }
