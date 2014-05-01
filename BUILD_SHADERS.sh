@@ -5,13 +5,13 @@ rm -rf ./export/shaders
 mkdir -p ./export/shaders
 
 # common glsl code
-for f in  ./shaders/*.glsllib
+for f in  ./public/shaders/*.glsllib
 do
     cp $f ./export/shaders
 done
 
 # programs
-for f in  ./shaders/*.glsl
+for f in  ./public/shaders/*.glsl
 do
     cat $f >> ./export/shaders/all.glsl
 done
