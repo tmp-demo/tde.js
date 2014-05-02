@@ -127,6 +127,12 @@ directives.directive("tdeEngineView", function()
 			}
 			demo.end_time = time_sum
 			seeker.attr("max", time_sum)
+			
+			element.find("canvas").dblclick(function()
+			{
+				this.requestFullScreen = this.requestFullScreen || this.mozRequestFullScreen || this.webkitRequestFullScreen
+				this.requestFullScreen()
+			})
 		}
 	}
 })
