@@ -54,7 +54,6 @@ function main() {
   canvas = document.createElement("canvas");
   document.body.appendChild(canvas);
   
-  init_audio();
   prepare();
   canvas.width = demo.w;
   canvas.height = demo.h;
@@ -66,9 +65,6 @@ function main() {
   render_scene(demo.scenes[0]);
   init_audio();
 
-  // #debug{{
-  if (window.editor_init) { editor_init(); }
-  // #debug}}
   main_loop();
 }
 

@@ -73,8 +73,8 @@ function prepare() {
     {name: "view_proj_mat", type: MAT4}
   ]
 
-  demo.w = 800;
-  demo.h = 600;
+  demo.w = 640;
+  demo.h = 360;
 }
 
 function blur_pass(in_tex, out_tex, vec, res) {
@@ -192,7 +192,7 @@ function demo_init() {
           update: function(scenes, scene, time) {
             vec3.lerp(cameraPosition, [2.0, -2.0, 1.0], [3.0, 0.0, 2.0], time.scene_norm);
             mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
-            mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
+            mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, width/height, 0.5, 100.0)
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
             uniforms["view_proj_mat"].val = viewProjectionMatrix;
           },
@@ -219,7 +219,7 @@ function demo_init() {
           update: function(scenes, scene, time) {
             vec3.lerp(cameraPosition, [0.0, -10.0, 10.0], [10.0, 0.0, 3.0], time.scene_norm);
             mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
-            mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
+            mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, width/height, 0.5, 100.0)
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
             uniforms["view_proj_mat"].val = viewProjectionMatrix;
           },
@@ -273,7 +273,7 @@ function demo_init() {
           update: function(scenes, scene, time) {
             vec3.lerp(cameraPosition, [30.0, -40.0, 10.0], [10.0, 0.0, 100.0], time.scene_norm);
             mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,50.0], [0.0, 0.0, 1.0]);
-            mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, 1.5, 0.5, 100.0)
+            mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, width/height, 0.5, 100.0)
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
             uniforms["view_proj_mat"].val = viewProjectionMatrix;
           },
