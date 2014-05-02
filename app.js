@@ -3,6 +3,7 @@ var bodyParser = require('body-parser')
 var http = require("http")
 var git = require("gift")
 var fs = require("fs")
+var exec = require("child_process").exec
 
 var app = express()
 var server = http.createServer(app)
@@ -201,6 +202,37 @@ app.get("/data/project/:projectId/asset/:assetId", function(req, res)
 		
 		res.type("application/json")
 		res.send(200, assetData)
+	})
+})
+
+app.get("/export/:projectId", function(req, res)
+{
+	var projectId = req.params.projectId
+	
+	var demoFilename = __dirname + "/export/demo.png.html"
+	fs.unlink(demoFilename, function(err)
+	{
+		var command = __dirname + "/EXPORT.sh"
+		
+		// hack for windows debug (assumes cygwin is installed in c:\cygwin)
+		if (process.platform == "win32")
+			command = "c:/cygwin/bin/bash.exe --login -c \"cd '" + __dirname + "' && ./EXPORT.sh\""
+		
+		exec(command, function(err, stdout, stderr)
+		{
+			fs.exists(demoFilename, function(exists)
+			{
+				if (!exists)
+				{
+					res.type("text/plain")
+					res.send(500, "== Export failed ==\n\nstdout:\n" + stdout + "\n\nstderr:\n" + stderr)
+					return
+				}
+				
+				res.type("text/html")
+				fs.createReadStream(demoFilename).pipe(res)
+			})
+		})
 	})
 })
 
