@@ -45,55 +45,51 @@ directives.directive("tdeAssetList", function()
 	}
 })
 
-ctx = null
 directives.directive("tdeCodeEditor", function()
 {
 	return {
 		restrict: "A",
 		link: function($scope, element, attrs)
 		{
-			$scope.assetData = "ctx.fillStyle = \"rgb(40, 40, 20)\"\nctx.fillRect(100, 50, 100, 60)\n\nctx.fillStyle = \"rgb(200, 200, 140)\"\nfor (var i = 0; i < 100; i++)\n  ctx.fillRect(Math.sin(i) * 5 + 45, i*5, 20, 2)\n\nctx.fillStyle = \"rgb(20, 30, 50)\"\nctx.fillRect(100, 150, 100, 60)\n\nctx.fillStyle = \"rgb(100, 140, 255)\"\nfor (var i = 0; i < 100; i++)\n  ctx.fillRect(Math.sin(i) * 5 + 20, i*5, 20, 2)"
+			$scope.error = null
+			$scope.dirty = false
 			
 			var editor = CodeMirror(element.get(0), {
 				mode: attrs.tdeCodeEditor,
-				/*matchBrackets: true,
-				autoCloseBrackets: true,*/
+				matchBrackets: true,
 				lineNumbers: true,
 				theme: "monokai",
-				value: $scope.assetData
+				value: $scope.code
 			})
 			
 			editor.on("change", function()
 			{
 				$scope.$apply(function()
 				{
-					$scope.assetData = editor.getValue()
-					$scope.render()
+					$scope.dirty = true
 				})
 			})
 			
-			ctx = ctx || $(".texture-editor canvas").get(0).getContext("2d")
-			$scope.render = function()
+			element.keypress(function(event)
 			{
-				ctx.fillStyle = "rgb(0, 0, 0)"
-				ctx.fillRect(0, 0, 256, 256)
-				
-				try
+				if (event.ctrlKey && (event.keyCode == 13 || event.keyCode == 10))
 				{
-					eval($scope.assetData)
-					$scope.error = ""
+					$scope.$apply(function()
+					{
+						$scope.code = editor.getValue()
+						try
+						{
+							eval($scope.code)
+							$scope.error = null
+							$scope.dirty = false
+						}
+						catch (err)
+						{
+							$scope.error = err.message
+						}
+					})
 				}
-				catch (err)
-				{
-					$scope.error = err.message
-				}
-			}
-			$scope.render()
-			
-			/*$scope.$watch("assetData", function(newValue, oldValue)
-			{
-				editor.setValue(newValue)
-			})*/
+			})
 		}
 	}
 })

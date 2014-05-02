@@ -1,9 +1,6 @@
-<div class="texture-editor">
+<div class="texture-editor" ng-controller="TextureEditorCtrl">
 	<div class="codemirror-wrapper" tde-code-editor="javascript"></div>
-	<div class="preview">
-		<table>
-			<tr><td><span ng-show="error" class="alert alert-danger">Error: {{error}}</span></td></tr>
-			<tr><td><canvas width="256" height="256"></canvas></td></tr>
-		</table>
+	<div class="codemirror-error-overlay"ng-show="error">
+		<span class="alert alert-danger">{{error}}</span>
 	</div>
 </div>

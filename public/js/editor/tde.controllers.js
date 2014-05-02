@@ -129,3 +129,9 @@ controllers.controller("AssetListCtrl", function($scope, $http, Asset)
 		$scope.tempName = null
 	}
 })
+
+controllers.controller("TextureEditorCtrl", function($scope)
+{
+	$scope.code = "texture code \\o/"
+	$scope.error = "some error line 42"
+})
