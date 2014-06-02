@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. ./utils.sh
+
 echo " -- preparing..."
 rm -rf ./export
 mkdir -p ./export
