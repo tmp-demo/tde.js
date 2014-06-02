@@ -26,16 +26,14 @@ if [ ! -f tools/compiler.jar ]; then
 fi
 
 echo " -- running the closure compiler..."
-java -jar tools/compiler.jar --js=./export/demo.js --js_output_file=./export/demo_min.js --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./externs/w3c_audio.js
+java -jar tools/compiler.jar --js=./export/demo.js --js_output_file=./export/demo.min.js --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./externs/w3c_audio.js
 
 echo " -- packing in a png..."
-ruby tools/pnginator.rb export/demo_min.js export/demo.png.html
+ruby tools/pnginator.rb export/demo.min.js export/demo.png.html
 
 echo " -- done."
 
-cp minified.html export/minified.html
-
 wc -c *.js ./export/shaders/shaders.js
 wc -c ./export/demo.js
-wc -c ./export/demo_min.js
+wc -c ./export/demo.min.js
 wc -c ./export/demo.png.html

@@ -18,5 +18,5 @@ check_cmd() {
 check_cmd ruby
 # need java for the closure compiler
 check_cmd java
-# need node for the editor. it's called nodejs on debian-like, node on other
+# need node for shader minification and the editor. it's called nodejs on debian-like, node on other
 NODE=`check_cmd node nodejs`
