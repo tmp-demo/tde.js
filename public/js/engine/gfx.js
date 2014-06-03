@@ -306,19 +306,16 @@ function clear() {
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 }
 
-function render_scene(scene) {
-  // reload geometries if needed
-  var td = demo.current_time;
-  var ts = td - scene.start_time;
-  var tsn = ts/scene.duration;
-  uniforms["demo_time"].val = td;
-  uniforms["clip_time"].val = ts;
+function render_scene(scene, demo_time, scene_time) {
+  var tsn = scene_time/scene.duration;
+  uniforms["demo_time"].val = demo_time;
+  uniforms["clip_time"].val = scene_time;
   uniforms["clip_time_norm"].val = tsn;
-  uniforms["clip_duration"].val = scene.start_time;
+  uniforms["clip_duration"].val = scene.duration;
   var t = {
     scene_norm: tsn,
-    demo: td,
-    scene: ts
+    demo: demo_time,
+    scene: scene_time
   };
   if (scene.update) {
     scene.update(demo.scenes, scene, t);

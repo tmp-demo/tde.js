@@ -1,21 +1,27 @@
 
-var render_index = 0;
+//var render_index = 0;
 
 demo = {
-  scenes: null,
-  current_scene: null,
-  current_time: 0,
-  start_time: 0,
-  end_time: 0
+  scenes: [],
+  start_time: 0
 };
 
 function main_loop() {
-  if (demo.current_time <= demo.end_time) {
-    demo.current_scene = find_scene_for_time(demo.current_time);
-    update_time()
-    render_scene(demo.current_scene);
-    requestAnimationFrame(main_loop);
+  var current_time = audioContext.currentTime * 1000 - demo.start_time;
+  
+  var start_time = 0;
+  for (var i = 0; i < demo.scenes.length; i++) {
+    var scene = demo.scenes[i]
+    var scene_time = current_time - start_time;
+    if ((scene_time >= 0) && (scene_time < scene.duration)) {
+      render_scene(scene, current_time, scene_time);
+      break;
+    }
+    
+    start_time += scene.duration;
   }
+  
+  requestAnimationFrame(main_loop);
   
   // reload all geometry that has reaload set to true
   /*for (var g in geometries) {
@@ -60,7 +66,6 @@ function main() {
   gl_init();
   demo_init();
   gfx_init();
-  time_init();
 
   render_scene(demo.scenes[0]);
   init_audio();
@@ -75,7 +80,7 @@ function editor_main() {
   gl_init();
   demo_init();
   gfx_init();
-  time_init();
 
+  render_scene(demo.scenes[0]);
   main_loop();
 }

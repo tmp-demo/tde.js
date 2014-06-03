@@ -111,7 +111,7 @@ directives.directive("tdeEngineView", function()
 			
 			setInterval(function()
 			{
-				seeker.val(demo.current_time)
+				seeker.val(audioContext.currentTime * 1000 - demo.start_time)
 			}, 50)
 			
 			// compute start tinme for each scene
