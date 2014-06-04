@@ -62,9 +62,9 @@ function main() {
   body.appendChild(canvas);
   body.style.margin = 0;
   
-  prepare();
   canvas.width = demo.w = window.innerWidth;
   canvas.height = demo.h = window.innerHeight;
+  
   gl_init();
   demo_init();
   gfx_init();
@@ -77,8 +77,10 @@ function main() {
 
 function editor_main() {
   canvas = document.getElementById("engine-view")
+  demo.w = canvas.width
+  demo.h = canvas.height
+  
   init_audio();
-  prepare();
   gl_init();
   demo_init();
   gfx_init();

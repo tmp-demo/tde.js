@@ -51,11 +51,6 @@ function generate_some_geometry() {
   ]);
 }
 
-function prepare() {
-  demo.w = 640;
-  demo.h = 360;
-}
-
 function blur_pass(in_tex, out_tex, vec, res) {
   var p = {
     texture_inputs: [in_tex],
