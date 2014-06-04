@@ -69,7 +69,7 @@ function main() {
   demo_init();
   gfx_init();
 
-  render_scene(demo.scenes[0]);
+  render_scene(demo.scenes[0], 0, 0);
   init_audio();
 
   main_loop();
@@ -83,6 +83,6 @@ function editor_main() {
   demo_init();
   gfx_init();
 
-  render_scene(demo.scenes[0]);
+  render_scene(demo.scenes[0], 0, 0);
   main_loop();
 }

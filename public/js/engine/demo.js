@@ -52,27 +52,6 @@ function generate_some_geometry() {
 }
 
 function prepare() {
-
-  demo_uniforms = [
-    {name: "demo_time", type: F32},
-    {name: "clip_time", type: F32},
-    {name: "clip_time_norm", type: F32},
-    {name: "clip_duration", type: F32},
-    {name: "beat", type: F32},
-    {name: "fade", type: F32},
-    {name: "near_plane", type: F32},
-    {name: "far_plane", type: F32},
-    {name: "resolution", type: VEC2},
-    {name: "texture_0", type: TEX},
-    {name: "texture_1", type: TEX},
-    {name: "texture_2", type: TEX},
-    {name: "texture_3", type: TEX},
-    {name: "model_mat", type: MAT4},
-    {name: "view_mat", type: MAT4},
-    {name: "proj_mat", type: MAT4},
-    {name: "view_proj_mat", type: MAT4}
-  ]
-
   demo.w = 640;
   demo.h = 360;
 }
@@ -194,7 +173,7 @@ function demo_init() {
             mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
             mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, width/height, 0.5, 100.0)
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-            uniforms["view_proj_mat"].val = viewProjectionMatrix;
+            uniforms["view_proj_mat"] = viewProjectionMatrix;
           },
           render: draw_mesh(geometries.cube),
           program: programs.deferred
@@ -221,7 +200,7 @@ function demo_init() {
             mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,0.0], [0.0, 0.0, 1.0]);
             mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, width/height, 0.5, 100.0)
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-            uniforms["view_proj_mat"].val = viewProjectionMatrix;
+            uniforms["view_proj_mat"] = viewProjectionMatrix;
           },
           render: draw_mesh(geometries.cube),
           program: programs.show_normals
@@ -275,7 +254,7 @@ function demo_init() {
             mat4.lookAt(viewMatrix, cameraPosition, [0.0,0.0,50.0], [0.0, 0.0, 1.0]);
             mat4.perspective(projectionMatrix, 75 * Math.PI / 180.0, width/height, 0.5, 100.0)
             mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-            uniforms["view_proj_mat"].val = viewProjectionMatrix;
+            uniforms["view_proj_mat"] = viewProjectionMatrix;
           },
           render: draw_mesh(geometries.extruded),
           program: programs.show_normals

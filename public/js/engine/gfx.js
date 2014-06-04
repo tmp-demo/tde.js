@@ -48,20 +48,6 @@ function gl_init() {
   }
   // #debug}}
 
-  F32.func  = gl.uniform1f;
-  VEC2.func = gl.uniform2f;
-  VEC3.func = gl.uniform3f;
-  VEC4.func = gl.uniform4f;
-  TEX.func  = gl.uniform1i;
-  MAT4.func = gl.uniformMatrix4fv;
-  for (var i in demo_uniforms) {
-    var name = demo_uniforms[i].name;
-    uniforms[name] = {
-      name: name,
-      type: demo_uniforms[i].type
-    }
-  }
-  
   load_shaders();
 }
 
@@ -79,13 +65,6 @@ POS = 0;
 TEX_COORDS = 1;
 NORMALS = 2;
 COLOR = 3;
-
-var F32  = {};
-var VEC2 = {};
-var VEC3 = {};
-var VEC4 = {};
-var TEX  = {};
-var MAT4 = {};
 
 // #debug{{
 function gl_error() {
@@ -286,16 +265,24 @@ function frame_buffer(target) {
 }
 
 function set_uniforms(program) {
-  for (var u in uniforms) {
-    var location = gl.getUniformLocation(program, uniforms[u].name);
-    var val = uniforms[u].val;
-    if (location == -1 || val === undefined) { continue; }
+  for (var uniformName in uniforms) {
+    var val = uniforms[uniformName];
 
-    if (uniforms[u].type === MAT4) {
-      gl.uniformMatrix4fv(location, gl.FALSE, val);
-    } else {
-      // for example VEC2.func is gl.uniform2f
-      uniforms[u].type.func.bind(gl, location, val[0]||val, val[1], val[2], val[3]);
+    var location = gl.getUniformLocation(program, uniformName);
+    if (location == -1)
+      continue;
+ 
+    // if val is a bare number, make a one-element array
+    if (typeof val == "number")
+      val = [val];
+
+    switch (val.length) {
+      case 1: gl.uniform1fv(location, val); break;
+      case 2: gl.uniform2fv(location, val); break;
+      case 3: gl.uniform3fv(location, val); break;
+      case 4: gl.uniform4fv(location, val); break;
+      case 9: gl.uniformMatrix3fv(location, gl.FALSE, val); break;
+      case 16: gl.uniformMatrix4fv(location, gl.FALSE, val); break;
     }
   }
 }
@@ -308,10 +295,10 @@ function clear() {
 
 function render_scene(scene, demo_time, scene_time) {
   var tsn = scene_time/scene.duration;
-  uniforms["demo_time"].val = demo_time;
-  uniforms["clip_time"].val = scene_time;
-  uniforms["clip_time_norm"].val = tsn;
-  uniforms["clip_duration"].val = scene.duration;
+  uniforms["demo_time"] = demo_time;
+  uniforms["clip_time"] = scene_time;
+  uniforms["clip_time_norm"] = tsn;
+  uniforms["clip_duration"] = scene.duration;
   var t = {
     scene_norm: tsn,
     demo: demo_time,
@@ -331,7 +318,7 @@ function render_scene(scene, demo_time, scene_time) {
         rx = pass.render_to.w || rx;
         ry = pass.render_to.h || ry;
       }
-      uniforms["resolution"].val = [rx,ry];
+      uniforms["resolution"] = [rx,ry];
       set_uniforms(shader_program);
       gl.viewport(0, 0, rx, ry);
     }
