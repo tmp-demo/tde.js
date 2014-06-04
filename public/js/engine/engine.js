@@ -56,13 +56,15 @@ function main_loop() {
 }
 
 function main() {
-  document.body.innerHTML = "";
+  var body = document.body
+  body.innerHTML = "";
   canvas = document.createElement("canvas");
-  document.body.appendChild(canvas);
+  body.appendChild(canvas);
+  body.style.margin = 0;
   
   prepare();
-  canvas.width = demo.w;
-  canvas.height = demo.h;
+  canvas.width = demo.w = window.innerWidth;
+  canvas.height = demo.h = window.innerHeight;
   gl_init();
   demo_init();
   gfx_init();
