@@ -8,7 +8,7 @@ var exec = require("child_process").exec
 var app = express()
 var server = http.createServer(app)
 
-var dataRoot = "data/"
+var dataRoot = __dirname + "/data/"
 
 var sockets = []
 function broadcast(name, data)
