@@ -154,6 +154,16 @@ function demo_init() {
     },
     {
       duration: 10000,
+      passes: [
+        {
+          //render_to: {color: [textures.noise], w:256, h:256},
+          render: draw_quad,
+          program: programs.raymarch
+        }
+      ]
+    },
+    {
+      duration: 10000,
       update: null,
       passes: [
         {
