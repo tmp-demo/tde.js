@@ -212,7 +212,7 @@ app.get("/export/:projectId", function(req, res)
 	var demoFilename = __dirname + "/export/demo.png.html"
 	fs.unlink(demoFilename, function(err)
 	{
-		var command = __dirname + "/EXPORT.sh"
+		var command = "cd \"" + __dirname + "\" && /EXPORT.sh"
 		
 		// hack for windows debug (assumes cygwin is installed in c:\cygwin)
 		if (process.platform == "win32")
