@@ -56,15 +56,15 @@ function blur_pass(in_tex, out_tex, vec, res) {
     texture_inputs: [in_tex],
     update: function(_, pass, time) {
       var NB_TAPS = 10
-      var dx = vec[0] / NB_TAPS / res[0];
-      var dy = vec[1] / NB_TAPS / res[1];
+      var dx = vec[0] / NB_TAPS / out_tex.width;
+      var dy = vec[1] / NB_TAPS / out_tex.height;
       gl.uniform2f(gl.getUniformLocation(programs.dblur, "step"), dx, dy);
     },
     render: draw_quad,
     program: programs.dblur
   }
   if (out_tex) {
-    p.render_to = {color: [out_tex], w: res[0], h: res[1]};
+    p.render_to = {color: [out_tex], w: out_tex.width, h: out_tex.height};
   }
   return p;
 }
@@ -212,33 +212,27 @@ function demo_init() {
         },
         blur_pass(
           textures.tex1, textures.tex_half1,
-          [10.0, 0.0],
-          [400, 300]
+          [10.0, 0.0]
         ),
         blur_pass(
           textures.tex_half1, textures.blur1,
-          [0.0, 10.0],
-          [400, 300]
+          [0.0, 10.0]
         ),
         blur_pass(
           textures.blur1, textures.tex_half1,
-          [10.0, 0.0],
-          [400, 300]
+          [10.0, 0.0]
         ),
         blur_pass(
           textures.tex_half1, textures.blur2,
-          [0.0, 10.0],
-          [400, 300]
+          [0.0, 10.0]
         ),
         blur_pass(
           textures.blur2, textures.tex_half1,
-          [10.0, 0.0],
-          [400, 300]
+          [10.0, 0.0]
         ),
         blur_pass(
           textures.tex_half1, textures.blur3,
-          [0.0, 10.0],
-          [400, 300]
+          [0.0, 10.0]
         ),
         {
           texture_inputs: [textures.tex1, textures.blur1, textures.blur2, textures.blur3],
