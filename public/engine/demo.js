@@ -58,7 +58,7 @@ function blur_pass(in_tex, out_tex, vec, res) {
       var NB_TAPS = 10
       var dx = vec[0] / NB_TAPS / out_tex.width;
       var dy = vec[1] / NB_TAPS / out_tex.height;
-      gl.uniform2f(gl.getUniformLocation(programs.dblur, "step"), dx, dy);
+      uniforms["step"] = [dx, dy];
     },
     render: draw_quad,
     program: programs.dblur
