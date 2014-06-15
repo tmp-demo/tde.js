@@ -315,8 +315,8 @@ function render_scene(scene, demo_time, scene_time) {
       var rx = demo.w;
       var ry = demo.h;
       if (pass.render_to) {
-        rx = pass.render_to.w || rx;
-        ry = pass.render_to.h || ry;
+        rx = pass.render_to.color[0].width;
+        ry = pass.render_to.color[0].height;
       }
       uniforms["resolution"] = [rx,ry];
       set_uniforms(shader_program);

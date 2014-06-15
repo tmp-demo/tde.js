@@ -64,7 +64,7 @@ function blur_pass(in_tex, out_tex, vec, res) {
     program: programs.dblur
   }
   if (out_tex) {
-    p.render_to = {color: [out_tex], w: out_tex.width, h: out_tex.height};
+    p.render_to = {color: [out_tex]};
   }
   return p;
 }
@@ -146,7 +146,7 @@ function demo_init() {
       duration: 0,
       passes: [
         {
-          render_to: {color: [textures.noise], w:256, h:256},
+          render_to: {color: [textures.noise]},
           render: draw_quad,
           program: programs.noise
         }
@@ -156,7 +156,6 @@ function demo_init() {
       duration: 10000,
       passes: [
         {
-          //render_to: {color: [textures.noise], w:256, h:256},
           render: draw_quad,
           program: programs.raymarch
         }
