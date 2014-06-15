@@ -1,57 +1,6 @@
-var controllers = angular.module("tde.controllers", [])
+angular.module("tde.project.asset-list", [])
 
-controllers.controller("ApplicationCtrl", function($scope, $routeParams, Notifications, User)
-{
-	$scope.$on('$routeChangeSuccess', function()
-	{
-		$scope.projectId = $routeParams.projectId
-		$scope.assetId = $routeParams.assetId
-	})
-	
-	$scope.connected = Notifications.connected
-	$scope.$on("connectionStateChanged", function()
-	{
-		$scope.connected = Notifications.connected
-	})
-	
-	$scope.currentUser = User.currentUser
-})
-
-controllers.controller("NavbarCtrl", function($scope, User)
-{
-	$scope.logout = User.logout
-})
-
-controllers.controller("HomeCtrl", function($scope, $http, $routeParams, Project)
-{
-	$scope.projects = Project.projects
-	$scope.$on("projectListChanged", function()
-	{
-		$scope.projects = Project.projects
-	})
-	
-	$scope.newProject = function()
-	{
-		$scope.error = ""
-		
-		if (!$scope.newProjectName)
-			return
-		
-		Project.createProject($scope.newProjectName, function(err)
-		{
-			if (err)
-				$scope.error = err
-			else
-				$scope.newProjectName = ""
-		})
-	}
-})
-
-controllers.controller("ProjectCtrl", function($scope)
-{
-})
-
-controllers.controller("AssetListCtrl", function($scope, $http, Asset)
+.controller("AssetListCtrl", function($scope, $http, Asset)
 {
 	$scope.assets = Asset.assets
 	$scope.$on("assetListChanged", function()
@@ -130,8 +79,39 @@ controllers.controller("AssetListCtrl", function($scope, $http, Asset)
 	}
 })
 
-controllers.controller("TextureEditorCtrl", function($scope)
+.directive("tdeAssetList", function()
 {
-	$scope.code = "texture code \\o/"
-	$scope.error = "some error line 42"
+	return {
+		restrict: "E",
+		templateUrl: "/tde/project/asset-list/asset-list.html",
+		link: function($scope, element, attrs)
+		{
+			var scrollables = element.find(".scrollable")
+			scrollables.mCustomScrollbar()
+			
+			function updateScroll()
+			{
+				setTimeout(function()
+				{
+					scrollables.mCustomScrollbar("update")
+				}, 0)
+			}
+			$scope.$watch("assets", updateScroll, true)
+			$scope.$watch("query", updateScroll)
+			
+			$scope.$watch("editedAsset", function(newValue, oldValue)
+			{
+				setTimeout(function()
+				{
+					element.find(".rename-box").focus().select()
+				}, 0)
+			})
+			
+			$scope.checkEscape = function(event)
+			{
+				if (event.keyCode == 27) // Esc
+					$scope.cancelRename()
+			}
+		}
+	}
 })
