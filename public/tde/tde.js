@@ -5,8 +5,10 @@ angular.module("tde", [
 	"tde.home",
 	"tde.navbar",
 	"tde.project",
-	"tde.directives",
-	"tde.services"
+	"tde.services.asset",
+	"tde.services.notifications",
+	"tde.services.project",
+	"tde.services.user"
 ])
 
 .config(["$routeProvider", function($routeProvider)

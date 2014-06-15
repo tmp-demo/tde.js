@@ -12,7 +12,7 @@ echo " -- building shaders"
 
 echo " -- concatenating js files and stripping debug code..."
 
-for f in  ./public/js/engine/*.js
+for f in  ./public/engine/*.js
 do
     ./tools/opt.py $f >> ./export/demo.js
 done
