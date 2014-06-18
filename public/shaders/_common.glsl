@@ -17,6 +17,9 @@ uniform sampler2D texture_4;
 
 uniform vec2 step;
 
+uniform float demo_time;
+uniform float clip_time;
+
 varying vec2 v_tex_coords;
 varying vec3 v_normals;
 varying vec3 v_position;
