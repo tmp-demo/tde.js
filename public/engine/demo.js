@@ -72,7 +72,7 @@ function blur_pass(in_tex, out_tex, vec, res) {
 function mesurebondingBox(cvs, c){
 
   alphaThreshold = 15;
-  var maxX=-Infinity,maxY=-Infinity;
+  var minX=+Infinity,minY=+Infinity,maxX=-Infinity,maxY=-Infinity;
   var w=cvs.width,h=cvs.height;
   var data = c.getImageData(0,0,w,h).data;
   for (var x=0;x<w;++x){
@@ -81,11 +81,12 @@ function mesurebondingBox(cvs, c){
       if (a>alphaThreshold){
         if (x>maxX) maxX=x;
         if (y>maxY) maxY=y;
+        if (x<minX) minX=x;
+        if (y<minY) minY=y;
       }
     }
   }
-  
-  return {width : maxX, height : maxY};
+  return {minX : minX-2, minY : minY-2, maxX : maxX+2, maxY : maxY+2, width : maxX-minX+4, height:maxY-minY+4};
 }
 function prepareTextTextures(texts){
   var cvs = document.createElement("canvas");
@@ -93,7 +94,7 @@ function prepareTextTextures(texts){
   var h = cvs.height = 1024;
   var c = cvs.getContext("2d");
   
-  var dim = {};
+  var bb = {};
   
   // flip context so the texture looks in the correct direction in shaders.
   c.scale(1, -1);
@@ -104,12 +105,12 @@ function prepareTextTextures(texts){
 
     c.font=texts[i].font;  
     var txt = texts[i].text;
-    c.fillText(txt,0,0);
+    c.fillText(txt,0,-512);
     
-    dim = mesurebondingBox(cvs, c);  
+    bb = mesurebondingBox(cvs, c);  
     
-    textures[texts[i].id] = create_texture(dim.width, dim.height, gl.RGBA, c.getImageData(0, 0, dim.width,  dim.height).data, false);
-    
+    textures[texts[i].id] = create_texture(bb.width, bb.height, gl.RGBA, c.getImageData(bb.minX, bb.minY, bb.width,  bb.height).data, false);
+    uniforms["textDim_"+texts[i].id] = [bb.width, bb.height];
     c.clearRect ( -2048 , -2048 , 4096 , 4096 );   
   }
 
@@ -136,7 +137,7 @@ function demo_init() {
   prepareTextTextures([
     { id: "hw", text: "Hello World !", font: "200px OCR A STD" },
     { id: "tmp", text: "/tmp", font: "200px OCR A STD"  },
-    { id: "scroll", text: "this is a stupid text to be scrolled.", font: "13px Cooper Std Black"  }
+    { id: "scroll", text: "this is a stupid text to be scrolled. and here is a few more for the sake of length, this is a stupid text to be scrolled. and here is a few more for the sake of length this is a stupid text to be scrolled. and here is a few more for the sake of length, this is a stupid text to be scrolled. and here is a few more for the sake of length", font: "20px cursive"  }
   ]);
 
   geometries.cube = create_geom([
@@ -218,9 +219,9 @@ function demo_init() {
       duration: 10000,
       passes: [
         {
-          texture_inputs: [textures["hw"]],
+          texture_inputs: [textures["scroll"]],
           render: draw_quad,
-          program: programs.printtext
+          program: programs.scrolltext
         }
       ]
     },
@@ -228,7 +229,7 @@ function demo_init() {
       duration: 10000,
       passes: [
         {
-          texture_inputs: [textures["scroll"]],
+          texture_inputs: [textures["hw"]],
           render: draw_quad,
           program: programs.printtext
         }
