@@ -69,6 +69,52 @@ function blur_pass(in_tex, out_tex, vec, res) {
   return p;
 }
 
+function mesurebondingBox(cvs, c){
+
+  alphaThreshold = 15;
+  var maxX=-Infinity,maxY=-Infinity;
+  var w=cvs.width,h=cvs.height;
+  var data = c.getImageData(0,0,w,h).data;
+  for (var x=0;x<w;++x){
+    for (var y=0;y<h;++y){
+      var a = data[(w*y+x)*4+3];
+      if (a>alphaThreshold){
+        if (x>maxX) maxX=x;
+        if (y>maxY) maxY=y;
+      }
+    }
+  }
+  
+  return {width : maxX, height : maxY};
+}
+function prepareTextTextures(texts){
+  var cvs = document.createElement("canvas");
+  var w = cvs.width = 2048;
+  var h = cvs.height = 1024;
+  var c = cvs.getContext("2d");
+  
+  var dim = {};
+  
+  // flip context so the texture looks in the correct direction in shaders.
+  c.scale(1, -1);
+  c.fillStyle="#FFFFFF";
+  
+  for (var i = 0; i < texts.length ; i++){
+  
+
+    c.font=texts[i].font;  
+    var txt = texts[i].text;
+    c.fillText(txt,0,0);
+    
+    dim = mesurebondingBox(cvs, c);  
+    
+    textures[texts[i].id] = create_texture(dim.width, dim.height, gl.RGBA, c.getImageData(0, 0, dim.width,  dim.height).data, false);
+    
+    c.clearRect ( -2048 , -2048 , 4096 , 4096 );   
+  }
+
+}
+
 function demo_init() {
   console.log("demo_init"); // #debug
   
@@ -85,6 +131,13 @@ function demo_init() {
   textures.tex1       = create_texture();
   textures.tex2       = create_texture();
   textures.noise      = create_texture(256,256, null, null, true);
+  
+  //Note textures.text... is reserved for holding text to be displayed
+  prepareTextTextures([
+    { id: "hw", text: "Hello World !", font: "200px OCR A STD" },
+    { id: "tmp", text: "/tmp", font: "200px OCR A STD"  },
+    { id: "scroll", text: "this is a stupid text to be scrolled.", font: "13px Cooper Std Black"  }
+  ]);
 
   geometries.cube = create_geom([
     // Front face     | normals        | tex coords
@@ -149,6 +202,35 @@ function demo_init() {
           render_to: {color: [textures.noise]},
           render: draw_quad,
           program: programs.noise
+        }
+      ]
+    },
+    //{
+    //  duration: 10000,
+    //  passes: [
+    //    {
+    //      render: draw_quad,
+    //      program: programs.raymarchvoxel
+    //    }
+    //  ]
+    //},
+    {
+      duration: 10000,
+      passes: [
+        {
+          texture_inputs: [textures["hw"]],
+          render: draw_quad,
+          program: programs.printtext
+        }
+      ]
+    },
+    {
+      duration: 10000,
+      passes: [
+        {
+          texture_inputs: [textures["scroll"]],
+          render: draw_quad,
+          program: programs.printtext
         }
       ]
     },
