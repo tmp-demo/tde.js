@@ -137,7 +137,7 @@ function demo_init() {
   prepareTextTextures([
     { id: "hw", text: "Hello World !", font: "200px OCR A STD" },
     { id: "tmp", text: "/tmp", font: "200px OCR A STD"  },
-    { id: "scroll", text: "this is a stupid text to be scrolled. and here is a few more for the sake of length, this is a stupid text to be scrolled. and here is a few more for the sake of length this is a stupid text to be scrolled. and here is a few more for the sake of length, this is a stupid text to be scrolled. and here is a few more for the sake of length", font: "20px cursive"  }
+    { id: "scroll", text: "this is a stupid text to be scrolled. and here is a few more for the sake of length, this is a stupid text to be scrolled. and here is a few more for the sake of length this is a stupid text to be scrolled. and here is a few more for the sake of length, this is a stupid text to be scrolled. and here is a few more for the sake of length", font: "20px Hobo Std"  }
   ]);
 
   geometries.cube = create_geom([
