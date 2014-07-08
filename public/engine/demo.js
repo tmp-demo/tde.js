@@ -215,6 +215,35 @@ function demo_init() {
     //    }
     //  ]
     //},
+    //{
+    //  duration: 10000,
+    //  passes: [
+    //    {
+    //      render: draw_quad,
+    //      program: programs.raymarchWithText
+    //    }
+    //  ]
+    //},
+	{
+      duration: 100000,
+      passes: [
+        {
+          texture_inputs: [textures["hw"]],
+          render_to: {color: [textures.tex1], depth: depth_rb},
+          render: draw_quad,
+          program: programs.text3d
+        },
+        blur_pass(
+          textures.tex1, textures.tex_half1,
+          [10.0, 0.0]
+        ),
+        {
+          texture_inputs: [textures.tex_half1],
+          render: draw_quad,
+          program: programs.godrays
+        }
+      ]
+    },
     {
       duration: 10000,
       passes: [
