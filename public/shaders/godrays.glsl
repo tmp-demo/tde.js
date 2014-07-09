@@ -6,10 +6,19 @@ void main_vs_godrays() {
 }
 
 //! FRAGMENT
-#define NUM_SAMPLES 200
-#define Density 2.
+#define NUM_SAMPLES 50
+#define Density 1.
 #define Weight 1.
 #define Decay 0.8
+
+//float random(float t) {
+//  return fract(sin(t * sin(t) * 423.0 + sin(t * 1000. * 12.))*cos(t)*cos(exp(t)));
+//}
+
+float random(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
 
 void main_fs_godrays() {
 
@@ -22,7 +31,7 @@ void main_fs_godrays() {
   // Calculate vector from pixel to light source in screen space.  
    vec2 deltaTexCoord = (position - ScreenLightPos.xy);  
   // Divide by number of samples and scale by control factor.  
-  deltaTexCoord *= 1.0 / float(NUM_SAMPLES) * Density;  
+  deltaTexCoord *= 1.0 / float(NUM_SAMPLES) * Density  * (1.- random( position) / 3.);  
   // Store initial sample.  
   vec3 color = texture2D(texture_0, position).rgb;  
  // Set up illumination decay factor.  
@@ -39,7 +48,7 @@ void main_fs_godrays() {
    // Accumulate combined color.  
    color += sample;  
    // Update exponential decay factor.  
-   illuminationDecay *= Decay;  
+   illuminationDecay *= Decay * (1.- random( position) / 6.);  
  }  
  // Output final color with a further scale control factor.  
    gl_FragColor = vec4(color, 1.0);

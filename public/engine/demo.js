@@ -206,26 +206,8 @@ function demo_init() {
         }
       ]
     },
-    //{
-    //  duration: 10000,
-    //  passes: [
-    //    {
-    //      render: draw_quad,
-    //      program: programs.raymarchvoxel
-    //    }
-    //  ]
-    //},
-    //{
-    //  duration: 10000,
-    //  passes: [
-    //    {
-    //      render: draw_quad,
-    //      program: programs.raymarchWithText
-    //    }
-    //  ]
-    //},
 	{
-      duration: 100000,
+      duration: 10000,
       passes: [
         {
           texture_inputs: [textures["hw"]],
@@ -233,12 +215,8 @@ function demo_init() {
           render: draw_quad,
           program: programs.text3d
         },
-        blur_pass(
-          textures.tex1, textures.tex_half1,
-          [10.0, 0.0]
-        ),
         {
-          texture_inputs: [textures.tex_half1],
+          texture_inputs: [textures.tex1],
           render: draw_quad,
           program: programs.godrays
         }
