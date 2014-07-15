@@ -16,7 +16,7 @@ void main_fs_scrolltext() {
   uv = vec2( (gl_FragCoord.x + clip_time /8. + mod(gl_FragCoord.y- 50.,textDim_scroll.y) *cos(clip_time/1000.*2.) - 1000.) / textDim_scroll.x, (gl_FragCoord.y - 50.)/ textDim_scroll.y) ;
   color += texture2D(texture_0, uv ).rgb;   
     
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragData[0] = vec4(color, 1.0);
   
   
 }

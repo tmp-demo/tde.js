@@ -20,7 +20,7 @@ void main_fs_text3d() {
   color += texture2D(texture_0, uv ).rgb; 
   
     
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragData[0] = vec4(color, 1.0);
   
   
 }

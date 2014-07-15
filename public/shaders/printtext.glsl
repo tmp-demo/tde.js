@@ -29,5 +29,5 @@ void main_fs_printtext() {
   // fade to black
   color *= clamp(mod(rand(clip_time * 0.0000003), 1.0) * 1.8, 0.0, 1.0);
   
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragData[0] = vec4(color, 1.0);
 }
