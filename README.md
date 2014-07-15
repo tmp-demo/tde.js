@@ -1,2 +1,4 @@
-evoke13
-========
+/tmp demo engine
+================
+
+Making demos for fun and profit.
