@@ -1,6 +1,6 @@
 angular.module("tde.services.project", [])
 
-.service("Project", function($rootScope, $http, Notifications)
+.service("Project", function($rootScope, $http)
 {
 	this.projects = []
 	
@@ -30,9 +30,4 @@ angular.module("tde.services.project", [])
 	}
 	
 	this.refreshProjectList()
-	
-	Notifications.on("projectListChanged", function(data)
-	{
-		self.refreshProjectList()
-	})
 })

@@ -6,7 +6,6 @@ angular.module("tde", [
 	"tde.navbar",
 	"tde.project",
 	"tde.services.asset",
-	"tde.services.notifications",
 	"tde.services.project",
 	"tde.services.user"
 ])
@@ -22,18 +21,12 @@ angular.module("tde", [
 	$routeProvider.otherwise({redirectTo: "/"})
 }])
 
-.controller("ApplicationCtrl", function($scope, $routeParams, Notifications, User)
+.controller("ApplicationCtrl", function($scope, $routeParams, User)
 {
 	$scope.$on('$routeChangeSuccess', function()
 	{
 		$scope.projectId = $routeParams.projectId
 		$scope.assetId = $routeParams.assetId
-	})
-	
-	$scope.connected = Notifications.connected
-	$scope.$on("connectionStateChanged", function()
-	{
-		$scope.connected = Notifications.connected
 	})
 	
 	$scope.currentUser = User.currentUser

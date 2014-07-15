@@ -1,6 +1,6 @@
 angular.module("tde.services.asset", [])
 
-.service("Asset", function($rootScope, $http, $routeParams, Notifications)
+.service("Asset", function($rootScope, $http, $routeParams)
 {
 	this.assets = []
 	this.currentProjectId = ""
@@ -27,6 +27,7 @@ angular.module("tde.services.asset", [])
 			{
 				if (callback)
 					callback(null, asset)
+				self.refreshAssetList()
 			}).
 			error(function(error)
 			{
@@ -42,6 +43,7 @@ angular.module("tde.services.asset", [])
 			{
 				if (callback)
 					callback(null)
+				self.refreshAssetList()
 			}).
 			error(function(error)
 			{
@@ -59,11 +61,5 @@ angular.module("tde.services.asset", [])
 			$rootScope.$broadcast("assetListChanged")
 			self.refreshAssetList()
 		}
-	})
-	
-	Notifications.on("assetListChanged", function(data)
-	{
-		if ($routeParams.projectId == data.projectId)
-			self.refreshAssetList()
 	})
 })
