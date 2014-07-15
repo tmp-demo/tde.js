@@ -25,9 +25,9 @@ angular.module("tde.services.asset", [])
 		$http.post("/data/project/" + $routeParams.projectId + "/assets", asset).
 			success(function()
 			{
+				self.refreshAssetList()
 				if (callback)
 					callback(null, asset)
-				self.refreshAssetList()
 			}).
 			error(function(error)
 			{
@@ -38,12 +38,12 @@ angular.module("tde.services.asset", [])
 	
 	this.renameAsset = function(asset, newName, callback)
 	{
-		$http.post("/data/project/" + $routeParams.projectId + "/asset/" + asset.name + "." + asset.type, {rename: newName}).
+		$http.post("/data/project/" + $routeParams.projectId + "/asset/" + asset.name + "." + asset.type, {rename: newName + "." + asset.type}).
 			success(function()
 			{
+				self.refreshAssetList()
 				if (callback)
 					callback(null)
-				self.refreshAssetList()
 			}).
 			error(function(error)
 			{

@@ -16,9 +16,11 @@ angular.module("tde.services.project", [])
 	
 	this.createProject = function(name, callback)
 	{
+		var self = this
 		$http.post("/data/projects", {name: name}).
 			success(function()
 			{
+				self.refreshProjectList()
 				if (callback)
 					callback(null)
 			}).

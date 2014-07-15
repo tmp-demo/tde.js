@@ -6,7 +6,7 @@
 				<span ng-class="getIconClass(asset)"></span>
 				<span ng-hide="editedAsset == asset">{{asset.name}}</span>
 				<form ng-show="editedAsset == asset" ng-submit="finishRename()">
-					<input ng-show="editedAsset == asset" type="text" ng-model="$parent.tempName" class="rename-box" placeholder="{{asset.type}} name" ng-blur="finishRename()" ng-keypress="checkEscape($event)" />
+					<input ng-show="editedAsset == asset" type="text" ng-model="$parent.tempName" class="rename-box" ng-class="{error: renameError}" placeholder="{{asset.type}} name" ng-blur="finishRename()" ng-keypress="checkEscape($event)" />
 				</form>
 			</li>
 		</ul>

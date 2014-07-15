@@ -87,6 +87,12 @@
 	width: 215px;
 }
 
+#assets .rename-box.error
+{
+	background-color: #fdd;
+	border-color: #f00;
+}
+
 #assets .rename-box::-moz-placeholder
 {
 	color: #333;

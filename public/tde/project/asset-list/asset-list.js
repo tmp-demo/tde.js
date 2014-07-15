@@ -58,24 +58,32 @@ angular.module("tde.project.asset-list", [])
 		if (!$scope.editedAsset) // called when finish/cancel was already done, but the hidden field loses focus
 			return
 		
-		if ($scope.tempName == "")
+		if (($scope.tempName == "") || ($scope.tempName == $scope.editedAsset.name))
 		{
 			$scope.cancelRename()
 			return
 		}
 		
-		$scope.editedAsset.name = $scope.tempName
-		
-		$scope.selectAsset($scope.editedAsset)
-		
-		$scope.editedAsset = null
-		$scope.tempName = null
+		Asset.renameAsset($scope.editedAsset, $scope.tempName, function(err)
+		{
+			if (err)
+			{
+				$scope.renameError = true
+				return
+			}
+			
+			$scope.selectAsset({type: $scope.editedAsset.type, name: $scope.tempName})
+			$scope.editedAsset = null
+			$scope.tempName = null
+			$scope.renameError = false
+		})
 	}
 	
 	$scope.cancelRename = function()
 	{
 		$scope.editedAsset = null
 		$scope.tempName = null
+		$scope.renameError = false
 	}
 })
 
