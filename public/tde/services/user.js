@@ -4,16 +4,19 @@ angular.module("tde.services.user", [])
 .service("User", function()
 {
   this.currentUser = {
-    name: "plop"
+    name: "plop",
+    email: "plop@plop.net"
   }
   
-  this.login = function(username)
+  this.login = function(name, email)
   {
     this.currentUser.name = username
+    this.currentUser.email = email
   }
   
   this.logout = function()
   {
     this.currentUser.name = null
+    this.currentUser.email = null
   }
 })
