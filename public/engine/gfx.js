@@ -326,6 +326,8 @@ function render_scene(scene, demo_time, scene_time) {
     }
     if (pass.fbo) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
+    } else {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
     if (pass.update) {
       pass.update(scene, pass, t);
@@ -337,8 +339,7 @@ function render_scene(scene, demo_time, scene_time) {
         gl.bindTexture(GL_TEXTURE_2D, tex);
         gl.uniform1i(gl.getUniformLocation(shader_program,"texture_"+i), i);
       }
-    }
+    } 
     pass.render(pass.program);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 }
