@@ -1,16 +1,25 @@
 angular.module("tde.project.texture-editor", [])
 
-.controller("TextureEditorCtrl", function($scope)
+.controller("TextureEditorCtrl", function($scope, Asset)
 {
   $scope.code = "texture code \\o/"
   $scope.error = "some error line 42"
+  
+  $scope.updateAsset = function(callback)
+  {
+    Asset.updateAsset($scope.assetId + ".texture", $scope.code, function(err)
+    {
+      if (callback)
+        callback(err)
+    })
+  }
 })
 
 .directive("tdeCodeEditor", function()
 {
   return {
     restrict: "A",
-    link: function($scope, element, attrs)
+    link: function($scope, element, attrs, Asset)
     {
       $scope.error = null
       $scope.dirty = false
@@ -41,8 +50,19 @@ angular.module("tde.project.texture-editor", [])
             try
             {
               eval($scope.code)
-              $scope.error = null
-              $scope.dirty = false
+              
+              $scope.updateAsset(function(err)
+              {
+                if (err)
+                {
+                  $scope.error = err.error.message
+                }
+                else
+                {
+                  $scope.error = null
+                  $scope.dirty = false
+                }
+              })
             }
             catch (err)
             {

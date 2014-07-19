@@ -92,6 +92,33 @@ module.exports.init = function(app)
     })
   })
   
+  app.put("/data/project/:projectId/asset/:assetId", function(req, res, next)
+  {
+    var projectId = req.params.projectId
+    var assetId = req.params.assetId
+    
+    var assetPath = app.get("dataRoot") + projectId + "/" + assetId
+    fs.writeFile(assetPath, req.body.assetData, function(err)
+    {
+      if (err) return next(err)
+      
+      var repo = git(app.get("dataRoot") + projectId)
+      repo.add(assetPath, function(err)
+      {
+        if (err) return next(err)
+        
+        var cookies = new Cookies(req, res)
+        var authorString = cookies.get("name") + " <" + cookies.get("email") + ">"
+        repo.commit("updated " + assetId, {author: authorString}, function(err)
+        {
+          if (err) return next(err)
+          
+          res.send(200, "Asset udpated")
+        })
+      })
+    })
+  })
+  
   app.post("/data/project/:projectId/asset/:assetId", function(req, res, next)
   {
     var projectId = req.params.projectId

@@ -52,6 +52,21 @@ angular.module("tde.services.asset", [])
       })
   }
   
+  this.updateAsset = function(assetId, data, callback)
+  {
+    $http.put("/data/project/" + $routeParams.projectId + "/asset/" + assetId, {assetData: data}).
+      success(function()
+      {
+        if (callback)
+          callback(null)
+      }).
+      error(function(error)
+      {
+        if (callback)
+          callback(error)
+      })
+  }
+  
   $rootScope.$on('$routeChangeSuccess', function()
   {
     if (self.currentProjectId != $routeParams.projectId)
