@@ -1,5 +1,6 @@
 var git = require("gift")
 var fs = require("fs")
+var Cookies = require("cookies")
 
 module.exports.init = function(app)
 {
@@ -62,7 +63,9 @@ module.exports.init = function(app)
           {
             if (err) return next(err)
             
-            repo.commit("added new " + assetType, {author: "MrPlop <mr_plop@plop.net>"}, function(err)
+            var cookies = new Cookies(req, res)
+            var authorString = cookies.get("name") + " <" + cookies.get("email") + ">"
+            repo.commit("added new " + assetType, {author: authorString}, function(err)
             {
               if (err) return next(err)
               
@@ -119,7 +122,9 @@ module.exports.init = function(app)
         {
           if (err) return next(err)
           
-          repo.commit("removed " + assetId + " to " + req.body.rename, {author: "MrPlop <mr_plop@plop.net>"}, function(err)
+          var cookies = new Cookies(req, res)
+          var authorString = cookies.get("name") + " <" + cookies.get("email") + ">"
+          repo.commit("removed " + assetId + " to " + req.body.rename, {author: authorString}, function(err)
           {
             if (err) return next(err)
             
