@@ -16,7 +16,7 @@ Make sure you have the following installed and available from PATH:
 Then run the following commands:
 ```sh
 npm install
-./SERVER.sh
+node .
 ```
 
 You can now open a browser at <http://localhost:8084> to use the editor.
