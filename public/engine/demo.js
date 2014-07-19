@@ -210,7 +210,7 @@ function demo_init() {
         }
       ]
     },
-	{
+  {
       duration: 10000,
       passes: [
         {
