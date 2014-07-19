@@ -20,5 +20,5 @@ app.use(express.static(__dirname + "/export/shaders"))
 app.use(errorHandler())
 
 server.listen(app.get("port"), function() {
-	console.log("Serving listing on port %d in mode %s.", app.get("port"), app.get("env"))
+	console.log("Server listening on port %d in mode %s.", app.get("port"), app.get("env"))
 })
