@@ -191,8 +191,9 @@ function create_texture(width, height, format, image, allow_repeat) {
   gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
   gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  
   gl.texImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
-                format, gl.UNSIGNED_BYTE, image);
+                format, (format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT : gl.UNSIGNED_BYTE, image);
   return { tex: texture, width: width, height: height };
 }
 
@@ -237,7 +238,8 @@ function frame_buffer(target) {
   var buffers = [];
 
   if (target.depth) {
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, target.depth);
+    //gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, target.depth);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, target.depth.tex, 0);
   }
 
   // this branch is *always* taken in release builds

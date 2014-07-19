@@ -122,8 +122,12 @@ function demo_init() {
   var width = demo.w;
   var height = demo.h;
 
-  depth_rb   = create_depth_buffer(width, height);
-  depth_half = create_depth_buffer(width/2,height/2);
+  gl.getExtension("WEBGL_depth_texture")
+  
+  //depth_rb   = create_depth_buffer(width, height);
+  //depth_half = create_depth_buffer(width/2,height/2);
+  depth_rb   = create_texture(width, height, gl.DEPTH_COMPONENT);
+  depth_half = create_texture(width/2,height/2, gl.DEPTH_COMPONENT);
 
   textures.blur1      = create_texture(width/2, height/2);
   textures.blur2      = create_texture(width/2, height/2);
@@ -273,7 +277,7 @@ function demo_init() {
           program: programs.deferred
         },
         {
-          texture_inputs: [textures.tex1, textures.tex2],
+          texture_inputs: [depth_rb, textures.tex2],
           render: draw_quad,
           program: programs.show_deferred
         }

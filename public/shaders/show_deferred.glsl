@@ -11,6 +11,8 @@ void main_fs_show_deferred() {
   vec4 tex0 = texture2D(texture_0, v_tex_coords);
   vec4 tex1 = texture2D(texture_1, v_tex_coords);
   
+  gl_FragData[0] = vec4(vec3(tex0.r), 1.0); return;
+  
   vec3 albedo = tex0.xyz;
   vec3 normal = tex1.xyz;
   float depth = 50.0 * (tex0.w + tex1.w / 255.0);
