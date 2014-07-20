@@ -1,11 +1,13 @@
 angular.module("tde", [
   "ngAnimate",
   "ngRoute",
+  "tde.code-editor",
   "tde.engine-view",
   "tde.home",
   "tde.navbar",
   "tde.project",
   "tde.services.asset",
+  "tde.services.engine-driver",
   "tde.services.project",
   "tde.services.user"
 ])

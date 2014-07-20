@@ -13,7 +13,7 @@ var GL_ELEMENT_ARRAY_BUFFER;
 
 function gl_init() {
   gl = canvas.getContext("experimental-webgl");
-  gl.viewport(0, 0, demo.w, demo.h);
+  gl.viewport(0, 0, canvas.width, canvas.height);
   ext = {
     draw_buffers: gl.getExtension("WEBGL_draw_buffers")
   };
@@ -176,8 +176,8 @@ function load_shader_program(vs_entry_point, fs_entry_point) {
 function create_texture(width, height, format, image, allow_repeat) {
   var image = image || null;
   var format = format || gl.RGBA;
-  width = width || demo.w;
-  height = height || demo.h;
+  width = width || canvas.width;
+  height = height || canvas.height;
   if (image) {
     image = new Uint8Array(image, 0, 0);
   }
@@ -307,15 +307,15 @@ function render_scene(scene, demo_time, scene_time) {
     scene: scene_time
   };
   if (scene.update) {
-    scene.update(demo.scenes, scene, t);
+    scene.update(scene, t);
   }
   for (var p in scene.passes) {
     var pass = scene.passes[p];
     if (pass.program) {
       var shader_program = pass.program;
       gl.useProgram(shader_program);
-      var rx = demo.w;
-      var ry = demo.h;
+      var rx = canvas.width;
+      var ry = canvas.height;
       if (pass.render_to) {
         rx = pass.render_to.color[0].width;
         ry = pass.render_to.color[0].height;

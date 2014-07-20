@@ -1,22 +1,22 @@
-.texture-editor
+.code-editor
 {
 	width: 100%;
 	height: 100%;
 }
 
-.texture-editor .codemirror-wrapper
+.code-editor .codemirror-wrapper
 {
 	width: 100%;
 	height: 100%;
 }
 
-.texture-editor .CodeMirror
+.code-editor .CodeMirror
 {
 	width: 100%;
 	height: 100%;
 }
 
-.texture-editor .codemirror-error-overlay
+.code-editor .codemirror-error-overlay
 {
 	position: absolute;
 	left: 0px;

@@ -49,14 +49,14 @@ module.exports.init = function(app)
   {
     var projectId = req.params.projectId
     
-    var demoFilename = __dirname + "/export/demo.png.html"
+    var demoFilename = __dirname + "/export/" + projectId + "/demo.png.html"
     fs.unlink(demoFilename, function(err)
     {
-      var command = "cd \"" + __dirname + "\" && ./EXPORT.sh"
+      var command = "cd \"" + __dirname + "\" && ./EXPORT.sh " + projectId
       
       // hack for windows debug (assumes cygwin is installed in c:\cygwin)
       if (process.platform == "win32")
-        command = "c:/cygwin/bin/bash.exe --login -c \"cd '" + __dirname + "' && ./EXPORT.sh\""
+        command = "c:/cygwin/bin/bash.exe --login -c \"cd '" + __dirname + "' && ./EXPORT.sh " + projectId + "\""
       
       exec(command, function(err, stdout, stderr)
       {
