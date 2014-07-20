@@ -307,7 +307,7 @@ function render_scene(scene, demo_time, scene_time) {
     scene: scene_time
   };
   if (scene.update) {
-    scene.update(scene, t);
+    scene.update(t);
   }
   for (var p in scene.passes) {
     var pass = scene.passes[p];
@@ -330,7 +330,7 @@ function render_scene(scene, demo_time, scene_time) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
     if (pass.update) {
-      pass.update(scene, pass, t);
+      pass.update(t);
     }
     if (pass.texture_inputs) {
       for (var i=0; i<pass.texture_inputs.length; ++i) {
