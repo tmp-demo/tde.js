@@ -21,10 +21,11 @@ angular.module("tde.project.asset-list", [])
     var glyphicon = "warning-sign"
     switch (asset.split(".")[1])
     {
-      case "texture": glyphicon = "picture"; break
-      case "model": glyphicon = "th-large"; break
-      case "sequence": glyphicon = "film"; break
-      case "music": glyphicon = "headphones"; break
+      case "tex": glyphicon = "picture"; break
+      case "geom": glyphicon = "th-large"; break
+      case "seq": glyphicon = "film"; break
+      case "song": glyphicon = "music"; break
+      case "glsl": glyphicon = "fire"; break
     }
     
     return "glyphicon glyphicon-" + glyphicon

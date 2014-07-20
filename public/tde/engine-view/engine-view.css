@@ -1,0 +1,24 @@
+.engine-log
+{
+  overflow: auto;
+  position: absolute;
+  top: 400px;
+  bottom: 0px;
+}
+
+.engine-log ul
+{
+  list-style-type: none;
+  margin: 0px;
+  padding: 15px;
+}
+
+.engine-log .info
+{
+  color: #ddd;
+}
+
+.engine-log .error
+{
+  color: #d44;
+}

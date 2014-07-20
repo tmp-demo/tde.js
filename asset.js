@@ -33,13 +33,7 @@ module.exports.init = function(app)
       return next(new Error("Asset names should match /^[-\\w.]+$/"))
     }
     
-    var supportedAssetTypes = ["texture", "model", "sequence", "music"]
-    if (supportedAssetTypes.indexOf(assetType) == -1)
-    {
-      return next(new Error("Asset type unsupported. Possible type: " + supportedAssetTypes))
-    }
-    
-    var templatePath = __dirname + "/data_templates/" + assetType + ".json"
+    var templatePath = __dirname + "/data_templates/" + assetType + ".tpl"
     var assetPath = app.get("dataRoot") + projectName + "/" + assetName + "." + assetType
     
     fs.exists(assetPath, function(exists)
@@ -83,7 +77,7 @@ module.exports.init = function(app)
     {
       if (err) return next(err)
       
-      res.type("application/json")
+      res.type("text/plain")
       res.send(200, assetData)
     })
   })

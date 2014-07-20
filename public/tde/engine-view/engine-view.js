@@ -1,5 +1,10 @@
 angular.module("tde.engine-view", [])
 
+.controller("EngineViewCtrl", function($scope, EngineDriver)
+{
+  $scope.logBuffer = EngineDriver.logBuffer
+})
+
 .directive("tdeEngineView", function()
 {
   return {

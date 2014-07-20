@@ -44,9 +44,8 @@ angular.module("tde.services.asset", [])
     $http.post("/data/project/" + $routeParams.projectId + "/asset/" + assetId, {rename: newName}).
       success(function()
       {
-        self.refreshAssetList()
-        if (callback)
-          callback(null)
+        self.unloadAsset(assetId)
+        self.loadAsset(newName, callback)
       }).
       error(function(error)
       {
@@ -60,8 +59,8 @@ angular.module("tde.services.asset", [])
     $http.put("/data/project/" + $routeParams.projectId + "/asset/" + assetId, {assetData: data}).
       success(function()
       {
-        if (callback)
-          callback(null)
+        self.unloadAsset(assetId)
+        self.loadAsset(assetId, callback)
       }).
       error(function(error)
       {
@@ -75,6 +74,7 @@ angular.module("tde.services.asset", [])
     $http.get("/data/project/" + $routeParams.projectId + "/asset/" + assetId).
       success(function(data)
       {
+        if (typeof(data) == "object") data = JSON.stringify(data)
         self.assets[assetId] = data
         
         var parts = assetId.split(".")
@@ -82,7 +82,11 @@ angular.module("tde.services.asset", [])
         var type = parts[1]
         switch (type)
         {
-          case "sequence": EngineDriver.loadSequence(name, data); break
+          case "tex": EngineDriver.loadTexture(name, data); break
+          case "geom": EngineDriver.loadGeometry(name, data); break
+          case "seq": EngineDriver.loadSequence(name, data); break
+          case "song": EngineDriver.loadSong(name, data); break
+          case "glsl": EngineDriver.loadShader(name, data); break
           default: alert("unknown asset type: " + type); break
         }
         
@@ -100,7 +104,7 @@ angular.module("tde.services.asset", [])
   
   this.unloadAsset = function(assetId)
   {
-    if (!(assetIdself in self.assets))
+    if (!(assetId in self.assets))
       return
     
     var parts = assetId.split(".")
@@ -108,7 +112,11 @@ angular.module("tde.services.asset", [])
     var type = parts[1]
     switch (type)
     {
-      case "sequence": EngineDriver.unloadSequence(name); break
+      case "tex": EngineDriver.unloadTexture(name); break
+      case "geom": EngineDriver.unloadGeometry(name); break
+      case "seq": EngineDriver.unloadSequence(name); break
+      case "song": EngineDriver.unloadSong(name); break
+      case "glsl": EngineDriver.unloadShader(name); break
       default: alert("unknown asset type: " + type); break
     }
     
