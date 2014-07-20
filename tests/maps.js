@@ -21,6 +21,52 @@ function mod (a, m) {
   return (a%m+m)%m;
 }
 
+function intersection(a1, a2, b1, b2) {
+    var det = (a1[0]-a2[0])*(b1[1]-b2[1]) - (a1[1]-a2[1])*(b1[0]-b2[0]);
+    if (det*det < 0.0000001) { return null }
+    var a = (a1[0]*a2[1]- a1[1]*a2[0]);
+    var b = (b1[0]*b2[1]- b1[1]*b2[0]);
+    return [
+        (a * (b1[0] - b2[0]) - b * (a1[0] - a2[0])) / det,
+        (a * (b1[1] - b2[1]) - b * (a1[1] - a2[1])) / det,
+    ]
+}
+function vector(a,b) { return vec2.subtract([], b, a) }
+function vec2_add(a,b) { return vec2.add([], a, b) }
+function vec2_scale(v, f) { return [v[0]*f, v[1]*f] }
+
+function normal(v) {
+    var l = vec2.length(v);
+    return [-v[1]/l, v[0]/l]
+}
+
+
+function extrude_path(path, amount) {
+    var new_path = [];
+    for (var i = 0; i < path.length; ++i) {
+        var pa = path[mod(i-1, path.length)];
+        var px = path[mod(i, path.length)];
+        var pb = path[mod(i+1, path.length)];
+        var na = vec2_scale(normal(vector(pa, px)), amount);
+        var nb = vec2_scale(normal(vector(px, pb)), amount);
+
+        var inter = intersection(
+            vec2_add(pa, na),
+            vec2_add(px, na),
+            vec2_add(px, nb),
+            vec2_add(pb, nb)
+        );
+
+        if (inter !== null) {
+            new_path.push(inter);
+        } else {
+            // the points are aligned this should not happen
+            console.log("DARNIT!");
+        }
+    }
+    return new_path;
+}
+
 function subdivision_rec(paths, num_subdivs) {
     var sub_paths = [];
     for (var i in paths) {
@@ -41,7 +87,7 @@ function subdivision_rec(paths, num_subdivs) {
     return subdivision_rec(sub_paths, num_subdivs -1);
 }
 
-MIN_PERIMETER = 200;
+MIN_PERIMETER = 300;
 
 function subdivision(path, sub_id) {
     var path_length = path.length;
@@ -103,57 +149,12 @@ function subdivision(path, sub_id) {
         path1.push(path[i]);
     }
 
-    var path2 = [p_a3_2, p_b3_1]
-    for (var i = b1; i != a1; i = mod((i-1), path_length)) {
+    var path2 = [p_b3_1, p_a3_2]
+    for (var i = a2; i != b2; i = mod((i+1), path_length)) {
         path2.push(path[i]);
     }
 
     return [path1, path2];
-}
-
-function road_shrink(path, index, amount) {
-
-    // pb2 (2)         (-1) pa1
-    //  \ (1)          (0) /
-    //   pb3-------------pa3
-    //    \              /
-    //     pb1         pa2
-
-    var index_plus_one = mod(index+1, path.length);
-    var index_plus_two = mod(index+2, path.length);
-    var index_minus_one = mod(index-1, path.length);
-
-    var pa3 = path[index];
-    var pb3 = path[index_plus_one];
-
-    var d_b3a3 = vec2.substract([], pa3, pb3);
-    vec2.normalize(d_b3a3, d_b3a3);
-
-    var pb2 = path[index_plus_two];
-
-    var n = [d_b3a3[1], -d_b3a3[0]];
-
-    var b3b2 = vec2.substract([], pb2, pb3);
-    var dot = dot(b3b2, d_b3a3);
-
-    var b3x = [
-        b3[0] = dot * d_b3a3[0],
-        b3[1] = dot * d_b3a3[1]
-    ];
-
-    xb2 = vec2.distance(b3x, b2);
-
-
-
-    n[0] *= amount;
-    n[1] *= amount;
-    var b3b2 = vec2.substract([], path[index_plus_two]);
-    if (vec2.dot(n, b3b2) < 0) {
-        n[0] *= -1;
-        n[1] *= -1;
-    }
-
-
 }
 
 function stretch_path(path, amount) {
@@ -172,28 +173,29 @@ function stretch_path(path, amount) {
 }
 
 function draw_path(path) {
+    var extruded_path = extrude_path(path, 2);
     ctx.fillStyle = 'rgb(230, 230, 230)';
-    ctx.strokeStyle = null;
+    ctx.strokeStyle = '#000';
 
     ctx.beginPath();
-    ctx.moveTo(path[0][0], path[0][1])
-    for (var i in path) {
-        ctx.lineTo(path[i][0], path[i][1]);
+    ctx.moveTo(extruded_path[0][0], extruded_path[0][1])
+    for (var i in extruded_path) {
+        ctx.lineTo(extruded_path[i][0], extruded_path[i][1]);
     }
     ctx.closePath();
-    ctx.fill();
+    ctx.stroke();
 
-    for (var i = 0; i < path.length; ++i) {
-        var subdiv = path[i].subdiv*10;
-        console.log(" -- subdiv "+ subdiv);
-        ctx.strokeStyle = 'rgb('+subdiv+',0,0)';
-        var i2 = mod(i, path.length);
-        //ctx.beginPath();
-        ctx.moveTo(path[i][0],  path[i][1]);
-        ctx.lineTo(path[i2][0], path[i2][1]);
-        //ctx.closePath();
-        ctx.stroke();
-    }
+    //for (var i = 0; i < path.length; ++i) {
+    //    var subdiv = 0; //path[i].subdiv*10;
+    //    console.log(" -- subdiv "+ subdiv);
+    //    ctx.strokeStyle = 'rgb('+subdiv+',0,0)';
+    //    var i2 = mod(i, path.length);
+    //    //ctx.beginPath();
+    //    ctx.moveTo(path[i][0],  path[i][1]);
+    //    ctx.lineTo(path[i2][0], path[i2][1]);
+    //    //ctx.closePath();
+    //    ctx.stroke();
+    //}
 }
 
 function on_load() {
