@@ -9,7 +9,6 @@ angular.module("tde.code-editor", [])
   })
   
   $scope.error = null
-  $scope.dirty = false
   
   $scope.updateAsset = function(callback)
   {
@@ -30,7 +29,6 @@ angular.module("tde.code-editor", [])
     link: function($scope, element, attrs)
     {
       $scope.error = null
-      $scope.dirty = false
       
       var editor = CodeMirror(element.find(".codemirror-wrapper").get(0), {
         mode: attrs.language,
@@ -40,28 +38,19 @@ angular.module("tde.code-editor", [])
         value: $scope.code
       })
       
-      var updatingCodeFromEditor = false
       $scope.$watch("code", function(code)
       {
-        if (updatingCodeFromEditor)
-          return
-        
-        editor.setValue(code)
-      })
-      
-      editor.on("change", function()
-      {
-        $scope.$apply(function()
+        if (code != editor.getValue())
         {
-          $scope.dirty = true
-        })
+          console.log("setValue!!!")
+          editor.setValue(code)
+        }
       })
       
       element.keypress(function(event)
       {
         if (event.ctrlKey && (event.keyCode == 13 || event.keyCode == 10))
         {
-          updatingCodeFromEditor = true
           $scope.$apply(function()
           {
             var code = editor.getValue()
@@ -82,7 +71,6 @@ angular.module("tde.code-editor", [])
                 else
                 {
                   $scope.error = null
-                  $scope.dirty = false
                 }
               })
             }
@@ -91,7 +79,6 @@ angular.module("tde.code-editor", [])
               $scope.error = err.message
             }
           })
-          updatingCodeFromEditor = false
         }
       })
     }

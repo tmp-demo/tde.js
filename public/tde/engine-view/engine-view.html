@@ -1,4 +1,12 @@
-<div>
+<div ng-controller="EngineViewCtrl">
 	<canvas id="engine-view" onload="editor_main()" width="640" height="360"></canvas>
 	<input type="range" class="seeker" min="0" max="1000" />
+  <div class="engine-log">
+    <ul>
+      <li ng-repeat="line in logBuffer" ng-class="line.type">
+        {{line.message}}
+        <span>{{line.details}}</span>
+      </li>
+    </ul>
+  </div>
 </div>
