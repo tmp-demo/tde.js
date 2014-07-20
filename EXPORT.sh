@@ -1,23 +1,39 @@
 #!/bin/sh
 
+if [ $# -lt "1" ]; then
+  echo "Usage: $0 <project name>"
+  exit 1
+fi
+
+PROJECT=$1
+PROJECT_ROOT=./data/$PROJECT
+EXPORT_ROOT=./export/$PROJECT
+
 . ./utils.sh
 
 echo " -- preparing..."
-rm -rf ./export
-mkdir -p ./export
+rm -rf "$EXPORT_ROOT"
+mkdir -p "$EXPORT_ROOT"
 mkdir -p tools
 
 echo " -- building shaders"
-./BUILD_SHADERS.sh
+./BUILD_SHADERS.sh $PROJECT
 
 echo " -- concatenating js files and stripping debug code..."
 
 for f in  ./public/engine/*.js
 do
-    ./tools/opt.py $f >> ./export/demo.js
+    ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
 done
-cat ./export/shaders/shaders.js >> ./export/demo.js
-echo "window.onload=main;" >> ./export/demo.js
+
+cat $EXPORT_ROOT/shaders/shaders.js >> $EXPORT_ROOT/demo.js
+
+for f in  $PROJECT_ROOT/*.sequence
+do
+    ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
+done
+
+echo "window.onload=main;" >> $EXPORT_ROOT/demo.js
 
 if [ ! -f tools/compiler.jar ]; then
     echo " -- tools/compiler.jar not found, now downloading it..."
@@ -26,14 +42,14 @@ if [ ! -f tools/compiler.jar ]; then
 fi
 
 echo " -- running the closure compiler..."
-java -jar tools/compiler.jar --js=./export/demo.js --js_output_file=./export/demo.min.js --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./externs/w3c_audio.js
+java -jar tools/compiler.jar --js=$EXPORT_ROOT/demo.js --js_output_file=$EXPORT_ROOT/demo.min.js --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./externs/w3c_audio.js
 
 echo " -- packing in a png..."
-ruby tools/pnginator.rb export/demo.min.js export/demo.png.html
+ruby tools/pnginator.rb $EXPORT_ROOT/demo.min.js $EXPORT_ROOT/demo.png.html
 
 echo " -- done."
 
-wc -c *.js ./export/shaders/shaders.js
-wc -c ./export/demo.js
-wc -c ./export/demo.min.js
-wc -c ./export/demo.png.html
+wc -c *.js $EXPORT_ROOT/shaders/shaders.js
+wc -c $EXPORT_ROOT/demo.js
+wc -c $EXPORT_ROOT/demo.min.js
+wc -c $EXPORT_ROOT/demo.png.html

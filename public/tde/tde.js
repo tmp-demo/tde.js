@@ -1,11 +1,13 @@
 angular.module("tde", [
   "ngAnimate",
   "ngRoute",
+  "tde.code-editor",
   "tde.engine-view",
   "tde.home",
   "tde.navbar",
   "tde.project",
   "tde.services.asset",
+  "tde.services.engine-driver",
   "tde.services.project",
   "tde.services.user"
 ])
@@ -14,10 +16,7 @@ angular.module("tde", [
 {
   $routeProvider.when("/", {templateUrl: "/tde/home/home.html", controller: "HomeCtrl"})
   $routeProvider.when("/:projectId", {templateUrl: "/tde/project/project.html", controller: "ProjectCtrl"})
-  $routeProvider.when("/:projectId/texture/:assetId", {templateUrl: "/tde/project/texture-editor/texture-editor.html", controller: "ProjectCtrl"})
-  $routeProvider.when("/:projectId/model/:assetId", {templateUrl: "/tde/project/model-editor/model-editor.html", controller: "ProjectCtrl"})
-  $routeProvider.when("/:projectId/sequence/:assetId", {templateUrl: "/tde/project/model-editor/model-editor.html", controller: "ProjectCtrl"})
-  $routeProvider.when("/:projectId/music/:assetId", {templateUrl: "/tde/project/model-editor/model-editor.html", controller: "ProjectCtrl"})
+  $routeProvider.when("/:projectId/:assetType/:assetName", {templateUrl: function($routeParams) { return "/tde/project/" + $routeParams.assetType + "-editor/" + $routeParams.assetType + "-editor.html" }, controller: "ProjectCtrl"})
   $routeProvider.otherwise({redirectTo: "/"})
 }])
 
@@ -26,7 +25,9 @@ angular.module("tde", [
   $scope.$on('$routeChangeSuccess', function()
   {
     $scope.projectId = $routeParams.projectId
-    $scope.assetId = $routeParams.assetId
+    $scope.assetType = $routeParams.assetType
+    $scope.assetName = $routeParams.assetName
+    $scope.assetId = $scope.assetName ? $scope.assetName + "." + $scope.assetType : ""
   })
   
   $scope.currentUser = User.currentUser

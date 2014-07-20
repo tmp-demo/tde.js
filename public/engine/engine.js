@@ -62,8 +62,8 @@ function main() {
   body.appendChild(canvas);
   body.style.margin = 0;
   
-  canvas.width = demo.w = window.innerWidth;
-  canvas.height = demo.h = window.innerHeight;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
   
   gl_init();
   demo_init();
@@ -77,14 +77,9 @@ function main() {
 
 function editor_main() {
   canvas = document.getElementById("engine-view")
-  demo.w = canvas.width
-  demo.h = canvas.height
   
   init_audio();
   gl_init();
-  demo_init();
-  gfx_init();
 
-  render_scene(demo.scenes[0], 0, 0);
   main_loop();
 }

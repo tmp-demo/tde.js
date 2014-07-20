@@ -18,17 +18,17 @@ angular.module("tde.engine-view", [])
       setInterval(function()
       {
         seeker.val(audioContext.currentTime * 1000 - demo.start_time)
+        
+        // compute start time for each scene
+        var time_sum = 0
+        for (var s=0;s<demo.scenes.length;++s)
+        {
+          demo.scenes[s].start_time = time_sum
+          time_sum += demo.scenes[s].duration
+        }
+        demo.end_time = time_sum
+        seeker.attr("max", time_sum)
       }, 50)
-      
-      // compute start tinme for each scene
-      var time_sum = 0
-      for (var s=0;s<demo.scenes.length;++s)
-      {
-        demo.scenes[s].start_time = time_sum
-        time_sum += demo.scenes[s].duration
-      }
-      demo.end_time = time_sum
-      seeker.attr("max", time_sum)
       
       element.find("canvas").dblclick(function()
       {

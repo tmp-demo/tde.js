@@ -1,13 +1,19 @@
-angular.module("tde.project.texture-editor", [])
+angular.module("tde.code-editor", [])
 
-.controller("TextureEditorCtrl", function($scope, Asset)
+.controller("CodeEditorCtrl", function($scope, Asset)
 {
-  $scope.code = "texture code \\o/"
-  $scope.error = "some error line 42"
+  $scope.code = ($scope.assetId in Asset.assets) ? Asset.assets[$scope.assetId] : "loading..."
+  $scope.$on("assetLoaded", function(event, assetId)
+  {
+    $scope.code = Asset.assets[$scope.assetId]
+  })
+  
+  $scope.error = null
+  $scope.dirty = false
   
   $scope.updateAsset = function(callback)
   {
-    Asset.updateAsset($scope.assetId + ".texture", $scope.code, function(err)
+    Asset.updateAsset($scope.assetId, $scope.code, function(err)
     {
       if (callback)
         callback(err)
@@ -18,18 +24,29 @@ angular.module("tde.project.texture-editor", [])
 .directive("tdeCodeEditor", function()
 {
   return {
-    restrict: "A",
-    link: function($scope, element, attrs, Asset)
+    restrict: "E",
+    controller: "CodeEditorCtrl",
+    templateUrl: "/tde/code-editor/code-editor.html",
+    link: function($scope, element, attrs)
     {
       $scope.error = null
       $scope.dirty = false
       
-      var editor = CodeMirror(element.get(0), {
-        mode: attrs.tdeCodeEditor,
+      var editor = CodeMirror(element.find(".codemirror-wrapper").get(0), {
+        mode: attrs.language,
         matchBrackets: true,
         lineNumbers: true,
         theme: "monokai",
         value: $scope.code
+      })
+      
+      var updatingCodeFromEditor = false
+      $scope.$watch("code", function(code)
+      {
+        if (updatingCodeFromEditor)
+          return
+        
+        editor.setValue(code)
       })
       
       editor.on("change", function()
@@ -44,13 +61,18 @@ angular.module("tde.project.texture-editor", [])
       {
         if (event.ctrlKey && (event.keyCode == 13 || event.keyCode == 10))
         {
+          updatingCodeFromEditor = true
           $scope.$apply(function()
           {
-            $scope.code = editor.getValue()
+            var code = editor.getValue()
+            
+            // ignore if not modified
+            if (code == $scope.code)
+              return
+            
+            $scope.code = code
             try
             {
-              eval($scope.code)
-              
               $scope.updateAsset(function(err)
               {
                 if (err)
@@ -69,6 +91,7 @@ angular.module("tde.project.texture-editor", [])
               $scope.error = err.message
             }
           })
+          updatingCodeFromEditor = false
         }
       })
     }

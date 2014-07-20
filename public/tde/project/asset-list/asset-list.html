@@ -2,11 +2,11 @@
 	<input type="text" ng-model="query" class="form-control search-box" placeholder="Search assets" />
 	<div class="scrollable">
 		<ul class="asset-list">
-			<li ng-repeat="asset in assets | filter:query | orderBy:'name'" ng-click="selectAsset(asset)" ng-class="getActiveClass(asset)" ng-dblclick="startRename(asset)">
+			<li ng-repeat="asset in assets | filter:query" ng-click="selectAsset(asset)" ng-class="getActiveClass(asset)" ng-dblclick="startRename(asset)">
 				<span ng-class="getIconClass(asset)"></span>
-				<span ng-hide="editedAsset == asset">{{asset.name}}</span>
+				<span ng-hide="editedAsset == asset">{{asset}}</span>
 				<form ng-show="editedAsset == asset" ng-submit="finishRename()">
-					<input ng-show="editedAsset == asset" type="text" ng-model="$parent.tempName" class="rename-box" ng-class="{error: renameError}" placeholder="{{asset.type}} name" ng-blur="finishRename()" ng-keypress="checkEscape($event)" />
+					<input ng-show="editedAsset == asset" type="text" ng-model="$parent.tempName" class="rename-box" ng-class="{error: renameError}" placeholder="Name" ng-blur="finishRename()" ng-keypress="checkEscape($event)" />
 				</form>
 			</li>
 		</ul>

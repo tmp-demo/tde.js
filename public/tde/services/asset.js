@@ -1,8 +1,8 @@
 angular.module("tde.services.asset", [])
 
-.service("Asset", function($rootScope, $http, $routeParams)
+.service("Asset", function($rootScope, $http, $routeParams, EngineDriver)
 {
-  this.assets = []
+  this.assets = {}
   this.currentProjectId = ""
   
   var self = this
@@ -10,9 +10,12 @@ angular.module("tde.services.asset", [])
   {
     if ($routeParams.projectId)
     {
-      $http.get("/data/project/" + $routeParams.projectId + "/assets").success(function(data) {
-        self.assets = data;
-        $rootScope.$broadcast("assetListChanged")
+      $http.get("/data/project/" + $routeParams.projectId + "/assets").success(function(assetList) {
+        for (var i = 0; i < assetList.length; i++)
+        {
+          console.log("loading " + assetList[i])
+          self.loadAsset(assetList[i])
+        }
       })
     }
   }
@@ -36,9 +39,9 @@ angular.module("tde.services.asset", [])
       })
   }
   
-  this.renameAsset = function(asset, newName, callback)
+  this.renameAsset = function(assetId, newName, callback)
   {
-    $http.post("/data/project/" + $routeParams.projectId + "/asset/" + asset.name + "." + asset.type, {rename: newName + "." + asset.type}).
+    $http.post("/data/project/" + $routeParams.projectId + "/asset/" + assetId, {rename: newName}).
       success(function()
       {
         self.refreshAssetList()
@@ -67,13 +70,63 @@ angular.module("tde.services.asset", [])
       })
   }
   
+  this.loadAsset = function(assetId, callback)
+  {
+    $http.get("/data/project/" + $routeParams.projectId + "/asset/" + assetId).
+      success(function(data)
+      {
+        self.assets[assetId] = data
+        
+        var parts = assetId.split(".")
+        var name = parts[0]
+        var type = parts[1]
+        switch (type)
+        {
+          case "sequence": EngineDriver.loadSequence(name, data); break
+          default: alert("unknown asset type: " + type); break
+        }
+        
+        $rootScope.$broadcast("assetListChanged")
+        $rootScope.$broadcast("assetLoaded", assetId)
+        if (callback)
+          callback(null)
+      }).
+      error(function(error)
+      {
+        if (callback)
+          callback(error)
+      })
+  }
+  
+  this.unloadAsset = function(assetId)
+  {
+    if (!(assetIdself in self.assets))
+      return
+    
+    var parts = assetId.split(".")
+    var name = parts[0]
+    var type = parts[1]
+    switch (type)
+    {
+      case "sequence": EngineDriver.unloadSequence(name); break
+      default: alert("unknown asset type: " + type); break
+    }
+    
+    $rootScope.$broadcast("assetListChanged")
+    $rootScope.$broadcast("assetUnloaded", assetId)
+  }
+  
   $rootScope.$on('$routeChangeSuccess', function()
   {
     if (self.currentProjectId != $routeParams.projectId)
     {
-      self.assets = []
+      var assetList = Object.keys(self.assets)
+      for (var i = 0; i < assetList.length; i++)
+      {
+        self.unloadAsset(assetList[i])
+      }
+      
       self.currentProjectId = $routeParams.projectId
-      $rootScope.$broadcast("assetListChanged")
       self.refreshAssetList()
     }
   })

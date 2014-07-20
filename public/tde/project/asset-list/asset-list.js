@@ -2,16 +2,15 @@ angular.module("tde.project.asset-list", [])
 
 .controller("AssetListCtrl", function($scope, $http, Asset)
 {
-  $scope.assets = Asset.assets
+  $scope.assets = Object.keys(Asset.assets)
   $scope.$on("assetListChanged", function()
   {
-    $scope.assets = Asset.assets
-    $scope.editedAsset = null
+    $scope.assets = Object.keys(Asset.assets)
   })
   
   $scope.getActiveClass = function(asset)
   {
-    if ($scope.assetId == asset.name)
+    if ($scope.assetId == asset)
       return "active"
     else
       return ""
@@ -20,7 +19,7 @@ angular.module("tde.project.asset-list", [])
   $scope.getIconClass = function(asset)
   {
     var glyphicon = "warning-sign"
-    switch (asset.type)
+    switch (asset.split(".")[1])
     {
       case "texture": glyphicon = "picture"; break
       case "model": glyphicon = "th-large"; break
@@ -33,7 +32,8 @@ angular.module("tde.project.asset-list", [])
   
   $scope.selectAsset = function(asset)
   {
-    window.location.hash = "#/" + $scope.projectId + "/" + asset.type + "/" + asset.name
+    var parts = asset.split(".")
+    window.location.hash = "#/" + $scope.projectId + "/" + parts[1] + "/" + parts[0]
   }
   
   $scope.createAsset = function(type)
@@ -50,7 +50,7 @@ angular.module("tde.project.asset-list", [])
   $scope.startRename = function(asset)
   {
     $scope.editedAsset = asset
-    $scope.tempName = asset.name
+    $scope.tempName = asset
   }
   
   $scope.finishRename = function()
@@ -58,7 +58,7 @@ angular.module("tde.project.asset-list", [])
     if (!$scope.editedAsset) // called when finish/cancel was already done, but the hidden field loses focus
       return
     
-    if (($scope.tempName == "") || ($scope.tempName == $scope.editedAsset.name))
+    if (($scope.tempName == "") || ($scope.tempName == $scope.editedAsset))
     {
       $scope.cancelRename()
       return
@@ -72,7 +72,7 @@ angular.module("tde.project.asset-list", [])
         return
       }
       
-      $scope.selectAsset({type: $scope.editedAsset.type, name: $scope.tempName})
+      $scope.selectAsset($scope.tempName)
       $scope.editedAsset = null
       $scope.tempName = null
       $scope.renameError = false

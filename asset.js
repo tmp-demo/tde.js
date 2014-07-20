@@ -18,11 +18,7 @@ module.exports.init = function(app)
         return stats.isFile()
       })
       
-      res.json(assets.map(function(filename)
-      {
-        var parts = filename.split(".")
-        return {name: parts[0], type: parts[1]}
-      }))
+      res.json(assets)
     })
   })
 
@@ -151,7 +147,7 @@ module.exports.init = function(app)
           
           var cookies = new Cookies(req, res)
           var authorString = cookies.get("name") + " <" + cookies.get("email") + ">"
-          repo.commit("removed " + assetId + " to " + req.body.rename, {author: authorString}, function(err)
+          repo.commit("renamed " + assetId + " to " + req.body.rename, {author: authorString}, function(err)
           {
             if (err) return next(err)
             
