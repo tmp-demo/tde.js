@@ -4,10 +4,7 @@ angular.module("tde.services.engine-driver", [])
 {
   var self = this
   
-  this.logBuffer = [
-    { type: "info", message: "youpi" },
-    { type: "error", message: "does not work" }
-  ]
+  this.logBuffer = []
   
   this.loadTexture = function(name, data)
   {
@@ -64,11 +61,12 @@ angular.module("tde.services.engine-driver", [])
   {
   }
   
-  this.logInfo = function(message)
+  this.logInfo = function(message, details)
   {
     this.logBuffer.push({
       type: "info",
-      message: message
+      message: message,
+      details: details
     })
   }
   
