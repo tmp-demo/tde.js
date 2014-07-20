@@ -7,7 +7,7 @@ angular.module("tde.project.texture-editor", [])
   
   $scope.updateAsset = function(callback)
   {
-    Asset.updateAsset($scope.assetId + ".texture", $scope.code, function(err)
+    Asset.updateAsset($scope.assetId, $scope.code, function(err)
     {
       if (callback)
         callback(err)
