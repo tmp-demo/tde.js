@@ -28,7 +28,7 @@ done
 
 cat $EXPORT_ROOT/shaders/shaders.js >> $EXPORT_ROOT/demo.js
 
-for f in  $PROJECT_ROOT/*.sequence
+for f in  $PROJECT_ROOT/*.seq
 do
     ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
 done
