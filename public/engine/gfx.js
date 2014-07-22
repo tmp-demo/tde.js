@@ -125,8 +125,8 @@ function draw_geom(data) {
   gl.enable(gl.DEPTH_TEST);
   gl.bindBuffer(GL_ARRAY_BUFFER, data.vbo);
   for (var c = 0; c < data.attribs.length;++c) {
-    gl.enableVertexAttribArray(c);
     var a = data.attribs[c];
+    gl.enableVertexAttribArray(a.location);
     gl.vertexAttribPointer(a.location, a.components, gl.FLOAT, false, a.stride, a.offset);
   }
   gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.ibo);
