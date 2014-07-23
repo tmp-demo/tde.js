@@ -125,8 +125,8 @@ function draw_geom(data) {
   gl.enable(gl.DEPTH_TEST);
   gl.bindBuffer(GL_ARRAY_BUFFER, data.vbo);
   for (var c = 0; c < data.attribs.length;++c) {
-    gl.enableVertexAttribArray(c);
     var a = data.attribs[c];
+    gl.enableVertexAttribArray(a.location);
     gl.vertexAttribPointer(a.location, a.components, gl.FLOAT, false, a.stride, a.offset);
   }
   gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.ibo);
@@ -311,6 +311,9 @@ function render_scene(scene, demo_time, scene_time) {
   }
   for (var p in scene.passes) {
     var pass = scene.passes[p];
+    if (pass.update) {
+      pass.update(t);
+    }
     if (pass.program) {
       var shader_program = pass.program;
       gl.useProgram(shader_program);
@@ -328,9 +331,6 @@ function render_scene(scene, demo_time, scene_time) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
     } else {
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    }
-    if (pass.update) {
-      pass.update(t);
     }
     if (pass.texture_inputs) {
       for (var i=0; i<pass.texture_inputs.length; ++i) {
