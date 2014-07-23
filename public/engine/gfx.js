@@ -271,7 +271,7 @@ function set_uniforms(program) {
     var val = uniforms[uniformName];
 
     var location = gl.getUniformLocation(program, uniformName);
-    if (location == -1)
+    if (!location)
       continue;
  
     // if val is a bare number, make a one-element array
