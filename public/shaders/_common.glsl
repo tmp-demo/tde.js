@@ -18,7 +18,7 @@ uniform float clip_time;
 
 // x, y = scale
 // z = scroll offset
-// w = effect (cosine + skew)
+// w = cosine
 uniform vec4 text_params;
 
 varying vec2 v_tex_coords;

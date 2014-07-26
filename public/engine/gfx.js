@@ -165,7 +165,7 @@ function load_shader_program(vs_entry_point, fs_entry_point) {
   return program;
 }
 
-function create_texture(width, height, format, image, allow_repeat) {
+function create_texture(width, height, format, image, allow_repeat, linear_filtering) {
   var image = image || null;
   var format = format || gl.RGBA;
   width = width || canvas.width;
@@ -179,10 +179,13 @@ function create_texture(width, height, format, image, allow_repeat) {
   var wrap = gl.CLAMP_TO_EDGE;
   if (allow_repeat) { wrap = gl.REPEAT; }
 
+  var filtering = gl.NEAREST;
+  if (linear_filtering) { filtering = gl.LINEAR; }
+  
   gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
   gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
-  gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filtering);
+  gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filtering);
   
   gl.texImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
                 format, (format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT : gl.UNSIGNED_BYTE, image);
@@ -198,12 +201,12 @@ function create_text_texture(size, text) {
   
   textContext.scale(1, -1);
   textContext.font = size + "px OCR A STD";
-  textContext.fillStyle = "#f00";
-  textContext.fillText(text, 0, -size);
+  textContext.fillStyle = "#fff";
+  textContext.fillText(text, 0, -size / 4);
   
   var width = 1+textContext.measureText(text).width|0;
-  var height = size * 2;
-  return create_texture(width, height, gl.RGBA, textContext.getImageData(0, 0, width, height).data, false);
+  var height = size * 1.25;
+  return create_texture(width, height, gl.RGBA, textContext.getImageData(0, 0, width, height).data, false, true);
 }
 
 function texture_unit(i) { return gl.TEXTURE0+i; }
