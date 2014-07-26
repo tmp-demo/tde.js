@@ -273,7 +273,6 @@ function clear() {
 function render_scene(scene, demo_time, scene_time) {
   var clip_time_norm = scene_time/scene.duration;
   uniforms["clip_time"] = scene_time;
-  console.log(scene_time);
   var t = {
     scene_norm: clip_time_norm,
     demo: demo_time,

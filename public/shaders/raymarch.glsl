@@ -18,10 +18,10 @@ float distance_field(in vec3 position)
   return SphereDistance(position, vec3(0., 0., 0.), 2.);
 }
 
-vec3 ray_march(in vec3 position, in vec3 direction, out float steps)
+vec3 ray_march(vec3 position, vec3 direction, out float steps)
 {
   float next_distance = 1.0;
-  for (int i = 0; i < 200 ; ++i)
+  for (int i = 0; i < 80 ; ++i)
   {
       next_distance = distance_field(position);
       
@@ -32,7 +32,7 @@ vec3 ray_march(in vec3 position, in vec3 direction, out float steps)
       }
       position += direction * next_distance;
   }
-  steps = float(200);
+  steps = 80.0;
 
   return position;
 }
@@ -40,12 +40,12 @@ vec3 ray_march(in vec3 position, in vec3 direction, out float steps)
 
 void main_fs_raymarch()
 {
-  vec3 pos = vec3(cos(clip_time) * 5.0, 0.0, 0.0);
+  vec3 pos = vec3(cos(clip_time) * 2.0, 0.0, clip_time * 20.0);
 	vec3 dir = normalize(vec3(v_tex_coords.x * resolution.x / resolution.y, v_tex_coords.y + sin(clip_time * 0.2) * 0.2, 1.0)); //constant is fov. 1.0 = 90° vertical
   
   float steps;
   pos = ray_march(pos, dir, steps);
 
-  steps /= 200.0;
+  steps /= 80.0;
   gl_FragColor = vec4( vec3(steps, steps, steps), 1.0);
 }
