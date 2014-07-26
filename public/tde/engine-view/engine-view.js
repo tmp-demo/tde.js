@@ -17,12 +17,12 @@ angular.module("tde.engine-view", [])
       var seeker = element.find(".seeker")
       seeker.on("input", function()
       {
-        demo.start_time = audioContext.currentTime * 1000 - this.value
+        demo.start_time = audioContext.currentTime - this.value / 1000
       })
       
       setInterval(function()
       {
-        seeker.val(audioContext.currentTime * 1000 - demo.start_time)
+        seeker.val((audioContext.currentTime - demo.start_time) * 1000)
         
         // compute start time for each scene
         var time_sum = 0
@@ -32,7 +32,7 @@ angular.module("tde.engine-view", [])
           time_sum += demo.scenes[s].duration
         }
         demo.end_time = time_sum
-        seeker.attr("max", time_sum)
+        seeker.attr("max", time_sum * 1000)
       }, 50)
       
       element.find("canvas").dblclick(function()

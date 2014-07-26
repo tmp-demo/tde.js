@@ -7,7 +7,7 @@ demo = {
 };
 
 function main_loop() {
-  var current_time = audioContext.currentTime * 1000 - demo.start_time;
+  var current_time = audioContext.currentTime - demo.start_time;
   
   var start_time = 0;
   for (var i = 0; i < demo.scenes.length; i++) {

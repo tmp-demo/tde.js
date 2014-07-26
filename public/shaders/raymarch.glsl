@@ -15,48 +15,37 @@ float SphereDistance(vec3 point, vec3 center, float radius)
 
 float distance_field(in vec3 position)
 {
-    return SphereDistance(position, vec3(0., 0., 0.), 2.);
+  return SphereDistance(position, vec3(0., 0., 0.), 2.);
 }
 
 vec3 ray_march(in vec3 position, in vec3 direction, out float steps)
 {
-    float next_distance = 1.0;
-    for (int i = 0; i < 200 ; ++i)
-    {
-        next_distance = distance_field(position);
-        
-        if (next_distance < 0.01)
-        {
-            steps = float(i);
-            return position;
-        }
-        position += direction * next_distance;
-    }
+  float next_distance = 1.0;
+  for (int i = 0; i < 200 ; ++i)
+  {
+      next_distance = distance_field(position);
+      
+      if (next_distance < 0.01)
+      {
+          steps = float(i);
+          return position;
+      }
+      position += direction * next_distance;
+  }
   steps = float(200);
 
   return position;
 }
 
 
-void main_fs_raymarch() {
-
+void main_fs_raymarch()
+{
+  vec3 pos = vec3(cos(clip_time) * 5.0, 0.0, 0.0);
+	vec3 dir = normalize(vec3(v_tex_coords.x * resolution.x / resolution.y, v_tex_coords.y + sin(clip_time * 0.2) * 0.2, 1.0)); //constant is fov. 1.0 = 90° vertical
   
-  float an = 0.0;
-  vec3 ViewerPos = vec3(0.0,0.0,1.0);
-  vec3 Subject = vec3(0.,0.,5.);
-  
-  // camera matrix //obscure part no need to touch this, unless you wan to tilt your head sideways
-  vec3 ww = normalize(Subject - ViewerPos ); //looking direction
-  vec3 uu = normalize( cross(ww,vec3(0.0,1.0,0.0) ) ); //vector going to the viewer's right  // change the constant vector to fefine another top vector
-  vec3 vv = normalize( cross(uu,ww)); //vector to the top
+  float steps;
+  pos = ray_march(pos, dir, steps);
 
-	// create view ray
-  vec2 p = v_tex_coords;
-	vec3 dir = normalize( p.x*uu + p.y*vv + 2.*ww ); //constant is fov. 2.0 = 90° vertical, 90° horizontal.
-    
-  float steps = 0.;
-  vec3 pos = ray_march(ViewerPos, dir, steps);
-
-  gl_FragColor = vec4( vec3(steps / 200.,steps / 200.,steps / 200.), 1.0);
-  //gl_FragColor = vec4( pos, 1.0);
+  steps /= 200.0;
+  gl_FragColor = vec4( vec3(steps, steps, steps), 1.0);
 }
