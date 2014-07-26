@@ -62,8 +62,8 @@ function main() {
   body.appendChild(canvas);
   body.style.margin = 0;
   
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
   
   gl_init();
   demo_init();
