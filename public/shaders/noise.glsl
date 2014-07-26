@@ -28,5 +28,5 @@ float noise( in vec2 x )
 }
 
 void main_fs_noise() {
-  gl_FragData[0] = vec4(vec3(1.0,1.0,1.0)*noise(v_tex_coords*100.0), 1.0);
+  gl_FragColor = vec4(vec3(1.0,1.0,1.0)*noise(v_tex_coords*100.0), 1.0);
 }

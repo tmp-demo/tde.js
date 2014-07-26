@@ -57,6 +57,6 @@ void main_fs_raymarch() {
   float steps = 0.;
   vec3 pos = ray_march(ViewerPos, dir, steps);
 
-  gl_FragData[0] = vec4( vec3(steps / 200.,steps / 200.,steps / 200.), 1.0);
-  //gl_FragData[0] = vec4( pos, 1.0);
+  gl_FragColor = vec4( vec3(steps / 200.,steps / 200.,steps / 200.), 1.0);
+  //gl_FragColor = vec4( pos, 1.0);
 }

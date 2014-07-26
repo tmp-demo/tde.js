@@ -14,14 +14,6 @@ var GL_ELEMENT_ARRAY_BUFFER;
 function gl_init() {
   gl = canvas.getContext("experimental-webgl");
   gl.viewport(0, 0, canvas.width, canvas.height);
-  ext = {
-    draw_buffers: gl.getExtension("WEBGL_draw_buffers")
-  };
-  // #debug{{
-  if (!ext.draw_buffers) {
-    console.log("WEBGL_draw_buffers not supported :( parts of the demo will not render properly");
-  }
-  // #debug}}
 
   // put some commonly used gl constants behind variable names that can be
   // minified.
@@ -29,7 +21,6 @@ function gl_init() {
   GL_ARRAY_BUFFER = gl.ARRAY_BUFFER;
   GL_STATIC_DRAW = gl.STATIC_DRAW;
   GL_ELEMENT_ARRAY_BUFFER = gl.ELEMENT_ARRAY_BUFFER;
-
 
   var buffer = gl.createBuffer();
   gl.bindBuffer(GL_ARRAY_BUFFER, buffer);
@@ -207,15 +198,6 @@ function create_depth_buffer(w,h) {
 
 function texture_unit(i) { return gl.TEXTURE0+i; }
 
-function color_attachment(i) {
-  // #debug{{
-  if (!ext.draw_buffers) {
-    return gl.COLOR_ATTACHMENT0+i;
-  }
-  // #debug}}
-  return ext.draw_buffers["COLOR_ATTACHMENT0_WEBGL"]+i;
-}
-
 // #debug{{
 function frame_buffer_error(e) {
   if (e == gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT) {
@@ -235,34 +217,17 @@ function frame_buffer_error(e) {
 function frame_buffer(target) {
   var fbo = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-  var buffers = [];
-
-  if (target.depth) {
-    //gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, target.depth);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, target.depth.tex, 0);
-  }
-
-  // this branch is *always* taken in release builds
-  if (ext.draw_buffers) { // #debug
-
-    for (var t=0; t<target.color.length;++t) {
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(t),
-                              GL_TEXTURE_2D, target.color[t].tex, 0);
-      buffers.push(ext.draw_buffers["COLOR_ATTACHMENT0_WEBGL"]+t)
-    }
-    ext.draw_buffers["drawBuffersWEBGL"](buffers);
-
+  
+  if (target.color) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, GL_TEXTURE_2D, target.color.tex, 0);
+  if (target.depth) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, GL_TEXTURE_2D, target.depth.tex, 0);
+  
   // #debug{{
-  } else if (target.color.length > 0) {
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(0),
-                              GL_TEXTURE_2D, target.color[0].tex, 0);
-  }
   var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
   if (status != gl.FRAMEBUFFER_COMPLETE) {
     alert("incomplete framebuffer "+frame_buffer_error(status));
   }
   // #debug}}
-  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  
   return fbo;
 }
 
@@ -320,8 +285,8 @@ function render_scene(scene, demo_time, scene_time) {
       var rx = canvas.width;
       var ry = canvas.height;
       if (pass.render_to) {
-        rx = pass.render_to.color[0].width;
-        ry = pass.render_to.color[0].height;
+        rx = pass.render_to.color.width;
+        ry = pass.render_to.color.height;
       }
       uniforms["resolution"] = [rx,ry];
       set_uniforms(shader_program);

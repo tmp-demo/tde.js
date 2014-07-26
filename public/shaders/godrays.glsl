@@ -51,7 +51,7 @@ void main_fs_godrays() {
    illuminationDecay *= Decay * (1.- random( position) / 6.);  
  }  
  // Output final color with a further scale control factor.  
-   gl_FragData[0] = vec4(color, 1.0);
+   gl_FragColor = vec4(color, 1.0);
    
 
   

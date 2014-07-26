@@ -11,7 +11,7 @@ float rand(float t) {
 }
 
 void main_fs_printtext() {
-  //gl_FragData[0] = vec4(texture2D(texture_0, v_tex_coords).rgba);
+  //gl_FragColor = vec4(texture2D(texture_0, v_tex_coords).rgba);
   
   vec2 uv = gl_FragCoord.xy / resolution;
   uv += vec2(floor(rand(clip_time * 0.0000001) * 2.0) * 0.57 + rand(clip_time * 0.00000001) * 0.4 + sin(gl_FragCoord.x / resolution.x * 200.0 * cos(floor(clip_time * .00020))), 1.0);
@@ -29,5 +29,5 @@ void main_fs_printtext() {
   // fade to black
   color *= clamp(mod(rand(clip_time * 0.0000003), 1.0) * 1.8, 0.0, 1.0);
   
-  gl_FragData[0] = vec4(color, 1.0);
+  gl_FragColor = vec4(color, 1.0);
 }

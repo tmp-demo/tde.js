@@ -13,5 +13,5 @@ void main_fs_dblur() {
   for (int i = 0; i < int(NB_BLUR_TAPS); ++i) {
   	c = c + texture2D(texture_0, p + float(i) * step);
   }
-  gl_FragData[0] = c / NB_BLUR_TAPS;
+  gl_FragColor = c / NB_BLUR_TAPS;
 }

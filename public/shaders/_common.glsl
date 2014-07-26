@@ -30,5 +30,4 @@ attribute vec3 normals;
 attribute vec2 tex_coords;
 
 //! FRAGMENT
-#extension GL_EXT_draw_buffers : require
 #define NB_BLUR_TAPS 10.0

@@ -10,5 +10,5 @@ void main_vs_show_normals() {
 //! FRAGMENT
 
 void main_fs_show_normals() {
-  gl_FragData[0] = vec4(0.5*v_normals+vec3(0.5,0.5,0.5), 1.0);
+  gl_FragColor = vec4(0.5*v_normals+vec3(0.5,0.5,0.5), 1.0);
 }
