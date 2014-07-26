@@ -43,20 +43,20 @@ function gl_init() {
   load_shaders();
 }
 
-_quad_vbo = null;
-_enums = _enums = { }; // #debug
+var _quad_vbo = null;
+var _enums = _enums = { }; // #debug
 
-_locations = [
+var _locations = [
   "position",
   "tex_coords",
   "normals",
   "color"
 ];
 
-POS = 0;
-TEX_COORDS = 1;
-NORMALS = 2;
-COLOR = 3;
+var POS = 0;
+var TEX_COORDS = 1;
+var NORMALS = 2;
+var COLOR = 3;
 
 // #debug{{
 function gl_error() {
