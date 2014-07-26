@@ -2,7 +2,7 @@
 
 void main_vs_raymarch() {
   gl_Position = vec4(position.xy, 0.0, 1.0);
-  v_tex_coords = (vec2(1.0, 1.0) + position.xy) / 2.0;
+  v_tex_coords = position.xy;
 }
 
 //! FRAGMENT
@@ -51,7 +51,7 @@ void main_fs_raymarch() {
   vec3 vv = normalize( cross(uu,ww)); //vector to the top
 
 	// create view ray
-  vec2 p = vec2(v_tex_coords.x *2. -1., v_tex_coords.y *2. -1.);
+  vec2 p = v_tex_coords;
 	vec3 dir = normalize( p.x*uu + p.y*vv + 2.*ww ); //constant is fov. 2.0 = 90° vertical, 90° horizontal.
     
   float steps = 0.;

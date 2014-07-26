@@ -1,4 +1,5 @@
-
+var gl
+var canvas
 var textures = {}
 var uniforms = {}
 var geometries = {}
@@ -188,12 +189,21 @@ function create_texture(width, height, format, image, allow_repeat) {
   return { tex: texture, width: width, height: height };
 }
 
-function create_depth_buffer(w,h) {
-  var depth_rb = gl.createRenderbuffer();
-  gl.bindRenderbuffer(gl.RENDERBUFFER, depth_rb);
-  gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, w, h);
-  gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-  return depth_rb;
+function create_text_texture(size, text) {
+  var textCanvas = document.createElement("canvas");
+  textCanvas.width = 2048;
+  textCanvas.height = 512;
+  
+  var textContext = textCanvas.getContext("2d");
+  
+  textContext.scale(1, -1);
+  textContext.font = size + "px OCR A STD";
+  textContext.fillStyle = "#f00";
+  textContext.fillText(text, 0, -size);
+  
+  var width = 1+textContext.measureText(text).width|0;
+  var height = size * 2;
+  return create_texture(width, height, gl.RGBA, textContext.getImageData(0, 0, width, height).data, false);
 }
 
 function texture_unit(i) { return gl.TEXTURE0+i; }

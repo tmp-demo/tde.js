@@ -1,8 +1,5 @@
 //! COMMON
 
-// TODO the hard-coded far plane is a bit lame
-#define FAR_DIST 50.0
-
 precision lowp float;
 
 uniform mat4 view_proj_mat;
@@ -20,6 +17,11 @@ uniform vec2 step;
 uniform float demo_time;
 uniform float clip_time;
 
+// x, y = scale
+// z = scroll offset
+// w = effect (cosine + skew)
+uniform vec4 text_params;
+
 varying vec2 v_tex_coords;
 varying vec3 v_normals;
 varying vec3 v_position;
@@ -28,6 +30,3 @@ varying vec3 v_position;
 attribute vec3 position;
 attribute vec3 normals;
 attribute vec2 tex_coords;
-
-//! FRAGMENT
-#define NB_BLUR_TAPS 10.0

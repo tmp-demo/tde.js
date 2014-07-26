@@ -6,11 +6,7 @@ void main_vs_noise() {
 }
 
 //! FRAGMENT
-
-float hash( float n )
-{
-    return fract(sin(n)*43758.5453123);
-}
+//! INCLUDE rand.glsllib
 
 float noise( in vec2 x )
 {
@@ -21,8 +17,8 @@ float noise( in vec2 x )
 
     float n = p.x + p.y*57.0;
 
-    float res = mix(mix( hash(n+  0.0), hash(n+  1.0),f.x),
-                    mix( hash(n+ 57.0), hash(n+ 58.0),f.x),f.y);
+    float res = mix(mix( rand(n+  0.0), rand(n+  1.0),f.x),
+                    mix( rand(n+ 57.0), rand(n+ 58.0),f.x),f.y);
 
     return res;
 }

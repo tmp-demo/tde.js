@@ -6,6 +6,7 @@ void main_vs_dblur() {
 }
 
 //! FRAGMENT
+const float NB_BLUR_TAPS = 10.0;
 
 void main_fs_dblur() {
   vec2 p = v_tex_coords - step * NB_BLUR_TAPS / 2.0;
