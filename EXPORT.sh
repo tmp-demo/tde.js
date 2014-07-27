@@ -33,6 +33,11 @@ do
     ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
 done
 
+for f in  $PROJECT_ROOT/*.song
+do
+    ./tools/opt.py $f | sed "s/'\\(SND\\.[A-Za-z]*\\)'/\\1/g" >> $EXPORT_ROOT/demo.js
+done
+
 echo "onload=main;" >> $EXPORT_ROOT/demo.js
 
 if [ ! -f tools/compiler.jar ]; then

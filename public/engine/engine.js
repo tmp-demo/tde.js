@@ -1,5 +1,6 @@
 var scenes = [];
 var start_time = 0;
+var snd;
 
 function engine_render(current_time)
 {
@@ -17,7 +18,7 @@ function engine_render(current_time)
 }
 
 function main_loop() {
-  var current_time = audioContext.currentTime - start_time;
+  var current_time = snd.t();
   engine_render(current_time);
   requestAnimationFrame(main_loop);
 }
@@ -37,7 +38,9 @@ function main() {
   gfx_init();
 
   render_scene(scenes[0], 0, 0);
-  init_audio();
+  
+  snd = new SND(SONG);
+  snd.p();
 
   main_loop();
 }
@@ -45,6 +48,5 @@ function main() {
 function editor_main() {
   canvas = document.getElementById("engine-view")
 
-  init_audio();
   gl_init();
 }

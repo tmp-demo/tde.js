@@ -49,10 +49,23 @@ angular.module("tde.services.engine-driver", [])
   
   this.loadSong = function(name, data)
   {
+    self.logInfo("loading " + name)
+    
+    try
+    {
+      eval(data)
+      snd = new SND(SONG)
+    }
+    catch (err)
+    {
+      self.logError(err.message, err.stack)
+    }
   }
   
   this.unloadSong = function(name)
   {
+    if (snd)
+      snd.playing = false
   }
   
   this.loadShader = function(name, data)
@@ -85,10 +98,16 @@ angular.module("tde.services.engine-driver", [])
   {
     this.playing = true
     this.seek(this.currentTime)
+    if (snd)
+      snd.p()
     
     function render()
     {
-      self.currentTime = audioContext.currentTime - start_time;
+      if (snd)
+        self.currentTime = snd.t()
+      else
+        self.currentTime = 0;
+      
       engine_render(self.currentTime)
       
       if (self.playing)
@@ -101,12 +120,15 @@ angular.module("tde.services.engine-driver", [])
   this.pause = function()
   {
     this.playing = false
+    if (snd)
+      snd.playing = false
   }
   
   this.seek = function(time)
   {
     self.currentTime = time
-    start_time = audioContext.currentTime - self.currentTime
+    if (snd)
+      snd.startTime = snd.c.currentTime - time * (60 / snd.song.cfg.tempo)
     
     if (!this.playing)
       engine_render(self.currentTime)
