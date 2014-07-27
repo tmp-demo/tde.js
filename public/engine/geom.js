@@ -54,13 +54,13 @@ function join_rings(geom, r1, r2, skip) {
     var ibo = geom.ibo;
     for (var i = 0; i < n_vertices/skip; ++i) {
         // first triangle
-        ibo[i_cursor + i*6    ] = v_cursor1 +  i*skip;
-        ibo[i_cursor + i*6 + 1] = v_cursor2 +  i*skip;
-        ibo[i_cursor + i*6 + 2] = v_cursor2 + (i*skip+1);
+        ibo[i_cursor + i*6    ] = v_cursor1 +  i*2;
+        ibo[i_cursor + i*6 + 1] = v_cursor2 +  i*2;
+        ibo[i_cursor + i*6 + 2] = v_cursor2 + (i*2+1);
         // second triangle
-        ibo[i_cursor + i*6 + 3] = v_cursor1 +  i*skip;
-        ibo[i_cursor + i*6 + 4] = v_cursor2 + (i*skip+1);
-        ibo[i_cursor + i*6 + 5] = v_cursor1 + (i*skip+1);
+        ibo[i_cursor + i*6 + 3] = v_cursor1 +  i*2;
+        ibo[i_cursor + i*6 + 4] = v_cursor2 + (i*2+1);
+        ibo[i_cursor + i*6 + 5] = v_cursor1 + (i*2+1);
     }
 
     // bump cursors
@@ -71,6 +71,7 @@ function join_rings(geom, r1, r2, skip) {
     geom.v_cursor += 2*n_vertices * inv_skip;
     geom.i_cursor += n_vertices * 6 / skip; // 6 is the number of indices per quad
 }
+
 
 // normal offset *is* an offset (so don't multiply by the stride)
 function compute_normals(geom, normal_offset, first_index, n_indices) {
@@ -277,4 +278,130 @@ function num_city_base_vertices(paths) {
         accum += paths[path].length;
     }
     return accum;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Testing...
+
+function arrays_equal(a1, a2) {
+    if (a1.length != a2.length) {
+        return false;
+    }
+    for (i = 0; i < a1.length; ++i) {
+        if (a1[i] !== a2[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// if this code ends up in the minified code something's wrong
+function test_join_rings() {
+    console.log("BEGIN - test_join_rings...");
+    var r1 = [
+        [0,0,3],
+        [1,0,3],
+        [1,1,3],
+        [0,1,3]
+    ];
+    var r2 = [
+        [0,0,5],
+        [1,0,5],
+        [1,1,5],
+        [0,1,5]
+    ];
+
+    var floats_per_vertex = 8;
+    var geom = {
+        vbo: new Float32Array(r1.length * 4 * floats_per_vertex),
+        ibo: new Uint16Array(r1.length * 6),
+        v_stride: floats_per_vertex,
+        v_cursor: 0, i_cursor: 0
+    }
+
+    join_rings(geom, r1, r2, CONTINUOUS_PATH);
+    if (!arrays_equal(geom.ibo, [
+        0, 8, 9,
+        0, 9, 1,
+        2, 10, 11,
+        2, 11, 3,
+        4, 12, 13,
+        4, 13, 5,
+        6, 14, 15,
+        6, 15, 7
+    ])) {
+        console.log("test_join_rings failed: wrong ibo (continuous)");
+    }
+
+    if (!arrays_equal(geom.vbo, [
+        // ring 1
+        0,0,3, 0, 0, 0, 0, 0,
+        0,0,3, 0, 0, 0, 0, 0,
+        1,0,3, 0, 0, 0, 0, 0,
+        1,0,3, 0, 0, 0, 0, 0,
+        1,1,3, 0, 0, 0, 0, 0,
+        1,1,3, 0, 0, 0, 0, 0,
+        0,1,3, 0, 0, 0, 0, 0,
+        0,1,3, 0, 0, 0, 0, 0,
+        // ring 2
+        0,0,5, 0, 0, 0, 0, 0,
+        0,0,5, 0, 0, 0, 0, 0,
+        1,0,5, 0, 0, 0, 0, 0,
+        1,0,5, 0, 0, 0, 0, 0,
+        1,1,5, 0, 0, 0, 0, 0,
+        1,1,5, 0, 0, 0, 0, 0,
+        0,1,5, 0, 0, 0, 0, 0,
+        0,1,5, 0, 0, 0, 0, 0
+    ])) {
+        console.log("test_join_rings failed: wrong vbo (continuous)");
+    }
+
+    geom = {
+        vbo: new Float32Array(r1.length * 2 * floats_per_vertex),
+        ibo: new Uint16Array(r1.length * 6 / 2),
+        v_stride: floats_per_vertex,
+        v_cursor: 0, i_cursor: 0
+    }
+
+    join_rings(geom, r1, r2, DISCONTINUOUS_PATH);
+    if (!arrays_equal(geom.ibo, [
+        0, 4, 5,
+        0, 5, 1,
+        2, 6, 7,
+        2, 7, 3,
+    ])) {
+        console.log("test_join_rings failed: wrong ibo (discontinuous)");
+    }
+
+    if (!arrays_equal(geom.vbo, [
+        // ring 1
+        0,0,3, 0, 0, 0, 0, 0,
+        1,0,3, 0, 0, 0, 0, 0,
+        1,1,3, 0, 0, 0, 0, 0,
+        0,1,3, 0, 0, 0, 0, 0,
+        // ring 2
+        0,0,5, 0, 0, 0, 0, 0,
+        1,0,5, 0, 0, 0, 0, 0,
+        1,1,5, 0, 0, 0, 0, 0,
+        0,1,5, 0, 0, 0, 0, 0
+    ])) {
+        console.log("test_join_rings failed: wrong vbo (discontinuous)");
+    }
+
+    console.log("END - test_join_rings");
 }
