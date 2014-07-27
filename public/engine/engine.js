@@ -1,16 +1,11 @@
-
-//var render_index = 0;
-
-demo = {
-  scenes: [],
-  start_time: 0
-};
+var scenes = [];
+var start_time = 0;
 
 function engine_render(current_time)
 {
   var start_time = 0;
-  for (var i = 0; i < demo.scenes.length; i++) {
-    var scene = demo.scenes[i]
+  for (var i = 0; i < scenes.length; i++) {
+    var scene = scenes[i]
     var scene_time = current_time - start_time;
     if ((scene_time >= 0) && (scene_time < scene.duration)) {
       render_scene(scene, current_time, scene_time);
@@ -22,7 +17,7 @@ function engine_render(current_time)
 }
 
 function main_loop() {
-  var current_time = audioContext.currentTime - demo.start_time;
+  var current_time = audioContext.currentTime - start_time;
   engine_render(current_time);
   requestAnimationFrame(main_loop);
 }
@@ -41,7 +36,7 @@ function main() {
   demo_init();
   gfx_init();
 
-  render_scene(demo.scenes[0], 0, 0);
+  render_scene(scenes[0], 0, 0);
   init_audio();
 
   main_loop();

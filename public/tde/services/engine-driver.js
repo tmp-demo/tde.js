@@ -33,7 +33,7 @@ angular.module("tde.services.engine-driver", [])
       eval(data)
       demo_init()
       gfx_init()
-      render_scene(demo.scenes[0], 0, 0);
+      render_scene(scenes[0], 0, 0);
       engine_render(self.currentTime)
     }
     catch (err)
@@ -88,7 +88,7 @@ angular.module("tde.services.engine-driver", [])
     
     function render()
     {
-      self.currentTime = audioContext.currentTime - demo.start_time;
+      self.currentTime = audioContext.currentTime - start_time;
       engine_render(self.currentTime)
       
       if (self.playing)
@@ -106,7 +106,7 @@ angular.module("tde.services.engine-driver", [])
   this.seek = function(time)
   {
     self.currentTime = time
-    demo.start_time = audioContext.currentTime - self.currentTime
+    start_time = audioContext.currentTime - self.currentTime
     
     if (!this.playing)
       engine_render(self.currentTime)

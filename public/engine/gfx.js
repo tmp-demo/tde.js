@@ -70,8 +70,8 @@ function gl_error() {
 function gfx_init() {
   // replace the render passes' texture arrays by actual frame buffer objects
   // this is far from optimal...
-  for (var s=0; s<demo.scenes.length; ++s) {
-    var scene = demo.scenes[s];
+  for (var s=0; s<scenes.length; ++s) {
+    var scene = scenes[s];
     for (var p=0; p<scene.passes.length; ++p) {
       var pass = scene.passes[p];
       if (pass.render_to) {
