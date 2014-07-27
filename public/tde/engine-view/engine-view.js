@@ -3,6 +3,7 @@ angular.module("tde.engine-view", [])
 .controller("EngineViewCtrl", function($scope, EngineDriver)
 {
   $scope.logBuffer = EngineDriver.logBuffer
+  $scope.driver = EngineDriver
 })
 
 .directive("tdeEngineView", function()
@@ -10,6 +11,7 @@ angular.module("tde.engine-view", [])
   return {
     restrict: "E",
     templateUrl: "/tde/engine-view/engine-view.html",
+    controller: "EngineViewCtrl",
     link: function($scope, element, attrs)
     {
       editor_main()
@@ -17,12 +19,12 @@ angular.module("tde.engine-view", [])
       var seeker = element.find(".seeker")
       seeker.on("input", function()
       {
-        demo.start_time = audioContext.currentTime - this.value / 1000
+        $scope.driver.seek(this.value / 1000)
       })
       
       setInterval(function()
       {
-        seeker.val((audioContext.currentTime - demo.start_time) * 1000)
+        seeker.val($scope.driver.currentTime * 1000)
         
         // compute start time for each scene
         var time_sum = 0
@@ -35,10 +37,20 @@ angular.module("tde.engine-view", [])
         seeker.attr("max", time_sum * 1000)
       }, 50)
       
-      element.find("canvas").dblclick(function()
+      var canvasElement = element.find("canvas")
+      canvasElement.dblclick(function()
       {
         this.requestFullScreen = this.requestFullScreen || this.mozRequestFullScreen || this.webkitRequestFullScreen
         this.requestFullScreen()
+      })
+      
+      canvasElement.click(function()
+      {
+        var driver = $scope.driver
+        if (driver.playing)
+          driver.pause()
+        else
+          driver.play()
       })
     }
   }
