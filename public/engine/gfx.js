@@ -12,8 +12,12 @@ var GL_ARRAY_BUFFER;
 var GL_STATIC_DRAW;
 var GL_ELEMENT_ARRAY_BUFFER;
 
+function gl_bind_buffer(buf_type, buffer) {
+  gl.bindBuffer(buf_type, buffer)
+}
+
 function gl_init() {
-  gl = canvas.getContext("experimental-webgl");
+  gl = canvas.getContext("webgl");
   gl.viewport(0, 0, canvas.width, canvas.height);
 
   // put some commonly used gl constants behind variable names that can be
@@ -24,7 +28,7 @@ function gl_init() {
   GL_ELEMENT_ARRAY_BUFFER = gl.ELEMENT_ARRAY_BUFFER;
 
   var buffer = gl.createBuffer();
-  gl.bindBuffer(GL_ARRAY_BUFFER, buffer);
+  gl_bind_buffer(GL_ARRAY_BUFFER, buffer);
   var quad = new Float32Array([-1, -1,
                                -1,  1,
                                 1, -1,
@@ -82,9 +86,9 @@ function gfx_init() {
 }
 
 function upload_geom(geom) {
-  gl.bindBuffer(GL_ARRAY_BUFFER, geom.vbo);
+  gl_bind_buffer(GL_ARRAY_BUFFER, geom.vbo);
   gl.bufferData(GL_ARRAY_BUFFER, geom.src.vertices, GL_STATIC_DRAW);
-  gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, geom.ibo);
+  gl_bind_buffer(GL_ELEMENT_ARRAY_BUFFER, geom.ibo);
   gl.bufferData(GL_ELEMENT_ARRAY_BUFFER, geom.src.indices, GL_STATIC_DRAW);
 }
 
@@ -106,7 +110,7 @@ function create_geom(vertices, indices, comp_per_vertex, attrib_list) {
 
 function draw_quad() {
   gl.disable(gl.DEPTH_TEST);
-  gl.bindBuffer(GL_ARRAY_BUFFER, _quad_vbo);
+  gl_bind_buffer(GL_ARRAY_BUFFER, _quad_vbo);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(0);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -115,13 +119,13 @@ function draw_quad() {
 // actually renders
 function draw_geom(data) {
   gl.enable(gl.DEPTH_TEST);
-  gl.bindBuffer(GL_ARRAY_BUFFER, data.vbo);
+  gl_bind_buffer(GL_ARRAY_BUFFER, data.vbo);
   for (var c = 0; c < data.attribs.length;++c) {
     var a = data.attribs[c];
     gl.enableVertexAttribArray(a.location);
     gl.vertexAttribPointer(a.location, a.components, gl.FLOAT, false, a.stride, a.offset);
   }
-  gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.ibo);
+  gl_bind_buffer(GL_ELEMENT_ARRAY_BUFFER, data.ibo);
   gl.drawElements(gl.TRIANGLES, data.num_indices, gl.UNSIGNED_SHORT, 0);
 }
 

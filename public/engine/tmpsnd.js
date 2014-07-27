@@ -22,11 +22,15 @@
   var SND = function(song) {
     var t = this;
     t.song = song;
+    // Screw webkit, they should follow the spec.
+    // this occupies 18 precious bytes in the compressed code.
+    // #debug{{
     if (window.webkitAudioContext) {
       t.c = new webkitAudioContext();
     } else {
+    // #debug}}
       t.c = new AudioContext();
-    }
+    } // #debug
     t.initSends()
     t.initInstruments()
     log('SND.constr', this);
@@ -40,6 +44,7 @@
   SND.prototype.initSends = function() {
     var _sends = [];
     this.song.sends.forEach(function(send, index) {
+    var sendObj;
     // #debug{{
       if (true)
       {

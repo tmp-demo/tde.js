@@ -40,8 +40,7 @@
 function continuous_path(path) {
     var new_path = [path[0]];
     for (var i = 1; i < path.length; ++i) {
-        new_path.push(path[i]);
-        new_path.push(path[i]);
+        new_path.push(path[i], path[i]);
     }
     new_path.push(path[0]);
     return new_path;
@@ -64,6 +63,13 @@ function join_rings(geom, r1, r2) {
     var vbo = geom.vbo;
     var i = 0;
     for (var i = 0; i < n_points; ++i) {
+        // The closure compiler unrolls small loops like following one, so it's
+        // useless to try to factor repetitive xyz stuff in small loops.
+        //for (var xyz = 0; xyz < 3; ++xyz) {
+        //    vbo[(v_cursor1+i)*v_stride + xyz] = r1[i][xyz];
+        //    vbo[(v_cursor2+i)*v_stride + xyz] = r2[i][xyz];
+        //}
+
         // ring 1
         vbo[(v_cursor1+i)*v_stride    ] = r1[i][0];
         vbo[(v_cursor1+i)*v_stride + 1] = r1[i][1];
@@ -91,9 +97,7 @@ function join_rings(geom, r1, r2) {
     // Bump cursors
     //
     // 2 because we inject the vertices of the two rings and
-    // inv_skip is equal to 2 if we inject those vertice twice (continuous path)
-    // inv_skip is equal to 1 if we inject those vertice one (discontinuous path)
-    geom.v_cursor += 2*n_points;
+    geom.v_cursor += 2 * n_points;
     // 6 (indices per edge) divided by 2 (points per edge)
     geom.i_cursor += n_points * 3;
 }
@@ -107,7 +111,6 @@ function compute_normals(geom, normal_offset, first_index, n_indices) {
     // advance 3 by 3 indices (triangle by triangle)
     var i = first_index;
     while (i < n_indices) {
-        // TODO[8k] this can be factored in a loop
         // P1
         var v_offset = ibo[i]*v_stride;
         var p1 = [
@@ -139,30 +142,21 @@ function compute_normals(geom, normal_offset, first_index, n_indices) {
         vec3.normalize(p1, p1);
 
         // write in the vbo
-        var j = 0; // x,y,z
-        while (j < 3) {
-            // TODO[8k] this can be factored in a loop
+        for (var j = 0; j < 3; ++j) { // x,y,z
             vbo[ibo[i  ]*v_stride + normal_offset + j] = p1[j];
             vbo[ibo[i+1]*v_stride + normal_offset + j] = p1[j];
             vbo[ibo[i+2]*v_stride + normal_offset + j] = p1[j];
-            ++j;
         }
-        i+=3;
+
+        i += 3;
     }
-    console.log(vbo);
 }
-
-function console_log(a, label) {
-    console.log(a);
-}
-
-// --
 
 function rand_int(max) {
     return Math.floor(Math.random() * max);
 }
 
-function mod (a, m) {
+function mod(a, m) {
   return (a%m+m)%m;
 }
 
@@ -173,6 +167,7 @@ function deep_clone(obj) {
 
 function _vector(a,b) { return vec2.subtract([], b, a) }
 function _vec2_scale(v, f) { return [v[0]*f, v[1]*f] }
+function _vec2_add(a,b) { return vec2.add([], a, b) }
 
 function normal(v) {
     var l = vec2.length(v);
@@ -196,18 +191,27 @@ function extrude_path(path, amount) {
     var path_length = path.length;
     for (var i = 0; i < path_length; ++i) {
         var pa = path[mod(i-1, path_length)];
-        var px = path[mod(i, path_length)];
+        var px = path[mod(i,   path_length)];
         var pb = path[mod(i+1, path_length)];
         var na = _vec2_scale(normal(_vector(pa, px)), amount * (10 - pa.subdiv) * 0.3);
         var nb = _vec2_scale(normal(_vector(px, pb)), amount * (10 - px.subdiv) * 0.3);
 
-        var pxa = []; // px translated along na
-        var pxb = []; // px translated along nb
-        vec2.add(pa,  pa, na);
-        vec2.add(pxa, px, na);
-        vec2.add(pb,  pb, nb);
-        vec2.add(pxb, px, nb);
-        var inter = lines_intersection_2d(pa, pxa, pxb, pb);
+        //This doesn't work because modifying pa modifies the content of path
+        //var pxa = []; // px translated along na
+        //var pxb = []; // px translated along nb
+        //vec2.add(pa,  pa, na);
+        //vec2.add(pxa, px, na);
+        //vec2.add(pb,  pb, nb);
+        //vec2.add(pxb, px, nb);
+        //var inter = lines_intersection_2d(pa, pxa, pxb, pb);
+
+        var inter = lines_intersection_2d(
+            _vec2_add(pa, na),
+            _vec2_add(px, na),
+            _vec2_add(px, nb),
+            _vec2_add(pb, nb)
+        );
+
 
         if (inter !== null) {
             inter.subdiv = path[i].subdiv;
@@ -222,7 +226,6 @@ function extrude_path(path, amount) {
 }
 
 function city_subdivision_rec(paths, num_subdivs, sub_id) {
-    if (sub_id === undefined) { sub_id = 0 }
     var sub_paths = [];
     for (var i in paths) {
         var sub = city_subdivision(paths[i], sub_id)
@@ -230,8 +233,7 @@ function city_subdivision_rec(paths, num_subdivs, sub_id) {
             sub_paths.push(paths[i]);
         }
         else {
-            sub_paths.push(sub[0]);
-            sub_paths.push(sub[1]);
+            sub_paths.push(sub[0], sub[1]);
         }
     }
     if (num_subdivs == 1) {
