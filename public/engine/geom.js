@@ -234,7 +234,7 @@ function city_subdivision_rec(paths, num_subdivs, sub_id) {
 }
 
 // TODO make this show in the editor: it defines how the min size of city blocks
-MIN_PERIMETER = 400;
+MIN_PERIMETER = 40;
 EXTRUSION_FACTOR = 2;
 MIN_SEGMENT = 3* EXTRUSION_FACTOR;
 
@@ -247,7 +247,7 @@ function city_subdivision(path, sub_id) {
     // pick the longest segment
     for (var i = 0; i < path_length; ++i) {
         var d = vec2.distance(path[i], path[mod(i+1, path_length)]);
-        if (d < MIN_SEGMENT) { return null; }
+        //if (d < MIN_SEGMENT) { return null; }
         if (d > maxd) {
             maxd = d;
             a1 = i;
@@ -463,7 +463,7 @@ function test_join_rings() {
         0, 4, 5,
         0, 5, 1,
         2, 6, 7,
-        2, 7, 3,
+        2, 7, 3
     ])) {
         console.log("test_join_rings failed: wrong ibo (discontinuous)");
         console.log(geom.ibo);

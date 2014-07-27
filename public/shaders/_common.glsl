@@ -1,7 +1,7 @@
 //! COMMON
 
 // TODO the hard-coded far plane is a bit lame
-#define FAR_DIST 50.0
+#define FAR_DIST 100.0
 
 precision lowp float;
 
