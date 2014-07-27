@@ -172,7 +172,6 @@ function deep_clone(obj) {
 }
 
 function _vector(a,b) { return vec2.subtract([], b, a) }
-function _vec2_add(a,b) { return vec2.add([], a, b) }
 function _vec2_scale(v, f) { return [v[0]*f, v[1]*f] }
 
 function normal(v) {
@@ -202,18 +201,21 @@ function extrude_path(path, amount) {
         var na = _vec2_scale(normal(_vector(pa, px)), amount * (10 - pa.subdiv) * 0.3);
         var nb = _vec2_scale(normal(_vector(px, pb)), amount * (10 - px.subdiv) * 0.3);
 
-        var inter = lines_intersection_2d(
-            _vec2_add(pa, na),
-            _vec2_add(px, na),
-            _vec2_add(px, nb),
-            _vec2_add(pb, nb)
-        );
+        var pxa = []; // px translated along na
+        var pxb = []; // px translated along nb
+        vec2.add(pa,  pa, na);
+        vec2.add(pxa, px, na);
+        vec2.add(pb,  pb, nb);
+        vec2.add(pxb, px, nb);
+        var inter = lines_intersection_2d(pa, pxa, pxb, pb);
 
         if (inter !== null) {
             inter.subdiv = path[i].subdiv;
             new_path.push(inter);
+        // #debug{{
         } else {
             alert("null intersection");
+        // #debug}}
         }
     }
     return new_path;
@@ -239,18 +241,20 @@ function city_subdivision_rec(paths, num_subdivs, sub_id) {
 }
 
 // TODO make this show in the editor: it defines how the min size of city blocks
-MIN_PERIMETER = 40;
-EXTRUSION_FACTOR = 2;
-MIN_SEGMENT = 3* EXTRUSION_FACTOR;
+var MIN_PERIMETER = 40;
+var EXTRUSION_FACTOR = 2;
 
 function city_subdivision(path, sub_id) {
     var path_length = path.length;
 
+    // a1 is the index of the point starting the first edge we'll cut.
+    // b1 is the index of the point starting the second edge we'll cut.
     var a1;
     var maxd = 0;
     var perimeter = 0;
+    var i; // loop index, taken out to win a few bytes
     // pick the longest segment
-    for (var i = 0; i < path_length; ++i) {
+    for (i = 0; i < path_length; ++i) {
         var d = vec2.distance(path[i], path[mod(i+1, path_length)]);
         //if (d < MIN_SEGMENT) { return null; }
         if (d > maxd) {
@@ -280,23 +284,21 @@ function city_subdivision(path, sub_id) {
         var f1 = 0.5 + (0.5 - Math.abs(Math.random() - 0.5)) * 0.2;
         var f2 = 0.5 + (0.5 - Math.abs(Math.random() - 0.5)) * 0.2;
 
-        p_a3_1 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), '2': 0, subdiv: sub_id};
-        p_a3_2 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), '2': 0, subdiv: path[a1].subdiv};
-        p_b3_1 = { '0': path[b1][0]*f2 + path[b2][0]*(1.0-f2), '1': path[b1][1]*f2 + path[b2][1]*(1-f2), '2': 0, subdiv: sub_id};
-        p_b3_2 = { '0': path[b1][0]*f2 + path[b2][0]*(1.0-f2), '1': path[b1][1]*f2 + path[b2][1]*(1-f2), '2': 0, subdiv: path[b1].subdiv};
-
-        //console.log("inter.subdiv: "+ inter.subdiv);
+        var p_a3_1 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), '2': 0, subdiv: sub_id};
+        var p_a3_2 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), '2': 0, subdiv: path[a1].subdiv};
+        var p_b3_1 = { '0': path[b1][0]*f2 + path[b2][0]*(1.0-f2), '1': path[b1][1]*f2 + path[b2][1]*(1-f2), '2': 0, subdiv: sub_id};
+        var p_b3_2 = { '0': path[b1][0]*f2 + path[b2][0]*(1.0-f2), '1': path[b1][1]*f2 + path[b2][1]*(1-f2), '2': 0, subdiv: path[b1].subdiv};
 
         break;
     } while (1);
 
     var path1 = [p_a3_1, p_b3_2]
-    for (var i = b2; i != a2; i = mod((i+1), path_length)) {
+    for (i = b2; i != a2; i = mod((i+1), path_length)) {
         path1.push(path[i]);
     }
 
     var path2 = [p_b3_1, p_a3_2]
-    for (var i = a2; i != b2; i = mod((i+1), path_length)) {
+    for (i = a2; i != b2; i = mod((i+1), path_length)) {
         path2.push(path[i]);
     }
 
