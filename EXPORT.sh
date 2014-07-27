@@ -33,7 +33,7 @@ do
     ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
 done
 
-echo "window.onload=main;" >> $EXPORT_ROOT/demo.js
+echo "onload=main;" >> $EXPORT_ROOT/demo.js
 
 if [ ! -f tools/compiler.jar ]; then
     echo " -- tools/compiler.jar not found, now downloading it..."

@@ -1,4 +1,5 @@
-
+var gl
+var canvas
 var textures = {}
 var uniforms = {}
 var geometries = {}
@@ -14,14 +15,6 @@ var GL_ELEMENT_ARRAY_BUFFER;
 function gl_init() {
   gl = canvas.getContext("experimental-webgl");
   gl.viewport(0, 0, canvas.width, canvas.height);
-  ext = {
-    draw_buffers: gl.getExtension("WEBGL_draw_buffers")
-  };
-  // #debug{{
-  if (!ext.draw_buffers) {
-    console.log("WEBGL_draw_buffers not supported :( parts of the demo will not render properly");
-  }
-  // #debug}}
 
   // put some commonly used gl constants behind variable names that can be
   // minified.
@@ -29,7 +22,6 @@ function gl_init() {
   GL_ARRAY_BUFFER = gl.ARRAY_BUFFER;
   GL_STATIC_DRAW = gl.STATIC_DRAW;
   GL_ELEMENT_ARRAY_BUFFER = gl.ELEMENT_ARRAY_BUFFER;
-
 
   var buffer = gl.createBuffer();
   gl.bindBuffer(GL_ARRAY_BUFFER, buffer);
@@ -51,20 +43,20 @@ function gl_init() {
   load_shaders();
 }
 
-_quad_vbo = null;
-_enums = _enums = { }; // #debug
+var _quad_vbo = null;
+var _enums = _enums = { }; // #debug
 
-_locations = [
+var _locations = [
   "position",
   "tex_coords",
   "normals",
   "color"
 ];
 
-POS = 0;
-TEX_COORDS = 1;
-NORMALS = 2;
-COLOR = 3;
+var POS = 0;
+var TEX_COORDS = 1;
+var NORMALS = 2;
+var COLOR = 3;
 
 // #debug{{
 function gl_error() {
@@ -78,8 +70,8 @@ function gl_error() {
 function gfx_init() {
   // replace the render passes' texture arrays by actual frame buffer objects
   // this is far from optimal...
-  for (var s=0; s<demo.scenes.length; ++s) {
-    var scene = demo.scenes[s];
+  for (var s=0; s<scenes.length; ++s) {
+    var scene = scenes[s];
     for (var p=0; p<scene.passes.length; ++p) {
       var pass = scene.passes[p];
       if (pass.render_to) {
@@ -173,7 +165,7 @@ function load_shader_program(vs_entry_point, fs_entry_point) {
   return program;
 }
 
-function create_texture(width, height, format, image, allow_repeat) {
+function create_texture(width, height, format, image, allow_repeat, linear_filtering) {
   var image = image || null;
   var format = format || gl.RGBA;
   width = width || canvas.width;
@@ -187,34 +179,37 @@ function create_texture(width, height, format, image, allow_repeat) {
   var wrap = gl.CLAMP_TO_EDGE;
   if (allow_repeat) { wrap = gl.REPEAT; }
 
+  var filtering = gl.NEAREST;
+  if (linear_filtering) { filtering = gl.LINEAR; }
+  
   gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
   gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
-  gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filtering);
+  gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filtering);
   
   gl.texImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
                 format, (format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT : gl.UNSIGNED_BYTE, image);
   return { tex: texture, width: width, height: height };
 }
 
-function create_depth_buffer(w,h) {
-  var depth_rb = gl.createRenderbuffer();
-  gl.bindRenderbuffer(gl.RENDERBUFFER, depth_rb);
-  gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, w, h);
-  gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-  return depth_rb;
+function create_text_texture(size, text) {
+  var textCanvas = document.createElement("canvas");
+  textCanvas.width = 2048;
+  textCanvas.height = 512;
+  
+  var textContext = textCanvas.getContext("2d");
+  
+  textContext.scale(1, -1);
+  textContext.font = size + "px OCR A STD";
+  textContext.fillStyle = "#fff";
+  textContext.fillText(text, 0, -size / 4);
+  
+  var width = 1+textContext.measureText(text).width|0;
+  var height = size * 1.25;
+  return create_texture(width, height, gl.RGBA, textContext.getImageData(0, 0, width, height).data, false, true);
 }
 
 function texture_unit(i) { return gl.TEXTURE0+i; }
-
-function color_attachment(i) {
-  // #debug{{
-  if (!ext.draw_buffers) {
-    return gl.COLOR_ATTACHMENT0+i;
-  }
-  // #debug}}
-  return ext.draw_buffers["COLOR_ATTACHMENT0_WEBGL"]+i;
-}
 
 // #debug{{
 function frame_buffer_error(e) {
@@ -235,34 +230,17 @@ function frame_buffer_error(e) {
 function frame_buffer(target) {
   var fbo = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-  var buffers = [];
-
-  if (target.depth) {
-    //gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, target.depth);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, target.depth.tex, 0);
-  }
-
-  // this branch is *always* taken in release builds
-  if (ext.draw_buffers) { // #debug
-
-    for (var t=0; t<target.color.length;++t) {
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(t),
-                              GL_TEXTURE_2D, target.color[t].tex, 0);
-      buffers.push(ext.draw_buffers["COLOR_ATTACHMENT0_WEBGL"]+t)
-    }
-    ext.draw_buffers["drawBuffersWEBGL"](buffers);
-
+  
+  if (target.color) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, GL_TEXTURE_2D, target.color.tex, 0);
+  if (target.depth) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, GL_TEXTURE_2D, target.depth.tex, 0);
+  
   // #debug{{
-  } else if (target.color.length > 0) {
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, color_attachment(0),
-                              GL_TEXTURE_2D, target.color[0].tex, 0);
-  }
   var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
   if (status != gl.FRAMEBUFFER_COMPLETE) {
     alert("incomplete framebuffer "+frame_buffer_error(status));
   }
   // #debug}}
-  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  
   return fbo;
 }
 
@@ -296,13 +274,10 @@ function clear() {
 }
 
 function render_scene(scene, demo_time, scene_time) {
-  var tsn = scene_time/scene.duration;
-  uniforms["demo_time"] = demo_time;
+  var clip_time_norm = scene_time/scene.duration;
   uniforms["clip_time"] = scene_time;
-  uniforms["clip_time_norm"] = tsn;
-  uniforms["clip_duration"] = scene.duration;
   var t = {
-    scene_norm: tsn,
+    scene_norm: clip_time_norm,
     demo: demo_time,
     scene: scene_time
   };
@@ -320,8 +295,8 @@ function render_scene(scene, demo_time, scene_time) {
       var rx = canvas.width;
       var ry = canvas.height;
       if (pass.render_to) {
-        rx = pass.render_to.color[0].width;
-        ry = pass.render_to.color[0].height;
+        rx = pass.render_to.color.width;
+        ry = pass.render_to.color.height;
       }
       uniforms["resolution"] = [rx,ry];
       set_uniforms(shader_program);

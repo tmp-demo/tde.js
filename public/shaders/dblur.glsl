@@ -6,6 +6,7 @@ void main_vs_dblur() {
 }
 
 //! FRAGMENT
+const float NB_BLUR_TAPS = 10.0;
 
 void main_fs_dblur() {
   vec2 p = v_tex_coords - step * NB_BLUR_TAPS / 2.0;
@@ -13,5 +14,5 @@ void main_fs_dblur() {
   for (int i = 0; i < int(NB_BLUR_TAPS); ++i) {
   	c = c + texture2D(texture_0, p + float(i) * step);
   }
-  gl_FragData[0] = c / NB_BLUR_TAPS;
+  gl_FragColor = c / NB_BLUR_TAPS;
 }

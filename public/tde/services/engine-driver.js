@@ -5,6 +5,7 @@ angular.module("tde.services.engine-driver", [])
   var self = this
   
   this.logBuffer = []
+  this.currentTime = 0
   
   this.loadTexture = function(name, data)
   {
@@ -32,7 +33,8 @@ angular.module("tde.services.engine-driver", [])
       eval(data)
       demo_init()
       gfx_init()
-      render_scene(demo.scenes[0], 0, 0);
+      render_scene(scenes[0], 0, 0);
+      engine_render(self.currentTime)
     }
     catch (err)
     {
@@ -77,5 +79,36 @@ angular.module("tde.services.engine-driver", [])
       message: message,
       details: details
     })
+  }
+  
+  this.play = function()
+  {
+    this.playing = true
+    this.seek(this.currentTime)
+    
+    function render()
+    {
+      self.currentTime = audioContext.currentTime - start_time;
+      engine_render(self.currentTime)
+      
+      if (self.playing)
+        requestAnimationFrame(render)
+    }
+    
+    render()
+  }
+  
+  this.pause = function()
+  {
+    this.playing = false
+  }
+  
+  this.seek = function(time)
+  {
+    self.currentTime = time
+    start_time = audioContext.currentTime - self.currentTime
+    
+    if (!this.playing)
+      engine_render(self.currentTime)
   }
 })
