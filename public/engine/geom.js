@@ -166,6 +166,11 @@ function mod (a, m) {
   return (a%m+m)%m;
 }
 
+// Yeah. I know.
+function deep_clone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
 function _vector(a,b) { return vec2.subtract([], b, a) }
 function _vec2_add(a,b) { return vec2.add([], a, b) }
 function _vec2_scale(v, f) { return [v[0]*f, v[1]*f] }
