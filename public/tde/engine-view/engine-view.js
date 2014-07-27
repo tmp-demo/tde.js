@@ -37,20 +37,56 @@ angular.module("tde.engine-view", [])
         seeker.attr("max", time_sum * 1000)
       }, 50)
       
-      var canvasElement = element.find("canvas")
-      canvasElement.dblclick(function()
-      {
-        this.requestFullScreen = this.requestFullScreen || this.mozRequestFullScreen || this.webkitRequestFullScreen
-        this.requestFullScreen()
-      })
-      
-      canvasElement.click(function()
+      function togglePlayState()
       {
         var driver = $scope.driver
         if (driver.playing)
           driver.pause()
         else
           driver.play()
+      }
+      
+      function toggleFullscreen(element)
+      {
+        element.requestFullscreen = element.requestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen || element.msRequestFullscreen
+        document.exitFullscreen = document.exitFullscreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.msExitFullscreen
+        document.fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement
+        
+        if (document.fullscreenElement) {
+          document.exitFullscreen()
+          document.fullscreenElement = null
+        } else {
+          element.requestFullscreen()
+        }
+      }
+      
+      var canvasElement = element.find("canvas")
+      canvasElement.dblclick(function()
+      {
+        toggleFullscreen(this)
+      })
+      
+      canvasElement.click(function()
+      {
+        togglePlayState()
+      })
+      
+      $(document).keypress(function(event)
+      {
+        if ((event.target.tagName == "INPUT" && event.target.type == "text") || event.target.tagName == "TEXTAREA")
+          return
+        
+        if (event.which == 32) // space
+        {
+          event.preventDefault()
+          togglePlayState()
+        }
+        
+        if (event.which == 70 || event.which == 102) // f
+        {
+          event.preventDefault()
+          toggleFullscreen(canvasElement.get(0))
+        }
       })
     }
   }
