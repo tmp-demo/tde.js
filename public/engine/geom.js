@@ -9,11 +9,45 @@
 // Use v_cursor * v_stride for an offset in the array.
 
 
-// see the variable skip below
-var CONTINUOUS_PATH = 1;    //P1-----p2-----p3-------p4
-var DISCONTINUOUS_PATH = 2; //P1-----p2     p3-------p4
+// For a continuous ring of 4 points the indices are:
+//    0    1
+//  7 A----B 2
+//    |    |
+//    |    |
+//  6 D----C 3
+//    5    4
+//
+// The slice of the vbo for this ring looks like:
+// [A, B, B, C, C, D, D, A]
+//
+// Continuous rings are what the city generator outputs, but join_rings
+// takes discontinuous rings as inputs:
+//
+// For a discontinuous ring of 4 points the indices are:
+//    0    1
+//    A----B
+//
+//
+//    C----D
+//    3    2
+//
+// The slice of the vbo for this ring looks like:
+// [A, B, C, D]
 
-function join_rings(geom, r1, r2, skip) {
+
+// Creates a continuous path [A, B, B, C, C, D, D, A] from a discontinuous
+// one [A, B, C, D]
+function continuous_path(path) {
+    var new_path = [path[0]];
+    for (var i = 1; i < path.length; ++i) {
+        new_path.push(path[i]);
+        new_path.push(path[i]);
+    }
+    new_path.push(path[0]);
+    return new_path;
+}
+
+function join_rings(geom, r1, r2) {
     // #debug{{
     if (r1.length != r2.length) {
         console.log(r1);
@@ -22,37 +56,28 @@ function join_rings(geom, r1, r2, skip) {
     }
     // #debug}}
 
-    // if skip is 2: P1-----p2     p3-------p4
-    // if skip is 1: P1-----p2-----p3-------p4
-    // Sorry guys, it's a bit cryptic, I'll sort this out eventually or throw it away
-    // if skip is 2, inv_skip is 1
-    // if skip is 1, inv_skip is 2
-    var inv_skip = 2 / skip;
-
     // populate the vertex buffer
     var v_stride = geom.v_stride;
-    var n_vertices = r1.length;
+    var n_points = r1.length;
     var v_cursor1 = geom.v_cursor;
-    var v_cursor2 = v_cursor1 + n_vertices*inv_skip;
+    var v_cursor2 = v_cursor1 + n_points;
     var vbo = geom.vbo;
     var i = 0;
-    for (var s = 0; s < inv_skip; ++s) {
-        for (var i = 0; i < n_vertices; ++i) {
-            // ring 1
-            vbo[(v_cursor1+i*inv_skip+s)*v_stride    ] = r1[i][0];
-            vbo[(v_cursor1+i*inv_skip+s)*v_stride + 1] = r1[i][1];
-            vbo[(v_cursor1+i*inv_skip+s)*v_stride + 2] = r1[i][2];
-            // ring 2
-            vbo[(v_cursor2+i*inv_skip+s)*v_stride    ] = r2[i][0];
-            vbo[(v_cursor2+i*inv_skip+s)*v_stride + 1] = r2[i][1];
-            vbo[(v_cursor2+i*inv_skip+s)*v_stride + 2] = r2[i][2];
-        }
+    for (var i = 0; i < n_points; ++i) {
+        // ring 1
+        vbo[(v_cursor1+i)*v_stride    ] = r1[i][0];
+        vbo[(v_cursor1+i)*v_stride + 1] = r1[i][1];
+        vbo[(v_cursor1+i)*v_stride + 2] = r1[i][2];
+        // ring 2
+        vbo[(v_cursor2+i)*v_stride    ] = r2[i][0];
+        vbo[(v_cursor2+i)*v_stride + 1] = r2[i][1];
+        vbo[(v_cursor2+i)*v_stride + 2] = r2[i][2];
     }
 
     // populate the index buffer
     var i_cursor = geom.i_cursor;
     var ibo = geom.ibo;
-    for (var i = 0; i < n_vertices/skip; ++i) {
+    for (var i = 0; i < n_points/2; ++i) {
         // first triangle
         ibo[i_cursor + i*6    ] = v_cursor1 +  i*2;
         ibo[i_cursor + i*6 + 1] = v_cursor2 +  i*2;
@@ -63,13 +88,14 @@ function join_rings(geom, r1, r2, skip) {
         ibo[i_cursor + i*6 + 5] = v_cursor1 + (i*2+1);
     }
 
-    // bump cursors
-
+    // Bump cursors
+    //
     // 2 because we inject the vertices of the two rings and
     // inv_skip is equal to 2 if we inject those vertice twice (continuous path)
     // inv_skip is equal to 1 if we inject those vertice one (discontinuous path)
-    geom.v_cursor += 2*n_vertices * inv_skip;
-    geom.i_cursor += n_vertices * 6 / skip; // 6 is the number of indices per quad
+    geom.v_cursor += 2*n_points;
+    // 6 (indices per edge) divided by 2 (points per edge)
+    geom.i_cursor += n_points * 3;
 }
 
 
@@ -297,20 +323,31 @@ function num_city_base_vertices(paths) {
 
 
 // Testing...
+// if this code below ends up in the minified export, something's wrong.
 
 function arrays_equal(a1, a2) {
     if (a1.length != a2.length) {
         return false;
     }
-    for (i = 0; i < a1.length; ++i) {
+    for (var i = 0; i < a1.length; ++i) {
         if (a1[i] !== a2[i]) {
             return false;
         }
     }
     return true;
 }
+function arrays_of_arrays_equal(a1, a2) {
+    if (a1.length != a2.length) {
+        return false;
+    }
+    for (var i = 0; i < a1.length; ++i) {
+        if (!arrays_equal(a1[i], a2[i])) {
+            return false;
+        }
+    }
+    return true;
+}
 
-// if this code ends up in the minified code something's wrong
 function test_join_rings() {
     console.log("BEGIN - test_join_rings...");
     var r1 = [
@@ -326,6 +363,20 @@ function test_join_rings() {
         [0,1,5]
     ];
 
+    if (!arrays_of_arrays_equal(continuous_path(r1), [
+        [0,0,3],
+        [1,0,3],
+        [1,0,3],
+        [1,1,3],
+        [1,1,3],
+        [0,1,3],
+        [0,1,3],
+        [0,0,3]
+    ])) {
+        console.log("test_join_rings failed: wrong continuous path");
+        console.log(continuous_path(r1));
+    }
+
     var floats_per_vertex = 8;
     var geom = {
         vbo: new Float32Array(r1.length * 4 * floats_per_vertex),
@@ -334,7 +385,7 @@ function test_join_rings() {
         v_cursor: 0, i_cursor: 0
     }
 
-    join_rings(geom, r1, r2, CONTINUOUS_PATH);
+    join_rings(geom, continuous_path(r1), continuous_path(r2));
     if (!arrays_equal(geom.ibo, [
         0, 8, 9,
         0, 9, 1,
@@ -346,30 +397,59 @@ function test_join_rings() {
         6, 15, 7
     ])) {
         console.log("test_join_rings failed: wrong ibo (continuous)");
+        console.log(geom.ibo);
     }
 
     if (!arrays_equal(geom.vbo, [
         // ring 1
         0,0,3, 0, 0, 0, 0, 0,
+        1,0,3, 0, 0, 0, 0, 0,
+        1,0,3, 0, 0, 0, 0, 0,
+        1,1,3, 0, 0, 0, 0, 0,
+        1,1,3, 0, 0, 0, 0, 0,
+        0,1,3, 0, 0, 0, 0, 0,
+        0,1,3, 0, 0, 0, 0, 0,
         0,0,3, 0, 0, 0, 0, 0,
-        1,0,3, 0, 0, 0, 0, 0,
-        1,0,3, 0, 0, 0, 0, 0,
-        1,1,3, 0, 0, 0, 0, 0,
-        1,1,3, 0, 0, 0, 0, 0,
-        0,1,3, 0, 0, 0, 0, 0,
-        0,1,3, 0, 0, 0, 0, 0,
         // ring 2
-        0,0,5, 0, 0, 0, 0, 0,
         0,0,5, 0, 0, 0, 0, 0,
         1,0,5, 0, 0, 0, 0, 0,
         1,0,5, 0, 0, 0, 0, 0,
         1,1,5, 0, 0, 0, 0, 0,
         1,1,5, 0, 0, 0, 0, 0,
         0,1,5, 0, 0, 0, 0, 0,
-        0,1,5, 0, 0, 0, 0, 0
+        0,1,5, 0, 0, 0, 0, 0,
+        0,0,5, 0, 0, 0, 0, 0
     ])) {
         console.log("test_join_rings failed: wrong vbo (continuous)");
+        console.log(geom.vbo);
     }
+
+    // TODO: test the result of normals computation
+    //compute_normals(geom, 0, 0, geom.ibo.length);
+    //if (!arrays_equal(geom.vbo, [
+    //    // ring 1
+    //    0,0,3, 0, 0, 0, 0, 0,
+    //    0,0,3, 0, 0, 0, 0, 0,
+    //    1,0,3, 0, 0, 0, 0, 0,
+    //    1,0,3, 0, 0, 0, 0, 0,
+    //    1,1,3, 0, 0, 0, 0, 0,
+    //    1,1,3, 0, 0, 0, 0, 0,
+    //    0,1,3, 0, 0, 0, 0, 0,
+    //    0,1,3, 0, 0, 0, 0, 0,
+    //    // ring 2
+    //    0,0,5, 0, 0, 0, 0, 0,
+    //    0,0,5, 0, 0, 0, 0, 0,
+    //    1,0,5, 0, 0, 0, 0, 0,
+    //    1,0,5, 0, 0, 0, 0, 0,
+    //    1,1,5, 0, 0, 0, 0, 0,
+    //    1,1,5, 0, 0, 0, 0, 0,
+    //    0,1,5, 0, 0, 0, 0, 0,
+    //    0,1,5, 0, 0, 0, 0, 0
+    //])) {
+    //    console.log("test_join_rings failed: wrong normals in the vbo (continuous)");
+    //}
+
+    // ---  discontinuous paths  ---
 
     geom = {
         vbo: new Float32Array(r1.length * 2 * floats_per_vertex),
@@ -378,7 +458,7 @@ function test_join_rings() {
         v_cursor: 0, i_cursor: 0
     }
 
-    join_rings(geom, r1, r2, DISCONTINUOUS_PATH);
+    join_rings(geom, r1, r2);
     if (!arrays_equal(geom.ibo, [
         0, 4, 5,
         0, 5, 1,
@@ -386,6 +466,7 @@ function test_join_rings() {
         2, 7, 3,
     ])) {
         console.log("test_join_rings failed: wrong ibo (discontinuous)");
+        console.log(geom.ibo);
     }
 
     if (!arrays_equal(geom.vbo, [
@@ -401,6 +482,7 @@ function test_join_rings() {
         0,1,5, 0, 0, 0, 0, 0
     ])) {
         console.log("test_join_rings failed: wrong vbo (discontinuous)");
+        console.log(geom.vbo);
     }
 
     console.log("END - test_join_rings");

@@ -1,4 +1,3 @@
-
 //var render_index = 0;
 
 demo = {
