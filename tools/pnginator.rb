@@ -35,7 +35,7 @@ if js.length < MAX_WIDTH
 
 	# p01's single-pixel-row bootstrap (requires an 0x00 end marker on the js string)
 	# (edit by Gasman: move drawImage out of getImageData params (it returns undef, which is invalid) and change eval to (1,eval) to force global evaluation)
-	html = "<canvas id=c><img onload=with(c.getContext('2d'))for(p=e='';drawImage(this,p--,0),t=getImageData(0,0,1,1).data[0];)e+=String.fromCharCode(t);(1,eval)(e) src=#>"
+	html = "<canvas id=c><img onload=with(c.getContext('2d'))for(p=e='';drawImage(this,p--,0),t=getImageData(0,0,1,1).data[0];)e+=String.fromCharCode(t);(1,eval)(e.replace(/@/g,'function').replace(/`/g,'return').replace(/~/g,'var')) src=#>"
 else
 	js = "\x00" + js
 	width = MAX_WIDTH
@@ -45,7 +45,7 @@ else
 
 	# p01's multiple-pixel-row bootstrap (requires a dummy first byte on the js string)
 	# (edit by Gasman: set explicit canvas width to support widths above 300; move drawImage out of getImageData params; change eval to (1,eval) to force global evaluation)
-	html = "<canvas id=c><img onload=for(w=c.width=#{width},a=c.getContext('2d'),a.drawImage(this,p=0,0),e='',d=a.getImageData(0,0,w,#{height}).data;t=d[p+=4];)e+=String.fromCharCode(t);(1,eval)(e) src=#>"
+	html = "<canvas id=c><img onload=for(w=c.width=#{width},a=c.getContext('2d'),a.drawImage(this,p=0,0),e='',d=a.getImageData(0,0,w,#{height}).data;t=d[p+=4];)e+=String.fromCharCode(t);(1,eval)(e.replace(/@/g,'function').replace(/`/g,'return').replace(/~/g,'var')) src=#>"
 end
 
 # prepend each scanline with 0x00 to indicate 'no filtering', then concat into one string

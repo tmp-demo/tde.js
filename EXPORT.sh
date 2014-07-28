@@ -49,6 +49,13 @@ fi
 echo " -- running the closure compiler..."
 java -jar tools/compiler.jar --js=$EXPORT_ROOT/demo.js --js_output_file=$EXPORT_ROOT/demo.min.js --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./externs/w3c_audio.js
 
+echo " -- compressing some keywords"
+# for some reason replacing '@' by 'function ' breaks the demo while 'function' (without the space) works
+#sed -i 's/function(/function (/g' $EXPORT_ROOT/demo.min.js
+sed -i 's/function/@/g' $EXPORT_ROOT/demo.min.js
+sed -i 's/return/`/g' $EXPORT_ROOT/demo.min.js
+sed -i 's/var/~/g' $EXPORT_ROOT/demo.min.js
+
 echo " -- packing in a png..."
 ruby tools/pnginator.rb $EXPORT_ROOT/demo.min.js $EXPORT_ROOT/demo.png.html
 
