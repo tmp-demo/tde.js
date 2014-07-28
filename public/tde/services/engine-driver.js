@@ -121,7 +121,7 @@ angular.module("tde.services.engine-driver", [])
   {
     this.playing = false
     if (snd)
-      snd.playing = false
+      snd.s()
   }
   
   this.seek = function(time)
