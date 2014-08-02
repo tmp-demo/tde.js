@@ -61,7 +61,6 @@ function join_rings(geom, r1, r2) {
     var v_cursor1 = geom.v_cursor;
     var v_cursor2 = v_cursor1 + n_points;
     var vbo = geom.vbo;
-    var i = 0;
     for (var i = 0; i < n_points; ++i) {
         // The closure compiler unrolls small loops like following one, so it's
         // useless to try to factor repetitive xyz stuff in small loops.
@@ -183,10 +182,10 @@ function lines_intersection_2d(a1, a2, b1, b2) {
         (a * (b1[0] - b2[0]) - b * (a1[0] - a2[0])) / det,
         (a * (b1[1] - b2[1]) - b * (a1[1] - a2[1])) / det,
         0
-    ]
+    ];
 }
 
-function extrude_path(path, amount) {
+function extrude_path(path, amount, z) {
     var new_path = [];
     var path_length = path.length;
     for (var i = 0; i < path_length; ++i) {
@@ -213,16 +212,54 @@ function extrude_path(path, amount) {
         );
 
 
-        if (inter !== null) {
-            inter.subdiv = path[i].subdiv;
-            new_path.push(inter);
-        // #debug{{
-        } else {
-            alert("null intersection");
-        // #debug}}
-        }
+        // If inter is null (pa, px and pb are aligned)
+        inter = inter || _vec2_add(px, na);
+        inter[2] = z;
+        inter.subdiv = path[i].subdiv;
+        new_path.push(inter);
     }
     return new_path;
+}
+
+function fill_concave_path(geom, path) {
+    var center = [];
+    path_center(center, path);
+
+    // populate the vertex buffer
+    var v_stride = geom.v_stride;
+    var n_points = path.length;
+    var v_cursor = geom.v_cursor;
+    var i_cursor = geom.i_cursor;
+    var vbo = geom.vbo;
+    var ibo = geom.ibo;
+    vbo[v_cursor*v_stride  ] = center[0];
+    vbo[v_cursor*v_stride+1] = center[1];
+    vbo[v_cursor*v_stride+2] = center[2];
+    v_cursor++;
+    for (var i = 0; i < n_points; ++i) {
+        vbo[(v_cursor+i)*v_stride    ] = path[i][0];
+        vbo[(v_cursor+i)*v_stride + 1] = path[i][1];
+        vbo[(v_cursor+i)*v_stride + 2] = path[i][2];
+
+        ibo[i_cursor+i*3  ] = v_cursor - 1; // center
+        ibo[i_cursor+i*3+2] = v_cursor + (i+1)%n_points;
+        ibo[i_cursor+i*3+1] = v_cursor + i;
+    }
+
+    // Bump cursors
+    geom.v_cursor += n_points + 1;
+    geom.i_cursor += n_points * 3;
+}
+
+function path_center(out, path) {
+    out[0] = 0;
+    out[1] = 0;
+    out[2] = 0;
+    var len = path.length;
+    for (var i = 0; i < len; ++i) {
+        vec3.add(out, out, path[i]);
+    }
+    vec3.multiply(out, out, len);
 }
 
 function city_subdivision_rec(paths, num_subdivs, sub_id) {
