@@ -175,7 +175,7 @@ function normal(v) {
 
 function lines_intersection_2d(a1, a2, b1, b2) {
     var det = (a1[0]-a2[0])*(b1[1]-b2[1]) - (a1[1]-a2[1])*(b1[0]-b2[0]);
-    if (det*det < 0.0000001) { return null }
+    if (det*det < 0.0001) { return null }
     var a = (a1[0]*a2[1]- a1[1]*a2[0]);
     var b = (b1[0]*b2[1]- b1[1]*b2[0]);
     return [
@@ -185,15 +185,20 @@ function lines_intersection_2d(a1, a2, b1, b2) {
     ];
 }
 
-function extrude_path(path, amount, z) {
+function shrink_path(path, amount, z, subdiv_coef) {
     var new_path = [];
     var path_length = path.length;
     for (var i = 0; i < path_length; ++i) {
         var pa = path[mod(i-1, path_length)];
         var px = path[mod(i,   path_length)];
         var pb = path[mod(i+1, path_length)];
-        var na = _vec2_scale(normal(_vector(pa, px)), amount * (10 - pa.subdiv) * 0.3);
-        var nb = _vec2_scale(normal(_vector(px, pb)), amount * (10 - px.subdiv) * 0.3);
+        // avoid shrinking too much
+        if (vec2.distance(pa, pb) < (1+pa.subdiv*subdiv_coef)*0.6) {
+            return deep_clone(path);
+        }
+        subdiv_coef = subdiv_coef || 0;
+        var na = _vec2_scale(normal(_vector(pa, px)), amount * (1+pa.subdiv*subdiv_coef)*0.3);
+        var nb = _vec2_scale(normal(_vector(px, pb)), amount * (1+px.subdiv*subdiv_coef)*0.3);
 
         //This doesn't work because modifying pa modifies the content of path
         //var pxa = []; // px translated along na
@@ -210,7 +215,6 @@ function extrude_path(path, amount, z) {
             _vec2_add(px, nb),
             _vec2_add(pb, nb)
         );
-
 
         // If inter is null (pa, px and pb are aligned)
         inter = inter || _vec2_add(px, na);
@@ -242,8 +246,8 @@ function fill_concave_path(geom, path) {
         vbo[(v_cursor+i)*v_stride + 2] = path[i][2];
 
         ibo[i_cursor+i*3  ] = v_cursor - 1; // center
-        ibo[i_cursor+i*3+2] = v_cursor + (i+1)%n_points;
         ibo[i_cursor+i*3+1] = v_cursor + i;
+        ibo[i_cursor+i*3+2] = v_cursor + (i+1)%n_points;
     }
 
     // Bump cursors
@@ -259,7 +263,7 @@ function path_center(out, path) {
     for (var i = 0; i < len; ++i) {
         vec3.add(out, out, path[i]);
     }
-    vec3.multiply(out, out, len);
+    vec3.multiply(out, out, [1/len, 1/len, 1/len]);
 }
 
 function city_subdivision_rec(paths, num_subdivs, sub_id) {
@@ -276,11 +280,12 @@ function city_subdivision_rec(paths, num_subdivs, sub_id) {
     if (num_subdivs == 1) {
         return sub_paths;
     }
-    return city_subdivision_rec(sub_paths, num_subdivs - 1, sub_id + 1);
+    return city_subdivision_rec(sub_paths, num_subdivs - 1, sub_id - 1);
 }
 
 // TODO make this show in the editor: it defines how the min size of city blocks
-var MIN_PERIMETER = 40;
+var MIN_PERIMETER = 50;
+var MIN_SEGMENT = 10;
 var EXTRUSION_FACTOR = 2;
 
 function city_subdivision(path, sub_id) {
@@ -312,10 +317,8 @@ function city_subdivision(path, sub_id) {
     do {
 
         b1 = rand_int(path_length);
-        if (a1 == b1) { continue; }
-
-        if (guard++ > 10) { break; }
-        if (a1 == b1 + 1) { continue; }
+        if (a1 == b1 || a1 == b1 + 1) { continue; }
+        //if (guard++ > 10) { break; }
 
         b2 = mod((b1+1), path_length);
 
@@ -370,6 +373,23 @@ function num_city_base_vertices(paths) {
 
 // Testing...
 // if this code below ends up in the minified export, something's wrong.
+
+function debug_draw_path(path, color, offset_x, offset_y) {
+    map_ctx.strokeStyle = color;
+    for (var i in path) {
+        map_ctx.beginPath();
+        map_ctx.moveTo(
+            path[i][0] + offset_x,
+            path[i][1] + offset_y
+        );
+        map_ctx.lineTo(
+            path[mod(i-1, path.length)][0] + offset_x,
+            path[mod(i-1, path.length)][1] + offset_y
+        );
+        map_ctx.stroke();
+        map_ctx.closePath();
+    }
+}
 
 function arrays_equal(a1, a2) {
     if (a1.length != a2.length) {

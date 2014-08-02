@@ -38,8 +38,10 @@ function main() {
   gfx_init();
 
   render_scene(scenes[0], 0, 0);
-  
+
   snd = new SND(SONG);
+  // If you want to shut the music up comment this out and also comment
+  // out the equivalent line in engine-driver.js:~100
   snd.p();
 
   main_loop();
@@ -47,6 +49,11 @@ function main() {
 
 function editor_main() {
   canvas = document.getElementById("engine-view")
-
   gl_init();
+  canvas_map = document.getElementById("map-view")
+  canvas_map.width = 640;
+  canvas_map.width = 360;
+  map_ctx = canvas_map.getContext("2d");
+  map_ctx.fillStyle = "rgb(220, 220, 220)";
+  map_ctx.fillRect(0, 0, 640, 360);
 }
