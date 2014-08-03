@@ -14,9 +14,21 @@ angular.module("tde", [
 
 .config(["$routeProvider", function($routeProvider)
 {
-  $routeProvider.when("/", {templateUrl: "/tde/home/home.html", controller: "HomeCtrl"})
-  $routeProvider.when("/:projectId", {templateUrl: "/tde/project/project.html", controller: "ProjectCtrl"})
-  $routeProvider.when("/:projectId/:assetType/:assetName", {templateUrl: function($routeParams) { return "/tde/project/" + $routeParams.assetType + "-editor/" + $routeParams.assetType + "-editor.html" }, controller: "ProjectCtrl"})
+  $routeProvider.when("/", {
+    templateUrl: "/tde/home/home.html",
+    controller: "HomeCtrl"
+  })
+  $routeProvider.when("/:projectId", {
+    templateUrl: "/tde/project/project.html",
+    controller: "ProjectCtrl"
+  })
+  $routeProvider.when("/:projectId/:assetType/:assetName", {
+    templateUrl: function($routeParams) {
+      return "/tde/project/" + $routeParams.assetType + "-editor/" + $routeParams.assetType + "-editor.html"
+    },
+    controller: "ProjectCtrl",
+    reloadOnSearch: false
+  })
   $routeProvider.otherwise({redirectTo: "/"})
 }])
 
