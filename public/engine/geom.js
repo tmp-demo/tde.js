@@ -82,8 +82,8 @@ function join_rings(geom, r1, r2) {
       var next = (i + 1) % r1.length;
       geom.positions = geom.positions.concat(r1[i], r1[next], r2[next], r2[next], r2[i], r1[i]);
       
-      vec3.sub(e1, r1[next], r1[i]);
-      vec3.sub(e2, r2[next], r1[i]);
+      vec3.sub(e1, r2[next], r1[i]);
+      vec3.sub(e2, r1[next], r1[i]);
       vec3.cross(normal, e1, e2);
       vec3.normalize(normal, normal);
       geom.normals = geom.normals.concat(normal, normal, normal, normal, normal, normal);
