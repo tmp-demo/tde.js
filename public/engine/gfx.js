@@ -195,18 +195,18 @@ function create_texture(width, height, format, image, allow_repeat, linear_filte
   return { tex: texture, width: width, height: height };
 }
 
-function create_text_texture(size, text, badgeDiameter) {
+function create_text_texture(text, fontSize, badgeDiameter) {
   var textCanvas = document.createElement("canvas");
   textCanvas.width = 2048;
   textCanvas.height = 512;
   
   var textContext = textCanvas.getContext("2d");
-  textContext.font = size + "px OCR A STD";
+  textContext.font = fontSize + "px OCR A STD";
   
-  var width = 1+textContext.measureText(text).width|0
-    height = size * 1.25,
-    x = 0,
-    y = - size / 4;
+  var width = 1 + textContext.measureText(text).width|0
+    height = fontSize * 1.25,
+    x = 2,
+    y = - fontSize / 4;
   
   if (badgeDiameter) {
     textContext.fillStyle = "#36A";
@@ -350,6 +350,12 @@ function render_scene(scene, demo_time, scene_time) {
         gl.uniform1i(gl.getUniformLocation(shader_program,"texture_"+i), i);
       }
     }
+    if (pass.blend) {
+      gl.enable(gl.BLEND);
+      gl.blendFunc.apply(gl, pass.blend);
+    }
     pass.render(pass.program);
+    if (pass.blend)
+      gl.disable(gl.BLEND);
   }
 }
