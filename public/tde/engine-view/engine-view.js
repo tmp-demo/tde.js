@@ -95,7 +95,7 @@ angular.module("tde.engine-view", [])
         }
       }
       
-      var canvasElement = element.find("canvas")
+      var canvasElement = element.find("#engine-view")
       canvasElement.dblclick(function()
       {
         toggleFullscreen(this)
@@ -122,6 +122,22 @@ angular.module("tde.engine-view", [])
           event.preventDefault()
           toggleFullscreen(canvasElement.get(0))
         }
+      })
+      
+      var canvas_map = document.getElementById("map-view")
+      map_ctx = canvas_map.getContext("2d");
+      map_ctx.fillStyle = "rgb(220, 220, 220)";
+      map_ctx.fillRect(0, 0, 640, 360);
+
+      element.find("#map-view").mousemove(function(e)
+      {
+        if (!("cam_pos" in uniforms))
+          return;
+        
+        uniforms["cam_pos"][0] = e.pageX - $("#map-view").offset().left - 150;
+        uniforms["cam_pos"][1] = e.pageY - $("#map-view").offset().top - 150;
+        
+        $scope.driver.drawFrame();
       })
     }
   }
