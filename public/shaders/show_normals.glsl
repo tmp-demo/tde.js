@@ -5,7 +5,7 @@ void main_vs_show_normals() {
   v_position = gl_Position.xyz;
   v_normals = normals;
   v_tex_coords = tex_coords;
-  gl_Position.z = gl_Position.z / 10.0;
+  gl_Position.z = gl_Position.z / 1.0;
 }
 
 //! FRAGMENT
