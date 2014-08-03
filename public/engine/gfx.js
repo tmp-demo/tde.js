@@ -203,31 +203,28 @@ function create_text_texture(size, text, badgeDiameter) {
   var textContext = textCanvas.getContext("2d");
   textContext.font = size + "px OCR A STD";
   
-  var x, width, textWidth = 1+textContext.measureText(text).width|0;
-  var y, height, textHeight = size * 1.25;
+  var width = 1+textContext.measureText(text).width|0
+    height = size * 1.25,
+    x = 0,
+    y = - size / 4;
   
   if (badgeDiameter) {
-    height = width = badgeDiameter;
     textContext.fillStyle = "#36A";
     textContext.moveTo(badgeDiameter, badgeDiameter / 2);
     for (var i = 1; i < 49; ++i) {
-      var radius = ((i % 2) ? badgeDiameter * 0.8 : badgeDiameter) / 2;
-      textContext.lineTo(badgeDiameter/2 + radius * Math.cos(i / 24 * Math.PI), badgeDiameter/2 + radius * Math.sin(i / 24 * Math.PI));
+      var radius = (i % 2) ? badgeDiameter * 0.4 : badgeDiameter / 2;
+      textContext.lineTo(badgeDiameter / 2 + radius * Math.cos(i / 24 * Math.PI), badgeDiameter / 2 + radius * Math.sin(i / 24 * Math.PI));
     }
     textContext.fill();
     textContext.globalCompositeOperation = 'destination-out';
     textContext.moveTo(badgeDiameter * 0.85, badgeDiameter / 2);
-    textContext.arc(badgeDiameter / 2, badgeDiameter / 2, badgeDiameter*0.35, Math.PI*2, false);
-    textContext.lineWidth = badgeDiameter*0.025;
+    textContext.arc(badgeDiameter / 2, badgeDiameter / 2, badgeDiameter * 0.35, Math.PI*2, false);
+    textContext.lineWidth = badgeDiameter / 2 * 0.05;
     textContext.stroke();
     textContext.globalCompositeOperation = 'source-over';
-    x = (badgeDiameter - textWidth)/2;
-    y = size / 4 - badgeDiameter / 2;
-  } else {
-    width = textWidth;
-    height = textHeight;
-    x = 0;
-    y = - size / 4;
+    x = (badgeDiameter - width)/2;
+    y = - y - badgeDiameter / 2;
+    height = width = badgeDiameter;
   }
   
   textContext.scale(1, -1);
