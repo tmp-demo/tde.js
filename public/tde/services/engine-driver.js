@@ -103,8 +103,9 @@ angular.module("tde.services.engine-driver", [])
   {
     this.playing = true
     this.seek(this.currentTime)
-    //if (snd)
+    if (snd) {
       snd.p()
+    }
 
     function render()
     {

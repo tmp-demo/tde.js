@@ -9,7 +9,7 @@
 // Use v_cursor * v_stride for an offset in the array.
 
 
-var seed = 0;
+var seed = 42;
 function seedable_random() {
     return (seed = (69069 * seed + 1) & 0x7FFFFFFF) / 0x80000000;
 }
@@ -243,6 +243,16 @@ function shrink_path(path, amount, z, use_subdiv) {
         inter[2] = z;
         inter.subdiv = path[i].subdiv;
         new_path.push(inter);
+    }
+
+    var old_segment = vec3.create();
+    var new_segment = vec3.create();
+    for (var i = 0; i < path_length; ++i) {
+        vec3.subtract(old_segment, path[(i+1)%path_length], path[i]);
+        vec3.subtract(new_segment, new_path[(i+1)%path_length], new_path[i]);
+        if (vec3.dot(old_segment, new_segment) < 0) {
+            return null;
+        }
     }
     return new_path;
 }
