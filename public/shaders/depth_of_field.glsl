@@ -1,13 +1,13 @@
 //! VERTEX
 
-void main_vs_select4() {
+void main_vs_depth_of_field() {
   gl_Position = vec4(position.xy, 0.0, 1.0);
   v_tex_coords = (vec2(1.0, 1.0) + position.xy) / 2.0;
 }
 
 //! FRAGMENT
 
-void main_fs_select4() {
+void main_fs_depth_of_field() {
   float v = max((texture2D(texture_4, v_tex_coords).r - near) / (far-near), 0.0);
   v = v*v;
   if (v > focus) {

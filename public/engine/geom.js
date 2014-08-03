@@ -178,7 +178,7 @@ function shrink_path(path, amount, z, use_subdiv) {
     return new_path;
 }
 
-function fill_concave_ring(geom, ring) {
+function fill_convex_ring(geom, ring) {
   var normal = [0, 1, 0];
   var uv = [0, 0];
   for (var i = 1; i < ring.length - 1; i++) {
