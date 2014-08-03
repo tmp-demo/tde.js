@@ -11,6 +11,6 @@ void main_vs_city() {
 //! FRAGMENT
 
 void main_fs_city() {
-  float dp = dot(v_normals, light);
+  float dp = dot(normalize(v_normals), light);
   gl_FragColor = vec4(dp, dp, dp, 1.0);
 }
