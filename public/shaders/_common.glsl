@@ -6,6 +6,8 @@ uniform mat4 view_proj_mat;
 
 uniform vec2 resolution;
 
+uniform vec3 light;
+
 uniform sampler2D texture_0;
 uniform sampler2D texture_1;
 uniform sampler2D texture_2;
