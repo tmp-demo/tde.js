@@ -5,7 +5,7 @@ void main_vs_city() {
   v_position = gl_Position.xyz;
   v_normals = normals;
   v_tex_coords = tex_coords;
-  gl_Position.z = gl_Position.z / 10.0;
+  //gl_Position.z = gl_Position.z / 2.0;
 }
 
 //! FRAGMENT

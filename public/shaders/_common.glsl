@@ -6,6 +6,10 @@ uniform mat4 view_proj_mat;
 
 uniform vec2 resolution;
 
+uniform float near;
+uniform float far;
+uniform float focus;
+
 uniform vec3 light;
 
 uniform sampler2D texture_0;

@@ -54,8 +54,10 @@ angular.module("tde.engine-view", [])
       extrude_perimeter_slider.on("input", function() {
         MIN_PERIMETER_EXTRUSION = this.value;
         console.log("min perimeter when extruding: " + this.value);
-        city_map = document._generate_map();
-        replace_geom(geometries.city, document._generate_city_geom(city_map));
+        //city_map = document._generate_map();
+        //replace_geom(geometries.city, document._generate_city_geom(city_map));
+        uniforms["focus"] = [this.value];
+        $scope.driver.drawFrame();
       })
 
       setInterval(function()
