@@ -1,0 +1,27 @@
+vec3 sunDirection = vec3(0.707, 0.707, 0.0);
+vec3 sunColor = vec3(0.9, 0.9, 0.8);
+
+float sunFactor(vec3 direction)
+{
+  return dot(direction, sunDirection) * 0.5 + 0.5;
+}
+
+vec3 sun(vec3 direction)
+{
+  float coeff = pow(sunFactor(direction), 16.0);
+  return coeff * sunColor;
+}
+
+vec3 skyColor(vec3 direction)
+{
+  //return mix(vec3(1.0), vec3(0.0), direction.x * 0.5 + 0.5);
+  return mix(vec3(0.75, 0.8, 0.9), vec3(1.0, 0.9, 0.7), sunFactor(direction));
+}
+
+vec3 applyFog(vec3 direction, vec3 color)
+{
+  float d = distance(v_position, cam_pos);
+  float fogFactor = exp(-d * 0.01); // actually 1 - fog factor
+  
+  return mix(skyColor(direction), color, fogFactor);
+}

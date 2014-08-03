@@ -2,15 +2,15 @@
 
 void main_vs_city() {
   gl_Position = view_proj_mat * vec4(position, 1.0);
-  v_position = gl_Position.xyz;
+  v_position = position;
   v_normals = normals;
   v_tex_coords = tex_coords;
-  gl_Position.z = gl_Position.z / 10.0;
 }
 
 //! FRAGMENT
+//! INCLUDE scattering.glsllib
 
 void main_fs_city() {
-  float dp = dot(normalize(v_normals), light);
-  gl_FragColor = vec4(dp, dp, dp, 1.0);
+  vec3 diffuse = dot(normalize(v_normals), light) * skyColor(v_normals);
+  gl_FragColor = vec4(applyFog(v_normals, diffuse), 1.0);
 }

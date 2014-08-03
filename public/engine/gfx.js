@@ -276,12 +276,15 @@ function set_uniforms(program, ratio) {
   var viewMatrix = mat4.create()
   var projectionMatrix = mat4.create()
   var viewProjectionMatrix = mat4.create()
+  var viewProjectionMatrixInv = mat4.create()
   
   // derive camera matrices from simpler parameters
   mat4.lookAt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], [0.0, 1.0, 0.0]);
   mat4.perspective(projectionMatrix, uniforms["cam_fov"] * Math.PI / 180.0, ratio, 1.0, 1000.0)
   mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
+  mat4.invert(viewProjectionMatrixInv, viewProjectionMatrix);
   uniforms["view_proj_mat"] = viewProjectionMatrix;
+  uniforms["view_proj_mat_inv"] = viewProjectionMatrixInv;
   
   for (var uniformName in uniforms) {
     var val = uniforms[uniformName];

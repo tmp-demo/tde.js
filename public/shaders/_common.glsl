@@ -2,7 +2,9 @@
 
 precision lowp float;
 
+uniform vec3 cam_pos;
 uniform mat4 view_proj_mat;
+uniform mat4 view_proj_mat_inv;
 
 uniform vec2 resolution;
 
