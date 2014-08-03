@@ -9,9 +9,9 @@
 // Use v_cursor * v_stride for an offset in the array.
 
 
-var seed = 0;
+var SEED = 42;
 function seedable_random() {
-    return (seed = (69069 * seed + 1) & 0x7FFFFFFF) / 0x80000000;
+    return (SEED = (69069 * SEED + 1) & 0x7FFFFFFF) / 0x80000000;
 }
 
 // For a continuous ring of 4 points the indices are:
@@ -94,7 +94,7 @@ function join_rings(geom, r1, r2) {
 }
 
 function rand_int(max) {
-    return Math.floor(Math.random() * max);
+    return Math.floor(seedable_random() * max);
 }
 
 function mod(a, m) {
@@ -127,7 +127,7 @@ function lines_intersection_2d(a1, a2, b1, b2) {
     ];
 }
 
-SUBDIV_SHRINK_COEF = 0.2;
+SUBDIV_SHRINK_COEF = 0.01;
 
 function shrink_path(path, amount, z, use_subdiv) {
     var new_path = [];
@@ -164,6 +164,16 @@ function shrink_path(path, amount, z, use_subdiv) {
         inter = inter || _vec2_add(px, na);
         inter.subdiv = path[i].subdiv;
         new_path.push(inter);
+    }
+
+    var old_segment = vec3.create();
+    var new_segment = vec3.create();
+    for (var i = 0; i < path_length; ++i) {
+        vec3.subtract(old_segment, path[(i+1)%path_length], path[i]);
+        vec3.subtract(new_segment, new_path[(i+1)%path_length], new_path[i]);
+        if (vec3.dot(old_segment, new_segment) < 0) {
+            return null;
+        }
     }
     return new_path;
 }
@@ -253,8 +263,8 @@ function city_subdivision(path, sub_id) {
         b2 = mod((b1+1), path_length);
 
         // TODO: this skews the distribution towards 0.5 - make it less verbose
-        var f1 = 0.5 + (0.5 - Math.abs(Math.random() - 0.5)) * 0.2;
-        var f2 = 0.5 + (0.5 - Math.abs(Math.random() - 0.5)) * 0.2;
+        var f1 = 0.5 + (0.5 - Math.abs(seedable_random() - 0.5)) * 0.2;
+        var f2 = 0.5 + (0.5 - Math.abs(seedable_random() - 0.5)) * 0.2;
 
         var p_a3_1 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), subdiv: sub_id};
         var p_a3_2 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), subdiv: path[a1].subdiv};

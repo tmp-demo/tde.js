@@ -195,20 +195,42 @@ function create_texture(width, height, format, image, allow_repeat, linear_filte
   return { tex: texture, width: width, height: height };
 }
 
-function create_text_texture(size, text) {
+function create_text_texture(size, text, badgeDiameter) {
   var textCanvas = document.createElement("canvas");
   textCanvas.width = 2048;
   textCanvas.height = 512;
   
   var textContext = textCanvas.getContext("2d");
+  textContext.font = size + "px OCR A STD";
+  
+  var width, textWidth = 1+textContext.measureText(text).width|0;
+  var height, textHeight = size * 1.25;
+  
+  if (badgeDiameter) {
+    height = width = badgeDiameter;
+    textContext.fillStyle = "#36A";
+    textContext.moveTo(badgeDiameter, badgeDiameter / 2);
+    for (var i = 1; i < 49; ++i) {
+      var radius = ((i % 2) ? badgeDiameter * 0.8 : badgeDiameter) / 2;
+      textContext.lineTo(badgeDiameter/2 + radius * Math.cos(i / 24 * Math.PI), badgeDiameter/2 + radius * Math.sin(i / 24 * Math.PI));
+    }
+    textContext.fill();
+    textContext.globalCompositeOperation = 'destination-out';
+    textContext.moveTo(badgeDiameter * 0.85, badgeDiameter / 2);
+    textContext.arc(badgeDiameter / 2, badgeDiameter / 2, badgeDiameter*0.35, Math.PI*2, false);
+    textContext.lineWidth = badgeDiameter*0.025;
+    textContext.stroke();
+    textContext.globalCompositeOperation = 'source-over';
+    textContext.moveTo((badgeDiameter - textWidth)/2, (badgeDiameter - textHeight)/2);
+  } else {
+    width = textWidth;
+    height = textHeight;
+  }
   
   textContext.scale(1, -1);
-  textContext.font = size + "px OCR A STD";
   textContext.fillStyle = "#fff";
   textContext.fillText(text, 0, -size / 4);
   
-  var width = 1+textContext.measureText(text).width|0;
-  var height = size * 1.25;
   return create_texture(width, height, gl.RGBA, textContext.getImageData(0, 0, width, height).data, false, true);
 }
 
