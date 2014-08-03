@@ -56,7 +56,7 @@ function editor_main() {
   map_ctx.fillRect(0, 0, 640, 360);
 
   canvas_map.onmousemove = function(e) {
-    cameraPosition[0] = e.layerX - 150;
-    cameraPosition[1] = e.layerY - 150 - canvas_map.offsetTop;
+    uniforms["cam_pos"][0] = e.layerX - 150;
+    uniforms["cam_pos"][1] = e.layerY - 150 - canvas_map.offsetTop;
   }
 }
