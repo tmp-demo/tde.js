@@ -10,7 +10,6 @@ var vertex_shaders = {}
 var GL_TEXTURE_2D;
 var GL_ARRAY_BUFFER;
 var GL_STATIC_DRAW;
-var GL_ELEMENT_ARRAY_BUFFER;
 
 function gl_bind_buffer(buf_type, buffer) {
   gl.bindBuffer(buf_type, buffer)
@@ -25,7 +24,6 @@ function gl_init() {
   GL_TEXTURE_2D = gl.TEXTURE_2D;
   GL_ARRAY_BUFFER = gl.ARRAY_BUFFER;
   GL_STATIC_DRAW = gl.STATIC_DRAW;
-  GL_ELEMENT_ARRAY_BUFFER = gl.ELEMENT_ARRAY_BUFFER;
 
   var buffer = gl.createBuffer();
   gl_bind_buffer(GL_ARRAY_BUFFER, buffer);
@@ -89,27 +87,11 @@ function gfx_init() {
   uniforms["cam_fov"] = 75
 }
 
-function upload_geom(geom) {
-  gl_bind_buffer(GL_ARRAY_BUFFER, geom.vbo);
-  gl.bufferData(GL_ARRAY_BUFFER, geom.src.vertices, GL_STATIC_DRAW);
-  gl_bind_buffer(GL_ELEMENT_ARRAY_BUFFER, geom.ibo);
-  gl.bufferData(GL_ELEMENT_ARRAY_BUFFER, geom.src.indices, GL_STATIC_DRAW);
-}
-
-function create_geom(vertices, indices, comp_per_vertex, attrib_list) {
-  var geom = {
-    src: {
-      vertices: new Float32Array(vertices),
-      indices: new Uint16Array(indices)
-    },
-    vbo: gl.createBuffer(),
-    ibo: gl.createBuffer(),
-    num_indices: indices.length,
-    components_per_vertex: comp_per_vertex,
-    attribs: attrib_list
-  };
-  upload_geom(geom);
-  return geom;
+function make_vbo(location, buffer) {
+  var vbo = gl.createBuffer();
+  gl_bind_buffer(GL_ARRAY_BUFFER, vbo);
+  gl.bufferData(GL_ARRAY_BUFFER, new Float32Array(buffer), GL_STATIC_DRAW);
+  return {location: location, vbo: vbo, length: buffer.length};
 }
 
 // editor only
@@ -137,20 +119,19 @@ function draw_quad() {
 // actually renders
 function draw_geom(data) {
   gl.enable(gl.DEPTH_TEST);
-  gl_bind_buffer(GL_ARRAY_BUFFER, data.vbo);
-  for (var c = 0; c < data.attribs.length;++c) {
-    var a = data.attribs[c];
-    gl.enableVertexAttribArray(a.location);
-    gl.vertexAttribPointer(a.location, a.components, gl.FLOAT, false, a.stride, a.offset);
+  for (var i in data.buffers) {
+    var buffer = data.buffers[i];
+    gl_bind_buffer(GL_ARRAY_BUFFER, buffer.vbo);
+    gl.enableVertexAttribArray(buffer.location);
+    gl.vertexAttribPointer(buffer.location, buffer.length / data.vertex_count, gl.FLOAT, false, 0, 0);
   }
-  gl_bind_buffer(GL_ELEMENT_ARRAY_BUFFER, data.ibo);
-  gl.drawElements(gl.TRIANGLES, data.num_indices, gl.UNSIGNED_SHORT, 0);
+  gl.drawArrays(data.mode, 0, data.vertex_count);
 }
 
 // to use with the timeline
 function draw_mesh(data) {
-  return function(prog) {
-    draw_geom(data, prog);
+  return function() {
+    draw_geom(data);
   }
 }
 
@@ -272,7 +253,7 @@ function set_uniforms(program, ratio) {
   var viewProjectionMatrix = mat4.create()
   
   // derive camera matrices from simpler parameters
-  mat4.lookAt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], [0.0, 0.0, 1.0]);
+  mat4.lookAt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], [0.0, 1.0, 0.0]);
   mat4.perspective(projectionMatrix, uniforms["cam_fov"] * Math.PI / 180.0, ratio, 1.0, 1000.0)
   mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
   uniforms["view_proj_mat"] = viewProjectionMatrix;
