@@ -10,7 +10,6 @@ var vertex_shaders = {}
 var GL_TEXTURE_2D;
 var GL_ARRAY_BUFFER;
 var GL_STATIC_DRAW;
-var GL_ELEMENT_ARRAY_BUFFER;
 
 function gl_bind_buffer(buf_type, buffer) {
   gl.bindBuffer(buf_type, buffer)
@@ -25,7 +24,6 @@ function gl_init() {
   GL_TEXTURE_2D = gl.TEXTURE_2D;
   GL_ARRAY_BUFFER = gl.ARRAY_BUFFER;
   GL_STATIC_DRAW = gl.STATIC_DRAW;
-  GL_ELEMENT_ARRAY_BUFFER = gl.ELEMENT_ARRAY_BUFFER;
 
   var buffer = gl.createBuffer();
   gl_bind_buffer(GL_ARRAY_BUFFER, buffer);
@@ -89,27 +87,11 @@ function gfx_init() {
   uniforms["cam_fov"] = 75
 }
 
-function upload_geom(geom) {
-  gl_bind_buffer(GL_ARRAY_BUFFER, geom.vbo);
-  gl.bufferData(GL_ARRAY_BUFFER, geom.src.vertices, GL_STATIC_DRAW);
-  gl_bind_buffer(GL_ELEMENT_ARRAY_BUFFER, geom.ibo);
-  gl.bufferData(GL_ELEMENT_ARRAY_BUFFER, geom.src.indices, GL_STATIC_DRAW);
-}
-
-function create_geom(vertices, indices, comp_per_vertex, attrib_list) {
-  var geom = {
-    src: {
-      vertices: new Float32Array(vertices),
-      indices: new Uint16Array(indices)
-    },
-    vbo: gl.createBuffer(),
-    ibo: gl.createBuffer(),
-    num_indices: indices.length,
-    components_per_vertex: comp_per_vertex,
-    attribs: attrib_list
-  };
-  upload_geom(geom);
-  return geom;
+function make_vbo(location, buffer) {
+  var vbo = gl.createBuffer();
+  gl_bind_buffer(GL_ARRAY_BUFFER, vbo);
+  gl.bufferData(GL_ARRAY_BUFFER, new Float32Array(buffer), GL_STATIC_DRAW);
+  return {location: location, vbo: vbo, length: buffer.length};
 }
 
 // editor only
@@ -137,20 +119,19 @@ function draw_quad() {
 // actually renders
 function draw_geom(data) {
   gl.enable(gl.DEPTH_TEST);
-  gl_bind_buffer(GL_ARRAY_BUFFER, data.vbo);
-  for (var c = 0; c < data.attribs.length;++c) {
-    var a = data.attribs[c];
-    gl.enableVertexAttribArray(a.location);
-    gl.vertexAttribPointer(a.location, a.components, gl.FLOAT, false, a.stride, a.offset);
+  for (var i in data.buffers) {
+    var buffer = data.buffers[i];
+    gl_bind_buffer(GL_ARRAY_BUFFER, buffer.vbo);
+    gl.enableVertexAttribArray(buffer.location);
+    gl.vertexAttribPointer(buffer.location, buffer.length / data.vertex_count, gl.FLOAT, false, 0, 0);
   }
-  gl_bind_buffer(GL_ELEMENT_ARRAY_BUFFER, data.ibo);
-  gl.drawElements(gl.TRIANGLES, data.num_indices, gl.UNSIGNED_SHORT, 0);
+  gl.drawArrays(data.mode, 0, data.vertex_count);
 }
 
 // to use with the timeline
 function draw_mesh(data) {
-  return function(prog) {
-    draw_geom(data, prog);
+  return function() {
+    draw_geom(data);
   }
 }
 
@@ -214,20 +195,45 @@ function create_texture(width, height, format, image, allow_repeat, linear_filte
   return { tex: texture, width: width, height: height };
 }
 
-function create_text_texture(size, text) {
+function create_text_texture(size, text, badgeDiameter) {
   var textCanvas = document.createElement("canvas");
   textCanvas.width = 2048;
   textCanvas.height = 512;
   
   var textContext = textCanvas.getContext("2d");
+  textContext.font = size + "px OCR A STD";
+  
+  var x, width, textWidth = 1+textContext.measureText(text).width|0;
+  var y, height, textHeight = size * 1.25;
+  
+  if (badgeDiameter) {
+    height = width = badgeDiameter;
+    textContext.fillStyle = "#36A";
+    textContext.moveTo(badgeDiameter, badgeDiameter / 2);
+    for (var i = 1; i < 49; ++i) {
+      var radius = ((i % 2) ? badgeDiameter * 0.8 : badgeDiameter) / 2;
+      textContext.lineTo(badgeDiameter/2 + radius * Math.cos(i / 24 * Math.PI), badgeDiameter/2 + radius * Math.sin(i / 24 * Math.PI));
+    }
+    textContext.fill();
+    textContext.globalCompositeOperation = 'destination-out';
+    textContext.moveTo(badgeDiameter * 0.85, badgeDiameter / 2);
+    textContext.arc(badgeDiameter / 2, badgeDiameter / 2, badgeDiameter*0.35, Math.PI*2, false);
+    textContext.lineWidth = badgeDiameter*0.025;
+    textContext.stroke();
+    textContext.globalCompositeOperation = 'source-over';
+    x = (badgeDiameter - textWidth)/2;
+    y = size / 4 - badgeDiameter / 2;
+  } else {
+    width = textWidth;
+    height = textHeight;
+    x = 0;
+    y = - size / 4;
+  }
   
   textContext.scale(1, -1);
-  textContext.font = size + "px OCR A STD";
   textContext.fillStyle = "#fff";
-  textContext.fillText(text, 0, -size / 4);
+  textContext.fillText(text, x, y);
   
-  var width = 1+textContext.measureText(text).width|0;
-  var height = size * 1.25;
   return create_texture(width, height, gl.RGBA, textContext.getImageData(0, 0, width, height).data, false, true);
 }
 
@@ -272,7 +278,7 @@ function set_uniforms(program, ratio) {
   var viewProjectionMatrix = mat4.create()
   
   // derive camera matrices from simpler parameters
-  mat4.lookAt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], [0.0, 0.0, 1.0]);
+  mat4.lookAt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], [0.0, 1.0, 0.0]);
   mat4.perspective(projectionMatrix, uniforms["cam_fov"] * Math.PI / 180.0, ratio, 1.0, 1000.0)
   mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
   uniforms["view_proj_mat"] = viewProjectionMatrix;

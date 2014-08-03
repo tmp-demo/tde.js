@@ -6,7 +6,7 @@ angular.module("tde.engine-view", [])
   $scope.driver = EngineDriver
 })
 
-.directive("tdeEngineView", function()
+.directive("tdeEngineView", function($location)
 {
   return {
     restrict: "E",
@@ -22,6 +22,10 @@ angular.module("tde.engine-view", [])
         $scope.driver.seek(this.value / 1000)
       })
 
+      var search = $location.search();
+      if (typeof search.time !== 'undefined')
+      $scope.driver.seek(parseFloat(search.time));
+    
       subdiv_slider = element.find(".subdiv_param");
       //subdiv_slider.value = num_subdivs;
       subdiv_slider.on("input", function() {
@@ -63,6 +67,9 @@ angular.module("tde.engine-view", [])
       setInterval(function()
       {
         seeker.val($scope.driver.currentTime * 1000)
+        $scope.$apply(function() {
+          $location.search('time', $scope.driver.currentTime);
+        });
 
         // compute start time for each scene
         var time_sum = 0
@@ -137,7 +144,7 @@ angular.module("tde.engine-view", [])
           return;
         
         uniforms["cam_pos"][0] = e.pageX - $("#map-view").offset().left - 150;
-        uniforms["cam_pos"][1] = e.pageY - $("#map-view").offset().top - 150;
+        uniforms["cam_pos"][2] = e.pageY - $("#map-view").offset().top - 150;
         
         $scope.driver.drawFrame();
       })

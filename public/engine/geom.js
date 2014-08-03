@@ -42,12 +42,12 @@ function seedable_random() {
 function is_path_convex(path) {
     var path_length = path.length;
     var c = vec3.create();
-    var v1 = vec3.create();
-    var v2 = vec3.create();
+    var v1 = vec2.create();
+    var v2 = vec2.create();
     for (var i = 0; i < path_length; ++i) {
-        vec3.subtract(v1, path[(i+1)%path_length], path[i]);
-        vec3.subtract(v2, path[(i+2)%path_length], path[(i+1)%path_length]);
-        vec3.cross(c, v1, v2);
+        vec2.subtract(v1, path[(i+1)%path_length], path[i]);
+        vec2.subtract(v2, path[(i+2)%path_length], path[(i+1)%path_length]);
+        vec2.cross(c, v1, v2);
         if (c[2] > 0) {
             return false;
         }
@@ -55,15 +55,14 @@ function is_path_convex(path) {
     return true;
 }
 
-// Creates a continuous path [A, B, B, C, C, D, D, A] from a discontinuous
-// one [A, B, C, D]
-function continuous_path(path) {
-    var new_path = [path[0]];
-    for (var i = 1; i < path.length; ++i) {
-        new_path.push(path[i], path[i]);
-    }
-    new_path.push(path[0]);
-    return new_path;
+function make_ring(path, y) {
+  var ring = []
+  for (var i = 0; i < path.length; i++)
+  {
+    var point = path[i]
+    ring.push([point[0], y, -point[1]])
+  }
+  return ring
 }
 
 function join_rings(geom, r1, r2) {
@@ -75,99 +74,22 @@ function join_rings(geom, r1, r2) {
     }
     // #debug}}
 
-    // populate the vertex buffer
-    var v_stride = geom.v_stride;
-    var n_points = r1.length;
-    var v_cursor1 = geom.v_cursor;
-    var v_cursor2 = v_cursor1 + n_points;
-    var vbo = geom.vbo;
-    for (var i = 0; i < n_points; ++i) {
-        // The closure compiler unrolls small loops like following one, so it's
-        // useless to try to factor repetitive xyz stuff in small loops.
-        //for (var xyz = 0; xyz < 3; ++xyz) {
-        //    vbo[(v_cursor1+i)*v_stride + xyz] = r1[i][xyz];
-        //    vbo[(v_cursor2+i)*v_stride + xyz] = r2[i][xyz];
-        //}
-
-        // ring 1
-        vbo[(v_cursor1+i)*v_stride    ] = r1[i][0];
-        vbo[(v_cursor1+i)*v_stride + 1] = r1[i][1];
-        vbo[(v_cursor1+i)*v_stride + 2] = r1[i][2];
-        // ring 2
-        vbo[(v_cursor2+i)*v_stride    ] = r2[i][0];
-        vbo[(v_cursor2+i)*v_stride + 1] = r2[i][1];
-        vbo[(v_cursor2+i)*v_stride + 2] = r2[i][2];
-    }
-
-    // populate the index buffer
-    var i_cursor = geom.i_cursor;
-    var ibo = geom.ibo;
-    for (var i = 0; i < n_points/2; ++i) {
-        // first triangle
-        ibo[i_cursor + i*6    ] = v_cursor1 +  i*2;
-        ibo[i_cursor + i*6 + 1] = v_cursor2 +  i*2;
-        ibo[i_cursor + i*6 + 2] = v_cursor2 + (i*2+1);
-        // second triangle
-        ibo[i_cursor + i*6 + 3] = v_cursor1 +  i*2;
-        ibo[i_cursor + i*6 + 4] = v_cursor2 + (i*2+1);
-        ibo[i_cursor + i*6 + 5] = v_cursor1 + (i*2+1);
-    }
-
-    // Bump cursors
-    //
-    // 2 because we inject the vertices of the two rings and
-    geom.v_cursor += 2 * n_points;
-    // 6 (indices per edge) divided by 2 (points per edge)
-    geom.i_cursor += n_points * 3;
-}
-
-
-// normal offset *is* an offset (so don't multiply by the stride)
-function compute_normals(geom, normal_offset, first_index, n_indices) {
-    var vbo = geom.vbo;
-    var ibo = geom.ibo;
-    var v_stride = geom.v_stride;
-    // advance 3 by 3 indices (triangle by triangle)
-    var i = first_index;
-    while (i < n_indices) {
-        // P1
-        var v_offset = ibo[i]*v_stride;
-        var p1 = [
-            vbo[v_offset],
-            vbo[v_offset+1],
-            vbo[v_offset+2]
-        ];
-        // P2
-        v_offset = ibo[i+1]*v_stride;
-        var v2 = [
-            vbo[v_offset],
-            vbo[v_offset+1],
-            vbo[v_offset+2]
-        ];
-        // P3
-        v_offset = ibo[i+2]*v_stride;
-        var v3 = [
-            vbo[v_offset],
-            vbo[v_offset+1],
-            vbo[v_offset+2]
-        ];
-
-        // P2 becomes the vector p1->p2
-        vec3.sub(v2, v2, p1);
-        // P3 becomes the vector p1->p3
-        vec3.sub(v3, v3, p1);
-        // P1 becomes the normal
-        vec3.cross(p1, v2, v3);
-        vec3.normalize(p1, p1);
-
-        // write in the vbo
-        for (var j = 0; j < 3; ++j) { // x,y,z
-            vbo[ibo[i  ]*v_stride + normal_offset + j] = p1[j];
-            vbo[ibo[i+1]*v_stride + normal_offset + j] = p1[j];
-            vbo[ibo[i+2]*v_stride + normal_offset + j] = p1[j];
-        }
-
-        i += 3;
+    var e1 = vec3.create()
+    var e2 = vec3.create()
+    var normal = [0,0,0]
+    for (var i = 0; i < r1.length; i++)
+    {
+      var next = (i + 1) % r1.length;
+      geom.positions = geom.positions.concat(r1[i], r1[next], r2[next], r2[next], r2[i], r1[i]);
+      
+      vec3.sub(e1, r2[next], r1[i]);
+      vec3.sub(e2, r1[next], r1[i]);
+      vec3.cross(normal, e1, e2);
+      vec3.normalize(normal, normal);
+      geom.normals = geom.normals.concat(normal, normal, normal, normal, normal, normal);
+      
+      var uv = [0, 0];
+      geom.uvs = geom.uvs.concat(uv, uv, uv, uv, uv, uv);
     }
 }
 
@@ -240,7 +162,6 @@ function shrink_path(path, amount, z, use_subdiv) {
 
         // If inter is null (pa, px and pb are aligned)
         inter = inter || _vec2_add(px, na);
-        inter[2] = z;
         inter.subdiv = path[i].subdiv;
         new_path.push(inter);
     }
@@ -257,45 +178,14 @@ function shrink_path(path, amount, z, use_subdiv) {
     return new_path;
 }
 
-function fill_concave_path(geom, path) {
-    var center = [];
-    path_center(center, path);
-
-    // populate the vertex buffer
-    var v_stride = geom.v_stride;
-    var n_points = path.length;
-    var v_cursor = geom.v_cursor;
-    var i_cursor = geom.i_cursor;
-    var vbo = geom.vbo;
-    var ibo = geom.ibo;
-    vbo[v_cursor*v_stride  ] = center[0];
-    vbo[v_cursor*v_stride+1] = center[1];
-    vbo[v_cursor*v_stride+2] = center[2];
-    v_cursor++;
-    for (var i = 0; i < n_points; ++i) {
-        vbo[(v_cursor+i)*v_stride    ] = path[i][0];
-        vbo[(v_cursor+i)*v_stride + 1] = path[i][1];
-        vbo[(v_cursor+i)*v_stride + 2] = path[i][2];
-
-        ibo[i_cursor+i*3  ] = v_cursor - 1; // center
-        ibo[i_cursor+i*3+1] = v_cursor + i;
-        ibo[i_cursor+i*3+2] = v_cursor + (i+1)%n_points;
-    }
-
-    // Bump cursors
-    geom.v_cursor += n_points + 1;
-    geom.i_cursor += n_points * 3;
-}
-
-function path_center(out, path) {
-    out[0] = 0;
-    out[1] = 0;
-    out[2] = 0;
-    var len = path.length;
-    for (var i = 0; i < len; ++i) {
-        vec3.add(out, out, path[i]);
-    }
-    vec3.multiply(out, out, [1/len, 1/len, 1/len]);
+function fill_concave_ring(geom, ring) {
+  var normal = [0, 1, 0];
+  var uv = [0, 0];
+  for (var i = 1; i < ring.length - 1; i++) {
+      geom.positions = geom.positions.concat(ring[0], ring[i], ring[i + 1]);
+      geom.normals = geom.normals.concat(normal, normal, normal);
+      geom.uvs = geom.uvs.concat(uv, uv, uv);
+  }
 }
 
 function city_subdivision_rec(paths, num_subdivs, sub_id) {
@@ -376,10 +266,10 @@ function city_subdivision(path, sub_id) {
         var f1 = 0.5 + (0.5 - Math.abs(seedable_random() - 0.5)) * 0.2;
         var f2 = 0.5 + (0.5 - Math.abs(seedable_random() - 0.5)) * 0.2;
 
-        var p_a3_1 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), '2': 0, subdiv: sub_id};
-        var p_a3_2 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), '2': 0, subdiv: path[a1].subdiv};
-        var p_b3_1 = { '0': path[b1][0]*f2 + path[b2][0]*(1.0-f2), '1': path[b1][1]*f2 + path[b2][1]*(1-f2), '2': 0, subdiv: sub_id};
-        var p_b3_2 = { '0': path[b1][0]*f2 + path[b2][0]*(1.0-f2), '1': path[b1][1]*f2 + path[b2][1]*(1-f2), '2': 0, subdiv: path[b1].subdiv};
+        var p_a3_1 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), subdiv: sub_id};
+        var p_a3_2 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), subdiv: path[a1].subdiv};
+        var p_b3_1 = { '0': path[b1][0]*f2 + path[b2][0]*(1.0-f2), '1': path[b1][1]*f2 + path[b2][1]*(1-f2), subdiv: sub_id};
+        var p_b3_2 = { '0': path[b1][0]*f2 + path[b2][0]*(1.0-f2), '1': path[b1][1]*f2 + path[b2][1]*(1-f2), subdiv: path[b1].subdiv};
 
         break;
     } while (1);
@@ -396,17 +286,6 @@ function city_subdivision(path, sub_id) {
 
     return [path1, path2];
 }
-
-function num_city_base_vertices(paths) {
-    var accum = 0;
-    for (var path in paths) {
-        accum += paths[path].length;
-    }
-    return accum;
-}
-
-
-
 
 
 
@@ -441,7 +320,7 @@ function debug_draw_path(path, color, offset_x, offset_y) {
     }
 }
 
-function arrays_equal(a1, a2) {
+/*function arrays_equal(a1, a2) {
     if (a1.length != a2.length) {
         return false;
     }
@@ -603,3 +482,4 @@ function test_join_rings() {
 
     console.log("END - test_join_rings");
 }
+*/
