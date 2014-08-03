@@ -135,7 +135,7 @@ angular.module("tde.engine-view", [])
           return;
         
         uniforms["cam_pos"][0] = e.pageX - $("#map-view").offset().left - 150;
-        uniforms["cam_pos"][1] = e.pageY - $("#map-view").offset().top - 150;
+        uniforms["cam_pos"][2] = e.pageY - $("#map-view").offset().top - 150;
         
         $scope.driver.drawFrame();
       })

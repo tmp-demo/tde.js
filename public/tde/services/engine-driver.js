@@ -78,6 +78,7 @@ angular.module("tde.services.engine-driver", [])
 
   this.logInfo = function(message, details)
   {
+    console.log(message)
     this.logBuffer.push({
       type: "info",
       message: message,
@@ -87,6 +88,8 @@ angular.module("tde.services.engine-driver", [])
 
   this.logError = function(message, details)
   {
+    console.error(message)
+    console.error(details)
     this.logBuffer.push({
       type: "error",
       message: message,
