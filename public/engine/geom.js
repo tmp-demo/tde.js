@@ -185,20 +185,22 @@ function lines_intersection_2d(a1, a2, b1, b2) {
     ];
 }
 
-function shrink_path(path, amount, z, subdiv_coef) {
+SUBDIV_SHRINK_COEF = 0.2;
+
+function shrink_path(path, amount, z, use_subdiv) {
     var new_path = [];
     var path_length = path.length;
     for (var i = 0; i < path_length; ++i) {
         var pa = path[mod(i-1, path_length)];
         var px = path[mod(i,   path_length)];
         var pb = path[mod(i+1, path_length)];
+        use_subdiv = use_subdiv || 0;
         // avoid shrinking too much
-        if (vec2.distance(pa, pb) < (1+pa.subdiv*subdiv_coef)*0.6) {
+        if (vec2.distance(pa, pb) < amount*(1+pa.subdiv*use_subdiv*SUBDIV_SHRINK_COEF*2)) {
             return deep_clone(path);
         }
-        subdiv_coef = subdiv_coef || 0;
-        var na = _vec2_scale(normal(_vector(pa, px)), amount * (1+pa.subdiv*subdiv_coef)*0.3);
-        var nb = _vec2_scale(normal(_vector(px, pb)), amount * (1+px.subdiv*subdiv_coef)*0.3);
+        var na = _vec2_scale(normal(_vector(pa, px)), amount * (1+pa.subdiv*use_subdiv*SUBDIV_SHRINK_COEF));
+        var nb = _vec2_scale(normal(_vector(px, pb)), amount * (1+px.subdiv*use_subdiv*SUBDIV_SHRINK_COEF));
 
         //This doesn't work because modifying pa modifies the content of path
         //var pxa = []; // px translated along na
@@ -284,9 +286,28 @@ function city_subdivision_rec(paths, num_subdivs, sub_id) {
 }
 
 // TODO make this show in the editor: it defines how the min size of city blocks
-var MIN_PERIMETER = 50;
+var MIN_PERIMETER = 200;
 var MIN_SEGMENT = 10;
 var EXTRUSION_FACTOR = 2;
+
+function perimeter(path) {
+    var accum = 0;
+    var path_length = path.length;
+    for (var i = 0; i < path_length; ++i) {
+        accum += vec2.distance(path[i], path[(i+1) % path_length]);
+    }
+    return accum;
+}
+
+function smallest_segment_length(path) {
+    var smallest = 10000;
+    var path_length = path.length;
+    for (var i = 0; i < path_length; ++i) {
+        var d = vec2.distance(path[i], path[(i+1) % path_length]);
+        if (d < smallest) { smallest = d; }
+    }
+    return smallest;
+}
 
 function city_subdivision(path, sub_id) {
     var path_length = path.length;
@@ -315,7 +336,6 @@ function city_subdivision(path, sub_id) {
 
     var guard = 0;
     do {
-
         b1 = rand_int(path_length);
         if (a1 == b1 || a1 == b1 + 1) { continue; }
         //if (guard++ > 10) { break; }

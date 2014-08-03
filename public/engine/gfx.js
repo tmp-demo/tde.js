@@ -108,6 +108,20 @@ function create_geom(vertices, indices, comp_per_vertex, attrib_list) {
   return geom;
 }
 
+// editor only
+// #debug{{
+function replace_geom(old_geom, new_geom) {
+  gl.deleteBuffer(old_geom.vbo);
+  gl.deleteBuffer(old_geom.ibo);
+  old_geom.src = new_geom.src;
+  old_geom.vbo = new_geom.vbo;
+  old_geom.ibo = new_geom.ibo;
+  old_geom.num_indices = new_geom.num_indices;
+  old_geom.components_per_vertex = new_geom.components_per_vertex;
+  old_geom.attribs = new_geom.attribs;
+}
+// #debug}}
+
 function draw_quad() {
   gl.disable(gl.DEPTH_TEST);
   gl_bind_buffer(GL_ARRAY_BUFFER, _quad_vbo);
@@ -234,17 +248,17 @@ function frame_buffer_error(e) {
 function frame_buffer(target) {
   var fbo = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-  
+
   if (target.color) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, GL_TEXTURE_2D, target.color.tex, 0);
   if (target.depth) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, GL_TEXTURE_2D, target.depth.tex, 0);
-  
+
   // #debug{{
   var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
   if (status != gl.FRAMEBUFFER_COMPLETE) {
     alert("incomplete framebuffer "+frame_buffer_error(status));
   }
   // #debug}}
-  
+
   return fbo;
 }
 
@@ -255,7 +269,7 @@ function set_uniforms(program) {
     var location = gl.getUniformLocation(program, uniformName);
     if (!location)
       continue;
- 
+
     // if val is a bare number, make a one-element array
     if (typeof val == "number")
       val = [val];
@@ -318,7 +332,7 @@ function render_scene(scene, demo_time, scene_time) {
         gl.bindTexture(GL_TEXTURE_2D, tex);
         gl.uniform1i(gl.getUniformLocation(shader_program,"texture_"+i), i);
       }
-    } 
+    }
     pass.render(pass.program);
   }
 }
