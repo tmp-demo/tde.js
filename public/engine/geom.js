@@ -9,9 +9,9 @@
 // Use v_cursor * v_stride for an offset in the array.
 
 
-var seed = 42;
+var SEED = 42;
 function seedable_random() {
-    return (seed = (69069 * seed + 1) & 0x7FFFFFFF) / 0x80000000;
+    return (SEED = (69069 * SEED + 1) & 0x7FFFFFFF) / 0x80000000;
 }
 
 // For a continuous ring of 4 points the indices are:
