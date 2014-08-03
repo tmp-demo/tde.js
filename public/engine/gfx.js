@@ -203,8 +203,8 @@ function create_text_texture(size, text, badgeDiameter) {
   var textContext = textCanvas.getContext("2d");
   textContext.font = size + "px OCR A STD";
   
-  var width, textWidth = 1+textContext.measureText(text).width|0;
-  var height, textHeight = size * 1.25;
+  var x, width, textWidth = 1+textContext.measureText(text).width|0;
+  var y, height, textHeight = size * 1.25;
   
   if (badgeDiameter) {
     height = width = badgeDiameter;
@@ -221,15 +221,18 @@ function create_text_texture(size, text, badgeDiameter) {
     textContext.lineWidth = badgeDiameter*0.025;
     textContext.stroke();
     textContext.globalCompositeOperation = 'source-over';
-    textContext.moveTo((badgeDiameter - textWidth)/2, (badgeDiameter - textHeight)/2);
+    x = (badgeDiameter - textWidth)/2;
+    y = size / 4 - badgeDiameter / 2;
   } else {
     width = textWidth;
     height = textHeight;
+    x = 0;
+    y = - size / 4;
   }
   
   textContext.scale(1, -1);
   textContext.fillStyle = "#fff";
-  textContext.fillText(text, 0, -size / 4);
+  textContext.fillText(text, x, y);
   
   return create_texture(width, height, gl.RGBA, textContext.getImageData(0, 0, width, height).data, false, true);
 }
