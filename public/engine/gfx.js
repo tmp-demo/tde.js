@@ -83,6 +83,10 @@ function gfx_init() {
       }
     }
   }
+  
+  uniforms["cam_pos"] = [0, 1, 0]
+  uniforms["cam_target"] = [0, 0, 0]
+  uniforms["cam_fov"] = 75
 }
 
 function upload_geom(geom) {
@@ -262,7 +266,17 @@ function frame_buffer(target) {
   return fbo;
 }
 
-function set_uniforms(program) {
+function set_uniforms(program, ratio) {
+  var viewMatrix = mat4.create()
+  var projectionMatrix = mat4.create()
+  var viewProjectionMatrix = mat4.create()
+  
+  // derive camera matrices from simpler parameters
+  mat4.lookAt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], [0.0, 0.0, 1.0]);
+  mat4.perspective(projectionMatrix, uniforms["cam_fov"] * Math.PI / 180.0, ratio, 1.0, 1000.0)
+  mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
+  uniforms["view_proj_mat"] = viewProjectionMatrix;
+  
   for (var uniformName in uniforms) {
     var val = uniforms[uniformName];
 
@@ -317,7 +331,7 @@ function render_scene(scene, demo_time, scene_time) {
         ry = pass.render_to.color.height;
       }
       uniforms["resolution"] = [rx,ry];
-      set_uniforms(shader_program);
+      set_uniforms(shader_program, rx / ry);
       gl.viewport(0, 0, rx, ry);
     }
     if (pass.fbo) {

@@ -94,6 +94,11 @@ angular.module("tde.services.engine-driver", [])
     })
   }
 
+  this.drawFrame = function()
+  {
+    engine_render(this.currentTime)
+  }
+  
   this.play = function()
   {
     this.playing = true
@@ -107,9 +112,9 @@ angular.module("tde.services.engine-driver", [])
         self.currentTime = snd.t()
       else
         self.currentTime = 0;
-
-      engine_render(self.currentTime)
-
+      
+      self.drawFrame()
+      
       if (self.playing)
         requestAnimationFrame(render)
     }
