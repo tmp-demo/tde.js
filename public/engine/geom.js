@@ -9,6 +9,11 @@
 // Use v_cursor * v_stride for an offset in the array.
 
 
+var seed = 0;
+function seedable_random() {
+    return (seed = (69069 * seed + 1) & 0x7FFFFFFF) / 0x80000000;
+}
+
 // For a continuous ring of 4 points the indices are:
 //    0    1
 //  7 A----B 2
@@ -34,6 +39,21 @@
 // The slice of the vbo for this ring looks like:
 // [A, B, C, D]
 
+function is_path_convex(path) {
+    var path_length = path.length;
+    var c = vec3.create();
+    var v1 = vec3.create();
+    var v2 = vec3.create();
+    for (var i = 0; i < path_length; ++i) {
+        vec3.subtract(v1, path[(i+1)%path_length], path[i]);
+        vec3.subtract(v2, path[(i+2)%path_length], path[(i+1)%path_length]);
+        vec3.cross(c, v1, v2);
+        if (c[2] > 0) {
+            return false;
+        }
+    }
+    return true;
+}
 
 // Creates a continuous path [A, B, B, C, C, D, D, A] from a discontinuous
 // one [A, B, C, D]
@@ -164,7 +184,7 @@ function deep_clone(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
 
-function _vector(a,b) { return vec2.subtract([], b, a) }
+function _vector_2d(a,b) { return vec2.subtract([], b, a) }
 function _vec2_scale(v, f) { return [v[0]*f, v[1]*f] }
 function _vec2_add(a,b) { return vec2.add([], a, b) }
 
@@ -199,8 +219,8 @@ function shrink_path(path, amount, z, use_subdiv) {
         if (vec2.distance(pa, pb) < amount*(1+pa.subdiv*use_subdiv*SUBDIV_SHRINK_COEF*2)) {
             return deep_clone(path);
         }
-        var na = _vec2_scale(normal(_vector(pa, px)), amount * (1+pa.subdiv*use_subdiv*SUBDIV_SHRINK_COEF));
-        var nb = _vec2_scale(normal(_vector(px, pb)), amount * (1+px.subdiv*use_subdiv*SUBDIV_SHRINK_COEF));
+        var na = _vec2_scale(normal(_vector_2d(pa, px)), amount * (1+pa.subdiv*use_subdiv*SUBDIV_SHRINK_COEF));
+        var nb = _vec2_scale(normal(_vector_2d(px, pb)), amount * (1+px.subdiv*use_subdiv*SUBDIV_SHRINK_COEF));
 
         //This doesn't work because modifying pa modifies the content of path
         //var pxa = []; // px translated along na
