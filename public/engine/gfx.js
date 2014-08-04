@@ -218,13 +218,17 @@ function create_text_texture(text, fontSize, badgeDiameter) {
     y = - fontSize / 4;
 
   if (badgeDiameter) {
-    textContext.fillStyle = "#36A";
+    var gradient = textContext.createLinearGradient(0, badgeDiameter, badgeDiameter, 0);
+    gradient.addColorStop(0, "#79d");
+    gradient.addColorStop(1, "#36a");
+    textContext.fillStyle = gradient;
     textContext.moveTo(badgeDiameter, badgeDiameter / 2);
     for (var i = 1; i < 49; ++i) {
       var radius = (i % 2) ? badgeDiameter * 0.4 : badgeDiameter / 2;
       textContext.lineTo(badgeDiameter / 2 + radius * M.cos(i / 24 * M.PI), badgeDiameter / 2 + radius * M.sin(i / 24 * M.PI));
     }
     textContext.fill();
+    
     textContext.globalCompositeOperation = 'destination-out';
     textContext.moveTo(badgeDiameter * 0.85, badgeDiameter / 2);
     textContext.arc(badgeDiameter / 2, badgeDiameter / 2, badgeDiameter * 0.35, M.PI*2, false);
