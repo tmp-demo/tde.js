@@ -73,7 +73,7 @@ function push_vertices(to, v) {
     }
 }
 
-function join_rings(geom, r1, r2) {
+function join_rings(geom, r1, r2, uv_fn) {
     // #debug{{
     if (r1.length != r2.length) {
         console.log(r1);
@@ -95,19 +95,7 @@ function join_rings(geom, r1, r2) {
       vec3.cross(normal, e1, e2);
       vec3.normalize(normal, normal);
       push_vertices(geom.normals, [normal, normal, normal, normal, normal, normal]);
-
-      var u1 = 0;
-      var v1 = 0;
-      var u2 = 5;
-      var v2 = 1;
-      push_vertices(geom.uvs, [[
-        u1, v1,
-        u2, v1,
-        u2, v2,
-        u2, v2,
-        u1, v2,
-        u1, v1
-      ]]);
+      push_vertices(geom.uvs, uv_fn(vec3.length(e2)));
     }
 }
 

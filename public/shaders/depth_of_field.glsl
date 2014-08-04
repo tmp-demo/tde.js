@@ -14,7 +14,8 @@ float sample_depth(vec2 uv) {
 void main_fs_depth_of_field() {
   float rx = 1.5 /resolution.x;
   float ry = 1.5 /resolution.y;
-  float samples = sample_depth(vec2(0.0, 0.0))
+  float main_sample = sample_depth(vec2(0.0, 0.0));
+  float samples = main_sample
                 + sample_depth(vec2(rx,  0.0))
                 + sample_depth(vec2(-rx, 0.0))
                 + sample_depth(vec2(0.0,  ry))
@@ -23,7 +24,7 @@ void main_fs_depth_of_field() {
                 + sample_depth(vec2(rx,  -ry))
                 + sample_depth(vec2(-rx,  ry))
                 + sample_depth(vec2(-rx, -ry));
-  samples = samples / 9.0;
+  samples = max(samples / 9.0, main_sample);
   float v = max((samples - near) / (far-near), 0.0);
 
   v = v*v;
