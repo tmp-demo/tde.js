@@ -25,7 +25,7 @@ angular.module("tde.engine-view", [])
       var search = $location.search();
       if (typeof search.time !== 'undefined')
       $scope.driver.seek(parseFloat(search.time));
-    
+
       subdiv_slider = element.find(".subdiv_param");
       //subdiv_slider.value = num_subdivs;
       subdiv_slider.on("input", function() {
@@ -33,6 +33,7 @@ angular.module("tde.engine-view", [])
         console.log("Num subdivisions: " + this.value);
         city_map = document._generate_map();
         replace_geom(geometries.city, document._generate_city_geom(city_map));
+        $scope.driver.drawFrame();
       })
 
       perimeter_slider = element.find(".min_perimeter");
@@ -42,6 +43,7 @@ angular.module("tde.engine-view", [])
         console.log("Perimeter minimum: " + this.value);
         city_map = document._generate_map();
         replace_geom(geometries.city, document._generate_city_geom(city_map));
+        $scope.driver.drawFrame();
       })
 
       shrink_slider = element.find(".subdiv_shrink_coef");
@@ -51,16 +53,18 @@ angular.module("tde.engine-view", [])
         console.log("subdivision coefficient when shrinking paths: " + this.value);
         city_map = document._generate_map();
         replace_geom(geometries.city, document._generate_city_geom(city_map));
+        $scope.driver.drawFrame();
       })
 
       extrude_perimeter_slider = element.find(".extrude_min_perimeter");
       //shrink_slider.value = SUBDIV_SHRINK_COEF;
       extrude_perimeter_slider.on("input", function() {
-        MIN_PERIMETER_EXTRUSION = this.value;
-        console.log("min perimeter when extruding: " + this.value);
-        //city_map = document._generate_map();
-        //replace_geom(geometries.city, document._generate_city_geom(city_map));
-        uniforms["focus"] = [this.value];
+        //MIN_PERIMETER_EXTRUSION = this.value;
+        console.log("seed: " + this.value);
+        SEED = this.value;
+        city_map = document._generate_map();
+        replace_geom(geometries.city, document._generate_city_geom(city_map));
+        
         $scope.driver.drawFrame();
       })
 
@@ -80,7 +84,7 @@ angular.module("tde.engine-view", [])
         }
         seeker.attr("max", time_sum * 1000)
       }, 50)
-      
+
       function togglePlayState()
       {
         var driver = $scope.driver
@@ -89,13 +93,13 @@ angular.module("tde.engine-view", [])
         else
           driver.play()
       }
-      
+
       function toggleFullscreen(element)
       {
         element.requestFullscreen = element.requestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen || element.msRequestFullscreen
         document.exitFullscreen = document.exitFullscreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.msExitFullscreen
         document.fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement
-        
+
         if (document.fullscreenElement) {
           document.exitFullscreen()
           document.fullscreenElement = null
@@ -103,36 +107,36 @@ angular.module("tde.engine-view", [])
           element.requestFullscreen()
         }
       }
-      
+
       var canvasElement = element.find("#engine-view")
       canvasElement.dblclick(function()
       {
         toggleFullscreen(this)
       })
-      
+
       canvasElement.click(function()
       {
         togglePlayState()
       })
-      
+
       $(document).keypress(function(event)
       {
         if ((event.target.tagName == "INPUT" && event.target.type == "text") || event.target.tagName == "TEXTAREA")
           return
-        
+
         if (event.which == 32) // space
         {
           event.preventDefault()
           togglePlayState()
         }
-        
+
         if (event.which == 70 || event.which == 102) // f
         {
           event.preventDefault()
           toggleFullscreen(canvasElement.get(0))
         }
       })
-      
+
       var canvas_map = document.getElementById("map-view")
       map_ctx = canvas_map.getContext("2d");
       map_ctx.fillStyle = "rgb(220, 220, 220)";
@@ -142,10 +146,10 @@ angular.module("tde.engine-view", [])
       {
         if (!("cam_pos" in uniforms))
           return;
-        
-        uniforms["cam_pos"][0] = e.pageX - $("#map-view").offset().left - 150;
-        uniforms["cam_pos"][2] = e.pageY - $("#map-view").offset().top - 150;
-        
+
+        uniforms["cam_pos"][0] = (e.pageX - $("#map-view").offset().left - 150) * 5;
+        uniforms["cam_pos"][2] = (e.pageY - $("#map-view").offset().top - 150) * 5;
+
         $scope.driver.drawFrame();
       })
     }

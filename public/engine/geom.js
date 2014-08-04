@@ -65,6 +65,14 @@ function make_ring(path, y) {
   return ring
 }
 
+function push_vertices(to, v) {
+    for (var i = 0; i<v.length; ++i) {
+        for (var j = 0; j<v[i].length; ++j) {
+            to.push(v[i][j]);
+        }
+    }
+}
+
 function join_rings(geom, r1, r2) {
     // #debug{{
     if (r1.length != r2.length) {
@@ -80,16 +88,16 @@ function join_rings(geom, r1, r2) {
     for (var i = 0; i < r1.length; i++)
     {
       var next = (i + 1) % r1.length;
-      geom.positions = geom.positions.concat(r1[i], r1[next], r2[next], r2[next], r2[i], r1[i]);
-      
+      push_vertices(geom.positions, [r1[i], r1[next], r2[next], r2[next], r2[i], r1[i]]);
+
       vec3.sub(e1, r2[next], r1[i]);
       vec3.sub(e2, r1[next], r1[i]);
       vec3.cross(normal, e1, e2);
       vec3.normalize(normal, normal);
-      geom.normals = geom.normals.concat(normal, normal, normal, normal, normal, normal);
-      
+      push_vertices(geom.normals, [normal, normal, normal, normal, normal, normal]);
+
       var uv = [0, 0];
-      geom.uvs = geom.uvs.concat(uv, uv, uv, uv, uv, uv);
+      push_vertices(geom.uvs, [uv, uv, uv, uv, uv, uv]);
     }
 }
 
@@ -108,7 +116,6 @@ function deep_clone(obj) {
 
 function _vector_2d(a,b) { return vec2.subtract([], b, a) }
 function _vec2_scale(v, f) { return [v[0]*f, v[1]*f] }
-function _vec2_add(a,b) { return vec2.add([], a, b) }
 
 function normal(v) {
     var l = vec2.length(v);
@@ -122,8 +129,7 @@ function lines_intersection_2d(a1, a2, b1, b2) {
     var b = (b1[0]*b2[1]- b1[1]*b2[0]);
     return [
         (a * (b1[0] - b2[0]) - b * (a1[0] - a2[0])) / det,
-        (a * (b1[1] - b2[1]) - b * (a1[1] - a2[1])) / det,
-        0
+        (a * (b1[1] - b2[1]) - b * (a1[1] - a2[1])) / det
     ];
 }
 
@@ -132,6 +138,10 @@ SUBDIV_SHRINK_COEF = 0.01;
 function shrink_path(path, amount, z, use_subdiv) {
     var new_path = [];
     var path_length = path.length;
+    var pna = vec2.create();
+    var pnxa = vec2.create();
+    var pnb = vec2.create();
+    var pnxb = vec2.create();
     for (var i = 0; i < path_length; ++i) {
         var pa = path[mod(i-1, path_length)];
         var px = path[mod(i,   path_length)];
@@ -144,34 +154,30 @@ function shrink_path(path, amount, z, use_subdiv) {
         var na = _vec2_scale(normal(_vector_2d(pa, px)), amount * (1+pa.subdiv*use_subdiv*SUBDIV_SHRINK_COEF));
         var nb = _vec2_scale(normal(_vector_2d(px, pb)), amount * (1+px.subdiv*use_subdiv*SUBDIV_SHRINK_COEF));
 
-        //This doesn't work because modifying pa modifies the content of path
-        //var pxa = []; // px translated along na
-        //var pxb = []; // px translated along nb
-        //vec2.add(pa,  pa, na);
-        //vec2.add(pxa, px, na);
-        //vec2.add(pb,  pb, nb);
-        //vec2.add(pxb, px, nb);
-        //var inter = lines_intersection_2d(pa, pxa, pxb, pb);
+        vec2.add(pna, pa, na);
+        vec2.add(pnb, pb, nb);
+        vec2.add(pnxa, px, na);
+        vec2.add(pnxb, px, nb);
 
-        var inter = lines_intersection_2d(
-            _vec2_add(pa, na),
-            _vec2_add(px, na),
-            _vec2_add(px, nb),
-            _vec2_add(pb, nb)
-        );
+        var inter = lines_intersection_2d(pna, pnxa, pnxb, pnb );
 
         // If inter is null (pa, px and pb are aligned)
-        inter = inter || _vec2_add(px, na);
+        inter = inter || [pnxa[0], pnxa[1]];
         inter.subdiv = path[i].subdiv;
         new_path.push(inter);
     }
 
-    var old_segment = vec3.create();
-    var new_segment = vec3.create();
+    var old_segment = vec2.create();
+    var new_segment = vec2.create();
     for (var i = 0; i < path_length; ++i) {
-        vec3.subtract(old_segment, path[(i+1)%path_length], path[i]);
-        vec3.subtract(new_segment, new_path[(i+1)%path_length], new_path[i]);
-        if (vec3.dot(old_segment, new_segment) < 0) {
+        vec2.subtract(old_segment, path[(i+1)%path_length], path[i]);
+        vec2.subtract(new_segment, new_path[(i+1)%path_length], new_path[i]);
+        //var cross = vec3.create();
+        //vec3.cross(cross, new_path[i], new_path[i]+1)
+        //if (cross[1] > 0) {
+        //    return null;
+        //}
+        if (vec2.dot(old_segment, new_segment) < 0) {
             return null;
         }
     }
@@ -182,13 +188,14 @@ function fill_convex_ring(geom, ring) {
   var normal = [0, 1, 0];
   var uv = [0, 0];
   for (var i = 1; i < ring.length - 1; i++) {
-      geom.positions = geom.positions.concat(ring[0], ring[i], ring[i + 1]);
-      geom.normals = geom.normals.concat(normal, normal, normal);
-      geom.uvs = geom.uvs.concat(uv, uv, uv);
+      push_vertices(geom.positions, [ring[0], ring[i], ring[i + 1]]);
+      push_vertices(geom.normals, [normal, normal, normal]);
+      push_vertices(geom.uvs, [uv, uv, uv]);
   }
 }
 
 function city_subdivision_rec(paths, num_subdivs, sub_id) {
+    if (sub_id < 0) { sub_id = 0; }
     var sub_paths = [];
     for (var i in paths) {
         var sub = city_subdivision(paths[i], sub_id)
@@ -240,8 +247,7 @@ function city_subdivision(path, sub_id) {
     var i; // loop index, taken out to win a few bytes
     // pick the longest segment
     for (i = 0; i < path_length; ++i) {
-        var d = vec2.distance(path[i], path[mod(i+1, path_length)]);
-        //if (d < MIN_SEGMENT) { return null; }
+        var d = vec2.distance(path[i], path[(i+1)%path_length]);
         if (d > maxd) {
             maxd = d;
             a1 = i;
@@ -251,20 +257,20 @@ function city_subdivision(path, sub_id) {
 
     if (perimeter < MIN_PERIMETER) { return null; }
 
-    var a2 = mod((a1+1), path_length);
+    var a2 = (a1+1) % path_length;
     var b1, b2, p_a3, p_b3;
 
-    var guard = 0;
+    //var guard = 0;
     do {
         b1 = rand_int(path_length);
         if (a1 == b1 || a1 == b1 + 1) { continue; }
         //if (guard++ > 10) { break; }
 
-        b2 = mod((b1+1), path_length);
+        b2 = (b1+1) % path_length;
 
         // TODO: this skews the distribution towards 0.5 - make it less verbose
-        var f1 = 0.5 + (0.5 - Math.abs(seedable_random() - 0.5)) * 0.2;
-        var f2 = 0.5 + (0.5 - Math.abs(seedable_random() - 0.5)) * 0.2;
+        var f1 = 0.5 + (0.5 - Math.abs(seedable_random() - 0.5)) * 0.1;
+        var f2 = 0.5 + (0.5 - Math.abs(seedable_random() - 0.5)) * 0.1;
 
         var p_a3_1 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), subdiv: sub_id};
         var p_a3_2 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), subdiv: path[a1].subdiv};
@@ -287,7 +293,9 @@ function city_subdivision(path, sub_id) {
     return [path1, path2];
 }
 
-
+function circle_path(num_edges, sx, sy) {
+    var c = [];
+}
 
 
 
@@ -308,12 +316,12 @@ function debug_draw_path(path, color, offset_x, offset_y) {
     for (var i in path) {
         map_ctx.beginPath();
         map_ctx.moveTo(
-            path[i][0] + offset_x,
-            path[i][1] + offset_y
+            (path[i][0] + offset_x + 1000) / 6,
+            (path[i][1] + offset_y) / 6
         );
         map_ctx.lineTo(
-            path[mod(i-1, path.length)][0] + offset_x,
-            path[mod(i-1, path.length)][1] + offset_y
+            (path[mod(i-1, path.length)][0] + offset_x + 1000) / 6,
+            (path[mod(i-1, path.length)][1] + offset_y) / 6
         );
         map_ctx.stroke();
         map_ctx.closePath();
