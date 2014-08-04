@@ -2,7 +2,9 @@
 
 precision lowp float;
 
+uniform vec3 cam_pos;
 uniform mat4 view_proj_mat;
+uniform mat4 view_proj_mat_inv;
 
 uniform vec2 resolution;
 
@@ -22,10 +24,13 @@ uniform vec2 step;
 
 uniform float clip_time;
 
-// x, y = scale
-// z = scroll offset
-// w = cosine
+// x: center x
+// y: center y
+// z: width
+// w: height
 uniform vec4 text_params;
+
+uniform vec4 mask;
 
 varying vec2 v_tex_coords;
 varying vec3 v_normals;
