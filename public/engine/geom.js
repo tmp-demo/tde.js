@@ -96,8 +96,18 @@ function join_rings(geom, r1, r2) {
       vec3.normalize(normal, normal);
       push_vertices(geom.normals, [normal, normal, normal, normal, normal, normal]);
 
-      var uv = [0, 0];
-      push_vertices(geom.uvs, [uv, uv, uv, uv, uv, uv]);
+      var u1 = 0;
+      var v1 = 0;
+      var u2 = 5;
+      var v2 = 1;
+      push_vertices(geom.uvs, [[
+        u1, v1,
+        u2, v1,
+        u2, v2,
+        u2, v2,
+        u1, v2,
+        u1, v1
+      ]]);
     }
 }
 

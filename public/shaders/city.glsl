@@ -11,6 +11,10 @@ void main_vs_city() {
 //! INCLUDE scattering.glsllib
 
 void main_fs_city() {
-  vec3 diffuse = dot(normalize(v_normals), light) * skyColor(v_normals);
+  vec3 diffuse = mix(
+    texture2D(texture_0, v_tex_coords).rgb,
+    dot(normalize(v_normals), light) * skyColor(v_normals),
+    0.2
+  );
   gl_FragColor = vec4(applyFog(v_normals, diffuse), 1.0);
 }
