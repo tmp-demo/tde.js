@@ -168,22 +168,16 @@ function load_shader_program(vs_entry_point, fs_entry_point) {
   return program;
 }
 
-function create_texture(width, height, format, image, allow_repeat, linear_filtering) {
-  var image = image || null;
-  var format = format || gl.RGBA;
+function create_texture(width, height, format, data, allow_repeat, linear_filtering) {
+  format = format || gl.RGBA;
   width = width || canvas.width;
   height = height || canvas.height;
-  if (image) {
-    image = new Uint8Array(image, 0, 0);
-  }
+  
   var texture = gl.createTexture();
   gl.bindTexture(GL_TEXTURE_2D, texture);
 
-  var wrap = gl.CLAMP_TO_EDGE;
-  if (allow_repeat) { wrap = gl.REPEAT; }
-
-  var filtering = gl.NEAREST;
-  if (linear_filtering) { filtering = gl.LINEAR; }
+  var wrap = allow_repeat ? gl.REPEAT : gl.CLAMP_TO_EDGE;
+  var filtering = linear_filtering ? gl.LINEAR : gl.NEAREST;
   
   gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
   gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
@@ -191,14 +185,24 @@ function create_texture(width, height, format, image, allow_repeat, linear_filte
   gl.texParameteri(GL_TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filtering);
   
   gl.texImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
-                format, (format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT : gl.UNSIGNED_BYTE, image);
-  return { tex: texture, width: width, height: height };
+                format, (format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT : gl.UNSIGNED_BYTE, data ? new Uint8Array(data, 0, 0) : null);
+  return {
+    tex: texture,
+    width: width,
+    height: height,
+    format: format
+  };
+}
+
+function update_texture(desc, data) {
+  gl.bindTexture(GL_TEXTURE_2D, desc.tex);
+  gl.texImage2D(GL_TEXTURE_2D, 0, desc.format, desc.width, desc.height, 0,
+                desc.format, (desc.format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT : gl.UNSIGNED_BYTE, new Uint8Array(data, 0, 0));
 }
 
 function create_text_texture(text, fontSize, badgeDiameter) {
   var textCanvas = document.createElement("canvas");
-  textCanvas.width = 2048;
-  textCanvas.height = 512;
+  textCanvas.width = textCanvas.height = 2048;
   
   var textContext = textCanvas.getContext("2d");
   textContext.font = fontSize + "px OCR A STD";
@@ -230,6 +234,33 @@ function create_text_texture(text, fontSize, badgeDiameter) {
   textContext.scale(1, -1);
   textContext.fillStyle = "#fff";
   textContext.fillText(text, x, y);
+  
+  return create_texture(width, height, gl.RGBA, textContext.getImageData(0, 0, width, height).data, false, true);
+}
+
+function create_dev_tool() {
+  var width = 2048;
+  var height = 1024;
+  
+  var textCanvas = document.createElement("canvas");
+  textCanvas.width = width;
+  textCanvas.height = height;
+  
+  var textContext = textCanvas.getContext("2d");
+  textContext.scale(1, -1);
+  
+  textContext.fillStyle = '#222';
+  textContext.fillRect(0, -300, width, height);
+  
+  textContext.fillStyle = '#fff';
+  textContext.fillRect(2, -260, width - 4, height);
+  
+  textContext.font = 30 + "px OCR A STD";
+  textContext.fillText("Elements  Network  Sources  Timeline  Profiles  Console", 40, -270);
+  
+  textContext.font = 40 + "px Courier";
+  textContext.fillStyle = '#f11';
+  textContext.fillText("TypeError: undefined is not a function", 20, -220);
   
   return create_texture(width, height, gl.RGBA, textContext.getImageData(0, 0, width, height).data, false, true);
 }
