@@ -213,12 +213,12 @@ function create_text_texture(text, fontSize, badgeDiameter) {
     textContext.moveTo(badgeDiameter, badgeDiameter / 2);
     for (var i = 1; i < 49; ++i) {
       var radius = (i % 2) ? badgeDiameter * 0.4 : badgeDiameter / 2;
-      textContext.lineTo(badgeDiameter / 2 + radius * Math.cos(i / 24 * Math.PI), badgeDiameter / 2 + radius * Math.sin(i / 24 * Math.PI));
+      textContext.lineTo(badgeDiameter / 2 + radius * M.cos(i / 24 * M.PI), badgeDiameter / 2 + radius * M.sin(i / 24 * M.PI));
     }
     textContext.fill();
     textContext.globalCompositeOperation = 'destination-out';
     textContext.moveTo(badgeDiameter * 0.85, badgeDiameter / 2);
-    textContext.arc(badgeDiameter / 2, badgeDiameter / 2, badgeDiameter * 0.35, Math.PI*2, false);
+    textContext.arc(badgeDiameter / 2, badgeDiameter / 2, badgeDiameter * 0.35, M.PI*2, false);
     textContext.lineWidth = badgeDiameter / 2 * 0.05;
     textContext.stroke();
     textContext.globalCompositeOperation = 'source-over';
@@ -277,7 +277,7 @@ function set_uniforms(program, ratio) {
   
   // derive camera matrices from simpler parameters
   mat4.lookAt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], [0.0, 1.0, 0.0]);
-  mat4.perspective(projectionMatrix, uniforms["cam_fov"] * Math.PI / 180.0, ratio, 1.0, 1000.0)
+  mat4.perspective(projectionMatrix, uniforms["cam_fov"] * M.PI / 180.0, ratio, 1.0, 1000.0)
   mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
   mat4.invert(viewProjectionMatrixInv, viewProjectionMatrix);
   uniforms["view_proj_mat"] = viewProjectionMatrix;
