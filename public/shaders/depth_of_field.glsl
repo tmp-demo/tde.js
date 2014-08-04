@@ -21,13 +21,12 @@ void main_fs_depth_of_field() {
   vec4 d = texture2D(texture_3, v_tex_coords);
 
 //  gl_FragColor = vec4(v, v, v, 1.0);
-//  return;
-
+//
 //  a = vec4(0.2,0.2,0.2, 1.0);
 //  b = vec4(0.4,0.4,0.4, 1.0);
 //  c = vec4(0.6,0.6,0.6, 1.0);
 //  d = vec4(0.8,0.8,0.8, 1.0);
-
+//
 //  a = vec4(1.0,0.0,0.0, 1.0);
 //  b = vec4(0.0,1.0,0.0, 1.0);
 //  c = vec4(0.0,0.0,1.0, 1.0);
@@ -40,17 +39,4 @@ void main_fs_depth_of_field() {
 
   gl_FragColor = a * da + b * db + c * dc + d * dd;
   gl_FragColor.a = 1.0;
-  //if (v < 0.50) {
-  //  gl_FragColor = a;
-  //  //gl_FragColor = vec4(0.2,0.2,0.2, 1.0);
-  //} else if (v < 0.80) {
-  //  gl_FragColor = mix(a,b, 4.0*(v - 0.25));
-  //  //gl_FragColor = vec4(0.4,0.4,0.4, 1.0);
-  //} else if (v < 0.92) {
-  //  gl_FragColor = mix(b,c, 4.0*(v - 0.50));
-  //  //gl_FragColor = vec4(0.6,0.6,0.6, 1.0);
-  //} else {
-  //  gl_FragColor = mix(c,d, 4.0*(v - 0.75));
-  //  //gl_FragColor = vec4(0.8,0.8,0.8, 1.0);
-  //}
 }
