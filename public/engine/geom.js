@@ -102,7 +102,7 @@ function join_rings(geom, r1, r2) {
 }
 
 function rand_int(max) {
-    return Math.floor(seedable_random() * max);
+    return M.floor(seedable_random() * max);
 }
 
 function mod(a, m) {
@@ -133,7 +133,7 @@ function lines_intersection_2d(a1, a2, b1, b2) {
     ];
 }
 
-SUBDIV_SHRINK_COEF = 0.01;
+var SUBDIV_SHRINK_COEF = 0.01;
 
 function shrink_path(path, amount, z, use_subdiv) {
     var new_path = [];
@@ -269,8 +269,8 @@ function city_subdivision(path, sub_id) {
         b2 = (b1+1) % path_length;
 
         // TODO: this skews the distribution towards 0.5 - make it less verbose
-        var f1 = 0.5 + (0.5 - Math.abs(seedable_random() - 0.5)) * 0.1;
-        var f2 = 0.5 + (0.5 - Math.abs(seedable_random() - 0.5)) * 0.1;
+        var f1 = 0.5 + (0.5 - M.abs(seedable_random() - 0.5)) * 0.2;
+        var f2 = 0.5 + (0.5 - M.abs(seedable_random() - 0.5)) * 0.2;
 
         var p_a3_1 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), subdiv: sub_id};
         var p_a3_2 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), subdiv: path[a1].subdiv};

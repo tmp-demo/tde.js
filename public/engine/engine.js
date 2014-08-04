@@ -1,6 +1,7 @@
 var scenes = [];
 var start_time = 0;
 var snd;
+var M = Math;
 
 function engine_render(current_time)
 {
