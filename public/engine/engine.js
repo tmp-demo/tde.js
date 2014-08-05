@@ -15,13 +15,6 @@ function minify_context(ctx)
   {
     var name = names[i]
     
-    // #debug{{
-    // don't minify properties that are neither objects nor constants
-    var preservedNames = ["currentTime", "font", "fillStyle", "globalCompositeOperation", "lineWidth"]
-    if (preservedNames.indexOf(name) != -1)
-      continue;
-    // #debug}}
-    
     var m, newName = "";
     var re = /([A-Z0-9])[A-Z]*_?/g;
     if (name.match(/[a-z]/))
@@ -38,6 +31,11 @@ function minify_context(ctx)
     ctx[newName] = ctx[name];
     
     // #debug{{
+    // don't minify properties that are neither objects nor constants
+    var preservedNames = ["currentTime", "font", "fillStyle", "globalCompositeOperation", "lineWidth"]
+    if (preservedNames.indexOf(name) != -1)
+      continue;
+    
     if (name in symbolMap)
     {
       if (symbolMap[name] != newName)
