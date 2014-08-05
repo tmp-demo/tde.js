@@ -78,6 +78,7 @@ angular.module("tde.services.engine-driver", [])
 
   this.logInfo = function(message, details)
   {
+    toastr.info(details, message);
     console.log(message)
     this.logBuffer.push({
       type: "info",
@@ -88,6 +89,7 @@ angular.module("tde.services.engine-driver", [])
 
   this.logError = function(message, details)
   {
+    toastr.error(details, message);
     console.error(message)
     console.error(details)
     this.logBuffer.push({

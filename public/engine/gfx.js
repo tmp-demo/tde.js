@@ -33,10 +33,15 @@ function gl_init() {
   // #debug}}
 
   textureCanvas = document.createElement("canvas");
+  textureCanvas.width = textureCanvas.height = 2048;
   textureContext = textureCanvas.getContext("2d");
   minify_context(textureContext);
   
   load_shaders();
+}
+
+function clear_texture_canvas() {
+  textureContext.clearRect(0, 0, 2048, 2048);
 }
 
 var _quad_vbo = null;
@@ -245,64 +250,6 @@ function update_texture(desc, data) {
   gl.bindTexture(gl.TEXTURE_2D, desc.tex);
   gl.texImage2D(gl.TEXTURE_2D, 0, desc.format, desc.width, desc.height, 0,
                 desc.format, (desc.format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT : gl.UNSIGNED_BYTE, new Uint8Array(data, 0, 0));
-}
-
-function create_text_texture(text, fontSize, badgeDiameter) {
-  textureCanvas.width = textureCanvas.height = 2048;
-  textureContext.font = fontSize + "px OCR A STD";
-
-  var width = 1 + textureContext.measureText(text).width|0
-    height = fontSize * 1.25,
-    x = 2,
-    y = - fontSize / 4;
-
-  if (badgeDiameter) {
-    var gradient = textureContext.createLinearGradient(0, 0, badgeDiameter, badgeDiameter);
-    gradient.addColorStop(0, "#7bf");
-    gradient.addColorStop(1, "#579");
-    textureContext.fillStyle = gradient;
-    textureContext.moveTo(badgeDiameter, badgeDiameter / 2);
-    for (var i = 1; i < 49; ++i) {
-      var radius = (i % 2) ? badgeDiameter * 0.4 : badgeDiameter / 2;
-      textureContext.lineTo(badgeDiameter / 2 + radius * M.cos(i / 24 * M.PI), badgeDiameter / 2 + radius * M.sin(i / 24 * M.PI));
-    }
-    textureContext.fill();
-    
-    textureContext.globalCompositeOperation = 'destination-out';
-    textureContext.moveTo(badgeDiameter * 0.85, badgeDiameter / 2);
-    textureContext.arc(badgeDiameter / 2, badgeDiameter / 2, badgeDiameter * 0.35, M.PI*2, false);
-    textureContext.lineWidth = badgeDiameter / 2 * 0.05;
-    textureContext.stroke();
-    textureContext.globalCompositeOperation = 'source-over';
-    x = (badgeDiameter - width)/2;
-    y = badgeDiameter / 2 - y;
-    height = width = badgeDiameter;
-  }
-  
-  textureContext.fillStyle = "#fff";
-  textureContext.fillText(text, x, y);
-  
-  return create_texture(width, height, gl.RGBA, textureContext.getImageData(0, 0, width, height).data, false, true);
-}
-
-function create_dev_tool() {
-  var width = textureCanvas.width = 2048;
-  var height = textureCanvas.height = 1024;
-  
-  textureContext.fillStyle = '#222';
-  textureContext.fillRect(0, 700, width, height);
-  
-  textureContext.fillStyle = '#fff';
-  textureContext.fillRect(2, 740, width - 4, height);
-  
-  textureContext.font = 30 + "px OCR A STD";
-  textureContext.fillText("Elements  Network  Sources  Timeline  Profiles  Console", 40, 730);
-  
-  textureContext.font = 40 + "px Courier";
-  textureContext.fillStyle = '#f11';
-  textureContext.fillText("TypeError: undefined is not a function", 20, 780);
-  
-  return create_texture(width, height, gl.RGBA, textureContext.getImageData(0, 0, width, height).data, false, true);
 }
 
 function texture_unit(i) { return gl.TEXTURE0+i; }
