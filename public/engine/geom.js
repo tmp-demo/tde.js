@@ -184,11 +184,12 @@ function shrink_path(path, amount, z, use_subdiv) {
 
 function fill_convex_ring(geom, ring) {
   var normal = [0, 1, 0];
-  var uv = [0.5, 0.9];
+  // roof top or grass
+  var uv = ring[0][1] > 10 ? [0.5, 0.9] : [0.6, 0.05];
   for (var i = 1; i < ring.length - 1; i++) {
       push_vertices(geom.positions, [ring[0], ring[i], ring[i + 1]]);
       push_vertices(geom.normals, [normal, normal, normal]);
-      push_vertices(geom.uvs, [[0.5, 0.9], uv, uv]);
+      push_vertices(geom.uvs, [uv, uv, uv]);
   }
 }
 
