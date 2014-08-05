@@ -79,6 +79,14 @@ function gfx_init() {
   uniforms["cam_pos"] = [0, 1, 0]
   uniforms["cam_target"] = [0, 0, 0]
   uniforms["cam_fov"] = 75
+  
+  // hack to make the export toolchain minify attribute and uniform names
+  // #debug{{
+  var fakeContext = {}
+  for (var i in _locations) fakeContext[_locations[i]] = 42;
+  //for (var i in _uniforms) fakeContext[_uniforms[i]] = 42;
+  minify_context(fakeContext);
+  // #debug}}
 }
 
 function make_vbo(location, buffer) {
