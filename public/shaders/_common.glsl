@@ -1,5 +1,8 @@
 //! COMMON
 
+/** IMPORTANT **/
+/** Please maintain the lists in gfx.js if you update this file **/
+
 precision lowp float;
 
 uniform vec3 cam_pos;

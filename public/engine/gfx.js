@@ -55,6 +55,30 @@ var NORMALS = 2;
 var COLOR = 3;
 
 // #debug{{
+var _uniforms = [
+  "cam_pos",
+  "view_proj_mat",
+  "view_proj_mat_inv",
+  "resolution",
+  "near",
+  "far",
+  "focus",
+  "light",
+  "texture_0",
+  "texture_1",
+  "texture_2",
+  "texture_3",
+  "texture_4",
+  "step",
+  "clip_time",
+  "text_params",
+  "mask",
+  "cam_target",
+  "cam_fov"
+];
+// #debug}}
+
+// #debug{{
 function gl_error() {
   var v = gl.getError();
   var name = _enums[v];
@@ -83,8 +107,8 @@ function gfx_init() {
   // hack to make the export toolchain minify attribute and uniform names
   // #debug{{
   var fakeContext = {}
-  for (var i in _locations) fakeContext[_locations[i]] = 42;
-  //for (var i in _uniforms) fakeContext[_uniforms[i]] = 42;
+  for (var i in _locations) fakeContext["shader_" + _locations[i]] = 42;
+  for (var i in _uniforms) fakeContext["shader_" + _uniforms[i]] = 42;
   minify_context(fakeContext);
   // #debug}}
 }

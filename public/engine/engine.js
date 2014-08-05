@@ -15,11 +15,26 @@ function minify_context(ctx)
   {
     var name = names[i]
     
+    // add an underscore to shader variables, to avoid conflict with glsl-unit minification
+    // #debug{{
+    var shader = false
+    if (name.match(/^shader_/))
+    {
+      shader = true;
+      name = name.substr(7);
+    }
+    // #debug}}
+    
     var m, newName = "";
     var re = /([A-Z0-9])[A-Z]*_?/g;
     if (name.match(/[a-z]/))
       re = /(^[a-z]|[A-Z0-9])[a-z]*/g;
     while (m = re.exec(name)) newName += m[1];
+    
+    // #debug{{
+    if (shader)
+      newName = "_" + newName;
+    // #debug}}
     
     if (newName in ctx)
     {
