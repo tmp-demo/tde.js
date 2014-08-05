@@ -49,10 +49,11 @@ angular.module("tde.engine-view", [])
       shrink_slider = element.find(".subdiv_shrink_coef");
       //shrink_slider.value = SUBDIV_SHRINK_COEF;
       shrink_slider.on("input", function() {
-        SUBDIV_SHRINK_COEF = this.value;
-        console.log("subdivision coefficient when shrinking paths: " + this.value);
-        city_map = document._generate_map();
-        replace_geom(geometries.city, document._generate_city_geom(city_map));
+        //SUBDIV_SHRINK_COEF = this.value;
+        //console.log("subdivision coefficient when shrinking paths: " + this.value);
+        //city_map = document._generate_map();
+        //replace_geom(geometries.city, document._generate_city_geom(city_map));
+        uniforms["focus"] = [this.value];
         $scope.driver.drawFrame();
       })
 

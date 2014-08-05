@@ -49,5 +49,5 @@ void main_fs_buildings_mtl() {
              + street    * vec3(0.3, 0.3, 0.3)
              + side_walk * vec3(0.5, 0.5, 0.5);
 
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragColor = vec4(color, window);
 }
