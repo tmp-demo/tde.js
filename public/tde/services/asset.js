@@ -87,7 +87,7 @@ angular.module("tde.services.asset", [])
           case "seq": EngineDriver.loadSequence(name, data); break
           case "song": EngineDriver.loadSong(name, data); break
           case "glsl": EngineDriver.loadShader(name, data); break
-          default: alert("unknown asset type: " + type); break
+          default: toastr.warning(type, "Unknown asset type"); break
         }
         
         $rootScope.$broadcast("assetListChanged")
@@ -117,7 +117,7 @@ angular.module("tde.services.asset", [])
       case "seq": EngineDriver.unloadSequence(name); break
       case "song": EngineDriver.unloadSong(name); break
       case "glsl": EngineDriver.unloadShader(name); break
-      default: alert("unknown asset type: " + type); break
+      default: toastr.warning(type, "Unknown asset type"); break
     }
     
     $rootScope.$broadcast("assetListChanged")

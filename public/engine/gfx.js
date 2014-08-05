@@ -6,6 +6,8 @@ var geometries = {}
 var programs = {}
 var fragment_shaders = {}
 var vertex_shaders = {}
+var textureCanvas
+var textureContext
 
 function gl_init() {
   gl = canvas.getContext("webgl");
@@ -30,6 +32,10 @@ function gl_init() {
   }
   // #debug}}
 
+  textureCanvas = document.createElement("canvas");
+  textureContext = textureCanvas.getContext("2d");
+  minify_context(textureContext);
+  
   load_shaders();
 }
 
@@ -130,7 +136,7 @@ function compile_shader(txt_src, type) {
   gl.compileShader(shader);
   // #debug{{
   if ( !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    alert("Shader compilation failed: " + gl.getShaderInfoLog(shader));
+    toastr.error(gl.getShaderInfoLog(shader), "Shader compilation failed");
   }
   // #debug}}
   return shader;
@@ -150,7 +156,7 @@ function load_shader_program(vs_entry_point, fs_entry_point) {
   gl.linkProgram(program);
   // #debug{{
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    alert("Program link error: " + gl.getProgramInfoLog(program));
+    toastr.error(gl.getProgramInfoLog(program), "Program link error");
   }
   // #debug}}
   return program;
@@ -210,74 +216,61 @@ function update_texture(desc, data) {
 }
 
 function create_text_texture(text, fontSize, badgeDiameter) {
-  var textCanvas = document.createElement("canvas");
-  textCanvas.width = textCanvas.height = 2048;
+  textureCanvas.width = textureCanvas.height = 2048;
+  textureContext.font = fontSize + "px OCR A STD";
 
-  var textContext = textCanvas.getContext("2d");
-  minify_context(textContext);
-  textContext.font = fontSize + "px OCR A STD";
-
-  var width = 1 + textContext.measureText(text).width|0
+  var width = 1 + textureContext.measureText(text).width|0
     height = fontSize * 1.25,
     x = 2,
     y = - fontSize / 4;
 
   if (badgeDiameter) {
-    var gradient = textContext.createLinearGradient(0, badgeDiameter, badgeDiameter, 0);
-    gradient.addColorStop(0, "#79d");
-    gradient.addColorStop(1, "#36a");
-    textContext.fillStyle = gradient;
-    textContext.moveTo(badgeDiameter, badgeDiameter / 2);
+    var gradient = textureContext.createLinearGradient(0, 0, badgeDiameter, badgeDiameter);
+    gradient.addColorStop(0, "#7bf");
+    gradient.addColorStop(1, "#579");
+    textureContext.fillStyle = gradient;
+    textureContext.moveTo(badgeDiameter, badgeDiameter / 2);
     for (var i = 1; i < 49; ++i) {
       var radius = (i % 2) ? badgeDiameter * 0.4 : badgeDiameter / 2;
-      textContext.lineTo(badgeDiameter / 2 + radius * M.cos(i / 24 * M.PI), badgeDiameter / 2 + radius * M.sin(i / 24 * M.PI));
+      textureContext.lineTo(badgeDiameter / 2 + radius * M.cos(i / 24 * M.PI), badgeDiameter / 2 + radius * M.sin(i / 24 * M.PI));
     }
-    textContext.fill();
+    textureContext.fill();
     
-    textContext.globalCompositeOperation = 'destination-out';
-    textContext.moveTo(badgeDiameter * 0.85, badgeDiameter / 2);
-    textContext.arc(badgeDiameter / 2, badgeDiameter / 2, badgeDiameter * 0.35, M.PI*2, false);
-    textContext.lineWidth = badgeDiameter / 2 * 0.05;
-    textContext.stroke();
-    textContext.globalCompositeOperation = 'source-over';
+    textureContext.globalCompositeOperation = 'destination-out';
+    textureContext.moveTo(badgeDiameter * 0.85, badgeDiameter / 2);
+    textureContext.arc(badgeDiameter / 2, badgeDiameter / 2, badgeDiameter * 0.35, M.PI*2, false);
+    textureContext.lineWidth = badgeDiameter / 2 * 0.05;
+    textureContext.stroke();
+    textureContext.globalCompositeOperation = 'source-over';
     x = (badgeDiameter - width)/2;
-    y = - y - badgeDiameter / 2;
+    y = badgeDiameter / 2 - y;
     height = width = badgeDiameter;
   }
   
-  textContext.scale(1, -1);
-  textContext.fillStyle = "#fff";
-  textContext.fillText(text, x, y);
+  textureContext.fillStyle = "#fff";
+  textureContext.fillText(text, x, y);
   
-  return create_texture(width, height, gl.RGBA, textContext.getImageData(0, 0, width, height).data, false, true);
+  return create_texture(width, height, gl.RGBA, textureContext.getImageData(0, 0, width, height).data, false, true);
 }
 
 function create_dev_tool() {
-  var width = 2048;
-  var height = 1024;
+  var width = textureCanvas.width = 2048;
+  var height = textureCanvas.height = 1024;
   
-  var textCanvas = document.createElement("canvas");
-  textCanvas.width = width;
-  textCanvas.height = height;
+  textureContext.fillStyle = '#222';
+  textureContext.fillRect(0, 700, width, height);
   
-  var textContext = textCanvas.getContext("2d");
-  minify_context(textContext);
-  textContext.scale(1, -1);
+  textureContext.fillStyle = '#fff';
+  textureContext.fillRect(2, 740, width - 4, height);
   
-  textContext.fillStyle = '#222';
-  textContext.fillRect(0, -300, width, height);
+  textureContext.font = 30 + "px OCR A STD";
+  textureContext.fillText("Elements  Network  Sources  Timeline  Profiles  Console", 40, 730);
   
-  textContext.fillStyle = '#fff';
-  textContext.fillRect(2, -260, width - 4, height);
+  textureContext.font = 40 + "px Courier";
+  textureContext.fillStyle = '#f11';
+  textureContext.fillText("TypeError: undefined is not a function", 20, 780);
   
-  textContext.font = 30 + "px OCR A STD";
-  textContext.fillText("Elements  Network  Sources  Timeline  Profiles  Console", 40, -270);
-  
-  textContext.font = 40 + "px Courier";
-  textContext.fillStyle = '#f11';
-  textContext.fillText("TypeError: undefined is not a function", 20, -220);
-  
-  return create_texture(width, height, gl.RGBA, textContext.getImageData(0, 0, width, height).data, false, true);
+  return create_texture(width, height, gl.RGBA, textureContext.getImageData(0, 0, width, height).data, false, true);
 }
 
 function texture_unit(i) { return gl.TEXTURE0+i; }
@@ -308,7 +301,7 @@ function frame_buffer(target) {
   // #debug{{
   var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
   if (status != gl.FRAMEBUFFER_COMPLETE) {
-    alert("incomplete framebuffer "+frame_buffer_error(status));
+    toastr.error(frame_buffer_error(status), "Incomplete framebuffer");
   }
   // #debug}}
 
