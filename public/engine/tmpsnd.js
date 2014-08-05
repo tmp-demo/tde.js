@@ -31,6 +31,7 @@
     // #debug}}
       t.c = new AudioContext();
     } // #debug
+    minify_context(t.c);
     t.initSends()
     t.initInstruments()
     log('SND.constr', this);
