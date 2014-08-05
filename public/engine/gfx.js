@@ -157,17 +157,23 @@ function load_shader_program(vs_entry_point, fs_entry_point) {
 }
 
 function set_texture_flags(texture, allow_repeat, linear_filtering, mipmaps) {
+  // XXX - Getting the following error associated to the bind texture call:
+  // WebGL: A texture is going to be rendered as if it were black, as per the
+  // OpenGL ES 2.0.24 spec section 3.8.2, because it is a 2D texture, with a
+  // minification filter requiring a mipmap, and is not mipmap complete (as
+  // defined in section 3.7.10).
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
   var wrap = allow_repeat ? gl.REPEAT : gl.CLAMP_TO_EDGE;
-  var filtering = linear_filtering
-                ? mipmaps ? gl.LINEAR_MIPMAP_NEAREST : gl.LINEAR
-                : gl.NEAREST;
+  var min_filtering = linear_filtering
+                    ? mipmaps ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR
+                    : gl.NEAREST;
+  var mag_filtering = linear_filtering ? gl.LINEAR : gl.NEAREST;
 
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filtering);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filtering);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, min_filtering);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, mag_filtering);
   if (mipmaps) {
     gl.generateMipmap(gl.TEXTURE_2D);
   }
