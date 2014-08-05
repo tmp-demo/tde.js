@@ -156,29 +156,39 @@ function load_shader_program(vs_entry_point, fs_entry_point) {
   return program;
 }
 
-function set_texture_flags(texture, allow_repeat, linear_filtering) {
+function set_texture_flags(texture, allow_repeat, linear_filtering, mipmaps) {
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
   var wrap = allow_repeat ? gl.REPEAT : gl.CLAMP_TO_EDGE;
-  var filtering = linear_filtering ? gl.LINEAR : gl.NEAREST;
+  var filtering = linear_filtering
+                ? mipmaps ? gl.LINEAR_MIPMAP_NEAREST : gl.LINEAR
+                : gl.NEAREST;
 
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filtering);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filtering);
+  if (mipmaps) {
+    gl.generateMipmap(gl.TEXTURE_2D);
+  }
 }
 
-function create_texture(width, height, format, data, allow_repeat, linear_filtering) {
+function create_texture(width, height, format, data, allow_repeat, linear_filtering, mipmaps) {
   format = format || gl.RGBA;
   width = width || canvas.width;
   height = height || canvas.height;
 
   var texture = gl.createTexture();
 
-  set_texture_flags(texture, allow_repeat, linear_filtering);
-
+  gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0,
-                format, (format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT : gl.UNSIGNED_BYTE, data ? new Uint8Array(data, 0, 0) : null);
+                format,
+                (format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT
+                                               : gl.UNSIGNED_BYTE, data ? new Uint8Array(data, 0, 0)
+                                                                        : null);
+
+  set_texture_flags(texture, allow_repeat, linear_filtering, mipmaps);
+
   return {
     tex: texture,
     width: width,
