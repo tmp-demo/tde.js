@@ -14,7 +14,7 @@
   // change that to true to log
   function log() { if (false) { console.log.apply(console, arguments); }}
   function n2f(n) {
-    return Math.pow(2, (n - 69) / 12) * 440;
+    return M.pow(2, (n - 69) / 12) * 440;
   }
 
   AudioNode.prototype.c = AudioNode.prototype.connect;
@@ -31,6 +31,7 @@
     // #debug}}
       t.c = new AudioContext();
     } // #debug
+    minify_context(t.c);
     t.initSends()
     t.initInstruments()
     log('SND.constr', this);
@@ -120,7 +121,7 @@
       SND._noisebuffer = ac.createBuffer(1, ac.sampleRate * 0.5, ac.sampleRate / 2);
       var cdata = SND._noisebuffer.getChannelData(0);
       for(i=0,l=cdata.length;i<l;i++) { 
-        cdata[i] = Math.random() * 2.0 - 1.0; 
+        cdata[i] = M.random() * 2.0 - 1.0; 
       }
     }
     return SND._noisebuffer;
@@ -134,18 +135,18 @@
     var iR = buffer.getChannelData(1)
     var decay = opts.decay
     for(i=0,l=buffer.length;i<l;i++) {
-      iL[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, opts.d);
-      iR[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, opts.d);
+      iL[i] = (M.random() * 2 - 1) * M.pow(1 - i / len, opts.d);
+      iR[i] = (M.random() * 2 - 1) * M.pow(1 - i / len, opts.d);
     }
     return buffer;
   }
   
   SND.DistCurve = function(ac, k) {
     var c = new Float32Array(ac.sampleRate);
-    var deg = Math.PI / 180;
+    var deg = M.PI / 180;
     for (var i = 0; i < c.length; i++) {
       var x = i * 2 / c.length - 1;
-      c[i] = (3 + k) * x * 20 * deg / (Math.PI + k * Math.abs(x));
+      c[i] = (3 + k) * x * 20 * deg / (M.PI + k * M.abs(x));
     }
     return c;
   }
@@ -155,8 +156,8 @@
     var n_samples = c.length;
     for (var i = 0; i < c.length; i++) {
       var x = i * 2 / n_samples - 1;
-      var y = x < 0 ? -Math.pow(Math.abs(x), a + 0.04) : Math.pow(x, a);
-      c[i] = Math.tanh(y * 2);
+      var y = x < 0 ? -M.pow(M.abs(x), a + 0.04) : M.pow(x, a);
+      c[i] = M.tanh(y * 2);
     }
     return c;
   }
@@ -166,10 +167,10 @@
     var n_samples = c.length;
     for (var i = 0; i < c.length; i++) {
       var x = i * 2 / n_samples - 1;
-      var abx = Math.abs(x);
+      var abx = M.abs(x);
       var y;
       if(abx < a) y = abx;
-      else if(abx > a) y = a + (abx - a) / (1 + Math.pow((abx - a) / (1 - a), 2));
+      else if(abx > a) y = a + (abx - a) / (1 + M.pow((abx - a) / (1 - a), 2));
       else if(abx > 1) y = abx;
       c[i] = (x < 0 ? -1 : 1) * y * (1 / ((a + 1) / 2));
     }

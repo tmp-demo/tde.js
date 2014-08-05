@@ -3,6 +3,60 @@ var start_time = 0;
 var snd;
 var M = Math;
 
+var symbolMap = {} // #debug
+
+function minify_context(ctx)
+{
+  var names = []
+  for (var name in ctx) names.push(name);
+  names.sort();
+  
+  for (var i in names)
+  {
+    var name = names[i]
+    
+    var m, newName = "";
+    var re = /([A-Z0-9])[A-Z]*_?/g;
+    if (name.match(/[a-z]/))
+      re = /(^[a-z]|[A-Z0-9])[a-z]*/g;
+    while (m = re.exec(name)) newName += m[1];
+    
+    if (newName in ctx)
+    {
+      var index = 2;
+      while ((newName + index) in ctx) index++;
+      newName = newName + index;
+    }
+    
+    ctx[newName] = ctx[name];
+    
+    // #debug{{
+    // don't minify properties that are neither objects nor constants
+    var preservedNames = ["currentTime", "font", "fillStyle", "globalCompositeOperation", "lineWidth"]
+    if (preservedNames.indexOf(name) != -1)
+      continue;
+    
+    if (name in symbolMap)
+    {
+      if (symbolMap[name] != newName)
+      {
+        alert("Symbol " + name + " packed differently for multiple contexts (" + symbolMap[name] + ", " + newName + ")");
+      }
+    }
+    symbolMap[name] = newName;
+    // #debug}}
+  }
+}
+
+// export for minifcation tools
+// #debug{{
+function dump_symbol_map()
+{
+  console.log(symbolMap);
+  $(document.body).text(JSON.stringify(symbolMap));
+}
+// #debug}}
+
 function engine_render(current_time)
 {
   var start_time = 0;

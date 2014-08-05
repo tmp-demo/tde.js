@@ -7,31 +7,19 @@ var programs = {}
 var fragment_shaders = {}
 var vertex_shaders = {}
 
-var GL_TEXTURE_2D;
-var GL_ARRAY_BUFFER;
-var GL_STATIC_DRAW;
-
-function gl_bind_buffer(buf_type, buffer) {
-  gl.bindBuffer(buf_type, buffer)
-}
-
 function gl_init() {
   gl = canvas.getContext("webgl");
+  minify_context(gl);
+  
   gl.viewport(0, 0, canvas.width, canvas.height);
 
-  // put some commonly used gl constants behind variable names that can be
-  // minified.
-  GL_TEXTURE_2D = gl.TEXTURE_2D;
-  GL_ARRAY_BUFFER = gl.ARRAY_BUFFER;
-  GL_STATIC_DRAW = gl.STATIC_DRAW;
-
   var buffer = gl.createBuffer();
-  gl_bind_buffer(GL_ARRAY_BUFFER, buffer);
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   var quad = new Float32Array([-1, -1,
                                -1,  1,
                                 1, -1,
                                 1,  1]);
-  gl.bufferData(GL_ARRAY_BUFFER, quad, GL_STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
   _quad_vbo = buffer;
   // get readable strings for error enum values
   // #debug{{
@@ -89,8 +77,8 @@ function gfx_init() {
 
 function make_vbo(location, buffer) {
   var vbo = gl.createBuffer();
-  gl_bind_buffer(GL_ARRAY_BUFFER, vbo);
-  gl.bufferData(GL_ARRAY_BUFFER, new Float32Array(buffer), GL_STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(buffer), gl.STATIC_DRAW);
   return {location: location, vbo: vbo, length: buffer.length};
 }
 
@@ -110,7 +98,7 @@ function replace_geom(old_geom, new_geom) {
 
 function draw_quad() {
   gl.disable(gl.DEPTH_TEST);
-  gl_bind_buffer(GL_ARRAY_BUFFER, _quad_vbo);
+  gl.bindBuffer(gl.ARRAY_BUFFER, _quad_vbo);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(0);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -121,7 +109,7 @@ function draw_geom(data) {
   gl.enable(gl.DEPTH_TEST);
   for (var i in data.buffers) {
     var buffer = data.buffers[i];
-    gl_bind_buffer(GL_ARRAY_BUFFER, buffer.vbo);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer.vbo);
     gl.enableVertexAttribArray(buffer.location);
     gl.vertexAttribPointer(buffer.location, buffer.length / data.vertex_count, gl.FLOAT, false, 0, 0);
   }
@@ -200,8 +188,8 @@ function create_texture(width, height, format, data, allow_repeat, linear_filter
 }
 
 function update_texture(desc, data) {
-  gl.bindTexture(GL_TEXTURE_2D, desc.tex);
-  gl.texImage2D(GL_TEXTURE_2D, 0, desc.format, desc.width, desc.height, 0,
+  gl.bindTexture(gl.TEXTURE_2D, desc.tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, desc.format, desc.width, desc.height, 0,
                 desc.format, (desc.format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT : gl.UNSIGNED_BYTE, new Uint8Array(data, 0, 0));
 }
 
@@ -210,6 +198,7 @@ function create_text_texture(text, fontSize, badgeDiameter) {
   textCanvas.width = textCanvas.height = 2048;
 
   var textContext = textCanvas.getContext("2d");
+  minify_context(textContext);
   textContext.font = fontSize + "px OCR A STD";
 
   var width = 1 + textContext.measureText(text).width|0
@@ -256,6 +245,7 @@ function create_dev_tool() {
   textCanvas.height = height;
   
   var textContext = textCanvas.getContext("2d");
+  minify_context(textContext);
   textContext.scale(1, -1);
   
   textContext.fillStyle = '#222';
@@ -296,8 +286,8 @@ function frame_buffer(target) {
   var fbo = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 
-  if (target.color) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, GL_TEXTURE_2D, target.color.tex, 0);
-  if (target.depth) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, GL_TEXTURE_2D, target.depth.tex, 0);
+  if (target.color) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, target.color.tex, 0);
+  if (target.depth) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, target.depth.tex, 0);
 
   // #debug{{
   var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
@@ -389,7 +379,7 @@ function render_scene(scene, demo_time, scene_time) {
       for (var i=0; i<pass.texture_inputs.length; ++i) {
         var tex = pass.texture_inputs[i].tex;
         gl.activeTexture(texture_unit(i));
-        gl.bindTexture(GL_TEXTURE_2D, tex);
+        gl.bindTexture(gl.TEXTURE_2D, tex);
         gl.uniform1i(gl.getUniformLocation(shader_program,"texture_"+i), i);
       }
     }
