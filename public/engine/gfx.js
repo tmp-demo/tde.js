@@ -136,7 +136,7 @@ function compile_shader(txt_src, type) {
   gl.compileShader(shader);
   // #debug{{
   if ( !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    alert("Shader compilation failed: " + gl.getShaderInfoLog(shader));
+    toastr.error(gl.getShaderInfoLog(shader), "Shader compilation failed");
   }
   // #debug}}
   return shader;
@@ -156,7 +156,7 @@ function load_shader_program(vs_entry_point, fs_entry_point) {
   gl.linkProgram(program);
   // #debug{{
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    alert("Program link error: " + gl.getProgramInfoLog(program));
+    toastr.error(gl.getProgramInfoLog(program), "Program link error");
   }
   // #debug}}
   return program;
@@ -295,7 +295,7 @@ function frame_buffer(target) {
   // #debug{{
   var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
   if (status != gl.FRAMEBUFFER_COMPLETE) {
-    alert("incomplete framebuffer "+frame_buffer_error(status));
+    toastr.error(frame_buffer_error(status), "Incomplete framebuffer");
   }
   // #debug}}
 
