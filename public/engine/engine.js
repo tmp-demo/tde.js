@@ -17,7 +17,8 @@ function minify_context(ctx)
     
     // #debug{{
     // don't minify properties that are neither objects nor constants
-    if (name == "currentTime")
+    var preservedNames = ["currentTime", "font", "fillStyle", "globalCompositeOperation", "lineWidth"]
+    if (preservedNames.indexOf(name) != -1)
       continue;
     // #debug}}
     

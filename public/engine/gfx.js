@@ -189,6 +189,7 @@ function create_text_texture(text, fontSize, badgeDiameter) {
   textCanvas.height = 512;
   
   var textContext = textCanvas.getContext("2d");
+  minify_context(textContext);
   textContext.font = fontSize + "px OCR A STD";
   
   var width = 1 + textContext.measureText(text).width|0
