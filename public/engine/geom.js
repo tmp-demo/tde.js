@@ -56,13 +56,10 @@ function is_path_convex(path) {
 }
 
 function make_ring(path, y) {
-  var ring = []
-  for (var i = 0; i < path.length; i++)
+  return path.map(function(point)
   {
-    var point = path[i]
-    ring.push([point[0], y, -point[1]])
-  }
-  return ring
+    return [point[0], y, -point[1]]
+  })
 }
 
 function push_vertices(to, v) {
@@ -216,7 +213,7 @@ var MIN_PERIMETER = 200;
 var MIN_SEGMENT = 10;
 var EXTRUSION_FACTOR = 2;
 
-function perimeter(path) {
+/*function perimeter(path) {
     var accum = 0;
     var path_length = path.length;
     for (var i = 0; i < path_length; ++i) {
@@ -233,7 +230,7 @@ function smallest_segment_length(path) {
         if (d < smallest) { smallest = d; }
     }
     return smallest;
-}
+}*/
 
 function city_subdivision(path, sub_id) {
     var path_length = path.length;
@@ -257,7 +254,7 @@ function city_subdivision(path, sub_id) {
     if (perimeter < MIN_PERIMETER) { return null; }
 
     var a2 = (a1+1) % path_length;
-    var b1, b2, p_a3, p_b3;
+    var b1, b2;
 
     //var guard = 0;
     do {
@@ -291,13 +288,6 @@ function city_subdivision(path, sub_id) {
 
     return [path1, path2];
 }
-
-function circle_path(num_edges, sx, sy) {
-    var c = [];
-}
-
-
-
 
 
 
