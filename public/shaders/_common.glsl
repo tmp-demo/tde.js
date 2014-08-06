@@ -27,10 +27,19 @@ uniform vec2 step;
 
 uniform float clip_time;
 
-// x: center x
-// y: center y
-// z: width
-// w: height
+/*
+badge:
+	x: center x
+	y: center y
+	z: half size
+	w: angle
+
+text:
+	x: center x
+	y: center y
+	z: half height
+	w: aspect ratio
+*/
 uniform vec4 text_params;
 
 uniform vec4 mask;
