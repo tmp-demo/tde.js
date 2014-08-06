@@ -51,6 +51,7 @@ java -jar tools/compiler.jar --js=$EXPORT_ROOT/demo.js --js_output_file=$EXPORT_
 
 echo " -- packing expensive symbols"
 "$NODE" ./tools/symbol-minifier $EXPORT_ROOT/demo.min.js > $EXPORT_ROOT/demo.min2.js
+#cp $EXPORT_ROOT/demo.min.js $EXPORT_ROOT/demo.min2.js
 
 echo " -- compressing some keywords"
 # for some reason replacing '@' by 'function ' breaks the demo while 'function' (without the space) works

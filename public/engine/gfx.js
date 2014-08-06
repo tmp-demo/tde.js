@@ -69,11 +69,11 @@ var _uniforms = [
   "far",
   "focus",
   "light",
-  "texture_0",
+  /*"texture_0",
   "texture_1",
   "texture_2",
   "texture_3",
-  "texture_4",
+  "texture_4",*/
   "step",
   "clip_time",
   "text_params",
