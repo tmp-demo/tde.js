@@ -11,15 +11,19 @@
   
   // bind a to b
   function b(a, b) { a.bind(b); }
-  // change that to true to log
-  function log() { if (false) { console.log.apply(console, arguments); }}
+  
+  // uncomment to log
+  function log() {
+    //console.log.apply(console, arguments);
+  }
   function n2f(n) {
     return M.pow(2, (n - 69) / 12) * 440;
   }
 
   AudioNode.prototype.c = AudioNode.prototype.connect;
-
-  var SND = function(song) {
+  
+  /** @constructor */
+  function SND(song) {
     var t = this;
     t.song = song;
     // Screw webkit, they should follow the spec.
@@ -39,7 +43,6 @@
     b(this.p, this);
     b(this.t, this);
     t.playing = false;
-    return t;
   };
 
   SND.prototype.initSends = function() {
@@ -152,7 +155,7 @@
   }
 
   SND.DistCurve2 = function(ac, a) {
-    var c  = new Float32Array(ac.sampleRate);
+    var c = new Float32Array(ac.sampleRate);
     var n_samples = c.length;
     for (var i = 0; i < c.length; i++) {
       var x = i * 2 / n_samples - 1;
@@ -163,7 +166,7 @@
   }
 
   SND.DistCurve3 = function(ac, a) {
-    var c  = new Float32Array(ac.sampleRate);
+    var c = new Float32Array(ac.sampleRate);
     var n_samples = c.length;
     for (var i = 0; i < c.length; i++) {
       var x = i * 2 / n_samples - 1;
@@ -223,10 +226,14 @@
     }).bind(this);
     patternScheduler();
   };
+  
   SND.prototype.s = function() {
     this.playing = false;
   }
+  
   // SEND EFFECTS
+  
+  /** @constructor */
   SND.DEL = function(ac, cfg) {
     var opts = SND.extend({t: 0.2, fb: 0.4, m: 0.6, f: 800, q: 2}, cfg)
     this.ac = ac;
@@ -249,9 +256,9 @@
     };
     b(this.c, this);
     this.destination = this.delay;
-    return this;
   };
   
+  /** @constructor */
   SND.REV = function(ac, cfg) {
     var opts = SND.extend({l: 2, d: 5, m: 0.8}, cfg);
     this.ac = ac;
@@ -264,9 +271,9 @@
       this.mix.c(node);
     };
     this.destination = cnv;
-    return this;
   }
   
+  /** @constructor */
   SND.DELREV = function(ac, cfg) {
     var opts = SND.extend({t:0.2, fb: 0.4, m: 1, f: 800, q: 2, l: 6, d: 5}, cfg);
     this.del = new SND.DEL(ac, {t: opts.t, fb: opts.fb, m: opts.m, f: opts.f, q: opts.q});
@@ -276,9 +283,9 @@
     this.c= function(node) {
       this.rev.c(node);
     };
-    return this;
   }
 
+  /** @constructor */
   SND.DIST = function(ac, cfg) {
     var opts = SND.extend({a: 50, m: 1}, cfg);
     this.ac = ac;
@@ -291,16 +298,15 @@
       this.mix.c(node);
     };
     this.destination = ws;
-    return this;
   }
   
   // INSTRUMENTS
   
+  /** @constructor */
   SND.SProto = function(ac, sends, options, defaults) {
     this.ac = ac;
     this.sends = sends;
     this.options = SND.extend(defaults, options);
-    return this;
   };
   SND.SProto.prototype.pp = function(times, stepTime, data) {
     times.forEach(function(t, i) {
@@ -313,11 +319,13 @@
       }
     }, this);
   };
+  
   SND.Noise = function(ac, sends, options) {
     log("INIT NOISE", ac, sends, options)
     var that = new SND.SProto(ac, sends, options, {q: 10, d: 0.05, ft: 'highpass', f: 8000, v: 0.1, s: []});
     var noise = SND.NoiseBuffer(ac);
     var opts = that.options;
+    /*** @this {SND} */
     that.play = function(t, stepTime, data) {
       var opts = SND.extend(that.options, data[1]);
       var smp = ac.createBufferSource();
@@ -336,8 +344,10 @@
     b(that.play, that);
     return that;
   }
+  
   SND.Drum = function(ac, sends, options) {
     var that = new SND.SProto(ac, sends, options, {sw: 0.05, k: 0.07, st: 200, en: 50, v: 0.8, s: []});
+    /*** @this {SND} */
     that.play = function(t, stepTime, data) {
       var opts = SND.extend(that.options, data[1]);
       var osc = that.ac.createOscillator();
@@ -380,6 +390,7 @@
     options.f = 3000;
     options.v *= 0.15;
     that.n = new SND.Noise(ac, sends, options);
+    /*** @this {SND} */
     that.play =  function(t, stepTime, data) {
       that.d.play(t, stepTime, data);
       that.n.play(t, stepTime, data);
@@ -387,8 +398,10 @@
     b(that.play, that);
     return that;
   };
+  
   SND.Synth = function(ac, sends, options) {
-    var that = new SND.SProto(ac, sends, options, {t: 'sawtooth', q: 10, f: 200, fm: 1000, d: 1.0, v: 0.5, s: []});    
+    var that = new SND.SProto(ac, sends, options, {t: 'sawtooth', q: 10, f: 200, fm: 1000, d: 1.0, v: 0.5, s: []});
+    /*** @this {SND} */
     that.play = function(t, stepTime, data) {
       var note = data[0];
       if (note.length) {  // chord!
@@ -417,6 +430,7 @@
 
   SND.Sub = function(ac, sends, options) {
     var that = new SND.SProto(ac, sends, options, {t: 'sine', v:0.5});
+    /*** @this {SND} */
     that.play = function(t, stepTime, data) {
       var note = data[0];
       if (note.length) {  // chord!
@@ -447,6 +461,7 @@
 
   SND.Reese = function(ac, sends, options) {
     var that = new SND.SProto(ac, sends, options, {t: 'sawtooth', v:0.5});
+    /*** @this {SND} */
     that.play = function(t, stepTime, data) {
       var note = data[0];
       if (note.length) {  // chord!
@@ -481,6 +496,7 @@
 
   SND.Organ = function(ac, sends, options) {
     var that = new SND.SProto(ac, sends, options, {t: 'sine', v:0.5});
+    /*** @this {SND} */
     that.play = function(t, stepTime, data) {
       var note = data[0];
       var opts = SND.extend(that.options, data[1]);
