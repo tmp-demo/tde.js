@@ -275,6 +275,10 @@ function city_subdivision(path, sub_id) {
         break;
     } while (1);
 
+    if (sub_id == 5) {
+        console.log("Subdiv 5: "+path[a1][0]+" "+path[a1][1]);
+    }
+
     var path1 = [p_a3_1, p_b3_2]
     for (i = b2; i != a2; i = mod((i+1), path_length)) {
         path1.push(path[i]);
