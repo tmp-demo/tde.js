@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -lt "1" ]; then
   echo "Usage: $0 <project name>"
@@ -33,10 +33,12 @@ do
     ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
 done
 
-for f in  $PROJECT_ROOT/*.song
-do
-    ./tools/opt.py $f | sed "s/'\\(SND\\.[A-Za-z]*\\)'/\\1/g" >> $EXPORT_ROOT/demo.js
-done
+# for f in  $PROJECT_ROOT/*.song
+# do
+#     ./tools/opt.py $f | sed "s/'\\(SND\\.[A-Za-z]*\\)'/\\1/g" >> $EXPORT_ROOT/demo.js
+# done
+
+cat $PROJECT_ROOT/song.song >> $EXPORT_ROOT/demo.js
 
 echo "onload=main;" >> $EXPORT_ROOT/demo.js
 

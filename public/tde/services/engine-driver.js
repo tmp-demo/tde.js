@@ -139,7 +139,7 @@ angular.module("tde.services.engine-driver", [])
   {
     self.currentTime = time
     if (snd)
-      snd.startTime = snd.c.currentTime - time * (60 / snd.song.cfg.tempo)
+      snd.startTime = ac.currentTime - time * (60 / 125) // tempo is 125
 
     if (!this.playing)
       engine_render(self.currentTime)
