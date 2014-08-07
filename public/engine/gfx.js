@@ -340,6 +340,7 @@ function render_scene(scene, demo_time, scene_time) {
   if (scene.update) {
     scene.update(t);
   }
+  gl.disable(gl.BLEND);
   for (var p in scene.passes) {
     var pass = scene.passes[p];
     if (pass.update) {
@@ -378,7 +379,5 @@ function render_scene(scene, demo_time, scene_time) {
     if (pass.render) {
       pass.render(pass.program);
     }
-    if (pass.blend)
-      gl.disable(gl.BLEND);
   }
 }
