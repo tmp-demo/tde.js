@@ -317,8 +317,8 @@ function set_uniforms(program, ratio) {
       case 2: gl.uniform2fv(location, val); break;
       case 3: gl.uniform3fv(location, val); break;
       case 4: gl.uniform4fv(location, val); break;
-      case 9: gl.uniformMatrix3fv(location, gl.FALSE, val); break;
-      case 16: gl.uniformMatrix4fv(location, gl.FALSE, val); break;
+      case 9: gl.uniformMatrix3fv(location, 0, val); break;
+      case 16: gl.uniformMatrix4fv(location, 0, val); break;
     }
   }
 }
