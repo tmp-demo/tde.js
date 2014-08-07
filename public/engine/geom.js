@@ -288,8 +288,27 @@ function city_subdivision(path, sub_id) {
     return [path1, path2];
 }
 
+function circle_path(center, radius, n_points) {
+    var path = []
+    for (i = 0; i < n_points; ++i) {
+        path.push([
+            center[0] + M.cos(i/n_points * 2 * M.PI) * radius,
+            center[1] + M.sin(i/n_points * 2 * M.PI) * radius
+        ]);
+    }
+    return path;
+}
 
-
+function make_room(city_paths, pos, rad) {
+  for (i=0; i<city_paths.length; ++i) {
+    var path = city_paths[i];
+    for (p=0; p<path.length; ++p) {
+      if (vec2.distance(path[p], pos) < rad) {
+        console.log("point in radius: in path "+ i);
+      }
+    }
+  }
+}
 
 
 
