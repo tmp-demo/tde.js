@@ -1,5 +1,7 @@
   // change that to true to log
-  function log() { if (false) { console.log.apply(console, arguments); }}
+  function log() {
+    // console.log.apply(console, arguments);
+  }
   function editing() { return false; }
   function n2f(n) {
     return Math.pow(2, (n - 69) / 12) * 440;
@@ -10,6 +12,7 @@
   ac = new AudioContext();
   minify_context(ac);
 
+  /** @constructor */
   function SND(song) {
     var t = this;
     t.song = song;
@@ -17,7 +20,6 @@
     t.initInstruments()
     log('SND.constr', this);
     t.playing = false;
-    return t;
   };
 
   SND.prototype.initSends = function() {
@@ -156,7 +158,10 @@
   SND.prototype.s = function() {
     this.playing = false;
   }
+  
   // SEND EFFECTS
+  
+  /** @constructor */
   SND.DEL = function() {
     var opts = {t: 0.36, fb: 0.4, m: 0.6, f: 800, q: 2};
     this.delay = ac.createDelay();
@@ -180,6 +185,7 @@
     return this;
   };
   
+  /** @constructor */
   SND.REV = function() {
     var opts = {d: 0.05, m: 1};
     var cnv = ac.createConvolver();
@@ -194,6 +200,7 @@
     return this;
   }
 
+  /** @constructor */
   SND.DIST = function() {
     var ws = ac.createWaveShaper();
     this.mix = ac.createGain();
@@ -209,11 +216,12 @@
   
   // INSTRUMENTS
   
+  /** @constructor */
   SND.SProto = function(options, defaults) {
     this.ac = ac;
     this.options = SND.extend(defaults, options);
-    return this;
   };
+  
   SND.SProto.prototype.pp = function(times, stepTime, data) {
     times.forEach(function(t, i) {
       note = data[i];
@@ -225,6 +233,7 @@
       }
     }, this);
   };
+  
   SND.Noise = function() {
     var that = new SND.SProto();
     var noise = NoiseBuffer();
@@ -244,6 +253,7 @@
     }
     return that;
   }
+  
   SND.Drum = function(options) {
     var that = new SND.SProto(options);
     that.play = function(t) {
@@ -315,6 +325,7 @@
     };
     return that;
   };
+  
   SND.Synth = function() {
     var that = new SND.SProto();
     that.play = function(t, stepTime, data) {
