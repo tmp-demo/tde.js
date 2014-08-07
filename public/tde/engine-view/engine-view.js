@@ -65,7 +65,7 @@ angular.module("tde.engine-view", [])
         SEED = this.value;
         city_map = document._generate_map();
         replace_geom(geometries.city, document._generate_city_geom(city_map));
-        
+
         $scope.driver.drawFrame();
       })
 

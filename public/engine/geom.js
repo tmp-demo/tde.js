@@ -92,7 +92,8 @@ function join_rings(geom, r1, r2, uv_fn) {
       vec3.cross(normal, e1, e2);
       vec3.normalize(normal, normal);
       push_vertices(geom.normals, [normal, normal, normal, normal, normal, normal]);
-      push_vertices(geom.uvs, uv_fn(vec3.length(e2)));
+      var head_or_tail = rand_int(2) == 1 ? 0.3 : 0.5;
+      push_vertices(geom.uvs, uv_fn(vec3.length(e2), head_or_tail));
     }
 }
 
@@ -128,7 +129,7 @@ function lines_intersection_2d(a1, a2, b1, b2) {
     ];
 }
 
-var SUBDIV_SHRINK_COEF = 0.01;
+var SUBDIV_SHRINK_COEF = 1;//0.01;
 
 function shrink_path(path, amount, z, use_subdiv) {
     var new_path = [];
@@ -182,7 +183,7 @@ function shrink_path(path, amount, z, use_subdiv) {
 function fill_convex_ring(geom, ring) {
   var normal = [0, 1, 0];
   // roof top or grass
-  var uv = ring[0][1] > 10 ? [0.5, 0.9] : [0.6, 0.05];
+  var uv = ring[0][1] > 10 ? [0.5, 0.95] : [0.6, 0.02];
   for (var i = 1; i < ring.length - 1; i++) {
       push_vertices(geom.positions, [ring[0], ring[i], ring[i + 1]]);
       push_vertices(geom.normals, [normal, normal, normal]);
@@ -209,9 +210,7 @@ function city_subdivision_rec(paths, num_subdivs, sub_id) {
 }
 
 // TODO make this show in the editor: it defines how the min size of city blocks
-var MIN_PERIMETER = 200;
-var MIN_SEGMENT = 10;
-var EXTRUSION_FACTOR = 2;
+var MIN_PERIMETER = 300;
 
 /*function perimeter(path) {
     var accum = 0;
@@ -305,12 +304,12 @@ function debug_draw_path(path, color, offset_x, offset_y) {
     for (var i in path) {
         map_ctx.beginPath();
         map_ctx.moveTo(
-            (path[i][0] + offset_x + 1000) / 6,
-            (path[i][1] + offset_y) / 6
+            (path[i][0] + offset_x + 300) / 3,
+            (path[i][1] + offset_y) / 3
         );
         map_ctx.lineTo(
-            (path[mod(i-1, path.length)][0] + offset_x + 1000) / 6,
-            (path[mod(i-1, path.length)][1] + offset_y) / 6
+            (path[mod(i-1, path.length)][0] + offset_x + 300) / 3,
+            (path[mod(i-1, path.length)][1] + offset_y) / 3
         );
         map_ctx.stroke();
         map_ctx.closePath();

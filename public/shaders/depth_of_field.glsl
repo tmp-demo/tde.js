@@ -24,7 +24,15 @@ void main_fs_depth_of_field() {
   float depth_tl = sample_depth(vec2(-rx,  ry));
   float depth_bl = sample_depth(vec2(-rx, -ry));
 
-  float samples = main_sample + depth_r + depth_l + depth_t + depth_b + depth_tr + depth_br + depth_tl + depth_br;
+  float samples = main_sample
+                + depth_r
+                + depth_l
+                + depth_t
+                + depth_b
+                + depth_tr
+                + depth_br
+                + depth_tl
+                + depth_bl;
 
   samples = max(samples / 9.0, main_sample);
   float v = max((samples - near) / (far-near), 0.0);
@@ -63,7 +71,9 @@ void main_fs_depth_of_field() {
   float dd = smoothstep(0.9, 0.99, v); // * (1.0 - smoothstep(0.99999999999, 1.0, v));
 
   gl_FragColor = a * da + b * db + c * dc + d * dd;
+  gl_FragColor = a;// * da + b * db + c * dc + d * dd;
   gl_FragColor *= sob;
+  //gl_FragColor = vec4(main_sample, main_sample, main_sample, 1.0);
 
   gl_FragColor.a = 1.0;
 }
