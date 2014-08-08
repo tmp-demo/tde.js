@@ -95,10 +95,10 @@ void main_fs_buildings_mtl() {
 
   float wall_shade = 1.0 - (mod(uv.y - 0.1, 0.2) * 0.4);
 
-  vec3 color = window    * vec3(0.0, 0.0, 0.0)
+  vec3 color = window    * vec3(0.1, 0.1, 0.1)
              + wall      * vec3(wall_shade, wall_shade*0.9, wall_shade*0.7)
              + roof      * vec3(0.2, 0.2, 0.4) * sin(uv.x*1000.0)
-             + grass     * vec3(0.0, 0.6, 0.1)
+             + grass     * vec3(0.0, 0.7, 0.1)
              + street    * vec3(0.3, 0.3, 0.3)
              + side_walk * vec3(0.5, 0.5, 0.5)
              + window_b  * vec3(0.6, 0.5, 0.4)
@@ -106,7 +106,7 @@ void main_fs_buildings_mtl() {
              + door      * vec3(0.5, 0.1, 0.1);
   color *= (1.0 - balcony);
 
-  float sum = window
+  /*float sum = window
             + wall
             + roof
             + grass
@@ -114,7 +114,7 @@ void main_fs_buildings_mtl() {
             + side_walk
             + window_b
             + balcony;
-  sum *= 0.5;
+  sum *= 0.5;*/
 
-  gl_FragColor = vec4(color, window + balcony);
+  gl_FragColor = vec4(color, window + balcony + street * noise(uv * 500.0));
 }

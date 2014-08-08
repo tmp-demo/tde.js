@@ -129,7 +129,7 @@ function lines_intersection_2d(a1, a2, b1, b2) {
     ];
 }
 
-function shrink_path(path, amount, z, use_subdiv) {
+function shrink_path(path, amount, z, use_subdiv, disp) {
     var new_path = [];
     var path_length = path.length;
     var pna = vec2.create();
@@ -141,6 +141,10 @@ function shrink_path(path, amount, z, use_subdiv) {
         var px = path[mod(i,   path_length)];
         var pb = path[mod(i+1, path_length)];
         use_subdiv = use_subdiv || 0;
+        var displacement;
+        //if(disp)
+        //  console.log("on a disp=" + disp);
+        displacement = disp || [0,0];
         // avoid shrinking too much
         if (vec2.distance(pa, pb) < amount*(1+pa.subdiv*use_subdiv*2)) {
             return deep_clone(path);
@@ -159,6 +163,7 @@ function shrink_path(path, amount, z, use_subdiv) {
 
         // If inter is null (pa, px and pb are aligned)
         inter = inter || [pnxa[0], pnxa[1]];
+        inter = vec2.add(inter, inter, displacement);
         inter.subdiv = path[i].subdiv;
         new_path.push(inter);
     }
