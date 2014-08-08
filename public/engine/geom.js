@@ -10,9 +10,8 @@
 
 
 var SEED = 42;
-var random_mask = 0x80000000;
 function seedable_random() {
-    return (SEED = (69069 * SEED + 1) & ~random_mask) / random_mask;
+    return (SEED = (69069 * SEED + 1) & 0x7FFFFFFF) / 0x80000000;
 }
 
 // For a continuous ring of 4 points the indices are:
