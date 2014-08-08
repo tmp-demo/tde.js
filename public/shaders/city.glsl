@@ -13,14 +13,21 @@ void main_vs_city() {
 //! INCLUDE scattering.glsllib
 
 void main_fs_city() {
-  vec4 texture = texture2D(texture_0, v_tex_coords);
 
-  vec3 diffuse = mix(
+  vec4 texture = texture2D(texture_0, v_tex_coords);
+  
+  vec3 normal = normalize(v_normals);
+  vec3 diffuse = dot(normalize(normal), light) * skyColor(normal) * texture.rgb;
+  
+  vec3 eye = normalize(cam_pos - v_position);
+  vec3 half = normalize(eye + light);
+  vec3 specular = pow(dot(half, normal), 50.0) * vec3(100.0);// * texture.a;
+  
+  vec3 radiance = mix( // cartoonify
     texture.rgb,
-    dot(normalize(v_normals), light) * skyColor(v_normals),
-    0.2
+    clamp(diffuse + specular, 0.0, 1.0),
+    0.5
   );
-  // XXX make use of the reflectance, my BRDFs are a bit rusty...
-  float reflect = texture.a * dot(v_normals, light) * 0.5;
-  gl_FragColor = vec4(applyFog(v_normals, diffuse), 1.0);
+  
+  gl_FragColor = vec4(applyFog(normal, radiance), 1.0);
 }
