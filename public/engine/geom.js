@@ -160,11 +160,10 @@ function shrink_path(path, amount, z, use_subdiv, disp) {
         vec2.add(pnxb, px, nb);
 
         var inter = lines_intersection_2d(pna, pnxa, pnxb, pnb );
-        
-        inter = vec2.add(inter, inter, displacement);
 
         // If inter is null (pa, px and pb are aligned)
         inter = inter || [pnxa[0], pnxa[1]];
+        inter = vec2.add(inter, inter, displacement);
         inter.subdiv = path[i].subdiv;
         new_path.push(inter);
     }
