@@ -129,8 +129,6 @@ function lines_intersection_2d(a1, a2, b1, b2) {
     ];
 }
 
-var SUBDIV_SHRINK_COEF = 1;//0.01;
-
 function shrink_path(path, amount, z, use_subdiv) {
     var new_path = [];
     var path_length = path.length;
@@ -144,11 +142,13 @@ function shrink_path(path, amount, z, use_subdiv) {
         var pb = path[mod(i+1, path_length)];
         use_subdiv = use_subdiv || 0;
         // avoid shrinking too much
-        if (vec2.distance(pa, pb) < amount*(1+pa.subdiv*use_subdiv*SUBDIV_SHRINK_COEF*2)) {
+        if (vec2.distance(pa, pb) < amount*(1+pa.subdiv*use_subdiv*2)) {
             return deep_clone(path);
         }
-        var na = _vec2_scale(normal(_vector_2d(pa, px)), amount * (1+pa.subdiv*use_subdiv*SUBDIV_SHRINK_COEF));
-        var nb = _vec2_scale(normal(_vector_2d(px, pb)), amount * (1+px.subdiv*use_subdiv*SUBDIV_SHRINK_COEF));
+        var pa_sub = pa.subdiv || 0;
+        var px_sub = px.subdiv || 0;
+        var na = _vec2_scale(normal(_vector_2d(pa, px)), amount * (1+pa_sub*use_subdiv));
+        var nb = _vec2_scale(normal(_vector_2d(px, pb)), amount * (1+px_sub*use_subdiv));
 
         vec2.add(pna, pa, na);
         vec2.add(pnb, pb, nb);
@@ -168,11 +168,7 @@ function shrink_path(path, amount, z, use_subdiv) {
     for (var i = 0; i < path_length; ++i) {
         vec2.subtract(old_segment, path[(i+1)%path_length], path[i]);
         vec2.subtract(new_segment, new_path[(i+1)%path_length], new_path[i]);
-        //var cross = vec3.create();
-        //vec3.cross(cross, new_path[i], new_path[i]+1)
-        //if (cross[1] > 0) {
-        //    return null;
-        //}
+
         if (vec2.dot(old_segment, new_segment) < 0) {
             return null;
         }
@@ -180,10 +176,10 @@ function shrink_path(path, amount, z, use_subdiv) {
     return new_path;
 }
 
-function fill_convex_ring(geom, ring) {
+function fill_convex_ring(geom, ring, uv) {
   var normal = [0, 1, 0];
   // roof top or grass
-  var uv = ring[0][1] > 10 ? [0.5, 0.95] : [0.6, 0.02];
+  uv = uv || [0.5, 0.95];
   for (var i = 1; i < ring.length - 1; i++) {
       push_vertices(geom.positions, [ring[0], ring[i], ring[i + 1]]);
       push_vertices(geom.normals, [normal, normal, normal]);
@@ -255,15 +251,12 @@ function city_subdivision(path, sub_id) {
     var a2 = (a1+1) % path_length;
     var b1, b2;
 
-    //var guard = 0;
     do {
         b1 = rand_int(path_length);
         if (a1 == b1 || a1 == b1 + 1) { continue; }
-        //if (guard++ > 10) { break; }
 
         b2 = (b1+1) % path_length;
 
-        // TODO: this skews the distribution towards 0.5 - make it less verbose
         var f1 = 0.5 + (0.5 - M.abs(seedable_random() - 0.5)) * 0.2;
         var f2 = 0.5 + (0.5 - M.abs(seedable_random() - 0.5)) * 0.2;
 
@@ -274,10 +267,6 @@ function city_subdivision(path, sub_id) {
 
         break;
     } while (1);
-
-    if (sub_id == 5) {
-        console.log("Subdiv 5: "+path[a1][0]+" "+path[a1][1]);
-    }
 
     var path1 = [p_a3_1, p_b3_2]
     for (i = b2; i != a2; i = mod((i+1), path_length)) {
@@ -296,22 +285,20 @@ function circle_path(center, radius, n_points) {
     var path = []
     for (i = 0; i < n_points; ++i) {
         path.push([
-            center[0] + M.cos(i/n_points * 2 * M.PI) * radius,
+            center[0] + -M.cos(i/n_points * 2 * M.PI) * radius,
             center[1] + M.sin(i/n_points * 2 * M.PI) * radius
         ]);
     }
     return path;
 }
 
-function make_room(city_paths, pos, rad) {
-  for (i=0; i<city_paths.length; ++i) {
-    var path = city_paths[i];
+function plazza(path, pos, rad) {
     for (p=0; p<path.length; ++p) {
       if (vec2.distance(path[p], pos) < rad) {
-        console.log("point in radius: in path "+ i);
+        return true;
       }
     }
-  }
+    return false;
 }
 
 
