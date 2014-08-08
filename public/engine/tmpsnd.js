@@ -270,7 +270,7 @@
       function d(o, e){
         var amp = ac.createGain();
         o.c(amp);
-        SND.D(amp.gain, t, 1.0, e);
+        SND.D(amp.gain, t, 1.3, e);
         amp.c(ac.destination);
       }
 
@@ -392,7 +392,7 @@
     var that = new SND.SProto(options);
     var noise = NoiseBuffer();
     that.play = function(t, stepTime, data) {
-      var len = 48 * stepTime;
+      var len = (data[1].l || 1) * stepTime;
       var source = ac.createBufferSource();
       var end = t + len;
       var sources = [];
