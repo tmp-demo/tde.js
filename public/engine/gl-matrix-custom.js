@@ -3546,6 +3546,49 @@ mat4.lookAt = function (out, eye, center, up) {
 };
 
 /**
+ * Generates a look-at matrix with the given eye position, focal point, and tilt
+ *
+ * @param {mat4} out mat4 frustum matrix will be written into
+ * @param {vec3} eye Position of the viewer
+ * @param {vec3} center Point the viewer is looking at
+ * @param {vec3} tilt Tilt angle (radians)
+ * @returns {mat4} out
+ */
+mat4.lookAtTilt = function (out, eye, center, tilt) {
+    var x = [0,0,0];
+    var y = [0,0,0];
+    var z = [0,0,0];
+    
+    vec3.subtract(z, eye, center);
+    vec3.normalize(z, z);
+    vec3.cross(x, [0,1,0], z);
+    vec3.normalize(x, x);
+    vec3.cross(y, z, x);
+    vec3.scale(y, y, M.cos(tilt))
+    vec3.scaleAndAdd(y, y, x, M.sin(tilt));
+    vec3.cross(x, y, z);
+
+    out[0] = x[0];
+    out[1] = y[0];
+    out[2] = z[0];
+    out[3] = 0;
+    out[4] = x[1];
+    out[5] = y[1];
+    out[6] = z[1];
+    out[7] = 0;
+    out[8] = x[2];
+    out[9] = y[2];
+    out[10] = z[2];
+    out[11] = 0;
+    out[12] = -vec3.dot(x, eye);
+    out[13] = -vec3.dot(y, eye);
+    out[14] = -vec3.dot(z, eye);
+    out[15] = 1;
+
+    return out;
+};
+
+/**
  * Returns a string representation of a mat4
  *
  * @param {mat4} mat matrix to represent as a string
