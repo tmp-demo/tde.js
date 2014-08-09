@@ -243,15 +243,8 @@ function create_texture(width, height, format, data, allow_repeat, linear_filter
   return {
     tex: texture,
     width: width,
-    height: height,
-    format: format
+    height: height
   };
-}
-
-function update_texture(desc, data) {
-  gl.bindTexture(gl.TEXTURE_2D, desc.tex);
-  gl.texImage2D(gl.TEXTURE_2D, 0, desc.format, desc.width, desc.height, 0,
-                desc.format, (desc.format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT : gl.UNSIGNED_BYTE, new Uint8Array(data, 0, 0));
 }
 
 function texture_unit(i) { return gl.TEXTURE0+i; }
