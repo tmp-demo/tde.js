@@ -71,7 +71,7 @@ void main_fs_depth_of_field() {
   float dd = smoothstep(0.9, 0.99, v); // * (1.0 - smoothstep(0.99999999999, 1.0, v));
 
   gl_FragColor = a * da + b * db + c * dc + d * dd;
-  gl_FragColor = a;// * da + b * db + c * dc + d * dd;
+  //gl_FragColor = a;// * da + b * db + c * dc + d * dd;
   gl_FragColor *= sob;
   //gl_FragColor = vec4(main_sample, main_sample, main_sample, 1.0);
 
