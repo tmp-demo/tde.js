@@ -164,9 +164,7 @@ angular.module("tde.engine-view", [])
           mapY = M.round(- (mapY / 353 * 1400 -700)) ;
         }
 
-        console.log(mapX+":"+mapY);
         element.find("#map-coords")[0].innerHTML = "["+mapX+","+mapY+"]";
-        console.log(element.find("#map-coords"));
         $scope.driver.drawFrame();
       })
     }
