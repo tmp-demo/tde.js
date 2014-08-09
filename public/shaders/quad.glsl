@@ -1,8 +1,8 @@
 //! VERTEX
 
 void main_vs_quad() {
-  gl_Position = vec4(position.xy, 0.0, 1.0);
-  v_tex_coords = ((position.xy + text_params.zw + 1.0) * 0.5 - text_params.xy) / text_params.zw;
+  gl_Position = vec4(text_params.xy + position.xy * text_params.zw, 0.0, 1.0);
+  v_tex_coords = position.xy * 0.5 + 0.5;
 }
 
 //! FRAGMENT

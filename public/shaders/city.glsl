@@ -34,5 +34,5 @@ void main_fs_city() {
   
   vec3 radiance = clamp(diffuse + specular, 0.0, 1.0);
   gl_FragColor = vec4(applyFog(normal, radiance), 1.0);
-  //gl_FragColor = vec4(normal, 1.0);
+  //gl_FragColor = vec4(radiance, 1.0);
 }

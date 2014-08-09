@@ -44,6 +44,8 @@ uniform vec4 text_params;
 
 uniform vec4 mask;
 
+uniform float glitch;
+
 varying vec2 v_tex_coords;
 varying vec3 v_normals;
 varying vec3 v_position;
