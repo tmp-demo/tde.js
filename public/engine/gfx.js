@@ -79,7 +79,8 @@ var _uniforms = [
   "text_params",
   "mask",
   "cam_target",
-  "cam_fov"
+  "cam_fov",
+  "glitch"
 ];
 // #debug}}
 

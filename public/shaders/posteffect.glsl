@@ -11,7 +11,7 @@ void main_vs_posteffect() {
 void main_fs_posteffect() {
   
   vec2 uv = v_tex_coords;
-  uv += vec2(floor(rand(clip_time * 0.0001) * 2.0) * 0.57 + rand(clip_time * 0.00001) * 0.4 + sin(v_tex_coords.x * 200.0 * cos(floor(clip_time * .20))), 1.0);
+  /*uv += vec2(floor(rand(clip_time * 0.0001) * 2.0) * 0.57 + rand(clip_time * 0.00001) * 0.4 + sin(v_tex_coords.x * 200.0 * cos(floor(clip_time * .20))), 1.0);
   
   // logo and background
   vec3 color = texture2D(texture_0, uv).rgb * 0.5;
@@ -25,6 +25,20 @@ void main_fs_posteffect() {
   
   // fade to black
   color *= clamp(mod(rand(clip_time * 0.0003), 1.0) * 1.8, 0.0, 1.0);
+  
+  gl_FragColor = vec4(color, 1.0);*/
+  
+  // block displacement
+  vec2 uv2 = floor(uv * 5.0) / 5.0;
+  float offset1 = floor(rand2(uv2 + floor(glitch * 10.0)) * 2.0) / 2.0;
+  float offset2 = floor(uv.y * 20.0 + rand2(uv2) * 100.0) / 100.0;
+  vec3 color = texture2D(texture_0, uv + vec2(offset1 + offset2, offset1) * glitch).rgb;
+  
+  // vignette
+  color *= 1.0 - pow(length(uv - 0.5) * 1.2, 4.0);
+  
+  // gamma
+  //color = sqrt(color);
   
   gl_FragColor = vec4(color, 1.0);
 }
