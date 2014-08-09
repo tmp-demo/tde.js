@@ -15,8 +15,7 @@ function animate(keyframes, time)
   keyframes.push([0, next]);
   
   var i = 1;
-  ++last;
-  while ((i < last) && (keyframes[i][0] < time)) i++;
+  while ((i <= last) && (keyframes[i][0] < time)) i++;
   
   var k0 = keyframes[i - 2];
   var k1 = keyframes[i - 1];
