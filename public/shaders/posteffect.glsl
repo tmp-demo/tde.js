@@ -34,6 +34,9 @@ void main_fs_posteffect() {
   float offset2 = floor(uv.y * 20.0 + rand2(uv2) * 100.0) / 100.0;
   vec3 color = texture2D(texture_0, uv + vec2(offset1 + offset2, offset1) * glitch).rgb;
   
+  // noise
+  color += vec3(rand2(uv + clip_time)) * glitch * 0.4;
+  
   // vignette
   color *= 1.0 - pow(length(uv - 0.5) * 1.2, 4.0);
   
