@@ -20,11 +20,12 @@ void main_fs_city() {
   vec2 uv2 = v_tex_coords * 200.0;
   vec3 fakeNormalMap = (noise3(uv2) - 0.5) * (1.0 - texture.a) * 0.1;
   vec3 normal = normalize(normalize(v_normals) + fakeNormalMap);
-  vec3 diffuse = dot(normal, light) * skyColor(normal) * texture.rgb;
+  vec3 diffuse = (dot(normal, light) * 0.5 + 0.5) * skyColor(normal) * texture.rgb;
 
   vec3 eye = normalize(cam_pos - v_position);
   vec3 half = normalize(eye + light);
-  vec3 specular = pow(dot(half, normal), 100.0) * vec3(noise(uv2) * 2.0) * texture.a;
+  //vec3 specular = pow(dot(half, normal), 100.0) * vec3(noise(uv2) * 2.0) * texture.a;
+  vec3 specular = pow(dot(half, normal), 100.0) * vec3(texture.a);
 
   /*vec3 radiance = mix(
     texture.rgb,
@@ -34,5 +35,5 @@ void main_fs_city() {
   
   vec3 radiance = clamp(diffuse + specular, 0.0, 1.0);
   gl_FragColor = vec4(applyFog(normal, radiance), 1.0);
-  //gl_FragColor = vec4(radiance, 1.0);
+  //gl_FragColor = vec4(texture.rgb, 1.0);
 }

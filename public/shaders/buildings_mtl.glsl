@@ -116,5 +116,5 @@ void main_fs_buildings_mtl() {
             + balcony;
   sum *= 0.5;*/
 
-  gl_FragColor = vec4(color, window + balcony + street * noise(uv * 500.0));
+  gl_FragColor = vec4(color, window + balcony + (street + roof) * noise(uv * 500.0));
 }
