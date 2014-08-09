@@ -317,7 +317,8 @@ function set_uniforms(program, ratio) {
 }
 
 function clear() {
-  gl.clearColor(0.7, 0.8, 0.9, 1.0);
+  //gl.clearColor(0.7, 0.8, 0.9, 1.0);
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
   gl.clearDepth(1.0);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 }
