@@ -29,8 +29,9 @@ void main_fs_posteffect() {
   gl_FragColor = vec4(color, 1.0);*/
   
   // block displacement
-  float offset0 = rand(floor(uv.y * 30.0) + floor(noise(vec2(clip_time * 4.0, 0.0)) * 2.0) * 50.0 * clip_time) - 0.5;
-  vec2 uv2 = floor(uv * 5.0 + vec2(offset0 * 2.0, 0.0) * floor(glitch * 20.0) / 100.0) / 5.0;
+  float glitchFactor = floor(noise(vec2(clip_time * 4.0, 0.0)) * 2.0);
+  float offset0 = rand(floor(uv.y * 30.0) + glitchFactor * 50.0 * clip_time) - 0.5;
+  vec2 uv2 = floor(uv * 5.0 + vec2(offset0 * 2.0 * glitchFactor, 0.0) * floor(glitch * 20.0) / 100.0) / 5.0;
   float offset1 = floor(rand2(uv2 + floor(clip_time * 10.0))) / 2.0;
   float offset2 = floor(uv.y * 20.0 + rand2(uv2) * 100.0) / 100.0;
   vec3 color = texture2D(texture_0, uv + vec2(offset1 + offset2, offset1) * glitch).rgb;
