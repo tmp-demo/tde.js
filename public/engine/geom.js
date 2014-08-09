@@ -8,7 +8,7 @@
 // v_cursor is an index (in vertex, not an offset in the array).
 // Use v_cursor * v_stride for an offset in the array.
 
-var SEED = 1;
+var SEED;
 function seedable_random() {
     return (SEED = (69069 * SEED + 1) & 0x7FFFFFFF) / 0x80000000;
 }
