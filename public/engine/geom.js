@@ -8,8 +8,7 @@
 // v_cursor is an index (in vertex, not an offset in the array).
 // Use v_cursor * v_stride for an offset in the array.
 
-
-var SEED = 42;
+var SEED = 1;
 function seedable_random() {
     return (SEED = (69069 * SEED + 1) & 0x7FFFFFFF) / 0x80000000;
 }
@@ -211,7 +210,7 @@ function city_subdivision_rec(paths, num_subdivs, sub_id) {
 }
 
 // TODO make this show in the editor: it defines how the min size of city blocks
-var MIN_PERIMETER = 300;
+var MIN_PERIMETER = 260;
 
 /*function perimeter(path) {
     var accum = 0;
