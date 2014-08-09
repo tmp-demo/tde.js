@@ -141,7 +141,7 @@ angular.module("tde.engine-view", [])
       var canvas_map = document.getElementById("map-view")
       map_ctx = canvas_map.getContext("2d");
       map_ctx.fillStyle = "rgb(220, 220, 220)";
-      map_ctx.fillRect(0, 0, 640, 360);
+      map_ctx.fillRect(0, 0, 640, 500);
 
       element.find("#map-view").mousemove(function(e)
       {
@@ -152,19 +152,20 @@ angular.module("tde.engine-view", [])
         //uniforms["cam_pos"][2] = (e.pageY - $("#map-view").offset().top - 150) * 5;
         
         var mapX = 0, mapY = 0;
-        //console.log(e.pageY - $("#map-view").offset().top);
         mouseX = e.pageX - $("#map-view").offset().left;
         mouseY = e.pageY - $("#map-view").offset().top
         if(mouseX >106 &&mouseX  < 574){
           mapX = mouseX -  106;
           mapX = M.round(mapX / 468 * 1400 -700);
+          if(mouseY >7 &&mouseY  < 473){
+            mapY = mouseY -  7;
+            mapY = M.round(- (mapY / 466 * 1400 -700)) ;
+            
+            element.find("#map-coords")[0].innerHTML = "["+mapX+","+mapY+"]";
+          }
         }
-        if(mouseY >7 &&mouseY  < 360){
-          mapY = mouseY -  7;
-          mapY = M.round(- (mapY / 353 * 1400 -700)) ;
-        }
+        
 
-        element.find("#map-coords")[0].innerHTML = "["+mapX+","+mapY+"]";
         $scope.driver.drawFrame();
       })
     }
