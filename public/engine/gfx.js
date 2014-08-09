@@ -291,7 +291,7 @@ function set_uniforms(program, ratio) {
   // derive camera matrices from simpler parameters
   //mat4.lookAt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], [0.0, 1.0, 0.0]);
   mat4.lookAtTilt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], uniforms["cam_tilt"]);
-  mat4.perspective(projectionMatrix, uniforms["cam_fov"] * M.PI / 180.0, ratio, 1.0, 10000.0)
+  mat4.perspective(projectionMatrix, uniforms["cam_fov"] * M.PI / 180.0, ratio, 2.0, 2000.0)
   mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
   mat4.invert(viewProjectionMatrixInv, viewProjectionMatrix);
   uniforms["view_proj_mat"] = viewProjectionMatrix;

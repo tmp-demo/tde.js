@@ -8,5 +8,5 @@ void main_vs_show_texture() {
 //! FRAGMENT
 
 void main_fs_show_texture() {
-  gl_FragColor = vec4(vec3(texture2D(texture_0, v_tex_coords).a), 1.0);
+  gl_FragColor = vec4(vec3(texture2D(texture_0, v_tex_coords).rgb), 1.0);
 }

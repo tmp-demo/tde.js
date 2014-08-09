@@ -7,8 +7,26 @@ void main_vs_depth_of_field() {
 
 //! FRAGMENT
 
+const float RADIUS = 0.02;
+const float STEP = RADIUS / 5.0;
+
 float sample_depth(vec2 uv) {
   return texture2D(texture_4, v_tex_coords + uv).r;
+}
+
+float linearizeDepth(float depth)
+{
+  const float zNear = 2.0;
+  const float zFar = 2000.0;
+
+  depth = 2.0 * depth - 1.0;
+  return 2.0 * zNear * zFar / (zFar + zNear - depth * (zFar - zNear));
+}
+
+float computeCoc(float depth)
+{
+  const float dof = 100.0;
+  return clamp(abs(depth - focus) / dof, 0.0, 1.0) * RADIUS;
 }
 
 void main_fs_depth_of_field() {
@@ -24,7 +42,7 @@ void main_fs_depth_of_field() {
   float depth_tl = sample_depth(vec2(-rx,  ry));
   float depth_bl = sample_depth(vec2(-rx, -ry));
 
-  float samples = main_sample
+  /*float samples = main_sample
                 + depth_r
                 + depth_l
                 + depth_t
@@ -43,10 +61,10 @@ void main_fs_depth_of_field() {
   } else {
     v = (focus - v - 0.2) / max(focus, 0.0000001);
   }
-  vec4 a = texture2D(texture_0, v_tex_coords);
-  vec4 b = texture2D(texture_1, v_tex_coords);
-  vec4 c = texture2D(texture_2, v_tex_coords);
-  vec4 d = texture2D(texture_3, v_tex_coords);
+  vec3 a = texture2D(texture_0, v_tex_coords).rgb;
+  vec3 b = texture2D(texture_1, v_tex_coords).rgb;
+  vec3 c = texture2D(texture_2, v_tex_coords).rgb;
+  vec3 d = texture2D(texture_3, v_tex_coords).rgb;*/
 
   float sobel_x =  depth_tl + 2.0*depth_l + depth_bl - depth_tr - 2.0 * depth_r - depth_br;
   float sobel_y = -depth_tl - 2.0*depth_t - depth_tr + depth_bl + 2.0 * depth_b + depth_br;
@@ -65,15 +83,55 @@ void main_fs_depth_of_field() {
 //  d = vec4(0.5,0.5,0.5, 1.0);
 
   // smoothstep(a, b, x) has undefined behavior if a > b
-  float da = 1.0 - smoothstep(0.4, 0.6, v);// +  smoothstep(0.999999999999, 1.0, v);
+  /*float da = 1.0 - smoothstep(0.4, 0.6, v);// +  smoothstep(0.999999999999, 1.0, v);
   float db = smoothstep(0.4, 0.6, v) * (1.0 - smoothstep(0.7, 0.8, v));
   float dc = smoothstep(0.7, 0.8, v) * (1.0 - smoothstep(0.9, 1.0, v));
-  float dd = smoothstep(0.9, 0.99, v); // * (1.0 - smoothstep(0.99999999999, 1.0, v));
+  float dd = smoothstep(0.9, 0.99, v); // * (1.0 - smoothstep(0.99999999999, 1.0, v));*/
 
-  gl_FragColor = a * da + b * db + c * dc + d * dd;
+  /*gl_FragColor = a * da + b * db + c * dc + d * dd;
   //gl_FragColor = a;// * da + b * db + c * dc + d * dd;
   gl_FragColor *= sob;
   //gl_FragColor = vec4(main_sample, main_sample, main_sample, 1.0);
 
-  gl_FragColor.a = 1.0;
+  gl_FragColor.a = 1.0;*/
+  
+  /*vec4 color;
+  if (v_tex_coords.x < 0.25)
+    color = a;
+  else if (v_tex_coords.x < 0.5)
+    color = b;
+  else if (v_tex_coords.x < 0.75)
+    color = c;
+  else
+    color = d;
+  
+  gl_FragColor = vec4(color.rgb, 1.0);*/
+  
+  vec3 color = vec3(0.0);
+  float sum = 0.0;
+  for (float y = -RADIUS; y <= RADIUS; y += STEP)
+  {
+    for (float x = -RADIUS; x <= RADIUS; x += STEP)
+    {
+      vec2 offset = vec2(x, y);
+      float depth = sample_depth(offset);
+      if (depth <= main_sample)
+      {
+        float linearDepth = linearizeDepth(depth);
+        float coc = computeCoc(linearDepth);
+        float weight = smoothstep(coc, coc * 0.5, length(offset));
+        color += weight * texture2D(texture_0, v_tex_coords + offset).rgb;
+        sum += weight;
+      }
+    }
+  }
+  color /= sum;
+  
+  //float d = sample_depth(vec2(0.0));
+  // d = 2.0 * d - 1.0;
+  // float ld = 2.0 * zNear * zFar / (zFar + zNear - d * (zFar - zNear));
+  //float coc = clamp((d - focus) / 2.0, 0.0, 1.0);
+  //float coc = max((d - 0.98) / 0.02, 0.0);
+  //color = vec3(computeCoc(linearizeDepth(d)));
+  gl_FragColor = vec4(color * sob, 1.0);
 }
