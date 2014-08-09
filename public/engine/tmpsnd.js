@@ -131,6 +131,9 @@
       if (currentTime - ac.currentTime < (patternTime / 4)) {
         SND.st = [];
         for(i=0;i<64;i++) { SND.st[i] = currentTime + (stepTime * i); }
+        if (this.song.playlist.length == this.currentPos) {
+          return;
+        }
         var cP = this.song.playlist[this.currentPos];
         log(cP);
         for (var instrId in cP) {
@@ -147,7 +150,7 @@
             this.currentPos = this.loop;
           }
         } else{
-          this.currentPos = (this.currentPos + 1) % this.song.playlist.length;
+          this.currentPos++;
         }
         currentTime += patternTime;
       }
