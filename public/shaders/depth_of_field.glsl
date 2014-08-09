@@ -11,7 +11,7 @@ const float RADIUS = 0.02;
 const float STEP = RADIUS / 5.0;
 
 float sample_depth(vec2 uv) {
-  return texture2D(texture_4, v_tex_coords + uv).r;
+  return texture2D(texture_1, v_tex_coords + uv).r;
 }
 
 float linearizeDepth(float depth)

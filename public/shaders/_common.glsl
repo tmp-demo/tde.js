@@ -11,8 +11,6 @@ uniform mat4 view_proj_mat_inv;
 
 uniform vec2 resolution;
 
-uniform float near;
-uniform float far;
 uniform float focus;
 
 uniform vec3 light;
@@ -22,8 +20,6 @@ uniform sampler2D texture_1;
 uniform sampler2D texture_2;
 uniform sampler2D texture_3;
 uniform sampler2D texture_4;
-
-uniform vec2 step;
 
 uniform float clip_time;
 

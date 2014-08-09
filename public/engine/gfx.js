@@ -65,8 +65,6 @@ var _uniforms = [
   "view_proj_mat",
   "view_proj_mat_inv",
   "resolution",
-  "near",
-  "far",
   "focus",
   "light",
   /*"texture_0",
@@ -74,7 +72,6 @@ var _uniforms = [
   "texture_2",
   "texture_3",
   "texture_4",*/
-  "step",
   "clip_time",
   "text_params",
   "mask",
