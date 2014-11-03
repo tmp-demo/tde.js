@@ -45,7 +45,7 @@ echo "onload=main;" >> $EXPORT_ROOT/demo.js
 if [ ! -f tools/compiler.jar ]; then
     echo " -- tools/compiler.jar not found, now downloading it..."
     wget -O tools/compiler-latest.zip "http://dl.google.com/closure-compiler/compiler-latest.zip"
-    cd tools && unzip compiler-latest.zip
+    (cd tools && unzip compiler-latest.zip)
 fi
 
 echo " -- running the closure compiler..."
