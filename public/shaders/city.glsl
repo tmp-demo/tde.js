@@ -1,4 +1,5 @@
 //! VERTEX
+//! INCLUDE _common.glsllib
 
 void main_vs_city() {
   gl_Position = view_proj_mat * vec4(position
@@ -10,6 +11,7 @@ void main_vs_city() {
 }
 
 //! FRAGMENT
+//! INCLUDE _common.glsllib
 //! INCLUDE scattering.glsllib
 //! INCLUDE rand.glsllib
 

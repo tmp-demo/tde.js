@@ -1,4 +1,5 @@
 //! VERTEX
+//! INCLUDE _common.glsllib
 
 void main_vs_badge() {
   float c = cos(text_params.w), s = sin(text_params.w);
@@ -8,6 +9,7 @@ void main_vs_badge() {
 }
 
 //! FRAGMENT
+//! INCLUDE _common.glsllib
 
 void main_fs_badge() {
   gl_FragColor = texture2D(texture_0, v_tex_coords) * mask;

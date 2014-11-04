@@ -15,7 +15,7 @@ require("./project").init(app)
 require("./asset").init(app)
 
 app.use(express.static(__dirname + "/public"))
-app.use(express.static(__dirname + "/export/demojs2014-playground/shaders"))
+app.use(express.static(__dirname + "/export/wsmind-playground/shaders"))
 
 app.use(errorHandler())
 

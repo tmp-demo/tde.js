@@ -1,4 +1,5 @@
 //! VERTEX
+//! INCLUDE _common.glsllib
 
 void main_vs_buildings_mtl() {
   gl_Position = vec4(position.xy, 0.0, 1.0);
@@ -6,6 +7,7 @@ void main_vs_buildings_mtl() {
 }
 
 //! FRAGMENT
+//! INCLUDE _common.glsllib
 //! INCLUDE rand.glsllib
 
 float rectangle(vec2 uv, float x1, float y1, float x2, float y2) {

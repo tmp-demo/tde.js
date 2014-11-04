@@ -1,4 +1,5 @@
 //! VERTEX
+//! INCLUDE _common.glsllib
 
 void main_vs_posteffect() {
   gl_Position = vec4(position.xy, 0.0, 1.0);
@@ -6,6 +7,7 @@ void main_vs_posteffect() {
 }
 
 //! FRAGMENT
+//! INCLUDE _common.glsllib
 //! INCLUDE rand.glsllib
 
 void main_fs_posteffect() {
