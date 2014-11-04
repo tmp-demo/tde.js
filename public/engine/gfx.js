@@ -340,8 +340,9 @@ function render_scene(scene, demo_time, scene_time) {
     if (pass.update) {
       pass.update(t);
     }
-    if (pass.program) {
-      var shader_program = pass.program;
+    var program = programs[pass.program]
+    if (program) {
+      var shader_program = program;
       gl.useProgram(shader_program);
       var rx = canvas.width;
       var ry = canvas.height;
@@ -371,7 +372,7 @@ function render_scene(scene, demo_time, scene_time) {
       gl.blendFunc.apply(gl, pass.blend);
     }
     if (pass.render) {
-      pass.render(pass.program);
+      pass.render(program);
     }
   }
 }
