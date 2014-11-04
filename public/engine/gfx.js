@@ -15,14 +15,19 @@ function gl_init() {
   
   gl.viewport(0, 0, canvas.width, canvas.height);
 
-  var buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  var quad = new Float32Array([-1, -1,
-                               -1,  1,
-                                1, -1,
-                                1,  1]);
-  gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
-  _quad_vbo = buffer;
+  geometries.quad = {
+    buffers: [
+      make_vbo(POS, [
+        -1, -1,
+        -1, 1,
+        1, -1,
+        1, 1
+      ])
+    ],
+    mode: gl.TRIANGLE_STRIP,
+    vertex_count: 4
+  }
+  
   // get readable strings for error enum values
   // #debug{{
   for (var propertyName in gl) {
@@ -44,7 +49,6 @@ function clear_texture_canvas() {
   textureContext.clearRect(0, 0, 2048, 2048);
 }
 
-var _quad_vbo = null;
 var _enums = _enums = { }; // #debug
 
 var _locations = [
@@ -138,17 +142,8 @@ function replace_geom(old_geom, new_geom) {
 }
 // #debug}}
 
-function draw_quad() {
-  gl.disable(gl.DEPTH_TEST);
-  gl.bindBuffer(gl.ARRAY_BUFFER, _quad_vbo);
-  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(0);
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-}
-
 // actually renders
 function draw_geom(data) {
-  gl.enable(gl.DEPTH_TEST);
   for (var i in data.buffers) {
     var buffer = data.buffers[i];
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer.vbo);
@@ -156,13 +151,6 @@ function draw_geom(data) {
     gl.vertexAttribPointer(buffer.location, buffer.length / data.vertex_count, gl.FLOAT, false, 0, 0);
   }
   gl.drawArrays(data.mode, 0, data.vertex_count);
-}
-
-// to use with the timeline
-function draw_mesh(data) {
-  return function() {
-    draw_geom(data);
-  }
 }
 
 // type: gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
@@ -316,13 +304,6 @@ function set_uniforms(program, ratio) {
   }
 }
 
-function clear() {
-  //gl.clearColor(0.7, 0.8, 0.9, 1.0);
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
-  gl.clearDepth(1.0);
-  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-}
-
 function render_scene(scene, demo_time, scene_time) {
   var clip_time_norm = scene_time/scene.duration;
   uniforms["clip_time"] = scene_time;
@@ -371,8 +352,23 @@ function render_scene(scene, demo_time, scene_time) {
       gl.enable(gl.BLEND);
       gl.blendFunc.apply(gl, pass.blend);
     }
-    if (pass.render) {
-      pass.render(program);
+    
+    if (pass.depthTest) {
+      gl.enable(gl.DEPTH_TEST);
+    }
+    else {
+      gl.disable(gl.DEPTH_TEST);
+    }
+    
+    if (pass.clear) {
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      gl.clearDepth(1.0);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    }
+    
+    var geometry = geometries[pass.geometry]
+    if (geometry) {
+      draw_geom(geometry)
     }
   }
 }
