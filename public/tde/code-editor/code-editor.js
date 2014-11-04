@@ -30,13 +30,17 @@ angular.module("tde.code-editor", [])
     {
       $scope.error = null
       
-      var editor = CodeMirror(element.find(".codemirror-wrapper").get(0), {
+      /*var editor = CodeMirror(element.find(".codemirror-wrapper").get(0), {
         mode: attrs.language,
         matchBrackets: true,
         lineNumbers: true,
         theme: "monokai",
         value: $scope.code
-      })
+      })*/
+      
+      var editor = ace.edit(element.find(".codemirror-wrapper").get(0))
+      editor.setTheme("ace/theme/monokai");
+      editor.getSession().setMode("ace/mode/" + attrs.language);
       
       $scope.$watch("code", function(code)
       {
@@ -47,9 +51,10 @@ angular.module("tde.code-editor", [])
         }
       })
       
-      element.keypress(function(event)
-      {
-        if (event.ctrlKey && (event.keyCode == 13 || event.keyCode == 10))
+      editor.commands.addCommand({
+        name: "Reload code",
+        bindKey: "Ctrl+Enter",
+        exec: function(editor)
         {
           $scope.$apply(function()
           {
