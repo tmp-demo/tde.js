@@ -45,7 +45,6 @@ cat $SHADER_EXPORT_ROOT/all.min.glsl | head -5 | tail -1 | tr -d '\r\n' >> $SHAD
 echo "'" >> $SHADER_EXPORT_ROOT/shaders.js
 
 # loading code
-echo "programs = {}" >> $SHADER_EXPORT_ROOT/shaders.js
 echo "function load_shaders()" >> $SHADER_EXPORT_ROOT/shaders.js
 echo "{" >> $SHADER_EXPORT_ROOT/shaders.js
 cat $SHADER_EXPORT_ROOT/loading_code.js >> $SHADER_EXPORT_ROOT/shaders.js

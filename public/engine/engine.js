@@ -107,6 +107,8 @@ function main() {
   demo_init();
   gfx_init();
 
+  load_geometries();
+  
   render_scene(scenes[0], 0, 0);
 
   snd = new SND(SONG);

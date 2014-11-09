@@ -28,7 +28,20 @@ done
 
 cat $EXPORT_ROOT/shaders/shaders.js >> $EXPORT_ROOT/demo.js
 
-for f in  $PROJECT_ROOT/*.seq
+for f in $PROJECT_ROOT/*.geom
+do
+    ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
+done
+
+echo "function load_geometries() {" >> $EXPORT_ROOT/demo.js
+for f in $PROJECT_ROOT/*.geom
+do
+    GEOM_NAME=`basename $f .geom`
+    echo "geometries."$GEOM_NAME" = generate_"$GEOM_NAME"_geom();" >> $EXPORT_ROOT/demo.js
+done
+echo "}" >> $EXPORT_ROOT/demo.js
+
+for f in $PROJECT_ROOT/*.seq
 do
     ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
 done
