@@ -15,19 +15,6 @@ function gl_init() {
   
   gl.viewport(0, 0, canvas.width, canvas.height);
 
-  geometries.quad = {
-    buffers: [
-      make_vbo(POS, [
-        -1, -1,
-        -1, 1,
-        1, -1,
-        1, 1
-      ])
-    ],
-    mode: gl.TRIANGLE_STRIP,
-    vertex_count: 4
-  }
-  
   // get readable strings for error enum values
   // #debug{{
   for (var propertyName in gl) {
