@@ -29,21 +29,21 @@ angular.module("tde.engine-view", [])
       subdiv_slider = element.find(".subdiv_param");
       //subdiv_slider.value = num_subdivs;
       subdiv_slider.on("input", function() {
-        num_subdivs = this.value;
-        console.log("Num subdivisions: " + this.value);
-        city_map = document._generate_map();
-        replace_geom(geometries.city, document._generate_city_geom(city_map));
-        $scope.driver.drawFrame();
+        //num_subdivs = this.value;
+        //console.log("Num subdivisions: " + this.value);
+        //city_map = document._generate_map();
+        //replace_geom(geometries.city, document._generate_city_geom(city_map));
+        //$scope.driver.drawFrame();
       })
 
       perimeter_slider = element.find(".min_perimeter");
       //perimeter_slider.value = MIN_PERIMETER;
       perimeter_slider.on("input", function() {
-        MIN_PERIMETER = this.value;
-        console.log("Perimeter minimum: " + this.value);
-        city_map = document._generate_map();
-        replace_geom(geometries.city, document._generate_city_geom(city_map));
-        $scope.driver.drawFrame();
+        //MIN_PERIMETER = this.value;
+        //console.log("Perimeter minimum: " + this.value);
+        //city_map = document._generate_map();
+        //replace_geom(geometries.city, document._generate_city_geom(city_map));
+        //$scope.driver.drawFrame();
       })
 
       shrink_slider = element.find(".subdiv_shrink_coef");
@@ -61,10 +61,10 @@ angular.module("tde.engine-view", [])
       //shrink_slider.value = SUBDIV_SHRINK_COEF;
       extrude_perimeter_slider.on("input", function() {
         //MIN_PERIMETER_EXTRUSION = this.value;
-        console.log("seed: " + this.value);
-        SEED = this.value;
-        city_map = document._generate_map();
-        replace_geom(geometries.city, document._generate_city_geom(city_map));
+        //console.log("seed: " + this.value);
+        //SEED = this.value;
+        //city_map = document._generate_map();
+        //replace_geom(geometries.city, document._generate_city_geom(city_map));
 
         $scope.driver.drawFrame();
       })

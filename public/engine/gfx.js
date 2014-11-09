@@ -12,7 +12,7 @@ var textureContext
 function gl_init() {
   gl = canvas.getContext("webgl");
   minify_context(gl);
-  
+
   gl.viewport(0, 0, canvas.width, canvas.height);
 
   // get readable strings for error enum values
@@ -32,10 +32,6 @@ function gl_init() {
   load_shaders();
 }
 
-function clear_texture_canvas() {
-  textureContext.clearRect(0, 0, 2048, 2048);
-}
-
 var _enums = _enums = { }; // #debug
 
 var _locations = [
@@ -49,37 +45,6 @@ var POS = 0;
 var TEX_COORDS = 1;
 var NORMALS = 2;
 var COLOR = 3;
-
-// #debug{{
-var _uniforms = [
-  "cam_pos",
-  "view_proj_mat",
-  "view_proj_mat_inv",
-  "resolution",
-  "focus",
-  "light",
-  /*"texture_0",
-  "texture_1",
-  "texture_2",
-  "texture_3",
-  "texture_4",*/
-  "clip_time",
-  "text_params",
-  "mask",
-  "cam_target",
-  "cam_fov",
-  "glitch"
-];
-// #debug}}
-
-// #debug{{
-function gl_error() {
-  var v = gl.getError();
-  var name = _enums[v];
-  return (name !== undefined) ? ("gl." + name) :
-      ("/*UNKNOWN WebGL ENUM*/ 0x" + v.toString(16) + "");
-}
-// #debug}}
 
 function gfx_init() {
   // replace the render passes' texture arrays by actual frame buffer objects
@@ -215,23 +180,8 @@ function create_texture(width, height, format, data, allow_repeat, linear_filter
   };
 }
 
-function texture_unit(i) { return gl.TEXTURE0+i; }
 
-// #debug{{
-function frame_buffer_error(e) {
-  if (e == gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT) {
-      return "FRAMEBUFFER_INCOMPLETE_ATTACHMENT";}
-  if (e == gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) {
-      return "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";}
-  if (e == gl.FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER) {
-      return "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";}
-  if (e == gl.FRAMEBUFFER_UNSUPPORTED) {
-      return "FRAMEBUFFER_UNSUPPORTED";}
-  if (e == gl.FRAMEBUFFER_INCOMPLETE_MULTISAMPLE) {
-      return "FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";}
-  return "unknown framebuffer error";
-}
-// #debug}}
+function texture_unit(i) { return gl.TEXTURE0+i; }
 
 function frame_buffer(target) {
   var fbo = gl.createFramebuffer();
