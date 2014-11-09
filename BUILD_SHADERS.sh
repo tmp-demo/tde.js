@@ -6,6 +6,7 @@ if [ $# -lt "1" ]; then
 fi
 
 PROJECT=$1
+PROJECT_ROOT=./data/$PROJECT
 SHADER_EXPORT_ROOT=./export/$PROJECT/shaders
 
 . ./utils.sh
@@ -15,13 +16,13 @@ rm -rf "$SHADER_EXPORT_ROOT"
 mkdir -p "$SHADER_EXPORT_ROOT"
 
 # common glsl code
-for f in  ./public/shaders/*.glsllib
+for f in  $PROJECT_ROOT/*.glsllib
 do
     cp $f $SHADER_EXPORT_ROOT
 done
 
 # programs
-for f in  ./public/shaders/*.glsl
+for f in  $PROJECT_ROOT/*.glsl
 do
     cat $f >> $SHADER_EXPORT_ROOT/all.glsl
 done
