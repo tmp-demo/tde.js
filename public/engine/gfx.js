@@ -130,15 +130,11 @@ function make_vbo(location, buffer) {
 
 // editor only
 // #debug{{
-function replace_geom(old_geom, new_geom) {
-  gl.deleteBuffer(old_geom.vbo);
-  gl.deleteBuffer(old_geom.ibo);
-  old_geom.src = new_geom.src;
-  old_geom.vbo = new_geom.vbo;
-  old_geom.ibo = new_geom.ibo;
-  old_geom.num_indices = new_geom.num_indices;
-  old_geom.components_per_vertex = new_geom.components_per_vertex;
-  old_geom.attribs = new_geom.attribs;
+function destroy_geom(geom) {
+  for (var i in geom.buffers) {
+    var buffer = geom.buffers[i];
+    gl.deleteBuffer(buffer.vbo);
+  }
 }
 // #debug}}
 

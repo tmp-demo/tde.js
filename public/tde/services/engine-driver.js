@@ -18,10 +18,15 @@ angular.module("tde.services.engine-driver", [])
   this.loadGeometry = function(name, data)
   {
     self.logInfo("loading " + name)
+    var geometry_generator = eval(data)
+    geometries[name] = geometry_generator();
+    self.drawFrame();
   }
 
   this.unloadGeometry = function(name)
   {
+    self.logInfo("unloading geom " + name)
+    destroy_geom(geometries[name])
   }
 
   this.loadSequence = function(name, data)
