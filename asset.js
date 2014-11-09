@@ -1,4 +1,4 @@
-var git = require("gift")
+//var git = require("gift")
 var fs = require("fs")
 var Cookies = require("cookies")
 
@@ -48,7 +48,7 @@ module.exports.init = function(app)
         {
           if (err) return next(err)
           
-          var repo = git(app.get("dataRoot") + projectName)
+          /*var repo = git(app.get("dataRoot") + projectName)
           repo.add(assetName + "." + assetType, function(err)
           {
             if (err) return next(err)
@@ -61,7 +61,9 @@ module.exports.init = function(app)
               
               res.send(200, "Asset created")
             })
-          })
+          })*/
+          
+          res.send(200, "Asset created")
         })
       })
     })
@@ -92,7 +94,7 @@ module.exports.init = function(app)
     {
       if (err) return next(err)
       
-      var repo = git(app.get("dataRoot") + projectId)
+      /*var repo = git(app.get("dataRoot") + projectId)
       repo.add(assetPath, function(err)
       {
         if (err) return next(err)
@@ -105,7 +107,9 @@ module.exports.init = function(app)
           
           res.send(200, "Asset udpated")
         })
-      })
+      })*/
+      
+      res.send(200, "Asset updated")
     })
   })
   
@@ -130,7 +134,7 @@ module.exports.init = function(app)
     {
       if (err) return next(err)
       
-      var repo = git(app.get("dataRoot") + projectId)
+      /*var repo = git(app.get("dataRoot") + projectId)
       repo.add(newAssetPath, function(err)
       {
         if (err) return next(err)
@@ -148,7 +152,9 @@ module.exports.init = function(app)
             res.send(200, "Asset renamed")
           })
         })
-      })
+      })*/
+      
+      res.send(200, "Asset renamed")
     })
   })
 }

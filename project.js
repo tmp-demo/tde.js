@@ -1,4 +1,4 @@
-var git = require("gift")
+//var git = require("gift")
 var fs = require("fs")
 var exec = require("child_process").exec
 
@@ -36,12 +36,14 @@ module.exports.init = function(app)
     {
       if (err) return next(err)
       
-      git.init(projectFolder, function(err, repo)
+      /*git.init(projectFolder, function(err, repo)
       {
         if (err) next(err)
         
         res.send(201, "Project created")
-      })
+      })*/
+      
+      res.send(201, "Project created")
     })
   })
   
