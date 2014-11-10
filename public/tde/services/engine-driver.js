@@ -9,11 +9,19 @@ angular.module("tde.services.engine-driver", [])
 
   this.loadTexture = function(name, data)
   {
+    self.logInfo("loading texture "+ name);
+    self.logInfo(data);
     var asset = eval(data);
     switch (asset.type) {
       case "js": {
-        self.logInfo("js texture "+ name);
         textures[name] = asset.generator();
+        break;
+      }
+      case "text": {
+        for (var i = 0; i <asset.data.length; ++i) {
+          var item = asset.data[i];
+          textures[item.id] = create_text_texture(item.size, item.text);
+        }
         break;
       }
       default: {
