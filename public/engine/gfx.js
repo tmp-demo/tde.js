@@ -181,7 +181,7 @@ function create_texture(width, height, format, data, allow_repeat, linear_filter
 }
 
 function destroy_texture(texture) {
-  console.log("TODO: Nical! you feakin' leaked that texture, man");
+  gl.deleteTexture(texture.tex);
 }
 
 function texture_unit(i) { return gl.TEXTURE0+i; }
