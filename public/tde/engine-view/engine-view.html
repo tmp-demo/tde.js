@@ -1,12 +1,14 @@
-<div>
-	<canvas id="engine-view" onload="editor_main()" width="640" height="360"></canvas>
+<div id="engine">
+  <div class="canvas-container">
+    <canvas id="engine-view" onload="editor_main()" width="640" height="360"></canvas>
+  </div>
   <input type="range" class="seeker" min="0" max="1000" />
-  <canvas id="map-view" width="640" height="500" onload="editor_init_map()"></canvas>
+  <!--<canvas id="map-view" width="640" height="500" onload="editor_init_map()"></canvas>
   <div id="map-coords" style="color:white">&nbsp;</div>
   <input type="range" class="subdiv_param" min="0" max="100" />
   <input type="range" class="min_perimeter" min="0" max="200" />
   <input type="range" class="subdiv_shrink_coef" min="0" max="1.0" step="0.01" />
-  <!--<input type="range" class="extrude_min_perimeter" min="0" max="200" />-->
+  <input type="range" class="extrude_min_perimeter" min="0" max="200" />
   <input type="range" class="extrude_min_perimeter" min="0" max="500" step="1"/>
   <div class="engine-log">
     <ul>
@@ -15,5 +17,5 @@
         <span>{{line.details}}</span>
       </li>
     </ul>
-  </div>
+  </div>-->
 </div>

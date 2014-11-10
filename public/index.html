@@ -17,13 +17,15 @@
 	</head>
 	<body ng-controller="ApplicationCtrl">
 		<tde-navbar></tde-navbar>
-		<div ng-controller="AssetListCtrl" id="assets">
-			<tde-asset-list></tde-asset-list>
-		</div>
-		<div id="content" ng-view></div>
-		<div id="engine">
-			<tde-engine-view></tde-engine-view>
-		</div>
+    <div id="leftPane">
+      <div id="inspector" ng-view></div>
+    </div>
+    <div id="rightPane">
+      <tde-engine-view></tde-engine-view>
+      <div id="timeline">
+        passes and keyframes...
+      </div>
+    </div>
 		
     <div class="modal fade" id="loginBox" ng-controller="NavbarCtrl">
       <div class="modal-dialog">

@@ -24,7 +24,9 @@ angular.module("tde", [
   })
   $routeProvider.when("/:projectId/:assetType/:assetName", {
     templateUrl: function($routeParams) {
-      return "/tde/project/" + $routeParams.assetType + "-editor/" + $routeParams.assetType + "-editor.html"
+      var assetType = $routeParams.assetType
+      if (assetType == "glsllib") assetType = "glsl"
+      return "/tde/project/" + assetType + "-editor/" + assetType + "-editor.html"
     },
     controller: "ProjectCtrl",
     reloadOnSearch: false

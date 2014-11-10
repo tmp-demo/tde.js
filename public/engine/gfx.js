@@ -10,7 +10,7 @@ var textureCanvas
 var textureContext
 
 function gl_init() {
-  gl = canvas.getContext("webgl");
+  gl = canvas.getContext("webgl", {alpha: false});
   minify_context(gl);
 
   gl.viewport(0, 0, canvas.width, canvas.height);

@@ -1,4 +1,9 @@
 <div>
 	<h1>{{projectId}}</h1>
-	<p>Create or edit assets on the left.</p>
+  <h2>Assets</h2>
+  <ul class="asset-list">
+    <li ng-repeat="asset in assets | filter:query">
+      <a href="#/{{projectId}}/{{asset.type}}/{{asset.name}}">{{asset.name}}.{{asset.type}}</a>
+    </li>
+  </ul>
 </div>

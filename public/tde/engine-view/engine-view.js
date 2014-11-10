@@ -6,7 +6,7 @@ angular.module("tde.engine-view", [])
   $scope.driver = EngineDriver
 })
 
-.directive("tdeEngineView", function($location)
+.directive("tdeEngineView", function($location, Asset)
 {
   return {
     restrict: "E",
@@ -24,9 +24,9 @@ angular.module("tde.engine-view", [])
 
       var search = $location.search();
       if (typeof search.time !== 'undefined')
-      $scope.driver.seek(parseFloat(search.time));
+        $scope.driver.seek(parseFloat(search.time));
 
-      subdiv_slider = element.find(".subdiv_param");
+      /*subdiv_slider = element.find(".subdiv_param");
       //subdiv_slider.value = num_subdivs;
       subdiv_slider.on("input", function() {
         //num_subdivs = this.value;
@@ -67,7 +67,7 @@ angular.module("tde.engine-view", [])
         //replace_geom(geometries.city, document._generate_city_geom(city_map));
 
         $scope.driver.drawFrame();
-      })
+      })*/
 
       setInterval(function()
       {
@@ -138,7 +138,7 @@ angular.module("tde.engine-view", [])
         }
       })
 
-      var canvas_map = document.getElementById("map-view")
+      /*var canvas_map = document.getElementById("map-view")
       map_ctx = canvas_map.getContext("2d");
       map_ctx.fillStyle = "rgb(220, 220, 220)";
       map_ctx.fillRect(0, 0, 640, 500);
@@ -167,7 +167,7 @@ angular.module("tde.engine-view", [])
         
 
         $scope.driver.drawFrame();
-      })
+      })*/
     }
   }
 })

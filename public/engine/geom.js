@@ -314,7 +314,7 @@ function plazza(path, pos, rad) {
 // if this code below ends up in the minified export, something's wrong.
 
 function debug_draw_path(path, color, offset_x, offset_y) {
-    map_ctx.strokeStyle = color;
+/*    map_ctx.strokeStyle = color;
     for (var i in path) {
         map_ctx.beginPath();
         map_ctx.moveTo(
@@ -327,7 +327,7 @@ function debug_draw_path(path, color, offset_x, offset_y) {
         );
         map_ctx.stroke();
         map_ctx.closePath();
-    }
+    }*/
 }
 
 /*function arrays_equal(a1, a2) {
