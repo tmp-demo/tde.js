@@ -25,9 +25,7 @@ angular.module("tde.services.engine-driver", [])
     self.logInfo("loading geometry " + name)
     var geometry_generator = eval(data)
     geometries[name] = geometry_generator();
-    // TODO[wsmind] if you do that you kick off rendering while half the assets
-    // aren't loaded yet. Should call drawFrame only when _reloading_
-    //self.drawFrame();
+    self.drawFrame();
   }
 
   this.unloadGeometry = function(name)
