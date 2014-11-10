@@ -28,7 +28,7 @@ do
 done
 
 # uncomment when working on the minifier
-(cd 'D:/proj/glsl-unit/' && ./BUILD.sh) && cp 'D:/proj/glsl-unit/bin/custom_template_glsl_compiler.js' ./tools
+# (cd 'D:/proj/glsl-unit/' && ./BUILD.sh) && cp 'D:/proj/glsl-unit/bin/custom_template_glsl_compiler.js' ./tools
 
 echo " -- minifying"
 "$NODE" ./tools/custom_template_glsl_compiler --input=$SHADER_EXPORT_ROOT/all.glsl --variable_renaming=INTERNAL --output=$SHADER_EXPORT_ROOT/all.min.glsl > $SHADER_EXPORT_ROOT/loading_code.js
