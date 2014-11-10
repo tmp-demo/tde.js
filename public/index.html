@@ -13,13 +13,14 @@
 		<link rel="stylesheet" href="/tde/tde.css" />
 		<link rel="stylesheet" href="/tde/code-editor/code-editor.css" />
 		<link rel="stylesheet" href="/tde/engine-view/engine-view.css" />
+		<link rel="stylesheet" href="/tde/home/home.css" />
+		<link rel="stylesheet" href="/tde/navbar/navbar.css" />
+		<link rel="stylesheet" href="/tde/project/project.css" />
 		<link rel="stylesheet" href="/tde/project/asset-list/asset-list.css" />
 	</head>
 	<body ng-controller="ApplicationCtrl">
 		<tde-navbar></tde-navbar>
-    <div id="leftPane">
-      <div id="inspector" ng-view></div>
-    </div>
+    <div id="leftPane" ng-view></div>
     <div id="rightPane">
       <tde-engine-view></tde-engine-view>
       <div id="timeline">
