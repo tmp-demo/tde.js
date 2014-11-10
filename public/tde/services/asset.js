@@ -71,10 +71,9 @@ angular.module("tde.services.asset", [])
   
   this.loadAsset = function(assetId, callback)
   {
-    $http.get("/data/project/" + $routeParams.projectId + "/asset/" + assetId).
+    $http.get("/data/project/" + $routeParams.projectId + "/asset/" + assetId, {transformResponse: function(data) {return data;} }).
       success(function(data)
       {
-        if (typeof(data) == "object") data = JSON.stringify(data)
         self.assets[assetId] = data
         
         var parts = assetId.split(".")
