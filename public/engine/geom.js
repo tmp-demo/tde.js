@@ -128,6 +128,82 @@ function lines_intersection_2d(a1, a2, b1, b2) {
     ];
 }
 
+// returns a transformed ring. 
+//displacements : vec3, translations along : 
+//                     - normale to the ring
+//                     - center to 1st vertice of the ring direction
+//                     - normale to both of the above
+//rotations : vec3, in radiatns, of the rotation along those same axis
+//homotecies, scalar
+function transform_ring ( ring_old, displacements, rotations, homotecies ){
+  var i = 0;
+  var center = vec3.create();
+  
+  var e1;
+  var e2;
+  var normal;
+  var a1;
+  
+  var ring;
+  
+  //first, make a copy of it
+  var ring = deep_clone(ring_old);
+  
+  //find out the normal
+  vec3.sub(e1, ring[0], ring[1]);
+  vec3.sub(e2, ring[0], ring[2]);
+  vec3.cross(normal, e1, e2);
+  vec3.normalize(normal, normal);
+  
+  //at first, we will have to make sure the ring is coplanar.
+  // #debug{{
+    var dotprod;
+    
+    for(i = 3; i < ring.length; i++){
+      vec3.sub(e1, ring[0], ring[i]);
+      vec3.normalize(e1, e1);
+      if(vec3.dot( normal, e1) > 0.1){
+        console.log("transform_ring : ring vertices are not coplanar. May lead to trouble !");
+      }
+    }
+  // #debug}}
+  
+  //compute the center of the ring.
+  for(i = 0; i < ring.length; i++){
+    vec3.add(center, ring[i]);
+  }
+  vec3.divide(center,center, i);
+  
+  //find out the two other axis
+  vec3.sub(a1, ring[0], center);
+  vec3.normalize(a1, a1);
+  
+  vec3.cross(a2, normal, a1);
+  
+  
+  //translate !
+  var temp;
+  for(i = 0; ring.length; i++){
+    temp = vec3.scale(temp, normal, displacement[0];
+    vec3.add(ring[i], temp);
+    temp = vec3.scale(temp, a1, displacement[1];
+    vec3.add(ring[i], temp);
+    temp = vec3.scale(temp, a2, displacement[2];
+    vec3.add(ring[i], temp);
+  }
+  
+  //rotate !
+  console.log("transform_ring : rotation not yet implemented !");
+  
+  //homotecies 
+  console.log("transform_ring : homotecies not yet implemented !");
+  
+  
+  return ring;
+  
+
+}
+
 function shrink_path(path, amount, z, use_subdiv, disp) {
     var new_path = [];
     var path_length = path.length;
@@ -191,23 +267,6 @@ function fill_convex_ring(geom, ring, uv) {
   }
 }
 
-function city_subdivision_rec(paths, num_subdivs, sub_id) {
-    if (sub_id < 0) { sub_id = 0; }
-    var sub_paths = [];
-    for (var i in paths) {
-        var sub = city_subdivision(paths[i], sub_id)
-        if (!sub) {
-            sub_paths.push(paths[i]);
-        }
-        else {
-            sub_paths.push(sub[0], sub[1]);
-        }
-    }
-    if (num_subdivs == 1) {
-        return sub_paths;
-    }
-    return city_subdivision_rec(sub_paths, num_subdivs - 1, sub_id - 1);
-}
 
 // TODO make this show in the editor: it defines how the min size of city blocks
 var MIN_PERIMETER = 260;
