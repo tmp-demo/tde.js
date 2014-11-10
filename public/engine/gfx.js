@@ -6,8 +6,7 @@ var geometries = {}
 var programs = {}
 var fragment_shaders = {}
 var vertex_shaders = {}
-var textureCanvas
-var textureContext
+var ctx_2d
 
 function gl_init() {
   gl = canvas.getContext("webgl", {alpha: false});
@@ -24,10 +23,10 @@ function gl_init() {
   }
   // #debug}}
 
-  textureCanvas = document.createElement("canvas");
-  textureCanvas.width = textureCanvas.height = 2048;
-  textureContext = textureCanvas.getContext("2d");
-  minify_context(textureContext);
+  canvas_2d = document.createElement("canvas");
+  canvas_2d.width = canvas_2d.height = 2048;
+  ctx_2d = canvas_2d.getContext("2d");
+  minify_context(ctx_2d);
   
   load_shaders();
 }

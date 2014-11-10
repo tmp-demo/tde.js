@@ -15,7 +15,6 @@ function minify_context(ctx)
   {
     var name = names[i]
     
-    // add an underscore to shader variables, to avoid conflict with glsl-unit minification
     // #debug{{
     var shader = false
     if (name.match(/^shader_/))
@@ -31,6 +30,7 @@ function minify_context(ctx)
       re = /(^[a-z]|[A-Z0-9])[a-z]*/g;
     while (m = re.exec(name)) newName += m[1];
     
+    // add an underscore to shader variables, to avoid conflict with glsl-unit minification
     // #debug{{
     if (shader)
       newName = "_" + newName;
@@ -104,6 +104,7 @@ function main() {
   canvas.height = innerHeight;
 
   gl_init();
+  text_init();
   demo_init();
   gfx_init();
 
@@ -122,4 +123,5 @@ function main() {
 function editor_main() {
   canvas = document.getElementById("engine-view")
   gl_init();
+  text_init();
 }
