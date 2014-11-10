@@ -70,6 +70,64 @@ function gfx_init() {
   for (var i in _uniforms) fakeContext["shader_" + _uniforms[i]] = 42;
   minify_context(fakeContext);
   // #debug}}
+
+  // edition placeholders
+  // #debug{{
+  geometry_placeholder = {
+    buffers: [
+      make_vbo(POS, [
+        -100, 0, -100,
+        -100, 0, 100,
+        100, 0, 100,
+        100, 0, 100,
+        100, 0, -100,
+        -100, 0, -100
+      ]),
+      make_vbo(NORMALS, [
+        0, 1, 0,
+        1, 1, 0,
+        0, 1, 0,
+        0, 0, 0,
+        0, 1, 0,
+        0, 1, 1
+      ]),
+      make_vbo(TEX_COORDS, [
+        0, 0,
+        0, 1,
+        1, 1,
+        1, 1,
+        1, 0,
+        0, 0
+      ])
+    ],
+    mode: gl.TRIANGLES,
+    vertex_count: 6
+  }
+
+  var vs_placeholder = "\
+    precision lowp float; \
+    uniform mat4 view_proj_mat; \
+    attribute vec3 position; \
+    varying vec3 v_position; \
+     \
+    void main() \
+    { \
+      gl_Position = view_proj_mat * vec4(position, 1.0); \
+      v_position = position; \
+    } \
+    ";
+  var fs_placeholder = "\
+    precision lowp float; \
+    varying vec3 v_position; \
+     \
+    void main() \
+    { \
+      vec3 pos = v_position * 0.1; \
+      gl_FragColor = vec4(vec3(mod(floor(pos.x) + floor(pos.y) + floor(pos.z), 2.0)), 1.0); \
+    } \
+  ";
+  program_placeholder = load_program_from_source(vs_placeholder, fs_placeholder);
+  // #debug}}
 }
 
 function make_vbo(location, buffer) {
@@ -132,6 +190,27 @@ function load_shader_program(vs_entry_point, fs_entry_point) {
   // #debug}}
   return program;
 }
+
+// #debug{{
+function load_program_from_source(vs_source, fs_source)
+{
+  var program = gl.createProgram();
+  gl.attachShader(program, compile_shader(vs_source, gl.VERTEX_SHADER));
+  gl.attachShader(program, compile_shader(fs_source, gl.FRAGMENT_SHADER));
+
+  for (var i in _locations) {
+    gl.bindAttribLocation(program, i, _locations[i]);
+  }
+
+  gl.linkProgram(program);
+
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    toastr.error(gl.getProgramInfoLog(program), "Program link error");
+  }
+
+  return program;
+}
+// #debug}}
 
 function set_texture_flags(texture, allow_repeat, linear_filtering, mipmaps) {
   // XXX - Getting the following error associated to the bind texture call:
@@ -266,19 +345,19 @@ function render_scene(scene, demo_time, scene_time) {
     }
 
     var program = programs[pass.program]
-    if (program) {
-      var shader_program = program;
-      gl.useProgram(shader_program);
-      var rx = canvas.width;
-      var ry = canvas.height;
-      if (pass.render_to) {
-        rx = textures[pass.render_to.color].width;
-        ry = textures[pass.render_to.color].height;
-      }
-      uniforms["resolution"] = [rx,ry];
-      set_uniforms(shader_program, rx / ry);
-      gl.viewport(0, 0, rx, ry);
+    program = program || program_placeholder
+    var shader_program = program;
+    gl.useProgram(shader_program);
+    var rx = canvas.width;
+    var ry = canvas.height;
+    if (pass.render_to) {
+      rx = textures[pass.render_to.color].width;
+      ry = textures[pass.render_to.color].height;
     }
+    uniforms["resolution"] = [rx,ry];
+    set_uniforms(shader_program, rx / ry);
+    gl.viewport(0, 0, rx, ry);
+
     if (pass.fbo) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
     } else {
@@ -319,8 +398,7 @@ function render_scene(scene, demo_time, scene_time) {
     }
     
     var geometry = geometries[pass.geometry]
-    if (geometry) {
-      draw_geom(geometry)
-    }
+    geometry = geometry || geometry_placeholder //#debug
+    draw_geom(geometry)
   }
 }
