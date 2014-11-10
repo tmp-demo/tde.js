@@ -9,9 +9,17 @@ angular.module("tde.services.engine-driver", [])
 
   this.loadTexture = function(name, data)
   {
-    self.logInfo("loading texture " + name)
-    var texture_generator = eval(data)
-    textures[name] = texture_generator();
+    var asset = eval(data);
+    switch (asset.type) {
+      case "js": {
+        self.logInfo("js texture "+ name);
+        textures[name] = asset.generator();
+        break;
+      }
+      default: {
+        self.logInfo("unsupported texture type " + asset.type);
+      }
+    }
   }
 
   this.unloadTexture = function(name)
