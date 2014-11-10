@@ -180,6 +180,9 @@ function create_texture(width, height, format, data, allow_repeat, linear_filter
   };
 }
 
+function destroy_texture(texture) {
+  console.log("TODO: Nical! you feakin' leaked that texture, man");
+}
 
 function texture_unit(i) { return gl.TEXTURE0+i; }
 
@@ -187,8 +190,8 @@ function frame_buffer(target) {
   var fbo = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 
-  if (target.color) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, target.color.tex, 0);
-  if (target.depth) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, target.depth.tex, 0);
+  if (target.color) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[target.color].tex, 0);
+  if (target.depth) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, textures[target.depth].tex, 0);
 
   // #debug{{
   var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
@@ -251,9 +254,18 @@ function render_scene(scene, demo_time, scene_time) {
   gl.disable(gl.BLEND);
   for (var p in scene.passes) {
     var pass = scene.passes[p];
-    if (pass.update) {
-      pass.update(t);
+
+    var texture_inputs = [];
+    if (pass.texture_inputs) {
+      for (var i=0; i<pass.texture_inputs.length; ++i) {
+        texture_inputs.push(textures[pass.texture_inputs[i]]);
+      }
     }
+
+    if (pass.update) {
+      pass.update(t, texture_inputs);
+    }
+
     var program = programs[pass.program]
     if (program) {
       var shader_program = program;
@@ -261,8 +273,8 @@ function render_scene(scene, demo_time, scene_time) {
       var rx = canvas.width;
       var ry = canvas.height;
       if (pass.render_to) {
-        rx = pass.render_to.color.width;
-        ry = pass.render_to.color.height;
+        rx = textures[pass.render_to.color].width;
+        ry = textures[pass.render_to.color].height;
       }
       uniforms["resolution"] = [rx,ry];
       set_uniforms(shader_program, rx / ry);
@@ -273,14 +285,22 @@ function render_scene(scene, demo_time, scene_time) {
     } else {
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
-    if (pass.texture_inputs) {
-      for (var i=0; i<pass.texture_inputs.length; ++i) {
-        var tex = pass.texture_inputs[i].tex;
-        gl.activeTexture(texture_unit(i));
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.uniform1i(gl.getUniformLocation(shader_program,"texture_"+i), i);
+    for (var i=0; i<texture_inputs.length; ++i) {
+      //#debug{{
+      if (!texture_inputs[i]) {
+        // TODO: should use a placeholder texture or something.
+        // This can happen in the editor if a frame is rendered
+        // while a texture is not loaded yet.
+        console.log("render_scene: missing texture "+pass.texture_inputs[i]);
+        return;
       }
+      //#debug}}
+      var tex = texture_inputs[i].tex;
+      gl.activeTexture(texture_unit(i));
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.uniform1i(gl.getUniformLocation(shader_program,"texture_"+i), i);
     }
+
     if (pass.blend) {
       gl.enable(gl.BLEND);
       gl.blendFunc.apply(gl, pass.blend);

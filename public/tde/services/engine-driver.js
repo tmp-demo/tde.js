@@ -9,18 +9,25 @@ angular.module("tde.services.engine-driver", [])
 
   this.loadTexture = function(name, data)
   {
+    self.logInfo("loading texture " + name)
+    var texture_generator = eval(data)
+    textures[name] = texture_generator();
   }
 
   this.unloadTexture = function(name)
   {
+    self.logInfo("unloading texture " + name)
+    destroy_texture(textures[name])
   }
 
   this.loadGeometry = function(name, data)
   {
-    self.logInfo("loading " + name)
+    self.logInfo("loading geometry " + name)
     var geometry_generator = eval(data)
     geometries[name] = geometry_generator();
-    self.drawFrame();
+    // TODO[wsmind] if you do that you kick off rendering while half the assets
+    // aren't loaded yet. Should call drawFrame only when _reloading_
+    //self.drawFrame();
   }
 
   this.unloadGeometry = function(name)
@@ -31,7 +38,7 @@ angular.module("tde.services.engine-driver", [])
 
   this.loadSequence = function(name, data)
   {
-    self.logInfo("loading " + name)
+    self.logInfo("loading timeline " + name)
 
     try
     {
@@ -54,7 +61,7 @@ angular.module("tde.services.engine-driver", [])
 
   this.loadSong = function(name, data)
   {
-    self.logInfo("loading " + name)
+    self.logInfo("loading song " + name)
 
     try
     {

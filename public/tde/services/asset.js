@@ -13,7 +13,7 @@ angular.module("tde.services.asset", [])
       $http.get("/data/project/" + $routeParams.projectId + "/assets").success(function(assetList) {
         for (var i = 0; i < assetList.length; i++)
         {
-          console.log("loading " + assetList[i])
+          console.log("loading asset " + assetList[i])
           self.loadAsset(assetList[i])
         }
       })
