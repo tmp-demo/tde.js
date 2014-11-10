@@ -10,14 +10,29 @@ angular.module("tde.services.engine-driver", [])
   this.loadTexture = function(name, data)
   {
     self.logInfo("loading texture "+ name);
-    self.logInfo(data);
     var asset = eval(data);
     switch (asset.type) {
+      case "empty": {
+        // A texture allocated but with no content, typically used as a render
+        // target.
+        textures[name] = create_texture(
+          eval(asset.width  || "undefined"),
+          eval(asset.height || "undefined"),
+          eval(asset.format || "undefined"),
+          null, // no data
+          eval(asset.allow_repeat || "undefined"),
+          eval(asset.linear_filtering || "undefined"),
+          eval(asset.mipmaps || "undefined")
+        );
+        break;
+      }
       case "js": {
+        // A texture initialized from a js function
         textures[name] = asset.generator();
         break;
       }
       case "text": {
+        // A set of textures containing some text
         for (var i = 0; i <asset.data.length; ++i) {
           var item = asset.data[i];
           textures[item.id] = create_text_texture(item.size, item.text);
@@ -105,7 +120,6 @@ angular.module("tde.services.engine-driver", [])
   this.logInfo = function(message, details)
   {
     toastr.info(details, message);
-    console.log(message)
     this.logBuffer.push({
       type: "info",
       message: message,
@@ -127,7 +141,9 @@ angular.module("tde.services.engine-driver", [])
 
   this.drawFrame = function()
   {
-    engine_render(this.currentTime)
+    if (gRemainingAssets == 0) {
+      engine_render(this.currentTime)
+    }
   }
   
   this.play = function()

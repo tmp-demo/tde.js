@@ -11,10 +11,13 @@ angular.module("tde.services.asset", [])
     if ($routeParams.projectId)
     {
       $http.get("/data/project/" + $routeParams.projectId + "/assets").success(function(assetList) {
+        gRemainingAssets = assetList.length;
         for (var i = 0; i < assetList.length; i++)
         {
           console.log("loading asset " + assetList[i])
-          self.loadAsset(assetList[i])
+          if (assetList[i] != "demo.seq") {
+            self.loadAsset(assetList[i])
+          }
         }
       })
     }
@@ -91,8 +94,15 @@ angular.module("tde.services.asset", [])
         
         $rootScope.$broadcast("assetListChanged")
         $rootScope.$broadcast("assetLoaded", assetId)
-        if (callback)
+        if (callback) {
           callback(null)
+        }
+        gRemainingAssets--;
+        if (gRemainingAssets == 1) {
+            // TODO!
+            // demo.seq needs to be loaded last until we fix the framebuffer dependencies
+            self.loadAsset("demo.seq");
+        }
       }).
       error(function(error)
       {

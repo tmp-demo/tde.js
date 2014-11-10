@@ -12,6 +12,8 @@ function gl_init() {
   gl = canvas.getContext("webgl", {alpha: false});
   minify_context(gl);
 
+  gl.getExtension("WEBGL_depth_texture");
+
   gl.viewport(0, 0, canvas.width, canvas.height);
 
   // get readable strings for error enum values
