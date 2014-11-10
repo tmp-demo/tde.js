@@ -37,15 +37,20 @@ echo "function load_geometries() {" >> $EXPORT_ROOT/demo.js
 for f in $PROJECT_ROOT/*.geom
 do
     GEOM_NAME=`basename $f .geom`
-    echo "geometries."$GEOM_NAME" = generate_"$GEOM_NAME"_geom();" >> $EXPORT_ROOT/demo.js
+    echo 'geometries["'$GEOM_NAME'"] = generate_'$GEOM_NAME'_geom();' >> $EXPORT_ROOT/demo.js
 done
 echo "}" >> $EXPORT_ROOT/demo.js
+
+for f in $PROJECT_ROOT/*.tex
+do
+    ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
+done
 
 echo "function load_textures() {" >> $EXPORT_ROOT/demo.js
 for f in $PROJECT_ROOT/*.tex
 do
     TEX_NAME=`basename $f .tex`
-    echo "textures."$TEX_NAME" = generate_"$TEX_NAME"_texture();" >> $EXPORT_ROOT/demo.js
+    echo 'textures["'$TEX_NAME'"] = generate_'$TEX_NAME'_texture();' >> $EXPORT_ROOT/demo.js
 done
 echo "}" >> $EXPORT_ROOT/demo.js
 
