@@ -47,11 +47,14 @@ do
 done
 
 echo "function load_textures() {" >> $EXPORT_ROOT/demo.js
-for f in $PROJECT_ROOT/*.tex
-do
-    TEX_NAME=`basename $f .tex`
-    echo 'textures["'$TEX_NAME'"] = generate_'$TEX_NAME'_texture();' >> $EXPORT_ROOT/demo.js
-done
+if [ -f $PROJECT_ROOT/*.tex ]; then
+  for f in $PROJECT_ROOT/*.tex
+  do
+      TEX_NAME=`basename $f .tex`
+      echo "texture: "$TEX_NAME
+      echo 'textures["'$TEX_NAME'"] = generate_'$TEX_NAME'_texture();' >> $EXPORT_ROOT/demo.js
+  done
+fi
 echo "}" >> $EXPORT_ROOT/demo.js
 
 for f in $PROJECT_ROOT/*.seq
