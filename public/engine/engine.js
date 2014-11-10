@@ -109,6 +109,7 @@ function main() {
   gfx_init();
 
   load_geometries();
+  load_textures();
   
   render_scene(scenes[0], 0, 0);
 

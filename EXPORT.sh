@@ -41,6 +41,14 @@ do
 done
 echo "}" >> $EXPORT_ROOT/demo.js
 
+echo "function load_textures() {" >> $EXPORT_ROOT/demo.js
+for f in $PROJECT_ROOT/*.tex
+do
+    TEX_NAME=`basename $f .tex`
+    echo "textures."$TEX_NAME" = generate_"$TEX_NAME"_texture();" >> $EXPORT_ROOT/demo.js
+done
+echo "}" >> $EXPORT_ROOT/demo.js
+
 for f in $PROJECT_ROOT/*.seq
 do
     ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
