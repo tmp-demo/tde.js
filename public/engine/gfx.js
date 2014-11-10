@@ -345,7 +345,7 @@ function render_scene(scene, demo_time, scene_time) {
     }
 
     var program = programs[pass.program]
-    program = program || program_placeholder
+    program = program || program_placeholder //#debug
     var shader_program = program;
     gl.useProgram(shader_program);
     var rx = canvas.width;
