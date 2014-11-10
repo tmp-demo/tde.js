@@ -1,8 +1,7 @@
-<div>
-	<h1>{{projectId}}</h1>
-  <h2>Assets</h2>
-  <ul class="asset-list">
-    <li ng-repeat="asset in assets | filter:query">
+<div id="project">
+	<h1>{{projectId}} <small>project</small></h1>
+  <ul class="list-group">
+    <li ng-repeat="asset in assets | filter:query" class="list-group-item">
       <a href="#/{{projectId}}/{{asset.type}}/{{asset.name}}">{{asset.name}}.{{asset.type}}</a>
     </li>
   </ul>

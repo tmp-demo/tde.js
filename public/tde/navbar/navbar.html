@@ -1,18 +1,14 @@
-<div ng-controller="NavbarCtrl" id="navbar" class="navbar navbar-inverse" role="navigation">
-	<div class="container-fluid">
-		<div class="navbar-header">
-			<span class="navbar-brand">/<a href="#/">tmp</a>/<a href="#{{projectId}}">{{projectId}}</a>/{{assetId}}</span>
-		</div>
-		<ul class="nav navbar-nav navbar-right">
-			<li>
-				<a href="/export/{{projectId}}" target="_blank" ng-show="projectId"><span class="glyphicon glyphicon-cog"></span> Export</a>
-			</li>
-			<li class="dropdown">
-				<a href="" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> {{currentUser.name}} &lt;{{currentUser.email}}&gt;</a>
-				<ul class="dropdown-menu">
-					<li><a href="#/" ng-click="logout()"><span class="glyphicon glyphicon-off"></span> Logout</a></li>
-				</ul>
-			</li>
-		</ul>
-	</div>
+<div ng-controller="NavbarCtrl" id="navbar" role="navigation">
+  <div class="header">/<a href="#/">tmp</a>/<a href="#{{projectId}}">{{projectId}}</a>/{{assetId}}</div>
+  <ul class="menu">
+    <li>
+      <a href="/export/{{projectId}}" target="_blank" ng-show="projectId"><span class="glyphicon glyphicon-cog"></span> Export</a>
+    </li>
+    <!--<li class="dropdown">
+      <a href="" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> {{currentUser.name}} &lt;{{currentUser.email}}&gt;</a>
+      <ul class="dropdown-menu">
+        <li><a href="#/" ng-click="logout()"><span class="glyphicon glyphicon-off"></span> Logout</a></li>
+      </ul>
+    </li>-->
+  </ul>
 </div>
