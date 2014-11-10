@@ -1,24 +1,28 @@
-.engine-log
+#engine input
 {
-  overflow: auto;
   position: absolute;
-  top: 900px;
+  left: 0px;
+  right: 0px;
+  height: 20px;
   bottom: 0px;
 }
 
-.engine-log ul
+#engine .canvas-container
 {
-  list-style-type: none;
-  margin: 0px;
-  padding: 15px;
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 20px;
 }
 
-.engine-log .info
+#engine canvas
 {
-  color: #ddd;
-}
-
-.engine-log .error
-{
-  color: #d44;
+  /*display: block;
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 20px;*/
+  height: 100%;
 }
