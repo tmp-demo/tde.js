@@ -6,7 +6,7 @@ angular.module("tde.engine-view", [])
   $scope.driver = EngineDriver
 })
 
-.directive("tdeEngineView", function($location, Asset)
+.directive("tdeEngineView", function(Asset)
 {
   return {
     restrict: "E",
@@ -22,9 +22,9 @@ angular.module("tde.engine-view", [])
         $scope.driver.seek(this.value / 1000)
       })
 
-      var search = $location.search();
+      /*var search = $location.search();
       if (typeof search.time !== 'undefined')
-        $scope.driver.seek(parseFloat(search.time));
+        $scope.driver.seek(parseFloat(search.time));*/
 
       /*subdiv_slider = element.find(".subdiv_param");
       //subdiv_slider.value = num_subdivs;
@@ -72,9 +72,10 @@ angular.module("tde.engine-view", [])
       setInterval(function()
       {
         seeker.val($scope.driver.currentTime * 1000)
-        $scope.$apply(function() {
+        
+        /*$scope.$apply(function() {
           $location.search('time', $scope.driver.currentTime);
-        });
+        });*/
 
         // compute start time for each scene
         var time_sum = 0
