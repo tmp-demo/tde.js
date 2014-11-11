@@ -27,8 +27,6 @@ function gl_init() {
   canvas_2d.width = canvas_2d.height = 2048;
   ctx_2d = canvas_2d.getContext("2d");
   minify_context(ctx_2d);
-  
-  load_shaders();
 }
 
 var _enums = _enums = { }; // #debug
@@ -209,6 +207,15 @@ function load_program_from_source(vs_source, fs_source)
   }
 
   return program;
+}
+
+function destroy_shader_program(name)
+{
+  var program = programs[name]
+  if (program) {
+    gl.deleteProgram(program)
+    delete programs[name]
+  }
 }
 // #debug}}
 

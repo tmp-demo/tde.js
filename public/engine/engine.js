@@ -108,6 +108,7 @@ function main() {
   demo_init();
   gfx_init();
 
+  load_shaders();
   load_geometries();
   load_textures();
   
