@@ -11,7 +11,7 @@ angular.module("tde.services.asset", [])
     if ($routeParams.projectId)
     {
       $http.get("/data/project/" + $routeParams.projectId + "/assets").success(function(assetList) {
-        gRemainingAssets = assetList.length;
+        self.gRemainingAssets = assetList.length;
         for (var i = 0; i < assetList.length; i++)
         {
           console.log("loading asset " + assetList[i])
@@ -88,8 +88,8 @@ angular.module("tde.services.asset", [])
           case "geom": EngineDriver.loadGeometry(name, data); break
           case "seq": EngineDriver.loadSequence(name, data); break
           case "song": EngineDriver.loadSong(name, data); break
-          case "glsl": EngineDriver.loadShader(name, data); break
-          case "glsllib": EngineDriver.loadShader(name, data); break
+          case "glsl": EngineDriver.loadShader(assetId, data); break
+          case "glsllib": EngineDriver.loadShader(assetId, data); break
           default: toastr.warning(type, "Unknown asset type"); break
         }
         
@@ -98,8 +98,8 @@ angular.module("tde.services.asset", [])
         if (callback) {
           callback(null)
         }
-        gRemainingAssets--;
-        if (gRemainingAssets == 1) {
+        self.gRemainingAssets--;
+        if (self.gRemainingAssets == 1) {
             // TODO!
             // demo.seq needs to be loaded last until we fix the framebuffer dependencies
             self.loadAsset("demo.seq");
@@ -126,8 +126,8 @@ angular.module("tde.services.asset", [])
       case "geom": EngineDriver.unloadGeometry(name); break
       case "seq": EngineDriver.unloadSequence(name); break
       case "song": EngineDriver.unloadSong(name); break
-      case "glsl": EngineDriver.unloadShader(name); break
-      case "glsllib": EngineDriver.unloadShader(name); break
+      case "glsl": EngineDriver.unloadShader(assetId); break
+      case "glsllib": EngineDriver.unloadShader(assetId); break
       default: toastr.warning(type, "Unknown asset type"); break
     }
     
