@@ -4,7 +4,6 @@ angular.module("tde.services.engine-driver", [])
 {
   var self = this
 
-  this.logBuffer = []
   this.currentTime = 0
   
   // metadata used for dependency tracking and automatic rebuild of dependent shaders
@@ -116,7 +115,7 @@ angular.module("tde.services.engine-driver", [])
   {
     self.logInfo("loading shader " + name)
     self.shaders[name] = self.parseShader(data)
-    self.logInfo("depends on " + self.shaders[name].dependencies)
+    //self.logInfo("depends on " + self.shaders[name].dependencies)
     self.compileDependentShaders(name)
     self.drawFrame()
   }
@@ -137,7 +136,7 @@ angular.module("tde.services.engine-driver", [])
     // exclude libraries (glsllib), they are only included and never explicitely compiled
     shadersToRebuild = shadersToRebuild.filter(function(name) { return !name.match(/glsllib$/); })
     
-    console.log("rebuilding " + shadersToRebuild)
+    //console.log("rebuilding " + shadersToRebuild)
     for (var i in shadersToRebuild)
     {
       self.rebuildShader(shadersToRebuild[i])
@@ -172,10 +171,10 @@ angular.module("tde.services.engine-driver", [])
         return null;
       }
       
-      console.log(dependency)
-      console.log(vertex)
+      //console.log(dependency)
+      //console.log(vertex)
       vertex = vertex.replace(new RegExp("//![ ]*INCLUDE[ ]+" + dependency + "[\n\r ]+", "g"), self.shaders[dependency].vertexSource +  "\n")
-      console.log(vertex)
+      //console.log(vertex)
       matches = includeRegex.exec(vertex)
     }
     
@@ -191,15 +190,16 @@ angular.module("tde.services.engine-driver", [])
         return null;
       }
       
-      console.log(dependency)
-      console.log(fragment)
+      //console.log(dependency)
+      //console.log(fragment)
       fragment = fragment.replace(new RegExp("//![ ]*INCLUDE[ ]+" + dependency + "[\n\r ]+", "g"), self.shaders[dependency].fragmentSource +  "\n")
-      console.log(fragment)
+      //console.log(fragment)
       matches = includeRegex.exec(fragment)
     }
     
     vertex = vertex.replace("main_vs_" + shaderName, "main")
     fragment = fragment.replace("main_fs_" + shaderName, "main")
+    console.log("compiling " + name)
     programs[shaderName] = load_program_from_source(vertex, fragment)
   }
   
@@ -215,7 +215,6 @@ angular.module("tde.services.engine-driver", [])
       
       for (var name in self.shaders)
       {
-        console.log("testing shader " + name)
         var shader = self.shaders[name]
         if (shader.dependencies.indexOf(dependency) != -1)
         {
@@ -292,31 +291,20 @@ angular.module("tde.services.engine-driver", [])
   
   this.logInfo = function(message, details)
   {
-    toastr.info(details, message);
-    this.logBuffer.push({
-      type: "info",
-      message: message,
-      details: details
-    })
+    //toastr.info(details, message);
+    console.log(message)
   }
 
   this.logError = function(message, details)
   {
-    toastr.error(details, message);
+    //toastr.error(details, message);
     console.error(message)
-    console.error(details)
-    this.logBuffer.push({
-      type: "error",
-      message: message,
-      details: details
-    })
+    //console.error(details)
   }
 
   this.drawFrame = function()
   {
-    if (gRemainingAssets == 0) {
-      engine_render(this.currentTime)
-    }
+    engine_render(this.currentTime)
   }
   
   this.play = function()

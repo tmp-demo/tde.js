@@ -165,7 +165,7 @@ function compile_shader(txt_src, type) {
   gl.compileShader(shader);
   // #debug{{
   if ( !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    toastr.error(gl.getShaderInfoLog(shader), "Shader compilation failed");
+    console.error(gl.getShaderInfoLog(shader), txt_src);
   }
   // #debug}}
   return shader;
@@ -185,7 +185,7 @@ function load_shader_program(vs_entry_point, fs_entry_point) {
   gl.linkProgram(program);
   // #debug{{
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    toastr.error(gl.getProgramInfoLog(program), "Program link error");
+    console.error(gl.getProgramInfoLog(program), "Program link error");
   }
   // #debug}}
   return program;
@@ -205,7 +205,7 @@ function load_program_from_source(vs_source, fs_source)
   gl.linkProgram(program);
 
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    toastr.error(gl.getProgramInfoLog(program), "Program link error");
+    console.error(gl.getProgramInfoLog(program), "Program link error");
   }
 
   return program;
@@ -258,7 +258,7 @@ function create_texture(width, height, format, data, allow_repeat, linear_filter
                                                : gl.UNSIGNED_BYTE, data ? new Uint8Array(data, 0, 0)
                                                                         : null);
 
-  set_texture_flags(texture, allow_repeat, linear_filtering, mipmaps);
+  (format == gl.DEPTH_COMPONENT) || set_texture_flags(texture, allow_repeat, linear_filtering, mipmaps);
 
   return {
     tex: texture,
@@ -283,7 +283,7 @@ function frame_buffer(target) {
   // #debug{{
   var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
   if (status != gl.FRAMEBUFFER_COMPLETE) {
-    toastr.error(frame_buffer_error(status), "Incomplete framebuffer");
+    console.error(frame_buffer_error(status), "Incomplete framebuffer");
   }
   // #debug}}
 
@@ -406,8 +406,10 @@ function render_scene(scene, demo_time, scene_time) {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     }
     
-    var geometry = geometries[pass.geometry]
-    geometry = geometry || geometry_placeholder //#debug
-    draw_geom(geometry)
+    if (pass.geometry) {
+      var geometry = geometries[pass.geometry]
+      geometry = geometry || geometry_placeholder //#debug
+      draw_geom(geometry)
+    }
   }
 }

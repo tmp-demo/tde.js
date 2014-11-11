@@ -11,7 +11,7 @@ angular.module("tde.services.asset", [])
     if ($routeParams.projectId)
     {
       $http.get("/data/project/" + $routeParams.projectId + "/assets").success(function(assetList) {
-        gRemainingAssets = assetList.length;
+        self.gRemainingAssets = assetList.length;
         for (var i = 0; i < assetList.length; i++)
         {
           console.log("loading asset " + assetList[i])
@@ -98,8 +98,8 @@ angular.module("tde.services.asset", [])
         if (callback) {
           callback(null)
         }
-        gRemainingAssets--;
-        if (gRemainingAssets == 1) {
+        self.gRemainingAssets--;
+        if (self.gRemainingAssets == 1) {
             // TODO!
             // demo.seq needs to be loaded last until we fix the framebuffer dependencies
             self.loadAsset("demo.seq");
