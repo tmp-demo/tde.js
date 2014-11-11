@@ -14,7 +14,7 @@ function paris_subdivision_rec(paths, num_subdivs, sub_id) {
     if (num_subdivs == 1) {
         return sub_paths;
     }
-    return city_subdivision_rec(sub_paths, num_subdivs - 1, sub_id - 1);
+    return paris_subdivision_rec(sub_paths, num_subdivs - 1, sub_id - 1);
 }
 
 

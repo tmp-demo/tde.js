@@ -41,21 +41,10 @@ do
 done
 echo "}" >> $EXPORT_ROOT/demo.js
 
-for f in $PROJECT_ROOT/*.tex
-do
-    ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
-done
-
+echo " -- exporting texture assets"
 echo "function load_textures() {" >> $EXPORT_ROOT/demo.js
-if [ -f $PROJECT_ROOT/*.tex ]; then
-  for f in $PROJECT_ROOT/*.tex
-  do
-      TEX_NAME=`basename $f .tex`
-      echo "texture: "$TEX_NAME
-      echo 'textures["'$TEX_NAME'"] = generate_'$TEX_NAME'_texture();' >> $EXPORT_ROOT/demo.js
-  done
-fi
-echo "}" >> $EXPORT_ROOT/demo.js
+"$NODE" ./tools/export-textures.js $PROJECT_ROOT/*.tex >> $EXPORT_ROOT/demo.js
+echo "} // load_textures" >> $EXPORT_ROOT/demo.js
 
 for f in $PROJECT_ROOT/*.seq
 do
