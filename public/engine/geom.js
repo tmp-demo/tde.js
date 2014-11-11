@@ -184,11 +184,11 @@ function transform_ring ( ring_old, displacements, rotations, homotecies ){
   //translate !
   var temp;
   for(i = 0; ring.length; i++){
-    temp = vec3.scale(temp, normal, displacement[0];
+    temp = vec3.scale(temp, normal, displacement[0]);
     vec3.add(ring[i], temp);
-    temp = vec3.scale(temp, a1, displacement[1];
+    temp = vec3.scale(temp, a1, displacement[1]);
     vec3.add(ring[i], temp);
-    temp = vec3.scale(temp, a2, displacement[2];
+    temp = vec3.scale(temp, a2, displacement[2]);
     vec3.add(ring[i], temp);
   }
   
