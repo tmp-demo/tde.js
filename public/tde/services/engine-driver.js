@@ -12,7 +12,7 @@ angular.module("tde.services.engine-driver", [])
   this.loadTexture = function(name, data)
   {
     self.logInfo("loading texture "+ name);
-    var asset = eval(data);
+    var asset = eval("___ = "+data);
     switch (asset.type) {
       case "empty": {
         // A texture allocated but with no content, typically used as a render
@@ -58,7 +58,7 @@ angular.module("tde.services.engine-driver", [])
   this.loadGeometry = function(name, data)
   {
     self.logInfo("loading geometry " + name);
-    var asset = eval(data);
+    var asset = eval("___ = "+data);
     switch (asset.type) {
       case "js": {
         // A texture initialized from a js function
