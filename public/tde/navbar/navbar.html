@@ -1,7 +1,5 @@
 <div ng-controller="NavbarCtrl" id="navbar" role="navigation">
-  <div class="header">/<a href="#/">tmp</a>
-    <span ng-if="projectId">/<a href="#{{projectId}}">{{projectId}}</a></span>
-    <span ng-if="assetId">/{{assetId}}</span>
+  <div class="header">/<a href="#/">tmp</a><span ng-show="projectId">/<a href="#{{projectId}}">{{projectId}}</a></span><span ng-show="assetId">/{{assetId}}</span>
   </div>
   <ul class="menu">
     <li>
