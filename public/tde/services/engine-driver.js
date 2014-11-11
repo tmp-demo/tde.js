@@ -49,22 +49,26 @@ angular.module("tde.services.engine-driver", [])
 
   this.unloadTexture = function(name)
   {
-    self.logInfo("unloading texture " + name)
-    destroy_texture(textures[name])
+    if (textures[name]) {
+      self.logInfo("unloading texture " + name);
+      destroy_texture(textures[name]);
+    }
   }
 
   this.loadGeometry = function(name, data)
   {
-    self.logInfo("loading geometry " + name)
-    var geometry_generator = eval(data)
+    self.logInfo("loading geometry " + name);
+    var geometry_generator = eval(data);
     geometries[name] = geometry_generator();
     self.drawFrame();
   }
 
   this.unloadGeometry = function(name)
   {
-    self.logInfo("unloading geom " + name)
-    destroy_geom(geometries[name])
+    if (geometries[name]) {
+      self.logInfo("unloading geom " + name);
+      destroy_geom(geometries[name]);
+    }
   }
 
   this.loadSequence = function(name, data)

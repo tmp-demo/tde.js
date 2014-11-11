@@ -13,6 +13,113 @@ function seedable_random() {
     return (SEED = (69069 * SEED + 1) & 0x7FFFFFFF) / 0x80000000;
 }
 
+function translate(dx, dy, dz) {
+    var identity = mat4.create();
+    return mat4.translate(identity, identity, [dx, dy, dz]);
+}
+function rotate_x(angle) {
+    var identity = mat4.create();
+    return mat4.rotate(identity, identity, angle, [1, 0, 0]);
+}
+function rotate_y(angle) {
+    var identity = mat4.create();
+    return mat4.rotate(identity, identity, angle, [0, 1, 0]);
+}
+function rotate_z(angle) {
+    var identity = mat4.create();
+    return mat4.rotate(identity, identity, angle, [0, 0, 1]);
+}
+function scale(sx, sy, sz) {
+    var identity = mat4.create();
+    return mat4.scale(identity, identity, [sx, sy, sz]);
+}
+
+function matrix_str(mat) {
+    return "[ " + mat[0] + " "
+                + mat[1] + " "
+                + mat[2] + " "
+                + mat[3] + " | "
+                + mat[4] + " "
+                + mat[5] + " "
+                + mat[6] + " "
+                + mat[7] + " | "
+                + mat[8] + " "
+                + mat[9] + " "
+                + mat[10] + " "
+                + mat[11] + " | "
+                + mat[12] + " "
+                + mat[13] + " "
+                + mat[14] + " "
+                + mat[15] + "]";
+}
+
+function vector_str(vec) {
+    var vec_3 = vec[3]||"";
+    return "[ " + vec[0] + " "
+                + vec[1] + " "
+                + vec[2] + " "
+                + vec_3 + " ]";
+}
+
+function extrude_geom(cmd_list) {
+    var base_paths;
+    var transform = mat4.create();
+    var previous_paths;
+    for (var i = 0; i < cmd_list.length; ++i) {
+        var item = cmd_list[i];
+        if (item.transform) {
+            mat4.multiply(transform, transform, item.transform);
+        }
+        if (item.apply) {
+            var transformed_paths = transform_paths(base_paths, transform);
+            if (previous_paths) {
+                item.apply(previous_paths, transformed_paths);
+            }
+            previous_paths = transformed_paths;
+        }
+        if (item.set_path) {
+            base_paths = item.set_path(base_paths);
+        }
+        if (item.jump) {
+            i = item.jump(i);
+        }
+    }
+}
+
+function jump_if(pc, cond) {
+    return function(i) { if (cond(i)) { return pc; } };
+}
+
+function transform_paths(path_array, transform) {
+    var out_array = [];
+    for (var i = 0; i < path_array.length; ++i) {
+        var path = path_array[i];
+        var new_path = [];
+        for (var v = 0; v < path.length; ++v) {
+            var vertex = vec3.fromValues(
+                path[v][0],
+                path[v][1],
+                path[v][2]
+            );
+            vec3.transformMat4(vertex, vertex, transform);
+            new_path.push(vertex);
+        }
+        out_array.push(new_path);
+    }
+    return out_array;
+}
+
+function uv_buffer(u1, v1, u2, v2) {
+  return [[
+    u1, v1,
+    u2, v1,
+    u2, v2,
+    u2, v2,
+    u1, v2,
+    u1, v1
+  ]];
+}
+
 // For a continuous ring of 4 points the indices are:
 //    0    1
 //  7 A----B 2
@@ -349,6 +456,18 @@ function circle_path(center, radius, n_points) {
     for (i = 0; i < n_points; ++i) {
         path.push([
             center[0] + -M.cos(i/n_points * 2 * M.PI) * radius,
+            center[1] + M.sin(i/n_points * 2 * M.PI) * radius
+        ]);
+    }
+    return path;
+}
+
+function circle_path_vec3(center, radius, n_points) {
+    var path = []
+    for (i = 0; i < n_points; ++i) {
+        path.push([
+            center[0] + -M.cos(i/n_points * 2 * M.PI) * radius,
+            0,
             center[1] + M.sin(i/n_points * 2 * M.PI) * radius
         ]);
     }
