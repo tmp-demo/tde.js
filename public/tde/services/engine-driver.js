@@ -58,8 +58,15 @@ angular.module("tde.services.engine-driver", [])
   this.loadGeometry = function(name, data)
   {
     self.logInfo("loading geometry " + name);
-    var geometry_generator = eval(data);
-    geometries[name] = geometry_generator();
+    var asset = eval(data);
+    switch (asset.type) {
+      case "js": {
+        // A texture initialized from a js function
+        geometries[name] = asset.generator();
+        break;
+      }
+    }
+
     self.drawFrame();
   }
 
