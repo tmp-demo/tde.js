@@ -3,6 +3,7 @@
 
 var _uniforms = [
   "cam_pos",
+  "world_mat",
   "view_proj_mat",
   "view_proj_mat_inv",
   "resolution",
