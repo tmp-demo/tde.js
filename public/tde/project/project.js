@@ -10,6 +10,7 @@ angular.module("tde.project", [
     {
       var parts = asset.split(".");
       return {
+        filename: asset,
         name: parts[0],
         type: parts[1]
       }
