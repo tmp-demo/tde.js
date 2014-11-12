@@ -65,6 +65,24 @@ angular.module("tde.services.engine-driver", [])
         geometries[name] = asset.generator();
         break;
       }
+      case "buffers": {
+        var buffers = [];
+        if (asset.positions) {
+          buffers.push(make_vbo(POS, asset.positions));
+        }
+        if (asset.normals) {
+          buffers.push(make_vbo(NORMALS, asset.normals));
+        }
+        if (asset.uvs) {
+          buffers.push(make_vbo(TEX_COORDS, asset.normals));
+        }
+
+        geometries[name] = {
+          buffers: buffers,
+          mode: asset.mode,
+          vertex_count: asset.vertex_count
+        }
+      }
     }
 
     self.drawFrame();
