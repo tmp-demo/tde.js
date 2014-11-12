@@ -61,7 +61,7 @@ function vector_str(vec) {
                 + vec_3 + " ]";
 }
 
-function extrude_geom(cmd_list) {
+function extrude_geom(geom, cmd_list) {
     var base_paths;
     var transform = mat4.create();
     var previous_paths;
@@ -73,7 +73,7 @@ function extrude_geom(cmd_list) {
         if (item.apply) {
             var transformed_paths = transform_paths(base_paths, transform);
             if (previous_paths) {
-                item.apply(previous_paths, transformed_paths);
+                item.apply(geom, previous_paths, transformed_paths);
             }
             previous_paths = transformed_paths;
         }
@@ -84,6 +84,20 @@ function extrude_geom(cmd_list) {
             i = item.jump(i);
         }
     }
+}
+
+function apply_fn(geom, previous_rings, new_rings) {
+  previous_rings.forEach(
+      function(prev_item, i) {
+          console.log(new_rings);
+          join_rings(
+            geom,
+            prev_item,
+            new_rings[i],
+            function() { return uv_buffer(0, 0, 1, 1) }
+          );
+      }
+  );
 }
 
 function jump_if(pc, cond) {

@@ -82,6 +82,32 @@ angular.module("tde.services.engine-driver", [])
           mode: asset.mode,
           vertex_count: asset.vertex_count
         }
+        break;
+      }
+      case "generated": {
+        var geom = {
+          positions: [],
+          normals: [],
+          uvs: []
+        }
+
+        if (asset.positions) { geom.positions = []; }
+        if (asset.normals) { geom.normals = []; }
+        if (asset.uvs) { geom.uvs = []; }
+
+        extrude_geom(geom, asset.commands);
+
+        var buffers = [];
+        if (asset.positions) { buffers.push(make_vbo(POS, geom.positions)); }
+        if (asset.normals) { buffers.push(make_vbo(NORMALS, geom.normals)); }
+        if (asset.uvs) { buffers.push(make_vbo(TEX_COORDS, geom.uvs)); }
+
+        geometries[name] = {
+          buffers: buffers,
+          mode: gl.TRIANGLES,
+          vertex_count: geom.positions.length / 3
+        };
+        break;
       }
     }
 
