@@ -79,17 +79,13 @@ angular.module("tde.services.engine-driver", [])
 
         geometries[name] = {
           buffers: buffers,
-          mode: asset.mode,
-          vertex_count: asset.vertex_count
+          mode: eval(asset.mode),
+          vertex_count: eval(asset.vertex_count)
         }
         break;
       }
       case "generated": {
-        var geom = {
-          positions: [],
-          normals: [],
-          uvs: []
-        }
+        var geom = {}
 
         if (asset.positions) { geom.positions = []; }
         if (asset.normals) { geom.normals = []; }
