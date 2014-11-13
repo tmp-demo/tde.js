@@ -43,10 +43,10 @@ for (var i = 2; i < process.argv.length; ++i) {
                       console.log("     make_vbo(POS,", JSON.stringify(asset.positions), ")");
                     }
                     if (asset.normals) {
-                      console.log("   , make_vbo(NORMALS,", JSON.stringify(asset.normals), ")");
+                      console.log("   , make_vbo(NORMAL,", JSON.stringify(asset.normals), ")");
                     }
                     if (asset.uvs) {
-                      console.log("   , make_vbo(TEX_COORDS,", JSON.stringify(asset.uvs), ")");
+                      console.log("   , make_vbo(UV,", JSON.stringify(asset.uvs), ")");
                     }
                     console.log("  ],");
                     console.log("  mode:", asset.mode, ",");

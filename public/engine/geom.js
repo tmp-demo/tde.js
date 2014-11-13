@@ -97,8 +97,8 @@ function create_geom_from_cmd_list(commands) {
 
     var buffers = [];
     if (asset.positions) { buffers.push(make_vbo(POS, geom.positions)); }
-    if (asset.normals) { buffers.push(make_vbo(NORMALS, geom.normals)); }
-    if (asset.uvs) { buffers.push(make_vbo(TEX_COORDS, geom.uvs)); }
+    if (asset.normals) { buffers.push(make_vbo(NORMAL, geom.normals)); }
+    if (asset.uvs) { buffers.push(make_vbo(UV, geom.uvs)); }
 
     geometries[name] = {
       buffers: buffers,

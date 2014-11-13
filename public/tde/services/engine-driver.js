@@ -71,10 +71,10 @@ angular.module("tde.services.engine-driver", [])
           buffers.push(make_vbo(POS, asset.positions));
         }
         if (asset.normals) {
-          buffers.push(make_vbo(NORMALS, asset.normals));
+          buffers.push(make_vbo(NORMAL, asset.normals));
         }
         if (asset.uvs) {
-          buffers.push(make_vbo(TEX_COORDS, asset.normals));
+          buffers.push(make_vbo(UV, asset.normals));
         }
 
         geometries[name] = {
@@ -95,8 +95,8 @@ angular.module("tde.services.engine-driver", [])
 
         var buffers = [];
         if (asset.positions) { buffers.push(make_vbo(POS, geom.positions)); }
-        if (asset.normals) { buffers.push(make_vbo(NORMALS, geom.normals)); }
-        if (asset.uvs) { buffers.push(make_vbo(TEX_COORDS, geom.uvs)); }
+        if (asset.normals) { buffers.push(make_vbo(NORMAL, geom.normals)); }
+        if (asset.uvs) { buffers.push(make_vbo(UV, geom.uvs)); }
 
         geometries[name] = {
           buffers: buffers,

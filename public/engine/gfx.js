@@ -35,14 +35,14 @@ var _enums = _enums = { }; // #debug
 
 var _locations = [
   "position",
-  "tex_coords",
-  "normals",
+  "uv",
+  "normal",
   "color"
 ];
 
 var POS = 0;
-var TEX_COORDS = 1;
-var NORMALS = 2;
+var UV = 1;
+var NORMAL = 2;
 var COLOR = 3;
 
 function gfx_init() {
@@ -83,7 +83,7 @@ function gfx_init() {
         100, 0, -100,
         -100, 0, -100
       ]),
-      make_vbo(NORMALS, [
+      make_vbo(NORMAL, [
         0, 1, 0,
         1, 1, 0,
         0, 1, 0,
@@ -91,7 +91,7 @@ function gfx_init() {
         0, 1, 0,
         0, 1, 1
       ]),
-      make_vbo(TEX_COORDS, [
+      make_vbo(UV, [
         0, 0,
         0, 1,
         1, 1,
