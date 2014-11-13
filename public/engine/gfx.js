@@ -34,10 +34,10 @@ function gl_init() {
 var _enums = _enums = { }; // #debug
 
 var _locations = [
-  "position",
-  "uv",
-  "normal",
-  "color"
+  "a_position",
+  "a_uv",
+  "a_normal",
+  "a_color"
 ];
 
 var POS = 0;
