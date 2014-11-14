@@ -12,7 +12,7 @@ angular.module("tde.services.engine-driver", [])
   this.loadTexture = function(name, data)
   {
     self.logInfo("loading texture "+ name);
-    var asset = eval(data);
+    var asset = eval("___ = "+data);
     switch (asset.type) {
       case "empty": {
         // A texture allocated but with no content, typically used as a render
@@ -49,22 +49,73 @@ angular.module("tde.services.engine-driver", [])
 
   this.unloadTexture = function(name)
   {
-    self.logInfo("unloading texture " + name)
-    destroy_texture(textures[name])
+    if (textures[name]) {
+      self.logInfo("unloading texture " + name);
+      destroy_texture(textures[name]);
+    }
   }
 
   this.loadGeometry = function(name, data)
   {
-    self.logInfo("loading geometry " + name)
-    var geometry_generator = eval(data)
-    geometries[name] = geometry_generator();
+    self.logInfo("loading geometry " + name);
+    var asset = eval("___ = "+data);
+    switch (asset.type) {
+      case "js": {
+        // A texture initialized from a js function
+        geometries[name] = asset.generator();
+        break;
+      }
+      case "buffers": {
+        var buffers = [];
+        if (asset.positions) {
+          buffers.push(make_vbo(POS, asset.positions));
+        }
+        if (asset.normals) {
+          buffers.push(make_vbo(NORMAL, asset.normals));
+        }
+        if (asset.uvs) {
+          buffers.push(make_vbo(UV, asset.normals));
+        }
+
+        geometries[name] = {
+          buffers: buffers,
+          mode: eval(asset.mode),
+          vertex_count: eval(asset.vertex_count)
+        }
+        break;
+      }
+      case "generated": {
+        var geom = {}
+
+        if (asset.positions) { geom.positions = []; }
+        if (asset.normals) { geom.normals = []; }
+        if (asset.uvs) { geom.uvs = []; }
+
+        extrude_geom(geom, asset.commands);
+
+        var buffers = [];
+        if (asset.positions) { buffers.push(make_vbo(POS, geom.positions)); }
+        if (asset.normals) { buffers.push(make_vbo(NORMAL, geom.normals)); }
+        if (asset.uvs) { buffers.push(make_vbo(UV, geom.uvs)); }
+
+        geometries[name] = {
+          buffers: buffers,
+          mode: gl.TRIANGLES,
+          vertex_count: geom.positions.length / 3
+        };
+        break;
+      }
+    }
+
     self.drawFrame();
   }
 
   this.unloadGeometry = function(name)
   {
-    self.logInfo("unloading geom " + name)
-    destroy_geom(geometries[name])
+    if (geometries[name]) {
+      self.logInfo("unloading geom " + name);
+      destroy_geom(geometries[name]);
+    }
   }
 
   this.loadSequence = function(name, data)

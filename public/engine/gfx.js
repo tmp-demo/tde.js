@@ -34,15 +34,15 @@ function gl_init() {
 var _enums = _enums = { }; // #debug
 
 var _locations = [
-  "position",
-  "tex_coords",
-  "normals",
-  "color"
+  "a_position",
+  "a_uv",
+  "a_normal",
+  "a_color"
 ];
 
 var POS = 0;
-var TEX_COORDS = 1;
-var NORMALS = 2;
+var UV = 1;
+var NORMAL = 2;
 var COLOR = 3;
 
 function gfx_init() {
@@ -83,7 +83,7 @@ function gfx_init() {
         100, 0, -100,
         -100, 0, -100
       ]),
-      make_vbo(NORMALS, [
+      make_vbo(NORMAL, [
         0, 1, 0,
         1, 1, 0,
         0, 1, 0,
@@ -91,7 +91,7 @@ function gfx_init() {
         0, 1, 0,
         0, 1, 1
       ]),
-      make_vbo(TEX_COORDS, [
+      make_vbo(UV, [
         0, 0,
         0, 1,
         1, 1,
@@ -299,7 +299,7 @@ function set_uniforms(program, ratio) {
   // derive camera matrices from simpler parameters
   //mat4.lookAt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], [0.0, 1.0, 0.0]);
   mat4.lookAtTilt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], uniforms["cam_tilt"]);
-  mat4.perspective(projectionMatrix, uniforms["cam_fov"] * M.PI / 180.0, ratio, 2.0, 2000.0)
+  mat4.perspective(projectionMatrix, uniforms["cam_fov"] * M.PI / 180.0, ratio, 1.0, 1000.0)
   mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
   mat4.invert(viewProjectionMatrixInv, viewProjectionMatrix);
   uniforms["view_proj_mat"] = viewProjectionMatrix;

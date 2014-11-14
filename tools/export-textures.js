@@ -8,7 +8,7 @@ for (var i = 2; i < process.argv.length; ++i) {
     (function(file) {
         fs.readFile(file.name, function(err, asset) {
             file_name = last(file.name.split('/')).split('.');
-            asset = eval(asset.toString());
+            asset = eval("___ = "+asset.toString());
             var asset_name = file_name[0];
             var SEP = ", "
             switch (asset.type) {
