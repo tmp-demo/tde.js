@@ -107,13 +107,13 @@ function gfx_init() {
   var vs_placeholder = "\
     precision lowp float; \
     uniform mat4 view_proj_mat; \
-    attribute vec3 position; \
+    attribute vec3 a_position; \
     varying vec3 v_position; \
      \
     void main() \
     { \
-      gl_Position = view_proj_mat * vec4(position, 1.0); \
-      v_position = position; \
+      gl_Position = view_proj_mat * vec4(a_position, 1.0); \
+      v_position = a_position; \
     } \
     ";
   var fs_placeholder = "\
