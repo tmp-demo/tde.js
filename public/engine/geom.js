@@ -13,6 +13,74 @@ function seedable_random() {
     return (SEED = (69069 * SEED + 1) & 0x7FFFFFFF) / 0x80000000;
 }
 
+function mid_point(a, b) {
+    return [
+        (a[0]+b[0])/2,
+        (a[1]+b[1])/2,
+        (a[2]+b[2])/2
+    ];
+}
+
+function get_vec3(buffer, offset) {
+    return [
+        buffer[offset],
+        buffer[offset+1],
+        buffer[offset+2]
+    ];
+}
+
+//      c
+//     / \
+//    /   \
+//  ac --- bc
+//  / \   / \
+// /   \ /   \
+//a-----ab----b
+
+function subdivide(prev_buffer) {
+    var output = [];
+    for (var i=0; i<prev_buffer.length; i+=9) {
+        var a = get_vec3(prev_buffer, i);
+        var b = get_vec3(prev_buffer, i+3);
+        var c = get_vec3(prev_buffer, i+6);
+        var ab = mid_point(a, b);
+        var bc = mid_point(b, c);
+        var ac = mid_point(a, c);
+        push_vertices(output,[
+            a,  ab, ac,
+            ac, ab, bc,
+            bc, ab, b,
+            ac, bc, c
+        ]);
+    }
+    return output;
+}
+
+//  a          b          c           d
+// (1, 1, 1), (1,-1,-1), (-1, 1,-1), (-1,-1, 1)
+function make_tetrahedron() {
+    return [
+         1, 1, 1,   1,-1,-1,  -1, 1,-1,  // abc
+        -1,-1, 1,   1,-1,-1,   1, 1, 1,  // dba
+        -1, 1,-1,  -1,-1, 1,   1,-1,-1,  // cdb
+         1, 1, 1,  -1,-1, 1,  -1, 1,-1,   // adc
+    ];
+}
+
+function make_sphere(radius, num_subdivs) {
+    var buffer = make_tetrahedron();
+    while (num_subdivs-- > 0) {
+        buffer = subdivide(buffer);
+    }
+    for (var i = 0; i < buffer.length; i+=3) {
+        var len = vec3.length([buffer[i], buffer[i+1], buffer[i+2]]);
+        buffer[i] *= radius/len;
+        buffer[i+1] *= radius/len;
+        buffer[i+2] *= radius/len;
+    }
+    return buffer;
+}
+
 function translate(dx, dy, dz) {
     var identity = mat4.create();
     return mat4.translate(identity, identity, [dx, dy, dz]);
@@ -413,25 +481,6 @@ function fill_convex_ring(geom, ring, uv) {
 // TODO make this show in the editor: it defines how the min size of city blocks
 var MIN_PERIMETER = 260;
 
-/*function perimeter(path) {
-    var accum = 0;
-    var path_length = path.length;
-    for (var i = 0; i < path_length; ++i) {
-        accum += vec2.distance(path[i], path[(i+1) % path_length]);
-    }
-    return accum;
-}
-
-function smallest_segment_length(path) {
-    var smallest = 10000;
-    var path_length = path.length;
-    for (var i = 0; i < path_length; ++i) {
-        var d = vec2.distance(path[i], path[(i+1) % path_length]);
-        if (d < smallest) { smallest = d; }
-    }
-    return smallest;
-}*/
-
 function city_subdivision(path, sub_id) {
     var path_length = path.length;
 
@@ -509,16 +558,6 @@ function circle_path_vec3(center, radius, n_points) {
     return path;
 }
 
-function plazza(path, pos, rad) {
-    for (p=0; p<path.length; ++p) {
-      if (vec2.distance(path[p], pos) < rad) {
-        return true;
-      }
-    }
-    return false;
-}
-
-
 
 
 
@@ -542,167 +581,3 @@ function debug_draw_path(path, color, offset_x, offset_y) {
         map_ctx.closePath();
     }*/
 }
-
-/*function arrays_equal(a1, a2) {
-    if (a1.length != a2.length) {
-        return false;
-    }
-    for (var i = 0; i < a1.length; ++i) {
-        if (a1[i] !== a2[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-function arrays_of_arrays_equal(a1, a2) {
-    if (a1.length != a2.length) {
-        return false;
-    }
-    for (var i = 0; i < a1.length; ++i) {
-        if (!arrays_equal(a1[i], a2[i])) {
-            return false;
-        }
-    }
-    return true;
-}
-
-function test_join_rings() {
-    console.log("BEGIN - test_join_rings...");
-    var r1 = [
-        [0,0,3],
-        [1,0,3],
-        [1,1,3],
-        [0,1,3]
-    ];
-    var r2 = [
-        [0,0,5],
-        [1,0,5],
-        [1,1,5],
-        [0,1,5]
-    ];
-
-    if (!arrays_of_arrays_equal(continuous_path(r1), [
-        [0,0,3],
-        [1,0,3],
-        [1,0,3],
-        [1,1,3],
-        [1,1,3],
-        [0,1,3],
-        [0,1,3],
-        [0,0,3]
-    ])) {
-        console.log("test_join_rings failed: wrong continuous path");
-        console.log(continuous_path(r1));
-    }
-
-    var floats_per_vertex = 8;
-    var geom = {
-        vbo: new Float32Array(r1.length * 4 * floats_per_vertex),
-        ibo: new Uint16Array(r1.length * 6),
-        v_stride: floats_per_vertex,
-        v_cursor: 0, i_cursor: 0
-    }
-
-    join_rings(geom, continuous_path(r1), continuous_path(r2));
-    if (!arrays_equal(geom.ibo, [
-        0, 8, 9,
-        0, 9, 1,
-        2, 10, 11,
-        2, 11, 3,
-        4, 12, 13,
-        4, 13, 5,
-        6, 14, 15,
-        6, 15, 7
-    ])) {
-        console.log("test_join_rings failed: wrong ibo (continuous)");
-        console.log(geom.ibo);
-    }
-
-    if (!arrays_equal(geom.vbo, [
-        // ring 1
-        0,0,3, 0, 0, 0, 0, 0,
-        1,0,3, 0, 0, 0, 0, 0,
-        1,0,3, 0, 0, 0, 0, 0,
-        1,1,3, 0, 0, 0, 0, 0,
-        1,1,3, 0, 0, 0, 0, 0,
-        0,1,3, 0, 0, 0, 0, 0,
-        0,1,3, 0, 0, 0, 0, 0,
-        0,0,3, 0, 0, 0, 0, 0,
-        // ring 2
-        0,0,5, 0, 0, 0, 0, 0,
-        1,0,5, 0, 0, 0, 0, 0,
-        1,0,5, 0, 0, 0, 0, 0,
-        1,1,5, 0, 0, 0, 0, 0,
-        1,1,5, 0, 0, 0, 0, 0,
-        0,1,5, 0, 0, 0, 0, 0,
-        0,1,5, 0, 0, 0, 0, 0,
-        0,0,5, 0, 0, 0, 0, 0
-    ])) {
-        console.log("test_join_rings failed: wrong vbo (continuous)");
-        console.log(geom.vbo);
-    }
-
-    // TODO: test the result of normals computation
-    //compute_normals(geom, 0, 0, geom.ibo.length);
-    //if (!arrays_equal(geom.vbo, [
-    //    // ring 1
-    //    0,0,3, 0, 0, 0, 0, 0,
-    //    0,0,3, 0, 0, 0, 0, 0,
-    //    1,0,3, 0, 0, 0, 0, 0,
-    //    1,0,3, 0, 0, 0, 0, 0,
-    //    1,1,3, 0, 0, 0, 0, 0,
-    //    1,1,3, 0, 0, 0, 0, 0,
-    //    0,1,3, 0, 0, 0, 0, 0,
-    //    0,1,3, 0, 0, 0, 0, 0,
-    //    // ring 2
-    //    0,0,5, 0, 0, 0, 0, 0,
-    //    0,0,5, 0, 0, 0, 0, 0,
-    //    1,0,5, 0, 0, 0, 0, 0,
-    //    1,0,5, 0, 0, 0, 0, 0,
-    //    1,1,5, 0, 0, 0, 0, 0,
-    //    1,1,5, 0, 0, 0, 0, 0,
-    //    0,1,5, 0, 0, 0, 0, 0,
-    //    0,1,5, 0, 0, 0, 0, 0
-    //])) {
-    //    console.log("test_join_rings failed: wrong normals in the vbo (continuous)");
-    //}
-
-    // ---  discontinuous paths  ---
-
-    geom = {
-        vbo: new Float32Array(r1.length * 2 * floats_per_vertex),
-        ibo: new Uint16Array(r1.length * 6 / 2),
-        v_stride: floats_per_vertex,
-        v_cursor: 0, i_cursor: 0
-    }
-
-    join_rings(geom, r1, r2);
-    if (!arrays_equal(geom.ibo, [
-        0, 4, 5,
-        0, 5, 1,
-        2, 6, 7,
-        2, 7, 3
-    ])) {
-        console.log("test_join_rings failed: wrong ibo (discontinuous)");
-        console.log(geom.ibo);
-    }
-
-    if (!arrays_equal(geom.vbo, [
-        // ring 1
-        0,0,3, 0, 0, 0, 0, 0,
-        1,0,3, 0, 0, 0, 0, 0,
-        1,1,3, 0, 0, 0, 0, 0,
-        0,1,3, 0, 0, 0, 0, 0,
-        // ring 2
-        0,0,5, 0, 0, 0, 0, 0,
-        1,0,5, 0, 0, 0, 0, 0,
-        1,1,5, 0, 0, 0, 0, 0,
-        0,1,5, 0, 0, 0, 0, 0
-    ])) {
-        console.log("test_join_rings failed: wrong vbo (discontinuous)");
-        console.log(geom.vbo);
-    }
-
-    console.log("END - test_join_rings");
-}
-*/

@@ -74,3 +74,14 @@ function paris_subdivision(path, sub_id) {
 
     return [path1, path2];
 }
+
+function plazza(path, pos, rad) {
+    for (p=0; p<path.length; ++p) {
+      if (vec2.distance(path[p], pos) < rad) {
+        return true;
+      }
+    }
+    return false;
+}
+
+

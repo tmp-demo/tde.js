@@ -123,7 +123,7 @@ function gfx_init() {
     void main() \
     { \
       vec3 pos = v_position * 0.1; \
-      gl_FragColor = vec4(vec3(mod(floor(pos.x) + floor(pos.y) + floor(pos.z), 2.0)), 1.0); \
+      gl_FragColor = vec4(vec3(mod(floor(pos.x) + floor(pos.y) + floor(pos.z), 2.0))+vec3(0.5, 0.5, 0.5), 1.0); \
     } \
   ";
   program_placeholder = load_program_from_source(vs_placeholder, fs_placeholder);
