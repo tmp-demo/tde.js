@@ -30,12 +30,18 @@ cat $EXPORT_ROOT/shaders/shaders.js >> $EXPORT_ROOT/demo.js
 
 echo " -- exporting texture assets"
 echo "function load_textures() {" >> $EXPORT_ROOT/demo.js
-"$NODE" ./tools/export-textures.js $PROJECT_ROOT/*.tex >> $EXPORT_ROOT/demo.js
+TEXTURES=($PROJECT_ROOT/*.tex)
+if [ -f $TEXTURES ]; then
+  "$NODE" ./tools/export-textures.js $PROJECT_ROOT/*.tex >> $EXPORT_ROOT/demo.js
+fi
 echo "} // load_textures" >> $EXPORT_ROOT/demo.js
 
 echo " -- exporting geometry assets"
 echo "function load_geometries() {" >> $EXPORT_ROOT/demo.js
-"$NODE" ./tools/export-geometries.js $PROJECT_ROOT/*.geom >> $EXPORT_ROOT/demo.js
+GEOMETRIES=($PROJECT_ROOT/*.geom)
+if [ -f $GEOMETRIES ]; then
+  "$NODE" ./tools/export-geometries.js $PROJECT_ROOT/*.geom >> $EXPORT_ROOT/demo.js
+fi
 echo "}" >> $EXPORT_ROOT/demo.js
 
 for f in $PROJECT_ROOT/*.seq
