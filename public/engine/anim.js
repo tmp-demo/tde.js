@@ -7,12 +7,12 @@ function animate(keyframes, time)
   // we must have at least 2 keyframes, or it will crash
   var prev = [], next = [];
   for (var i = 0; i < keyframes[1][1].length; i++) {
-    prev.push(2 * keyframes[1][1][i] - keyframes[0][1][i]);
+    prev.push(2 * keyframes[0][1][i] - keyframes[1][1][i]);
     next.push(2 * keyframes[last][1][i] - keyframes[last-1][1][i]);
   }
-  
-  keyframes.unshift([0, prev]);
-  keyframes.push([0, next]);
+
+  keyframes.push([2 * keyframes[last][0] - keyframes[last-1][0], next]);
+  keyframes.unshift([keyframes[0][0] - keyframes[1][0], prev]);
   
   var i = 1;
   while ((i <= last) && (keyframes[i][0] < time)) i++;
@@ -29,10 +29,11 @@ function animate(keyframes, time)
   var h3 = t * t * t - 2 * t * t + t;         // calculate basis function 3
   var h4 = t * t * t - t * t;
   
-  for (i = 0; i < k1[1].length; i++) {
+  var out = []
+  for (var i = 0; i < k1[1].length; i++) {
     var t1 = (k2[1][i] - k0[1][i]) / 4;
     var t2 = (k3[1][i] - k1[1][i]) / 4;
-    k1[1][i] = h1 * k1[1][i] + h2 * k2[1][i] + h3 * t1 + h4 * t2;
+    out.push(h1 * k1[1][i] + h2 * k2[1][i] + h3 * t1 + h4 * t2);
   }
-  return k1[1];
+  return out;
 }

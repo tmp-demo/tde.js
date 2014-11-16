@@ -528,34 +528,31 @@ vec2.transformMat4 = function(out, a, m) {
  * @returns {Array} a
  * @function
  */
-vec2.forEach = (function() {
-    var vec = vec2.create();
+vec2.forEach = function(a, stride, offset, count, fn, arg) {
+  var vec = vec2.create();
+  var i, l;
+  if(!stride) {
+      stride = 2;
+  }
 
-    return function(a, stride, offset, count, fn, arg) {
-        var i, l;
-        if(!stride) {
-            stride = 2;
-        }
+  if(!offset) {
+      offset = 0;
+  }
+  
+  if(count) {
+      l = M.min((count * stride) + offset, a.length);
+  } else {
+      l = a.length;
+  }
 
-        if(!offset) {
-            offset = 0;
-        }
-        
-        if(count) {
-            l = M.min((count * stride) + offset, a.length);
-        } else {
-            l = a.length;
-        }
-
-        for(i = offset; i < l; i += stride) {
-            vec[0] = a[i]; vec[1] = a[i+1];
-            fn(vec, vec, arg);
-            a[i] = vec[0]; a[i+1] = vec[1];
-        }
-        
-        return a;
-    };
-})();
+  for(i = offset; i < l; i += stride) {
+      vec[0] = a[i]; vec[1] = a[i+1];
+      fn(vec, vec, arg);
+      a[i] = vec[0]; a[i+1] = vec[1];
+  }
+  
+  return a;
+};
 
 /**
  * Returns a string representation of a vector
@@ -1146,34 +1143,31 @@ vec3.rotateZ = function(out, a, b, c){
  * @returns {Array} a
  * @function
  */
-vec3.forEach = (function() {
-    var vec = vec3.create();
+vec3.forEach = function(a, stride, offset, count, fn, arg) {
+  var vec = vec3.create();
+  var i, l;
+  if(!stride) {
+      stride = 3;
+  }
 
-    return function(a, stride, offset, count, fn, arg) {
-        var i, l;
-        if(!stride) {
-            stride = 3;
-        }
+  if(!offset) {
+      offset = 0;
+  }
+  
+  if(count) {
+      l = M.min((count * stride) + offset, a.length);
+  } else {
+      l = a.length;
+  }
 
-        if(!offset) {
-            offset = 0;
-        }
-        
-        if(count) {
-            l = M.min((count * stride) + offset, a.length);
-        } else {
-            l = a.length;
-        }
-
-        for(i = offset; i < l; i += stride) {
-            vec[0] = a[i]; vec[1] = a[i+1]; vec[2] = a[i+2];
-            fn(vec, vec, arg);
-            a[i] = vec[0]; a[i+1] = vec[1]; a[i+2] = vec[2];
-        }
-        
-        return a;
-    };
-})();
+  for(i = offset; i < l; i += stride) {
+      vec[0] = a[i]; vec[1] = a[i+1]; vec[2] = a[i+2];
+      fn(vec, vec, arg);
+      a[i] = vec[0]; a[i+1] = vec[1]; a[i+2] = vec[2];
+  }
+  
+  return a;
+};
 
 /**
  * Returns a string representation of a vector
@@ -1667,34 +1661,31 @@ vec4.transformQuat = function(out, a, q) {
  * @returns {Array} a
  * @function
  */
-vec4.forEach = (function() {
-    var vec = vec4.create();
+vec4.forEach = function(a, stride, offset, count, fn, arg) {
+  var vec = vec4.create();
+  var i, l;
+  if(!stride) {
+      stride = 4;
+  }
 
-    return function(a, stride, offset, count, fn, arg) {
-        var i, l;
-        if(!stride) {
-            stride = 4;
-        }
+  if(!offset) {
+      offset = 0;
+  }
+  
+  if(count) {
+      l = M.min((count * stride) + offset, a.length);
+  } else {
+      l = a.length;
+  }
 
-        if(!offset) {
-            offset = 0;
-        }
-        
-        if(count) {
-            l = M.min((count * stride) + offset, a.length);
-        } else {
-            l = a.length;
-        }
-
-        for(i = offset; i < l; i += stride) {
-            vec[0] = a[i]; vec[1] = a[i+1]; vec[2] = a[i+2]; vec[3] = a[i+3];
-            fn(vec, vec, arg);
-            a[i] = vec[0]; a[i+1] = vec[1]; a[i+2] = vec[2]; a[i+3] = vec[3];
-        }
-        
-        return a;
-    };
-})();
+  for(i = offset; i < l; i += stride) {
+      vec[0] = a[i]; vec[1] = a[i+1]; vec[2] = a[i+2]; vec[3] = a[i+3];
+      fn(vec, vec, arg);
+      a[i] = vec[0]; a[i+1] = vec[1]; a[i+2] = vec[2]; a[i+3] = vec[3];
+  }
+  
+  return a;
+};
 
 /**
  * Returns a string representation of a vector
@@ -3666,36 +3657,31 @@ quat.create = function() {
  * @param {vec3} b the destination vector
  * @returns {quat} out
  */
-quat.rotationTo = (function() {
-    var tmpvec3 = vec3.create();
-    var xUnitVec3 = vec3.fromValues(1,0,0);
-    var yUnitVec3 = vec3.fromValues(0,1,0);
-
-    return function(out, a, b) {
-        var dot = vec3.dot(a, b);
-        if (dot < -0.999999) {
-            vec3.cross(tmpvec3, xUnitVec3, a);
-            if (vec3.length(tmpvec3) < 0.000001)
-                vec3.cross(tmpvec3, yUnitVec3, a);
-            vec3.normalize(tmpvec3, tmpvec3);
-            quat.setAxisAngle(out, tmpvec3, M.PI);
-            return out;
-        } else if (dot > 0.999999) {
-            out[0] = 0;
-            out[1] = 0;
-            out[2] = 0;
-            out[3] = 1;
-            return out;
-        } else {
-            vec3.cross(tmpvec3, a, b);
-            out[0] = tmpvec3[0];
-            out[1] = tmpvec3[1];
-            out[2] = tmpvec3[2];
-            out[3] = 1 + dot;
-            return quat.normalize(out, out);
-        }
-    };
-})();
+quat.rotationTo = function(out, a, b) {
+  var tmpvec3 = vec3.create();
+  var dot = vec3.dot(a, b);
+  if (dot < -0.999999) {
+      vec3.cross(tmpvec3, [1,0,0], a);
+      if (vec3.length(tmpvec3) < 0.000001)
+          vec3.cross(tmpvec3, [0,1,0], a);
+      vec3.normalize(tmpvec3, tmpvec3);
+      quat.setAxisAngle(out, tmpvec3, M.PI);
+      return out;
+  } else if (dot > 0.999999) {
+      out[0] = 0;
+      out[1] = 0;
+      out[2] = 0;
+      out[3] = 1;
+      return out;
+  } else {
+      vec3.cross(tmpvec3, a, b);
+      out[0] = tmpvec3[0];
+      out[1] = tmpvec3[1];
+      out[2] = tmpvec3[2];
+      out[3] = 1 + dot;
+      return quat.normalize(out, out);
+  }
+}
 
 /**
  * Sets the specified quaternion with values corresponding to the given
@@ -3707,25 +3693,22 @@ quat.rotationTo = (function() {
  * @param {vec3} up    the vector representing the local "up" direction
  * @returns {quat} out
  */
-quat.setAxes = (function() {
+quat.setAxes = function(out, view, right, up) {
     var matr = mat3.create();
+    matr[0] = right[0];
+    matr[3] = right[1];
+    matr[6] = right[2];
 
-    return function(out, view, right, up) {
-        matr[0] = right[0];
-        matr[3] = right[1];
-        matr[6] = right[2];
+    matr[1] = up[0];
+    matr[4] = up[1];
+    matr[7] = up[2];
 
-        matr[1] = up[0];
-        matr[4] = up[1];
-        matr[7] = up[2];
+    matr[2] = -view[0];
+    matr[5] = -view[1];
+    matr[8] = -view[2];
 
-        matr[2] = -view[0];
-        matr[5] = -view[1];
-        matr[8] = -view[2];
-
-        return quat.normalize(out, quat.fromMat3(out, matr));
-    };
-})();
+    return quat.normalize(out, quat.fromMat3(out, matr));
+};
 
 /**
  * Creates a new quat initialized with values from an existing quaternion

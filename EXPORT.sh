@@ -30,12 +30,18 @@ cat $EXPORT_ROOT/shaders/shaders.js >> $EXPORT_ROOT/demo.js
 
 echo " -- exporting texture assets"
 echo "function load_textures() {" >> $EXPORT_ROOT/demo.js
-"$NODE" ./tools/export-textures.js $PROJECT_ROOT/*.tex >> $EXPORT_ROOT/demo.js
+TEXTURES=($PROJECT_ROOT/*.tex)
+if [ -f $TEXTURES ]; then
+  "$NODE" ./tools/export-textures.js $PROJECT_ROOT/*.tex >> $EXPORT_ROOT/demo.js
+fi
 echo "} // load_textures" >> $EXPORT_ROOT/demo.js
 
 echo " -- exporting geometry assets"
 echo "function load_geometries() {" >> $EXPORT_ROOT/demo.js
-"$NODE" ./tools/export-geometries.js $PROJECT_ROOT/*.geom >> $EXPORT_ROOT/demo.js
+GEOMETRIES=($PROJECT_ROOT/*.geom)
+if [ -f $GEOMETRIES ]; then
+  "$NODE" ./tools/export-geometries.js $PROJECT_ROOT/*.geom >> $EXPORT_ROOT/demo.js
+fi
 echo "}" >> $EXPORT_ROOT/demo.js
 
 for f in $PROJECT_ROOT/*.seq
@@ -59,7 +65,8 @@ if [ ! -f tools/compiler.jar ]; then
 fi
 
 echo " -- running the closure compiler..."
-java -jar tools/compiler.jar --js=$EXPORT_ROOT/demo.js --js_output_file=$EXPORT_ROOT/demo.min.js --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./externs/w3c_audio.js
+java -jar tools/compiler.jar --js=$EXPORT_ROOT/demo.js --js_output_file=$EXPORT_ROOT/demo.min.js --create_source_map $EXPORT_ROOT/demo.min.js.map --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./externs/w3c_audio.js
+"$NODE" ./tools/unminify-from-source-map.js $EXPORT_ROOT/demo.min.js.map > $EXPORT_ROOT/demo.unmin.js
 
 echo " -- packing expensive symbols"
 "$NODE" ./tools/symbol-minifier $EXPORT_ROOT/demo.min.js > $EXPORT_ROOT/demo.min2.js
