@@ -66,6 +66,7 @@ fi
 
 echo " -- running the closure compiler..."
 java -jar tools/compiler.jar --js=$EXPORT_ROOT/demo.js --js_output_file=$EXPORT_ROOT/demo.min.js --create_source_map $EXPORT_ROOT/demo.min.js.map --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./externs/w3c_audio.js
+"$NODE" ./tools/unminify-from-source-map.js $EXPORT_ROOT/demo.min.js.map > $EXPORT_ROOT/demo.unmin.js
 
 echo " -- packing expensive symbols"
 "$NODE" ./tools/symbol-minifier $EXPORT_ROOT/demo.min.js > $EXPORT_ROOT/demo.min2.js
