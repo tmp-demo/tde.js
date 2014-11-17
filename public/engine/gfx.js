@@ -372,11 +372,8 @@ function render_scene(scene, demo_time, scene_time) {
     set_uniforms(shader_program, rx / ry);
     gl.viewport(0, 0, rx, ry);
 
-    if (pass.fbo) {
-      gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
-    } else {
-      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
+    
     for (var i=0; i<texture_inputs.length; ++i) {
       //#debug{{
       if (!texture_inputs[i]) {
