@@ -148,7 +148,7 @@ angular.module("tde.services.engine-driver", [])
     try
     {
       eval(data)
-      snd = new SND(SONG)
+      snd = new SND()
     }
     catch (err)
     {
