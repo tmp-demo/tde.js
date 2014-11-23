@@ -1,8 +1,3 @@
-tde.js
-======
-
-JS demo engine.
-=======
 /tmp demo engine
 ================
 
