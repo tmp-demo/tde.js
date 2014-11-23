@@ -1,0 +1,12 @@
+<div id="home">
+	<h1>/tmp <small>demo engine</small></h1>
+	<ul class="list-group">
+		<li ng-repeat="project in projects" class="list-group-item">
+			<a href="#/{{project}}">{{project}}</a>
+		</li>
+	</ul>
+	<form ng-submit="newProject()">
+		<input type="text" ng-model="newProjectName" class="form-control" placeholder="New project" />
+		<div ng-show="error" class="alert alert-danger"><strong>Oops</strong><br />{{error}}</div>
+	</form>
+</div>

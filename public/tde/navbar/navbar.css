@@ -1,0 +1,17 @@
+#navbar .header
+{
+  float: left;
+  margin-left: 10px;
+}
+
+#navbar .menu
+{
+  float: right;
+  list-style-type: none;
+}
+
+#navbar .menu li
+{
+  display: inline;
+  margin-right: 10px;
+}

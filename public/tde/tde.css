@@ -1,0 +1,54 @@
+body
+{
+  margin: 0px;
+  padding: 0px;
+}
+
+#navbar
+{
+  line-height: 40px;
+  height: 40px;
+  font-size: 1.2em;
+}
+
+#leftPane
+{
+  position: absolute;
+  left: 0px;
+  right: 50%;
+  top: 40px;
+  bottom: 0px;
+  background-color: #333;
+  overflow: auto;
+}
+
+#rightPane
+{
+  position: absolute;
+  left: 50%;
+  right: 0px;
+  top: 40px;
+  bottom: 0px;
+}
+
+#engine
+{
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 50%;
+  margin: 0px;
+  padding: 0px;
+  background-color: #111;
+}
+
+#timeline
+{
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 50%;
+  bottom: 0px;
+  background-color: #000;
+}

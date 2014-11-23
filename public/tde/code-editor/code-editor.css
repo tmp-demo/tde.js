@@ -1,0 +1,27 @@
+.code-editor
+{
+	width: 100%;
+	height: 100%;
+}
+
+.code-editor .codemirror-wrapper
+{
+	width: 100%;
+	height: 100%;
+}
+
+.code-editor .CodeMirror
+{
+	width: 100%;
+	height: 100%;
+}
+
+.code-editor .codemirror-error-overlay
+{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	height: 50px;
+	text-align: center;
+}
