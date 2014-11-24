@@ -46,7 +46,7 @@ function subdivide(prev_buffer) {
         var ab = mid_point(a, b);
         var bc = mid_point(b, c);
         var ac = mid_point(a, c);
-        push_vertices(output,[
+        pack_vertices(output,[
             a,  ab, ac,
             ac, ab, bc,
             bc, ab, b,
@@ -62,8 +62,8 @@ function make_tetrahedron() {
     return [
          1, 1, 1,   1,-1,-1,  -1, 1,-1,  // abc
         -1,-1, 1,   1,-1,-1,   1, 1, 1,  // dba
-        -1, 1,-1,  -1,-1, 1,   1,-1,-1,  // cdb
-         1, 1, 1,  -1,-1, 1,  -1, 1,-1   // adc
+        -1,-1, 1,  -1, 1,-1,   1,-1,-1,  // dcb
+        -1,-1, 1,   1, 1, 1,  -1, 1,-1   // dac
     ];
 }
 
@@ -79,6 +79,46 @@ function make_sphere(radius, num_subdivs) {
         buffer[i+2] *= radius/len;
     }
     return buffer;
+}
+
+// TODO: it's sorta convenient to have this for prototyping but I assume we'll
+// have to not use this in the shipping demos and always generate from unpacked
+// geometry rather than packing and unpacking to re-pack afterwards like
+// map_triangles does.
+// turns [a, b, c, d, e, f, g, h, i] into [[a, b, c], [d, e, f], [g, h, i]]
+function unpack_vertices(vertices, offset, num_vertices) {
+    var output = [];
+    for(var i = offset; i < offset+num_vertices*3; i+=3) {
+        output.push([vertices[i], vertices[i+1], vertices[i+2]]);
+    }
+    return output;
+}
+
+function map_triangles(positions, fn) {
+    var output = [];
+    for (var i = 0; i < positions.length; i+=9) {
+        pack_vertices(output, fn(unpack_vertices(positions, i, 3), i));
+    }
+    return output;
+}
+
+// triangle: unpacked vertices [[x, y, z], [x, y, z], [x, y, z]]
+function flat_normals(triangle) {
+    var a = triangle[0];
+    var b = triangle[1];
+    var c = triangle[2];
+    var ab = vec3.create();
+    var ac = vec3.create();
+    var normal = vec3.create();
+    vec3.sub(ab, b, a);
+    vec3.sub(ac, c, a);
+    vec3.cross(normal, ab, ac);
+    vec3.normalize(normal, normal);
+    return [normal, normal, normal];
+}
+
+function triangle_index(triangle, i) {
+    return [[i],[i],[i]];
 }
 
 function translate(dx, dy, dz) {
@@ -271,7 +311,7 @@ function make_ring(path, y) {
   })
 }
 
-function push_vertices(to, v) {
+function pack_vertices(to, v) {
     for (var i = 0; i<v.length; ++i) {
         for (var j = 0; j<v[i].length; ++j) {
             to.push(v[i][j]);
@@ -294,15 +334,15 @@ function join_rings(geom, r1, r2, uv_fn) {
     for (var i = 0; i < r1.length; i++)
     {
       var next = (i + 1) % r1.length;
-      push_vertices(geom.positions, [r1[i], r1[next], r2[next], r2[next], r2[i], r1[i]]);
+      pack_vertices(geom.positions, [r1[i], r1[next], r2[next], r2[next], r2[i], r1[i]]);
 
       vec3.sub(e1, r2[next], r1[i]);
       vec3.sub(e2, r1[next], r1[i]);
       vec3.cross(normal, e1, e2);
       vec3.normalize(normal, normal);
-      push_vertices(geom.normals, [normal, normal, normal, normal, normal, normal]);
+      pack_vertices(geom.normals, [normal, normal, normal, normal, normal, normal]);
       var head_or_tail = rand_int(2) == 1 ? 0.3 : 0.5;
-      push_vertices(geom.uvs, uv_fn(vec3.length(e2), head_or_tail));
+      pack_vertices(geom.uvs, uv_fn(vec3.length(e2), head_or_tail));
     }
 }
 
@@ -322,7 +362,7 @@ function deep_clone(obj) {
 function _vector_2d(a,b) { return vec2.subtract([], b, a) }
 function _vec2_scale(v, f) { return [v[0]*f, v[1]*f] }
 
-function normal(v) {
+function tangent(v) {
     var l = vec2.length(v);
     return [-v[1]/l, v[0]/l]
 }
@@ -436,8 +476,8 @@ function shrink_path(path, amount, z, use_subdiv, disp) {
         }
         var pa_sub = pa.subdiv || 0;
         var px_sub = px.subdiv || 0;
-        var na = _vec2_scale(normal(_vector_2d(pa, px)), amount * (1+pa_sub*use_subdiv));
-        var nb = _vec2_scale(normal(_vector_2d(px, pb)), amount * (1+px_sub*use_subdiv));
+        var na = _vec2_scale(tangent(_vector_2d(pa, px)), amount * (1+pa_sub*use_subdiv));
+        var nb = _vec2_scale(tangent(_vector_2d(px, pb)), amount * (1+px_sub*use_subdiv));
 
         vec2.add(pna, pa, na);
         vec2.add(pnb, pb, nb);
@@ -471,9 +511,9 @@ function fill_convex_ring(geom, ring, uv) {
   // roof top or grass
   uv = uv || [0.5, 0.95];
   for (var i = 1; i < ring.length - 1; i++) {
-      push_vertices(geom.positions, [ring[0], ring[i], ring[i + 1]]);
-      push_vertices(geom.normals, [normal, normal, normal]);
-      push_vertices(geom.uvs, [uv, uv, uv]);
+      pack_vertices(geom.positions, [ring[0], ring[i], ring[i + 1]]);
+      pack_vertices(geom.normals, [normal, normal, normal]);
+      pack_vertices(geom.uvs, [uv, uv, uv]);
   }
 }
 

@@ -37,13 +37,15 @@ var _locations = [
   "a_position",
   "a_uv",
   "a_normal",
-  "a_color"
+  "a_color",
+  "a_triangle_id"
 ];
 
 var POS = 0;
 var UV = 1;
 var NORMAL = 2;
 var COLOR = 3;
+var TRIANGLE_ID = 4;
 
 function gfx_init() {
   // replace the render passes' texture arrays by actual frame buffer objects
