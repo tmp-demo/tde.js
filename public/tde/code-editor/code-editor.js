@@ -51,6 +51,9 @@ angular.module("tde.code-editor", [])
         }
       })
       
+      // remove annoying or conflicting shortcuts
+      editor.commands.bindKeys({"Ctrl+L": undefined, "Ctrl+P": undefined, "Ctrl+T": undefined})
+
       editor.commands.addCommand({
         name: "Reload code",
         bindKey: "Ctrl+Enter",
