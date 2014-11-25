@@ -38,14 +38,14 @@ angular.module("tde.goto-box", [])
 		{
 			$scope.$apply(function()
 			{
-				if (event.key == "Down") $scope.selectedIndex++;
-				if (event.key == "Up")   $scope.selectedIndex--;
+				if (event.keyCode == 40 /* Down */) $scope.selectedIndex++;
+				if (event.keyCode == 38 /* Up */)   $scope.selectedIndex--;
 
 				var filteredList = element.find("li")
 				if ($scope.selectedIndex < 0) $scope.selectedIndex = 0;
 				if ($scope.selectedIndex >= filteredList.length) $scope.selectedIndex = filteredList.length - 1;
 
-				if (event.key == "Enter") {
+				if (event.keyCode == 13 /* Enter */) {
 					$scope.selectItem(filteredList[$scope.selectedIndex].getAttribute("data-item"));
 				}
 			})
@@ -55,7 +55,7 @@ angular.module("tde.goto-box", [])
 		{
 			$scope.$apply(function()
 			{
-				if (event.ctrlKey && event.key == "p") {
+				if (event.ctrlKey && event.keyCode == 80 /* p */) {
 					event.preventDefault();
 
 					$scope.visible = !$scope.visible;
@@ -70,7 +70,7 @@ angular.module("tde.goto-box", [])
 					}
 				}
 
-				if (event.key == "Esc") {
+				if (event.keyCode == 27 /* Esc */) {
 					event.preventDefault();
 
 					$scope.visible = false;
