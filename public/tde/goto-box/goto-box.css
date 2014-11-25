@@ -30,3 +30,9 @@
 {
 	background-color: #444;
 }
+
+#goto-box .glyphicon
+{
+	left: -14px;
+	position: relative;
+}

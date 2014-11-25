@@ -33,7 +33,15 @@ angular.module("tde.goto-box", [])
 
 			$scope.$emit("gotoBoxItemSelected", item);
 		}
-
+		
+		$scope.highlight = function(item) {
+			if ($scope.filterText)
+				return item.replace($scope.filterText, '<span class="green">' + $scope.filterText + '</span>');
+			return item;
+		}
+		
+		$scope.getIconClass = Asset.getIconClass
+		
 		element.find("input").keydown(function(event)
 		{
 			$scope.$apply(function()
