@@ -215,6 +215,7 @@ function create_geom_from_cmd_list(commands) {
     };
 }
 
+// XXX - apply_extrusion
 function apply_fn(geom, previous_rings, new_rings) {
   previous_rings.forEach(
       function(prev_item, i) {
@@ -228,6 +229,15 @@ function apply_fn(geom, previous_rings, new_rings) {
       }
   );
 }
+
+function apply_fill(geom, ring) {
+  var normal = [0, 1, 0];
+  for (var i = 1; i < ring.length - 1; i++) {
+      pack_vertices(geom.positions, [ring[0], ring[i], ring[i + 1]]);
+      //pack_vertices(geom.normals, [normal, normal, normal]);
+  }
+}
+
 
 function jump_if(pc, cond) {
     return function(i) { if (cond(i)) { return pc; } };
