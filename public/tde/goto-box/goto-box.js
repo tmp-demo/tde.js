@@ -36,7 +36,7 @@ angular.module("tde.goto-box", [])
 		
 		$scope.highlight = function(item) {
 			if ($scope.filterText)
-				return item.replace($scope.filterText, '<span class="green">' + $scope.filterText + '</span>');
+				return item.replace(new RegExp($scope.filterText, 'g'), '<span class="green">' + $scope.filterText + '</span>');
 			return item;
 		}
 		
