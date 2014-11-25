@@ -1,0 +1,8 @@
+<div id="goto-box" ng-show="visible">
+	<input type="text" class="form-control" ng-model="filterText" placeholder="Filter" />
+	<ul class="scrollable">
+		<li ng-repeat="(index, item) in listData | filter:filterText" ng-class="{selected: (selectedIndex == index)}" data-item="{{item}}" ng-click="selectItem(item)">
+			{{item}}
+		</li>
+	</ul>
+</div>

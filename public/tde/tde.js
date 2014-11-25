@@ -3,6 +3,7 @@ angular.module("tde", [
   "ngRoute",
   "tde.code-editor",
   "tde.engine-view",
+  "tde.goto-box",
   "tde.home",
   "tde.navbar",
   "tde.project",
@@ -34,7 +35,7 @@ angular.module("tde", [
   $routeProvider.otherwise({redirectTo: "/"})
 }])
 
-.controller("ApplicationCtrl", function($scope, $routeParams, User)
+.controller("ApplicationCtrl", function($scope, $routeParams, $location, User)
 {
   $scope.$on('$routeChangeSuccess', function()
   {
@@ -42,6 +43,12 @@ angular.module("tde", [
     $scope.assetType = $routeParams.assetType
     $scope.assetName = $routeParams.assetName
     $scope.assetId = $scope.assetName ? $scope.assetName + "." + $scope.assetType : ""
+  })
+
+  $scope.$on("gotoBoxItemSelected", function(event, selectedItem)
+  {
+    var assetParts = selectedItem.split(".");
+    $location.url("/" + $scope.projectId + "/" + assetParts[1] + "/" + assetParts[0])
   })
   
   $scope.currentUser = User.currentUser

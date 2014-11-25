@@ -1,0 +1,32 @@
+#goto-box
+{
+  position: absolute;
+  left: 50%;
+  width: 500px;
+  margin: 0px -250px;
+  padding: 0px;
+  background-color: #222;
+  box-shadow: 0px 0px 2px #222;
+  z-index: 100;
+}
+
+#goto-box ul
+{
+	list-style-type: none;
+	margin: 0px;
+	padding: 0px;
+	max-height: 500px;
+	overflow: auto;
+}
+
+#goto-box li
+{
+	padding: 10px 30px;
+	border-top: 1px solid #333;
+	border-bottom: 1px solid #111;
+}
+
+#goto-box li.selected
+{
+	background-color: #444;
+}
