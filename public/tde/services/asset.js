@@ -137,6 +137,21 @@ angular.module("tde.services.asset", [])
     $rootScope.$broadcast("assetUnloaded", assetId)
   }
   
+  this.getIconClass = function(asset)
+  {
+    var glyphicon = "warning-sign"
+    switch (asset.split(".")[1])
+    {
+      case "tex": glyphicon = "picture"; break
+      case "geom": glyphicon = "th-large"; break
+      case "seq": glyphicon = "film"; break
+      case "song": glyphicon = "music"; break
+      case "glsl": glyphicon = "fire"; break
+    }
+    
+    return "glyphicon glyphicon-" + glyphicon
+  }
+  
   $rootScope.$on('$routeChangeSuccess', function()
   {
     if (self.currentProjectId != $routeParams.projectId)

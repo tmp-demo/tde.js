@@ -1,6 +1,7 @@
 angular.module("tde", [
   "ngAnimate",
   "ngRoute",
+  "ngSanitize",
   "tde.code-editor",
   "tde.engine-view",
   "tde.goto-box",
