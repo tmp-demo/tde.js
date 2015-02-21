@@ -30,9 +30,13 @@ for (var i = 2; i < process.argv.length; ++i) {
                 }
                 case "text": {
                     for (var t = 0; t < asset.data.length; ++t) {
+						var item = asset.data[t];
                         console.log(
-                            'textures["'+asset.data[t].id+'"] = create_text_texture(',
-                                asset.data[t].size, ', "'+asset.data[t].text+'");'
+                            "textures[%s] = %s(%d, %s);",
+							JSON.stringify(item.id),
+							(asset.vertical || item.vertical) ? "create_vertical_text_texture" : "create_text_texture",
+							item.size,
+							JSON.stringify(item.text)
                         );
                     }
                     break;

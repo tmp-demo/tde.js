@@ -35,3 +35,6 @@ function create_text_texture(fontSize, text) {
   );
 }
 
+function create_vertical_text_texture(fontSize, text) {
+	return text.split("").join("\n");
+}
