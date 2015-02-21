@@ -118,7 +118,7 @@ angular.module("tde.engine-view", [])
 
       canvasElement.click(function()
       {
-        togglePlayState()
+        //togglePlayState()
       })
 
       $(document).keypress(function(event)

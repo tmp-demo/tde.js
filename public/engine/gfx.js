@@ -303,7 +303,12 @@ function render_scene(scene, demo_time, scene_time) {
     }
 
     var program = programs[pass.program]
-    program = program || program_placeholder //#debug
+    //#debug{{
+    if (!program) {
+      console.log("Missing program "+pass.program+" (using placeholder)");
+      program = program_placeholder
+    }
+    //#debug}}
     var shader_program = program;
     gl.useProgram(shader_program);
     var rx = canvas.width;
@@ -312,7 +317,7 @@ function render_scene(scene, demo_time, scene_time) {
       rx = textures[pass.render_to.color].width;
       ry = textures[pass.render_to.color].height;
     }
-    uniforms["resolution"] = [rx,ry];
+    uniforms["u_resolution"] = [rx,ry];
     set_uniforms(shader_program, rx / ry);
     gl.viewport(0, 0, rx, ry);
 
@@ -339,7 +344,7 @@ function render_scene(scene, demo_time, scene_time) {
       gl.blendFunc.apply(gl, pass.blend);
     }
     
-    if (pass.depthTest) {
+    if (pass.depth_test) {
       gl.enable(gl.DEPTH_TEST);
     }
     else {
@@ -354,7 +359,13 @@ function render_scene(scene, demo_time, scene_time) {
     
     if (pass.geometry) {
       var geometry = geometries[pass.geometry]
-      geometry = geometry || geometry_placeholder //#debug
+      //#debug{{
+      if (!geometry) {
+        console.log("Missing geometry "+pass.geometry+" (using placeholder)");
+        geometry = geometry_placeholder
+      }
+      //#debug}}
+
       draw_geom(geometry)
     }
   }
