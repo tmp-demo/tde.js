@@ -76,6 +76,9 @@ angular.module("tde.services.engine-driver", [])
         if (asset.uvs) {
           buffers.push(make_vbo(UV, asset.normals));
         }
+        if (asset.colors) {
+          buffers.push(make_vbo(COLOR, asset.colors));
+        }
 
         geometries[name] = {
           buffers: buffers,

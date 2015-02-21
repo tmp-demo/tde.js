@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import itertools
 
 def load_materials(filename):
     materials = {}
@@ -27,6 +28,10 @@ def load_mesh(filename):
         positions = []
         normals = []
 
+        outputPositions = []
+        outputNormals = []
+        outputColors = []
+
         currentMaterial = None
 
         for line in meshFile:
@@ -46,14 +51,30 @@ def load_mesh(filename):
             elif fragments[0] == "f":
                 if len(fragments) > 4:
                     # make 2 triangles out of a quad
-                    fragments[1:] = fragments[1:4] + fragments[2:5]
-                    # todo: split on '/'
+                    fragments[1:] = fragments[1:4] + [fragments[3], fragments[1], fragments[4]]
+                outputPositions.extend([positions[int(indices.split('/')[0]) - 1] for indices in fragments[1:]])
+                outputNormals.extend([normals[int(indices.split('/')[2]) - 1] for indices in fragments[1:]])
+                outputColors.extend([(currentMaterial["diffuse"]) for indices in fragments[1:]])
 
-        return positions
+        # flatten tuples
+        outputPositions = list(itertools.chain.from_iterable(outputPositions))
+        outputNormals = list(itertools.chain.from_iterable(outputNormals))
+        outputColors = list(itertools.chain.from_iterable(outputColors))
+
+        return {
+            "type": "buffers",
+            "positions": outputPositions,
+            "normals": outputNormals,
+            "colors": outputColors,
+            "mode": "gl.TRIANGLES",
+            "vertex_count": int(len(outputPositions) / 3)
+        }
 
 if __name__ == "__main__":
-    print(load_mesh("../data/particles/raw/TORI-GATETDF.obj"))
-    #print(load_materials("../data/particles/raw/TORI-GATETDF.mtl"))
+    if len(sys.argv) < 3:
+        print(sys.argv[0] + " <input obj> <output geom>")
+        sys.exit(1)
 
-    #if len(sys.argv) < 3:
-    #    print(sys.argv[0] + " <input obj> <output geom>")
+    mesh_data = load_mesh(sys.argv[1])
+    with open(sys.argv[2], "w") as outFile:
+        outFile.write(json.dumps(mesh_data))
