@@ -211,7 +211,7 @@ angular.module("tde.services.engine-driver", [])
     // expand includes
     var vertex = shader.vertexSource
     var fragment = shader.fragmentSource
-    var includeRegex = /\/\/![ ]*INCLUDE[ ]+(.*)[\n\r ]+/g;
+    var includeRegex = /\/\/![ ]*INCLUDE[ ]+(.*)[\n\r ]+/;
     
     // vertex
     var matches = includeRegex.exec(vertex)
