@@ -48,6 +48,9 @@ for (var i = 2; i < process.argv.length; ++i) {
                     if (asset.uvs) {
                       console.log("   , make_vbo(UV,", JSON.stringify(asset.uvs), ")");
                     }
+                    if (asset.colors) {
+                      console.log("   , make_vbo(COLOR,", JSON.stringify(asset.colors), ")");
+                    }
                     console.log("  ],");
                     console.log("  mode:", asset.mode, ",");
                     console.log("  vertex_count:", asset.vertex_count);
