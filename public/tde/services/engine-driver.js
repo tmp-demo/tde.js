@@ -38,7 +38,7 @@ angular.module("tde.services.engine-driver", [])
         // A set of textures containing some text
         for (var i = 0; i <asset.data.length; ++i) {
           var item = asset.data[i];
-          textures[item.id] = create_text_texture(item.size, item.text);
+          textures[item.id] = ((asset.vertical || item.vertical) ? create_vertical_text_texture : create_text_texture)(item.size, item.text);
         }
         break;
       }
@@ -353,8 +353,11 @@ angular.module("tde.services.engine-driver", [])
   this.logError = function(message, details)
   {
     //toastr.error(details, message);
-    console.error(message)
-    //console.error(details)
+    var group = console.groupCollapsed || console.group;
+	console.error(message)
+	group.call(console)
+    console.error(details)
+	console.groupEnd()
   }
 
   this.drawFrame = function()
