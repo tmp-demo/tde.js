@@ -37,13 +37,15 @@ var _locations = [
   "a_position",
   "a_uv",
   "a_normal",
-  "a_color"
+  "a_color",
+  "a_triangle_id"
 ];
 
 var POS = 0;
 var UV = 1;
 var NORMAL = 2;
 var COLOR = 3;
+var TRIANGLE_ID = 4;
 
 function gfx_init() {
   // replace the render passes' texture arrays by actual frame buffer objects
@@ -345,7 +347,7 @@ function render_scene(scene, demo_time, scene_time) {
     }
     
     if (pass.clear) {
-      gl.clearColor(1.0, 1.0, 1.0, 1.0);
+      gl.clearColor(pass.clear[0], pass.clear[1], pass.clear[2], pass.clear[3]);
       gl.clearDepth(1.0);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     }
