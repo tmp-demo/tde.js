@@ -53,7 +53,7 @@ def load_mesh(filename):
                     # make 2 triangles out of a quad
                     fragments[1:] = fragments[1:4] + [fragments[3], fragments[1], fragments[4]]
                 outputPositions.extend([positions[int(indices.split('/')[0]) - 1] for indices in fragments[1:]])
-                outputNormals.extend([normals[int(indices.split('/')[1]) - 1] for indices in fragments[1:]])
+                outputNormals.extend([normals[int(indices.split('/')[2]) - 1] for indices in fragments[1:]])
                 outputColors.extend([(currentMaterial["diffuse"]) for indices in fragments[1:]])
 
         # flatten tuples
