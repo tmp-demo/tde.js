@@ -8,11 +8,21 @@ var fragment_shaders = {}
 var vertex_shaders = {}
 var ctx_2d
 
+var use_texture_float = true;
+var gl_ext_half_float;
+
 function gl_init() {
   gl = canvas.getContext("webgl", {alpha: false});
   minify_context(gl);
 
   gl.getExtension("WEBGL_depth_texture");
+
+  if (use_texture_float) {
+    gl_ext_half_float = gl.getExtension("OES_texture_half_float");
+    gl.getExtension("OES_texture_half_float_linear");
+    gl.getExtension("EXT_color_buffer_half_float");
+    minify_context(gl_ext_half_float);
+  }
 
   gl.viewport(0, 0, canvas.width, canvas.height);
 
@@ -193,7 +203,7 @@ function set_texture_flags(texture, allow_repeat, linear_filtering, mipmaps) {
   }
 }
 
-function create_texture(width, height, format, data, allow_repeat, linear_filtering, mipmaps) {
+function create_texture(width, height, format, data, allow_repeat, linear_filtering, mipmaps, float_tex) {
   format = format || gl.RGBA;
   width = width || canvas.width;
   height = height || canvas.height;
@@ -203,11 +213,18 @@ function create_texture(width, height, format, data, allow_repeat, linear_filter
   gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0,
                 format,
-                (format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT
-                                               : gl.UNSIGNED_BYTE, data ? new Uint8Array(data, 0, 0)
-                                                                        : null);
+                float_tex ? gl_ext_half_float.HALF_FLOAT_OES
+                          : (format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT
+                                                           : gl.UNSIGNED_BYTE,
+                data ? new Uint8Array(data, 0, 0) : null);
 
   (format == gl.DEPTH_COMPONENT) || set_texture_flags(texture, allow_repeat, linear_filtering, mipmaps);
+  //debug{{
+  if (float_tex && data) {
+    // wouldn't be hard to add, but we haven't needed it yet.
+    console.log("!!! We don't support uploading data to float textures, something may be busted.");
+  }
+  //debug}}
 
   return {
     tex: texture,
