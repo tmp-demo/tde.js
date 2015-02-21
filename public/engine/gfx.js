@@ -305,7 +305,9 @@ function render_scene(scene, demo_time, scene_time) {
     var program = programs[pass.program]
     //#debug{{
     if (!program) {
-      console.log("Missing program "+pass.program+" (using placeholder)");
+      if (pass.program) {
+        console.log("Missing program "+pass.program+" (using placeholder)");
+      }
       program = program_placeholder
     }
     //#debug}}
