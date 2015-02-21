@@ -22,9 +22,10 @@ function create_text_texture(fontSize, text) {
   fontSize *= 100;
   ctx_2d.font = fontSize + "px Calibri";
 
-  var width = 3 + ctx_2d.measureText(text).width|0,
-    height = fontSize * 1.50;
-  
+  var measure = ctx_2d.measureText(text);
+  var width = 3 + measure.width|0,
+    height = fontSize * 1.5;
+	
   ctx_2d.fillStyle = "#fff";
   ctx_2d.fillText(text, 2, fontSize);
   
@@ -36,5 +37,24 @@ function create_text_texture(fontSize, text) {
 }
 
 function create_vertical_text_texture(fontSize, text) {
-	return text.split("").join("\n");
+  clear_texture_canvas();
+  
+  fontSize *= 100;
+  ctx_2d.font = fontSize + "px Calibri";
+  ctx_2d.textAlign = "center";
+  ctx_2d.fillStyle = "#fff";
+
+  var width = fontSize,
+    height = fontSize;
+	
+  for (var i = 0; i < text.length; ++i) {
+	ctx_2d.fillText(text[i], width / 2, height);
+	height += fontSize * 0.7;
+  }
+  
+  return create_texture(
+    width, height, gl.RGBA,
+    ctx_2d.getImageData(0, 0, width, height).data,
+    false, true
+  );
 }
