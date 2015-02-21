@@ -52,6 +52,8 @@ function create_vertical_text_texture(fontSize, text) {
 	height += fontSize * 0.7;
   }
   
+  height += fontSize * 0.3;
+  
   return create_texture(
     width, height, gl.RGBA,
     ctx_2d.getImageData(0, 0, width, height).data,
