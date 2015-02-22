@@ -94,5 +94,5 @@ echo " -- done."
 
 wc -c *.js $EXPORT_ROOT/shaders/shaders.js
 wc -c $EXPORT_ROOT/demo.js
-wc -c $EXPORT_ROOT/demo.min.js
+#wc -c $EXPORT_ROOT/demo.min.js
 #wc -c $EXPORT_ROOT/demo.png.html
