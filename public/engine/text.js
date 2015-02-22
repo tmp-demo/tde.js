@@ -4,6 +4,8 @@ function text_init() {
   canvas_2d.width = canvas_2d.height = 2048;
   ctx_2d = canvas_2d.getContext("2d");
   minify_context(ctx_2d);
+  ctx_2d.textAlign = "center";
+  ctx_2d.fillStyle = "#fff";
 }
 
 function clear_texture_canvas() {
@@ -26,8 +28,7 @@ function create_text_texture(fontSize, text) {
   var width = 3 + measure.width|0,
     height = fontSize * 1.5;
 	
-  ctx_2d.fillStyle = "#fff";
-  ctx_2d.fillText(text, 2, fontSize);
+  ctx_2d.fillText(text, width / 2, fontSize);
   
   return create_texture(
     width, height, gl.RGBA,
@@ -41,8 +42,6 @@ function create_vertical_text_texture(fontSize, text) {
   
   fontSize *= 100;
   ctx_2d.font = fontSize + "px Calibri";
-  ctx_2d.textAlign = "center";
-  ctx_2d.fillStyle = "#fff";
 
   var width = fontSize,
     height = fontSize;
