@@ -68,27 +68,27 @@ if [ ! -f tools/compiler.jar ]; then
 fi
 
 echo " -- running the closure compiler..."
-java -jar tools/compiler.jar --js=$EXPORT_ROOT/demo.js --js_output_file=$EXPORT_ROOT/demo.min.js --create_source_map $EXPORT_ROOT/demo.min.js.map --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./externs/w3c_audio.js
-"$NODE" ./tools/unminify-from-source-map.js $EXPORT_ROOT/demo.min.js.map > $EXPORT_ROOT/demo.unmin.js
+#java -jar tools/compiler.jar --js=$EXPORT_ROOT/demo.js --js_output_file=$EXPORT_ROOT/demo.min.js --create_source_map $EXPORT_ROOT/demo.min.js.map --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./externs/w3c_audio.js
+#"$NODE" ./tools/unminify-from-source-map.js $EXPORT_ROOT/demo.min.js.map > $EXPORT_ROOT/demo.unmin.js
 
 echo " -- packing expensive symbols"
-"$NODE" ./tools/symbol-minifier $EXPORT_ROOT/demo.min.js > $EXPORT_ROOT/demo.min2.js
+#"$NODE" ./tools/symbol-minifier $EXPORT_ROOT/demo.min.js > $EXPORT_ROOT/demo.min2.js
 #cp $EXPORT_ROOT/demo.min.js $EXPORT_ROOT/demo.min2.js
 
 echo " -- compressing some keywords"
 # for some reason replacing '@' by 'function ' breaks the demo while 'function' (without the space) works
 #sed -i 's/function(/function (/g' $EXPORT_ROOT/demo.min2.js
-sed -i 's/function/@/g' $EXPORT_ROOT/demo.min2.js
-sed -i 's/return/`/g' $EXPORT_ROOT/demo.min2.js
-sed -i 's/var/~/g' $EXPORT_ROOT/demo.min2.js
+#sed -i 's/function/@/g' $EXPORT_ROOT/demo.min2.js
+#sed -i 's/return/`/g' $EXPORT_ROOT/demo.min2.js
+#sed -i 's/var/~/g' $EXPORT_ROOT/demo.min2.js
 
-cat $EXPORT_ROOT/demo.min2.js | egrep -o '[a-zA-Z0-9]{2,}' | sort | uniq -c | sort -nr > $EXPORT_ROOT/word_frequencies
+#cat $EXPORT_ROOT/demo.min2.js | egrep -o '[a-zA-Z0-9]{2,}' | sort | uniq -c | sort -nr > $EXPORT_ROOT/word_frequencies
 
 #echo " -- packing in a png..."
 #ruby tools/pnginator.rb $EXPORT_ROOT/demo.min2.js $EXPORT_ROOT/demo.png.html
 
 echo " -- creating runner"
-echo "<script src='demo.min.js'></script>" > $EXPORT_ROOT/demo.min.html
+echo "<script src='demo.js'></script>" > $EXPORT_ROOT/demo.min.html
 
 echo " -- done."
 
