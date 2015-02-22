@@ -366,7 +366,6 @@ function SND_Ogg(name, data)
 
   this.p = function()
   {
-    console.log("play!")
     audioElement.play();
   }
 
