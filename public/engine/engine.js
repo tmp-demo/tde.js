@@ -114,7 +114,8 @@ function main() {
   
   render_scene(scenes[0], 0, 0);
 
-  snd = new SND(SONG);
+  //snd = new SND(SONG);
+  snd = new SND_Ogg("tdf15_master3")
   // If you want to shut the music up comment this out and also comment
   // out the equivalent line in engine-driver.js:~100
   snd.p();

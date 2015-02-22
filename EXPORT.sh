@@ -49,12 +49,15 @@ do
     ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
 done
 
+echo " -- exporting ogg tracks"
+cp $PROJECT_ROOT/*.ogg $EXPORT_ROOT
+
 # for f in  $PROJECT_ROOT/*.song
 # do
 #     ./tools/opt.py $f | sed "s/'\\(SND\\.[A-Za-z]*\\)'/\\1/g" >> $EXPORT_ROOT/demo.js
 # done
 
-cat $PROJECT_ROOT/song.song >> $EXPORT_ROOT/demo.js
+#cat $PROJECT_ROOT/song.song >> $EXPORT_ROOT/demo.js
 
 echo "onload=main;" >> $EXPORT_ROOT/demo.js
 
@@ -81,12 +84,15 @@ sed -i 's/var/~/g' $EXPORT_ROOT/demo.min2.js
 
 cat $EXPORT_ROOT/demo.min2.js | egrep -o '[a-zA-Z0-9]{2,}' | sort | uniq -c | sort -nr > $EXPORT_ROOT/word_frequencies
 
-echo " -- packing in a png..."
-ruby tools/pnginator.rb $EXPORT_ROOT/demo.min2.js $EXPORT_ROOT/demo.png.html
+#echo " -- packing in a png..."
+#ruby tools/pnginator.rb $EXPORT_ROOT/demo.min2.js $EXPORT_ROOT/demo.png.html
+
+echo " -- creating runner"
+echo "<script src='demo.min.js'></script>" > $EXPORT_ROOT/demo.min.html
 
 echo " -- done."
 
 wc -c *.js $EXPORT_ROOT/shaders/shaders.js
 wc -c $EXPORT_ROOT/demo.js
-wc -c $EXPORT_ROOT/demo.min2.js
-wc -c $EXPORT_ROOT/demo.png.html
+wc -c $EXPORT_ROOT/demo.min.js
+#wc -c $EXPORT_ROOT/demo.png.html
