@@ -23,7 +23,8 @@ for (var i = 2; i < process.argv.length; ++i) {
                         "0, ",
                         asset.allow_repeat || undefined, SEP,
                         asset.linear_filtering || undefined, SEP,
-                        asset.mipmaps || undefined,
+                        asset.mipmaps || undefined, SEP,
+                        asset.float_texture || undefined,
                         ");"
                     );
                     break;

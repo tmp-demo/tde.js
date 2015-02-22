@@ -24,7 +24,8 @@ angular.module("tde.services.engine-driver", [])
           null, // no data
           eval(asset.allow_repeat || "undefined"),
           eval(asset.linear_filtering || "undefined"),
-          eval(asset.mipmaps || "undefined")
+          eval(asset.mipmaps || "undefined"),
+          eval(asset.float_texture || "undefined")
         );
         break;
       }
