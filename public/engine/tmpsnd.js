@@ -360,7 +360,7 @@ function SND_Ogg(name, data)
   if (data)
     src = "/data/project/tdf15/asset/" + name + ".ogg"
   else
-    src = "tdf15/" + name + ".ogg"
+    src = name + ".ogg"
 
   var audioElement = new Audio(src)
 
