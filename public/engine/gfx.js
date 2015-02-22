@@ -213,7 +213,7 @@ function create_texture(width, height, format, data, allow_repeat, linear_filter
   gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0,
                 format,
-                float_tex ? gl_ext_half_float.HALF_FLOAT_OES
+                float_tex ? use_texture_float && gl_ext_half_float.HALF_FLOAT_OES
                           : (format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT
                                                            : gl.UNSIGNED_BYTE,
                 data ? new Uint8Array(data, 0, 0) : null);
