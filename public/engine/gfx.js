@@ -328,8 +328,7 @@ function render_scene(scene, demo_time, scene_time) {
       program = program_placeholder
     }
     //#debug}}
-    if (!program)
-      return;
+    
     var shader_program = program;
     gl.useProgram(shader_program);
     var rx = canvas.width;
