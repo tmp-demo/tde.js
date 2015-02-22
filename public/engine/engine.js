@@ -106,11 +106,13 @@ function main() {
   gl_init();
   text_init();
   demo_init();
-  gfx_init();
 
   load_shaders();
   load_geometries();
   load_textures();
+
+  gfx_init();
+
   
   render_scene(scenes[0], 0, 0);
 
