@@ -49,6 +49,9 @@ do
     ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
 done
 
+echo " -- exporting ogg tracks"
+cp $PROJECT_ROOT/*.ogg $EXPORT_ROOT
+
 # for f in  $PROJECT_ROOT/*.song
 # do
 #     ./tools/opt.py $f | sed "s/'\\(SND\\.[A-Za-z]*\\)'/\\1/g" >> $EXPORT_ROOT/demo.js

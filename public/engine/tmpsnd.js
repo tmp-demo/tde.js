@@ -346,3 +346,42 @@
     sink.c(ac.destination);
     SND.setSends([0.3, 0.8], sink);
   }
+
+
+
+
+
+////////////////// Audio tag implementation
+
+function SND_Ogg(name, data)
+{
+  var src, audioElement;
+
+  if (data)
+    src = "/data/project/tdf15/asset/" + name + ".ogg"
+  else
+    src = "tdf15/" + name + ".ogg"
+
+  var audioElement = new Audio(src)
+
+  this.p = function()
+  {
+    console.log("play!")
+    audioElement.play();
+  }
+
+  this.s = function()
+  {
+    audioElement.pause();
+  }
+
+  this.t = function()
+  {
+    return audioElement.currentTime * (173.43 / 60);
+  }
+
+  this.seek = function(beat)
+  {
+    audioElement.currentTime = beat * 60 / 173.43
+  }
+}

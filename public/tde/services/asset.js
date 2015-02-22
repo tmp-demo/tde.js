@@ -90,6 +90,7 @@ angular.module("tde.services.asset", [])
           case "geom": EngineDriver.loadGeometry(name, data); break
           case "seq": EngineDriver.loadSequence(name, data); break
           case "song": EngineDriver.loadSong(name, data); break
+          case "ogg": EngineDriver.loadOgg(name, data); break
           case "glsl": EngineDriver.loadShader(assetId, data); break
           case "glsllib": EngineDriver.loadShader(assetId, data); break
           default: toastr.warning(type, "Unknown asset type"); break

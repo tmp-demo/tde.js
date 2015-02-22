@@ -165,6 +165,11 @@ angular.module("tde.services.engine-driver", [])
       snd.playing = false
   }
 
+  this.loadOgg = function(name, data)
+  {
+    snd = new SND_Ogg(name, data)
+  }
+
   this.loadShader = function(name, data)
   {
     self.logInfo("loading shader " + name)
@@ -399,7 +404,8 @@ angular.module("tde.services.engine-driver", [])
   {
     self.currentTime = time
     if (snd)
-      snd.startTime = ac.currentTime - time * (60 / 125) // tempo is 125
+      //snd.startTime = ac.currentTime - time * (60 / 125) // tempo is 125
+      snd.seek(time)
 
     if (!this.playing)
       engine_render(self.currentTime)
