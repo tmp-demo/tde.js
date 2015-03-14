@@ -219,6 +219,8 @@ function create_texture(width, height, format, data, allow_repeat, linear_filter
                                                            : gl.UNSIGNED_BYTE,
                 data ? new Uint8Array(data, 0, 0) : null);
 
+  gl.bindTexture(gl.TEXTURE_2D, null);
+
   return {
     tex: texture,
     width: width,
@@ -312,17 +314,16 @@ function render_pass(pass, time) {
         }
       }
 
-      var program = programs[pass.program]
+      var shader_program = programs[pass.program]
       //#debug{{
-      if (!program) {
+      if (!shader_program) {
         if (pass.program) {
           console.log("Missing program "+pass.program+" (using placeholder)");
         }
-        program = program_placeholder
+        shader_program = program_placeholder
       }
       //#debug}}
       
-      var shader_program = program;
       gl.useProgram(shader_program);
       var rx = canvas.width;
       var ry = canvas.height;
@@ -336,7 +337,7 @@ function render_pass(pass, time) {
       gl.viewport(0, 0, rx, ry);
 
       gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
-      
+
       for (var i=0; i<texture_inputs.length; ++i) {
         //#debug{{
         if (!texture_inputs[i]) {
@@ -373,6 +374,7 @@ function render_pass(pass, time) {
       
       if (pass.geometry) {
         var geometry = geometries[pass.geometry]
+
         //#debug{{
         if (!geometry) {
           console.log("Missing geometry "+pass.geometry+" (using placeholder)");
@@ -381,6 +383,12 @@ function render_pass(pass, time) {
         //#debug}}
 
         draw_geom(geometry)
+      }
+
+      // we may be able to remove this loop to loose a few bytes
+      for (var i=0; i<texture_inputs.length; ++i) {
+        gl.activeTexture(texture_unit(i));
+        gl.bindTexture(gl.TEXTURE_2D, null);
       }
     }
   }
