@@ -51,7 +51,7 @@ module.exports.init = function(app)
   {
     var projectId = req.params.projectId
     
-    var demoFilename = __dirname + "/export/" + projectId + "/demo.min.html"
+    var demoFilename = __dirname + "/export/" + projectId + "/demo.png.html"
     fs.unlink(demoFilename, function(err)
     {
       var command = "cd \"" + __dirname + "\" && ./EXPORT.sh " + projectId
