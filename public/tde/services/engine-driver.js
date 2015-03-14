@@ -151,6 +151,8 @@ angular.module("tde.services.engine-driver", [])
     {
       eval(data)
       snd = new SND()
+      if (self.isMute)
+        snd.mute()
     }
     catch (err)
     {
@@ -167,6 +169,8 @@ angular.module("tde.services.engine-driver", [])
   this.loadOgg = function(name, data)
   {
     snd = new SND_Ogg(name, data)
+    if (self.isMute)
+      snd.mute()
   }
 
   this.loadShader = function(name, data)
@@ -408,5 +412,19 @@ angular.module("tde.services.engine-driver", [])
 
     if (!this.playing)
       engine_render(self.currentTime)
+  }
+
+  this.mute = function()
+  {
+    self.isMute = true
+    if (snd)
+      snd.mute()
+  }
+
+  this.unmute = function()
+  {
+    self.isMute = false
+    if (snd)
+      snd.unmute()
   }
 })

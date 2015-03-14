@@ -384,4 +384,14 @@ function SND_Ogg(name, data)
   {
     audioElement.currentTime = beat * 60 / 173.43
   }
+
+  this.mute = function()
+  {
+    audioElement.volume = 0
+  }
+
+  this.unmute = function()
+  {
+    audioElement.volume = 1
+  }
 }

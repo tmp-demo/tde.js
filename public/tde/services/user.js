@@ -1,9 +1,28 @@
 angular.module("tde.services.user", [])
 
 // cookie-based login service (the client is fully trusted)
-.service("User", function()
+.service("User", function(EngineDriver)
 {
   var self = this
+
+  this.loadPrefs = function()
+  {
+    var prefs = localStorage["prefs"] || "{}"
+    self.prefs = JSON.parse(prefs)
+    self.prefs.mute = self.prefs.mute || false
+    self.applyPrefs()
+  }
+
+  this.applyPrefs = function()
+  {
+    if (self.prefs.mute)
+      EngineDriver.mute()
+    else
+      EngineDriver.unmute()
+
+    self.saveData()
+  }
+
   this.login = function(name, email)
   {
     self.currentUser.name = name
@@ -32,6 +51,8 @@ angular.module("tde.services.user", [])
       localStorage["email"] = self.currentUser.email
     else
       delete localStorage["email"]
+
+    localStorage["prefs"] = JSON.stringify(self.prefs)
   }
   
   this.currentUser = {
@@ -39,5 +60,6 @@ angular.module("tde.services.user", [])
     email: localStorage["email"]
   }
   
+  this.loadPrefs()
   this.saveData()
 })

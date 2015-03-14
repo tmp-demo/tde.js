@@ -15,3 +15,16 @@
   display: inline;
   margin-right: 10px;
 }
+
+#navbar .menu a
+{
+    margin-left: 10px;
+    outline: 0;
+}
+
+#navbar a:hover
+{
+    /*color: #0ce3ac;*/
+    color: #2ef4cd;
+    text-decoration: none;
+}
