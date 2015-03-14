@@ -5,6 +5,38 @@ angular.module("tde.services.asset", [])
   this.assets = {}
   this.currentProjectId = ""
   
+  var assetsOrder = [
+    "tex",
+    "geom",
+    "ogg",
+    "seq",
+    "song",
+    "glsllib",
+    "glsl"
+  ]
+  
+  function assetParts(assetId) {
+    var index = assetId.lastIndexOf(".")
+    return (index === -1 ? [assetId, ""] : [assetId.substr(0, index), assetId.substr(index + 1)])
+  }
+  
+  function assetsOrderCompare(a, b) {
+    var partsA = assetParts(a)
+    var nameA = partsA[0]
+    var typeA = partsA[1]
+    var orderA = assetsOrder.indexOf(typeA)
+    
+    var partsB = assetParts(b)
+    var nameB = partsB[0]
+    var typeB = partsB[1]
+    var orderB = assetsOrder.indexOf(typeB)
+    
+    if (orderA !== orderB)
+      return orderA - orderB
+    
+    return nameA.localeCompare(nameB)
+  }
+  
   var self = this
   this.refreshAssetList = function()
   {
@@ -12,13 +44,12 @@ angular.module("tde.services.asset", [])
     {
       $http.get("/data/project/" + $routeParams.projectId + "/assets").success(function(assetList) {
         self.gRemainingAssets = assetList.length;
-        for (var i = 0; i < assetList.length; i++)
-        {
-          console.log("loading asset " + assetList[i])
-          if (assetList[i] != "demo.seq") {
-            self.loadAsset(assetList[i])
+        assetList.sort(assetsOrderCompare).forEach(function(assetId) {
+          console.log("loading asset " + assetId)
+          if (assetId !== "demo.seq") {
+            self.loadAsset(assetId)
           }
-        }
+        })
       })
     }
   }
@@ -81,7 +112,7 @@ angular.module("tde.services.asset", [])
       {
         self.assets[assetId] = data
         
-        var parts = assetId.split(".")
+        var parts = assetParts(assetId)
         var name = parts[0]
         var type = parts[1]
         switch (type)
@@ -91,8 +122,8 @@ angular.module("tde.services.asset", [])
           case "seq": EngineDriver.loadSequence(name, data); break
           case "song": EngineDriver.loadSong(name, data); break
           case "ogg": EngineDriver.loadOgg(name, data); break
-          case "glsl": EngineDriver.loadShader(assetId, data); break
           case "glsllib": EngineDriver.loadShader(assetId, data); break
+          case "glsl": EngineDriver.loadShader(assetId, data); break
           default: toastr.warning(type, "Unknown asset type"); break
         }
         
@@ -120,7 +151,7 @@ angular.module("tde.services.asset", [])
     if (!(assetId in self.assets))
       return
     
-    var parts = assetId.split(".")
+    var parts = assetParts(assetId)
     var name = parts[0]
     var type = parts[1]
     switch (type)
@@ -129,8 +160,8 @@ angular.module("tde.services.asset", [])
       case "geom": EngineDriver.unloadGeometry(name); break
       case "seq": EngineDriver.unloadSequence(name); break
       case "song": EngineDriver.unloadSong(name); break
-      case "glsl": EngineDriver.unloadShader(assetId); break
       case "glsllib": EngineDriver.unloadShader(assetId); break
+      case "glsl": EngineDriver.unloadShader(assetId); break
       default: toastr.warning(type, "Unknown asset type"); break
     }
     
@@ -138,10 +169,10 @@ angular.module("tde.services.asset", [])
     $rootScope.$broadcast("assetUnloaded", assetId)
   }
   
-  this.getIconClass = function(asset)
+  this.getIconClass = function(assetId)
   {
     var glyphicon = "warning-sign"
-    switch (asset.split(".")[1])
+    switch (assetParts(assetId)[1])
     {
       case "tex": glyphicon = "picture"; break
       case "geom": glyphicon = "th-large"; break

@@ -358,11 +358,11 @@ angular.module("tde.services.engine-driver", [])
   this.logError = function(message, details)
   {
     //toastr.error(details, message);
-    var group = console.groupCollapsed || console.group;
-	console.error(message)
-	group.call(console)
+    console.error(message)
+    // var group = console.groupCollapsed || console.group;
+    // group.call(console)
     console.error(details)
-	console.groupEnd()
+    // console.groupEnd()
   }
 
   this.drawFrame = function()
