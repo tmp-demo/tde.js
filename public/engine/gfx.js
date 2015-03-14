@@ -8,7 +8,7 @@ var fragment_shaders = {}
 var vertex_shaders = {}
 var ctx_2d
 
-var use_texture_float = false;
+var use_texture_float = true;
 var gl_ext_half_float;
 
 function gl_init() {
