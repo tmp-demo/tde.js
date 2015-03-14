@@ -8,7 +8,7 @@ var fragment_shaders = {}
 var vertex_shaders = {}
 var ctx_2d
 
-var use_texture_float = true;
+var use_texture_float = false;
 var gl_ext_half_float;
 
 function gl_init() {
@@ -320,7 +320,7 @@ function render_pass(pass, time) {
         if (pass.program) {
           console.log("Missing program "+pass.program+" (using placeholder)");
         }
-        shader_program = program_placeholder
+        program = program_placeholder
       }
       //#debug}}
       

@@ -103,7 +103,7 @@ function map_triangles(positions, fn) {
 }
 
 // triangle: unpacked vertices [[x, y, z], [x, y, z], [x, y, z]]
-function flat_normals(triangle) {
+function flat_normal(triangle) {
     var a = triangle[0];
     var b = triangle[1];
     var c = triangle[2];
@@ -121,23 +121,23 @@ function triangle_index(triangle, i) {
     return [[i],[i],[i]];
 }
 
-function translate(dx, dy, dz) {
+function op_translate(dx, dy, dz) {
     var identity = mat4.create();
     return mat4.translate(identity, identity, [dx, dy, dz]);
 }
-function rotate_x(angle) {
+function op_rotate_x(angle) {
     var identity = mat4.create();
     return mat4.rotate(identity, identity, angle, [1, 0, 0]);
 }
-function rotate_y(angle) {
+function op_rotate_y(angle) {
     var identity = mat4.create();
     return mat4.rotate(identity, identity, angle, [0, 1, 0]);
 }
-function rotate_z(angle) {
+function op_rotate_z(angle) {
     var identity = mat4.create();
     return mat4.rotate(identity, identity, angle, [0, 0, 1]);
 }
-function scale(sx, sy, sz) {
+function op_scale(sx, sy, sz) {
     var identity = mat4.create();
     return mat4.scale(identity, identity, [sx, sy, sz]);
 }
@@ -216,15 +216,16 @@ function create_geom_from_cmd_list(commands) {
 }
 
 // XXX - apply_extrusion
-function apply_fn(geom, previous_rings, new_rings) {
+function apply_fn(geom, previous_rings, new_rings, triangle_fn, quad_fn) {
   previous_rings.forEach(
       function(prev_item, i) {
-          console.log(new_rings);
+          //console.log(new_rings);
           join_rings(
             geom,
             prev_item,
             new_rings[i],
-            function() { return uv_buffer(0, 0, 1, 1) }
+            triangle_fn,
+            quad_fn
           );
       }
   );
@@ -329,7 +330,7 @@ function pack_vertices(to, v) {
     }
 }
 
-function join_rings(geom, r1, r2, uv_fn) {
+function join_rings(geom, r1, r2, triangle_fn, quad_fn) {
     // #debug{{
     if (r1.length != r2.length) {
         console.log(r1);
@@ -346,13 +347,19 @@ function join_rings(geom, r1, r2, uv_fn) {
       var next = (i + 1) % r1.length;
       pack_vertices(geom.positions, [r1[i], r1[next], r2[next], r2[next], r2[i], r1[i]]);
 
-      vec3.sub(e1, r2[next], r1[i]);
-      vec3.sub(e2, r1[next], r1[i]);
-      vec3.cross(normal, e1, e2);
-      vec3.normalize(normal, normal);
-      pack_vertices(geom.normals, [normal, normal, normal, normal, normal, normal]);
-      var head_or_tail = rand_int(2) == 1 ? 0.3 : 0.5;
-      pack_vertices(geom.uvs, uv_fn(vec3.length(e2), head_or_tail));
+      var t1 = [r1[i], r1[next], r2[next]];
+      var t2 = [r2[next], r2[i], r1[i]];
+      if (geom.normals) {
+        pack_vertices(geom.normals, flat_normal(t1));
+        pack_vertices(geom.normals, flat_normal(t2));
+      }
+      if (triangle_fn) {
+        triangle_fn(t1);
+        triangle_fn(t2);
+      } 
+      if (quad_fn) {
+        quad_fn([r2[i], r2[next], r1[next], r1[i]]);
+      }
     }
 }
 
@@ -386,82 +393,6 @@ function lines_intersection_2d(a1, a2, b1, b2) {
         (a * (b1[0] - b2[0]) - b * (a1[0] - a2[0])) / det,
         (a * (b1[1] - b2[1]) - b * (a1[1] - a2[1])) / det
     ];
-}
-
-// returns a transformed ring. 
-//displacements : vec3, translations along : 
-//                     - normale to the ring
-//                     - center to 1st vertice of the ring direction
-//                     - normale to both of the above
-//rotations : vec3, in radiatns, of the rotation along those same axis
-//homotecies, scalar
-function transform_ring ( ring_old, displacements, rotations, homotecies ){
-  var i = 0;
-  var center = vec3.create();
-  
-  var e1;
-  var e2;
-  var normal;
-  var a1;
-  
-  var ring;
-  
-  //first, make a copy of it
-  var ring = deep_clone(ring_old);
-  
-  //find out the normal
-  vec3.sub(e1, ring[0], ring[1]);
-  vec3.sub(e2, ring[0], ring[2]);
-  vec3.cross(normal, e1, e2);
-  vec3.normalize(normal, normal);
-  
-  //at first, we will have to make sure the ring is coplanar.
-  // #debug{{
-    var dotprod;
-    
-    for(i = 3; i < ring.length; i++){
-      vec3.sub(e1, ring[0], ring[i]);
-      vec3.normalize(e1, e1);
-      if(vec3.dot( normal, e1) > 0.1){
-        console.log("transform_ring : ring vertices are not coplanar. May lead to trouble !");
-      }
-    }
-  // #debug}}
-  
-  //compute the center of the ring.
-  for(i = 0; i < ring.length; i++){
-    vec3.add(center, ring[i]);
-  }
-  vec3.divide(center,center, i);
-  
-  //find out the two other axis
-  vec3.sub(a1, ring[0], center);
-  vec3.normalize(a1, a1);
-  
-  vec3.cross(a2, normal, a1);
-  
-  
-  //translate !
-  var temp;
-  for(i = 0; ring.length; i++){
-    temp = vec3.scale(temp, normal, displacement[0]);
-    vec3.add(ring[i], temp);
-    temp = vec3.scale(temp, a1, displacement[1]);
-    vec3.add(ring[i], temp);
-    temp = vec3.scale(temp, a2, displacement[2]);
-    vec3.add(ring[i], temp);
-  }
-  
-  //rotate !
-  console.log("transform_ring : rotation not yet implemented !");
-  
-  //homotecies 
-  console.log("transform_ring : homotecies not yet implemented !");
-  
-  
-  return ring;
-  
-
 }
 
 function shrink_path(path, amount, z, use_subdiv, disp) {
@@ -516,73 +447,23 @@ function shrink_path(path, amount, z, use_subdiv, disp) {
     return new_path;
 }
 
-function fill_convex_ring(geom, ring, uv) {
-  var normal = [0, 1, 0];
-  // roof top or grass
-  uv = uv || [0.5, 0.95];
+//  Example:
+//
+//  fill_convex_ring(ctx, ring, (triangle) => {
+//      pack_vertices(ctx.uv, top_uv);
+//  });
+//
+// fn takes a triangle as parameter and must output an array of 3 attributes
+// ex: [[u,v], [u,v], [u,v]]
+function fill_convex_ring(geom, ring, fn) {
   for (var i = 1; i < ring.length - 1; i++) {
-      pack_vertices(geom.positions, [ring[0], ring[i], ring[i + 1]]);
-      pack_vertices(geom.normals, [normal, normal, normal]);
-      pack_vertices(geom.uvs, [uv, uv, uv]);
+      var triangle = [ring[0], ring[i], ring[i + 1]];
+      pack_vertices(geom.positions, triangle);
+      if (geom.normals) {
+        pack_vertices(geom.normals, flat_normal(triangle));
+      }
+      fn && fn(triangle, i);
   }
-}
-
-
-// TODO make this show in the editor: it defines how the min size of city blocks
-var MIN_PERIMETER = 260;
-
-function city_subdivision(path, sub_id) {
-    var path_length = path.length;
-
-    // a1 is the index of the point starting the first edge we'll cut.
-    // b1 is the index of the point starting the second edge we'll cut.
-    var a1;
-    var maxd = 0;
-    var perimeter = 0;
-    var i; // loop index, taken out to win a few bytes
-    // pick the longest segment
-    for (i = 0; i < path_length; ++i) {
-        var d = vec2.distance(path[i], path[(i+1)%path_length]);
-        if (d > maxd) {
-            maxd = d;
-            a1 = i;
-        }
-        perimeter += d;
-    }
-
-    if (perimeter < MIN_PERIMETER) { return null; }
-
-    var a2 = (a1+1) % path_length;
-    var b1, b2;
-
-    do {
-        b1 = rand_int(path_length);
-        if (a1 == b1 || a1 == b1 + 1) { continue; }
-
-        b2 = (b1+1) % path_length;
-
-        var f1 = 0.5 + (0.5 - M.abs(seedable_random() - 0.5)) * 0.2;
-        var f2 = 0.5 + (0.5 - M.abs(seedable_random() - 0.5)) * 0.2;
-
-        var p_a3_1 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), subdiv: sub_id};
-        var p_a3_2 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), subdiv: path[a1].subdiv};
-        var p_b3_1 = { '0': path[b1][0]*f2 + path[b2][0]*(1.0-f2), '1': path[b1][1]*f2 + path[b2][1]*(1-f2), subdiv: sub_id};
-        var p_b3_2 = { '0': path[b1][0]*f2 + path[b2][0]*(1.0-f2), '1': path[b1][1]*f2 + path[b2][1]*(1-f2), subdiv: path[b1].subdiv};
-
-        break;
-    } while (1);
-
-    var path1 = [p_a3_1, p_b3_2]
-    for (i = b2; i != a2; i = mod((i+1), path_length)) {
-        path1.push(path[i]);
-    }
-
-    var path2 = [p_b3_1, p_a3_2]
-    for (i = a2; i != b2; i = mod((i+1), path_length)) {
-        path2.push(path[i]);
-    }
-
-    return [path1, path2];
 }
 
 function circle_path(center, radius, n_points) {
@@ -597,37 +478,15 @@ function circle_path(center, radius, n_points) {
 }
 
 function circle_path_vec3(center, radius, n_points) {
-    var path = []
+    var path = [] 
     for (i = 0; i < n_points; ++i) {
         path.push([
             center[0] + -M.cos(i/n_points * 2 * M.PI) * radius,
-            0,
-            center[1] + M.sin(i/n_points * 2 * M.PI) * radius
+            center[1],
+            center[2] + M.sin(i/n_points * 2 * M.PI) * radius
         ]);
     }
     return path;
 }
 
 
-
-
-
-// Testing...
-// if this code below ends up in the minified export, something's wrong.
-
-function debug_draw_path(path, color, offset_x, offset_y) {
-/*    map_ctx.strokeStyle = color;
-    for (var i in path) {
-        map_ctx.beginPath();
-        map_ctx.moveTo(
-            (path[i][0] + offset_x + 300) / 3,
-            (path[i][1] + offset_y) / 3
-        );
-        map_ctx.lineTo(
-            (path[mod(i-1, path.length)][0] + offset_x + 300) / 3,
-            (path[mod(i-1, path.length)][1] + offset_y) / 3
-        );
-        map_ctx.stroke();
-        map_ctx.closePath();
-    }*/
-}

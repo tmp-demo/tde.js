@@ -18,12 +18,12 @@ var gl = {
 // TODO this is kinda yucks. If the function is not defined then either thos script
 // fails or we have to make every expression and function in a command list a string
 // and go through the hassle of evaluating them.
-function circle_path_vec3() {}
-function translate(x, y, z) { return "translate("+x+", "+y+", "+z+")" }
-function rotate_x(angle) { return "rotate_x("+angle+")" }
-function rotate_y(angle) { return "rotate_y("+angle+")" }
-function rotate_z(angle) { return "rotate_z("+angle+")" }
-function scale(sx, sy, sz) { return "scale("+sx+", "+sy+", "+sz+")" }
+function op_circle_path_vec3() {}
+function op_translate(x, y, z) { return "op_translate("+x+", "+y+", "+z+")" }
+function op_rotate_x(angle) { return "op_rotate_x("+angle+")" }
+function op_rotate_y(angle) { return "op_rotate_y("+angle+")" }
+function op_rotate_z(angle) { return "op_rotate_z("+angle+")" }
+function op_scale(sx, sy, sz) { return "op_scale("+sx+", "+sy+", "+sz+")" }
 var apply_fn = "apply_fn";
 
 // load the .tex assets passed as parameters and generate some code in stdout
