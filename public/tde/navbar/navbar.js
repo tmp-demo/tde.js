@@ -3,10 +3,17 @@ angular.module("tde.navbar", [])
 .controller("NavbarCtrl", function($scope, User)
 {
   $scope.logout = User.logout
+  $scope.prefs = User.prefs
   
   $scope.login = function()
   {
     User.login($scope.name, $scope.email)
+  }
+
+  $scope.toggleMute = function()
+  {
+    User.prefs.mute = !User.prefs.mute
+    User.applyPrefs()
   }
 })
 
