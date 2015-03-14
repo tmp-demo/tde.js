@@ -169,19 +169,20 @@ angular.module("tde.services.asset", [])
     $rootScope.$broadcast("assetUnloaded", assetId)
   }
   
-  this.getIconClass = function(assetId)
+  this.getTypeIconClass = function(assetId)
   {
-    var glyphicon = "warning-sign"
+    var glyphicon = "file-o"
     switch (assetParts(assetId)[1])
     {
-      case "tex": glyphicon = "picture"; break
-      case "geom": glyphicon = "th-large"; break
+      case "tex": glyphicon = "picture-o"; break
+      case "geom": glyphicon = "cube"; break
       case "seq": glyphicon = "film"; break
       case "song": glyphicon = "music"; break
-      case "glsl": glyphicon = "fire"; break
+      case "glsllib": glyphicon = "database"; break
+      case "glsl": glyphicon = "globe"; break
     }
     
-    return "glyphicon glyphicon-" + glyphicon
+    return "fa fa-" + glyphicon
   }
   
   $rootScope.$on('$routeChangeSuccess', function()
