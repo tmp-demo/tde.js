@@ -8,20 +8,25 @@ var fragment_shaders = {}
 var vertex_shaders = {}
 var ctx_2d
 
-var use_texture_float = true;
+var use_texture_float = false;
 var gl_ext_half_float;
 
 function gl_init() {
   gl = canvas.getContext("webgl", {alpha: false});
-  minify_context(gl);
+  //minify_context(gl);
 
-  gl.getExtension("WEBGL_depth_texture");
+  var depthTextureExtension = gl.getExtension("WEBGL_depth_texture");
+  // #debug{{
+  if (!depthTextureExtension) {
+    alert("Failed to load WEBGL_depth_texture");
+  }
+  // #debug}}
 
   if (use_texture_float) {
     gl_ext_half_float = gl.getExtension("OES_texture_half_float");
     gl.getExtension("OES_texture_half_float_linear");
     gl.getExtension("EXT_color_buffer_half_float");
-    minify_context(gl_ext_half_float);
+    //minify_context(gl_ext_half_float);
   }
 
   gl.viewport(0, 0, canvas.width, canvas.height);
@@ -38,7 +43,7 @@ function gl_init() {
   canvas_2d = document.createElement("canvas");
   canvas_2d.width = canvas_2d.height = 2048;
   ctx_2d = canvas_2d.getContext("2d");
-  minify_context(ctx_2d);
+  //minify_context(ctx_2d);
 }
 
 var _enums = _enums = { }; // #debug
@@ -60,13 +65,10 @@ var TRIANGLE_ID = 4;
 function gfx_init() {
   // replace the render passes' texture arrays by actual frame buffer objects
   // this is far from optimal...
-  for (var s=0; s<scenes.length; ++s) {
-    var scene = scenes[s];
-    for (var p=0; p<scene.passes.length; ++p) {
-      var pass = scene.passes[p];
-      if (pass.render_to) {
-        pass.fbo = frame_buffer(pass.render_to);
-      }
+  for (var p=0; p<sequence.length; ++p) {
+    var pass = sequence[p];
+    if (pass.render_to) {
+      pass.fbo = frame_buffer(pass.render_to);
     }
   }
   
@@ -80,7 +82,7 @@ function gfx_init() {
   var fakeContext = {}
   for (var i in _locations) fakeContext["shader_" + _locations[i]] = 42;
   for (var i in _uniforms) fakeContext["shader_" + _uniforms[i]] = 42;
-  minify_context(fakeContext);
+  //minify_context(fakeContext);
   // #debug}}
 
   // edition placeholders
@@ -180,13 +182,22 @@ function destroy_shader_program(name)
 }
 // #debug}}
 
-function set_texture_flags(texture, allow_repeat, linear_filtering, mipmaps) {
-  // XXX - Getting the following error associated to the bind texture call:
-  // WebGL: A texture is going to be rendered as if it were black, as per the
-  // OpenGL ES 2.0.24 spec section 3.8.2, because it is a 2D texture, with a
-  // minification filter requiring a mipmap, and is not mipmap complete (as
-  // defined in section 3.7.10).
-  gl.bindTexture(gl.TEXTURE_2D, texture);
+function create_texture(width, height, format, data, allow_repeat, linear_filtering, mipmaps, float_tex) {
+  //debug{{
+  if (float_tex && data) {
+    // wouldn't be hard to add, but we haven't needed it yet.
+    console.log("!!! We don't support uploading data to float textures, something may be busted.");
+  }
+
+  if ((format == gl.DEPTH_COMPONENT) && (linear_filtering || mipmaps || float_tex)) {
+    // bug somewhere
+    console.log("!!! Creating a depth texture with broken parameters, it won't work.");
+  }
+  //debug}}
+
+  var format = format || gl.RGBA;
+  var width = width || canvas.width;
+  var height = height || canvas.height;
 
   var wrap = allow_repeat ? gl.REPEAT : gl.CLAMP_TO_EDGE;
   var min_filtering = linear_filtering
@@ -194,37 +205,19 @@ function set_texture_flags(texture, allow_repeat, linear_filtering, mipmaps) {
                     : gl.NEAREST;
   var mag_filtering = linear_filtering ? gl.LINEAR : gl.NEAREST;
 
+  var texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, min_filtering);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, mag_filtering);
-  if (mipmaps) {
-    gl.generateMipmap(gl.TEXTURE_2D);
-  }
-}
-
-function create_texture(width, height, format, data, allow_repeat, linear_filtering, mipmaps, float_tex) {
-  format = format || gl.RGBA;
-  width = width || canvas.width;
-  height = height || canvas.height;
-
-  var texture = gl.createTexture();
-
-  gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0,
                 format,
                 (use_texture_float && float_tex) ? gl_ext_half_float.HALF_FLOAT_OES
                           : (format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT
                                                            : gl.UNSIGNED_BYTE,
                 data ? new Uint8Array(data, 0, 0) : null);
-
-  (format == gl.DEPTH_COMPONENT) || set_texture_flags(texture, allow_repeat, linear_filtering, mipmaps);
-  //debug{{
-  if (float_tex && data) {
-    // wouldn't be hard to add, but we haven't needed it yet.
-    console.log("!!! We don't support uploading data to float textures, something may be busted.");
-  }
-  //debug}}
 
   return {
     tex: texture,
@@ -260,16 +253,16 @@ function set_uniforms(program, ratio) {
   var viewMatrix = mat4.create()
   var projectionMatrix = mat4.create()
   var viewProjectionMatrix = mat4.create()
-  var viewProjectionMatrixInv = mat4.create()
+  //var viewProjectionMatrixInv = mat4.create()
   
   // derive camera matrices from simpler parameters
   //mat4.lookAt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], [0.0, 1.0, 0.0]);
   mat4.lookAtTilt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], uniforms["cam_tilt"]);
   mat4.perspective(projectionMatrix, uniforms["cam_fov"] * M.PI / 180.0, ratio, 2.0, 10000.0)
   mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-  mat4.invert(viewProjectionMatrixInv, viewProjectionMatrix);
+  //mat4.invert(viewProjectionMatrixInv, viewProjectionMatrix);
   uniforms["view_proj_mat"] = viewProjectionMatrix;
-  uniforms["view_proj_mat_inv"] = viewProjectionMatrixInv;
+  //uniforms["view_proj_mat_inv"] = viewProjectionMatrixInv;
   
   for (var uniformName in uniforms) {
     var val = uniforms[uniformName];
@@ -293,100 +286,111 @@ function set_uniforms(program, ratio) {
   }
 }
 
-function render_scene(scene, demo_time, scene_time) {
-  var clip_time_norm = scene_time/scene.duration;
-  uniforms["clip_time"] = scene_time;
-  var t = {
-    scene_norm: clip_time_norm,
-    demo: demo_time,
-    scene: scene_time
-  };
-  if (scene.update) {
-    scene.update(t);
-  }
-  gl.disable(gl.BLEND);
-  for (var p in scene.passes) {
-    var pass = scene.passes[p];
+function render_pass(pass, time) {
+  for (var j = 0; j < pass.clips.length; j++) {
+    var clip = pass.clips[j]
 
-    var texture_inputs = [];
-    if (pass.texture_inputs) {
-      for (var i=0; i<pass.texture_inputs.length; ++i) {
-        texture_inputs.push(textures[pass.texture_inputs[i]]);
+    var clip_time = time - clip.start
+    if ((clip_time >= 0) && (clip_time < clip.duration)) {
+      // if needed, clip_time_norm = clip_time / clip.duration
+      uniforms["clip_time"] = clip_time;
+
+      // uniform animation
+      if (clip.uniforms) {
+        for (var uniform_name in clip.uniforms) {
+          uniforms[uniform_name] = animate(deep_clone(clip.uniforms[uniform_name]), clip_time)
+        }
       }
-    }
 
-    if (pass.update) {
-      pass.update(t, texture_inputs);
-    }
+      // actual render
 
-    var program = programs[pass.program]
-    //#debug{{
-    if (!program) {
-      if (pass.program) {
-        console.log("Missing program "+pass.program+" (using placeholder)");
+      gl.disable(gl.BLEND);
+      var texture_inputs = [];
+      if (pass.texture_inputs) {
+        for (var i=0; i<pass.texture_inputs.length; ++i) {
+          texture_inputs.push(textures[pass.texture_inputs[i]]);
+        }
       }
-      program = program_placeholder
-    }
-    //#debug}}
-    
-    var shader_program = program;
-    gl.useProgram(shader_program);
-    var rx = canvas.width;
-    var ry = canvas.height;
-    if (pass.render_to) {
-      rx = textures[pass.render_to.color].width;
-      ry = textures[pass.render_to.color].height;
-    }
-    uniforms["u_resolution"] = [rx,ry];
-    set_uniforms(shader_program, rx / ry);
-    gl.viewport(0, 0, rx, ry);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
-    
-    for (var i=0; i<texture_inputs.length; ++i) {
+      var program = programs[pass.program]
       //#debug{{
-      if (!texture_inputs[i]) {
-        // TODO: should use a placeholder texture or something.
-        // This can happen in the editor if a frame is rendered
-        // while a texture is not loaded yet.
-        console.log("render_scene: missing texture "+pass.texture_inputs[i]);
-        return;
+      if (!program) {
+        if (pass.program) {
+          console.log("Missing program "+pass.program+" (using placeholder)");
+        }
+        program = program_placeholder
       }
       //#debug}}
-      var tex = texture_inputs[i].tex;
-      gl.activeTexture(texture_unit(i));
-      gl.bindTexture(gl.TEXTURE_2D, tex);
-      gl.uniform1i(gl.getUniformLocation(shader_program,"texture_"+i), i);
-    }
-
-    if (pass.blend) {
-      gl.enable(gl.BLEND);
-      gl.blendFunc.apply(gl, pass.blend);
-    }
-    
-    if (pass.depth_test) {
-      gl.enable(gl.DEPTH_TEST);
-    }
-    else {
-      gl.disable(gl.DEPTH_TEST);
-    }
-    
-    if (pass.clear) {
-      gl.clearColor(pass.clear[0], pass.clear[1], pass.clear[2], pass.clear[3]);
-      gl.clearDepth(1.0);
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    }
-    
-    if (pass.geometry) {
-      var geometry = geometries[pass.geometry]
-      //#debug{{
-      if (!geometry) {
-        console.log("Missing geometry "+pass.geometry+" (using placeholder)");
-        geometry = geometry_placeholder
+      
+      var shader_program = program;
+      gl.useProgram(shader_program);
+      var rx = canvas.width;
+      var ry = canvas.height;
+      if (pass.render_to) {
+        rx = textures[pass.render_to.color].width;
+        ry = textures[pass.render_to.color].height;
       }
-      //#debug}}
 
-      draw_geom(geometry)
+      uniforms["u_resolution"] = [rx,ry];
+      set_uniforms(shader_program, rx / ry);
+      gl.viewport(0, 0, rx, ry);
+
+      gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
+      
+      for (var i=0; i<texture_inputs.length; ++i) {
+        //#debug{{
+        if (!texture_inputs[i]) {
+          // TODO: should use a placeholder texture or something.
+          // This can happen in the editor if a frame is rendered
+          // while a texture is not loaded yet.
+          console.log("render_pass: missing texture "+pass.texture_inputs[i]);
+          return;
+        }
+        //#debug}}
+        var tex = texture_inputs[i].tex;
+        gl.activeTexture(texture_unit(i));
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.uniform1i(gl.getUniformLocation(shader_program,"texture_"+i), i);
+      }
+
+      if (pass.blend) {
+        gl.enable(gl.BLEND);
+        gl.blendFunc.apply(gl, pass.blend);
+      }
+      
+      if (pass.depth_test) {
+        gl.enable(gl.DEPTH_TEST);
+      }
+      else {
+        gl.disable(gl.DEPTH_TEST);
+      }
+      
+      if (pass.clear) {
+        gl.clearColor(pass.clear[0], pass.clear[1], pass.clear[2], pass.clear[3]);
+        gl.clearDepth(1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      }
+      
+      if (pass.geometry) {
+        var geometry = geometries[pass.geometry]
+        //#debug{{
+        if (!geometry) {
+          console.log("Missing geometry "+pass.geometry+" (using placeholder)");
+          geometry = geometry_placeholder
+        }
+        //#debug}}
+
+        draw_geom(geometry)
+      }
     }
   }
+}
+
+function render_sequence(sequence, time) {
+  /*for (var i = 0; i < sequence.length; i++) {
+    render_pass(sequence[i], time)
+  }*/
+  sequence.map(function(pass) {
+    render_pass(pass, time)
+  })
 }

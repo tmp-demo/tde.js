@@ -1,5 +1,4 @@
-var scenes = [];
-var start_time = 0;
+var sequence = [];
 var snd;
 var M = Math;
 
@@ -74,17 +73,7 @@ function dump_symbol_map()
 
 function engine_render(current_time)
 {
-  var start_time = 0;
-  for (var i = 0; i < scenes.length; i++) {
-    var scene = scenes[i]
-    var scene_time = current_time - start_time;
-    if ((scene_time >= 0) && (scene_time < scene.duration)) {
-      render_scene(scene, current_time, scene_time);
-      break;
-    }
-
-    start_time += scene.duration;
-  }
+  render_sequence(sequence, current_time)
 }
 
 function main_loop() {
@@ -105,16 +94,12 @@ function main() {
 
   gl_init();
   text_init();
-  demo_init();
 
   load_shaders();
   load_geometries();
   load_textures();
 
   gfx_init();
-
-  
-  render_scene(scenes[0], 0, 0);
 
   //snd = new SND(SONG);
   snd = new SND_Ogg("tdf15_master3")

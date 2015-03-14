@@ -78,12 +78,13 @@ angular.module("tde.engine-view", [])
         });
 
         // compute start time for each scene
-        var time_sum = 0
+        /*var time_sum = 0
         for (var s=0;s<scenes.length;++s)
         {
           scenes[s].start_time = time_sum
           time_sum += scenes[s].duration
-        }
+        }*/
+        time_sum = 64
         seeker.attr("max", time_sum * 1000)
       }, 50)
 

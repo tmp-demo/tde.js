@@ -10,7 +10,7 @@
   AudioNode.prototype.c = AudioNode.prototype.connect;
 
   ac = new AudioContext();
-  minify_context(ac);
+  //minify_context(ac);
 
   /** @constructor */
   function SND() {
@@ -353,6 +353,7 @@
 
 ////////////////// Audio tag implementation
 
+/** @constructor */
 function SND_Ogg(name, data)
 {
   var src, audioElement;

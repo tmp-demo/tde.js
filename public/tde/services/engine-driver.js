@@ -124,14 +124,12 @@ angular.module("tde.services.engine-driver", [])
 
   this.loadSequence = function(name, data)
   {
-    self.logInfo("loading timeline " + name)
+    self.logInfo("loading sequence " + name)
 
     try
     {
-      eval(data)
-      demo_init()
+      sequence = eval("___ = "+data);
       gfx_init()
-      render_scene(scenes[0], 0, 0);
       engine_render(self.currentTime)
     }
     catch (err)

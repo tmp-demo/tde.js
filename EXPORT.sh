@@ -44,10 +44,11 @@ if [ -f $GEOMETRIES ]; then
 fi
 echo "}" >> $EXPORT_ROOT/demo.js
 
-for f in $PROJECT_ROOT/*.seq
-do
-    ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
-done
+echo " -- exporting sequence assets"
+SEQUENCES=($PROJECT_ROOT/*.seq)
+if [ -f $SEQUENCES ]; then
+  "$NODE" ./tools/export-sequences.js $PROJECT_ROOT/*.seq >> $EXPORT_ROOT/demo.js
+fi
 
 echo " -- exporting ogg tracks"
 cp $PROJECT_ROOT/*.ogg $EXPORT_ROOT
@@ -68,8 +69,8 @@ if [ ! -f tools/compiler.jar ]; then
 fi
 
 echo " -- running the closure compiler..."
-#java -jar tools/compiler.jar --js=$EXPORT_ROOT/demo.js --js_output_file=$EXPORT_ROOT/demo.min.js --create_source_map $EXPORT_ROOT/demo.min.js.map --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./externs/w3c_audio.js
-#"$NODE" ./tools/unminify-from-source-map.js $EXPORT_ROOT/demo.min.js.map > $EXPORT_ROOT/demo.unmin.js
+java -jar tools/compiler.jar --js=$EXPORT_ROOT/demo.js --js_output_file=$EXPORT_ROOT/demo.min.js --create_source_map $EXPORT_ROOT/demo.min.js.map --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./externs/w3c_audio.js
+"$NODE" ./tools/unminify-from-source-map.js $EXPORT_ROOT/demo.min.js.map > $EXPORT_ROOT/demo.unmin.js
 
 echo " -- packing expensive symbols"
 #"$NODE" ./tools/symbol-minifier $EXPORT_ROOT/demo.min.js > $EXPORT_ROOT/demo.min2.js
@@ -85,10 +86,10 @@ echo " -- compressing some keywords"
 #cat $EXPORT_ROOT/demo.min2.js | egrep -o '[a-zA-Z0-9]{2,}' | sort | uniq -c | sort -nr > $EXPORT_ROOT/word_frequencies
 
 #echo " -- packing in a png..."
-#ruby tools/pnginator.rb $EXPORT_ROOT/demo.min2.js $EXPORT_ROOT/demo.png.html
+ruby tools/pnginator.rb $EXPORT_ROOT/demo.min.js $EXPORT_ROOT/demo.png.html
 
 echo " -- creating runner"
-echo "<script src='demo.js'></script>" > $EXPORT_ROOT/demo.min.html
+echo "<script src='demo.min.js'></script>" > $EXPORT_ROOT/demo.min.html
 
 echo " -- done."
 
