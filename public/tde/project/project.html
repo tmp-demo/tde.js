@@ -2,7 +2,7 @@
 	<h1>{{projectId}} <small>project</small></h1>
   <ul class="list-group">
     <li ng-repeat="asset in assets | filter:query | orderBy:'filename'" class="list-group-item">
-      <span ng-class="getTypeIconClass(asset)"></span>&nbsp;
+      <span ng-class="getTypeIconClass(asset.filename)"></span>&nbsp;
       <a href="#/{{projectId}}/{{asset.type}}/{{asset.name}}">
         {{asset.name}}.{{asset.type}}
       </a>

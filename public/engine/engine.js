@@ -6,14 +6,7 @@ var symbolMap = {} // #debug
 
 function minify_context(ctx)
 {
-  var names = []
-  for (var name in ctx) names.push(name);
-  names.sort();
-  
-  for (var i in names)
-  {
-    var name = names[i]
-    
+  Object.keys(ctx).sort().forEach(function(name) {
     // #debug{{
     var shader = false
     if (name.match(/^shader_/))
@@ -23,10 +16,8 @@ function minify_context(ctx)
     }
     // #debug}}
     
-    var m, newName = "";
-    var re = /([A-Z0-9])[A-Z]*_?/g;
-    if (name.match(/[a-z]/))
-      re = /(^[a-z]|[A-Z0-9])[a-z]*/g;
+    var m, newName = "";  
+    var re = (name.match(/[a-z]/) ? /(^[a-z]|[A-Z0-9])[a-z]*/g : /([A-Z0-9])[A-Z]*_?/g);
     while (m = re.exec(name)) newName += m[1];
     
     // add an underscore to shader variables, to avoid conflict with glsl-unit minification
@@ -47,8 +38,8 @@ function minify_context(ctx)
     // #debug{{
     // don't minify properties that are neither objects nor constants (or that map to strings)
     var preservedNames = ["canvas", "currentTime", "destination", "font", "fillStyle", "globalCompositeOperation", "lineWidth"]
-    if (preservedNames.indexOf(name) != -1)
-      continue;
+    if (preservedNames.indexOf(name) !== -1)
+      return;
     
     if (name in symbolMap)
     {
@@ -59,7 +50,7 @@ function minify_context(ctx)
     }
     symbolMap[name] = newName;
     // #debug}}
-  }
+  })
 }
 
 // export for minifcation tools

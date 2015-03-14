@@ -40,7 +40,7 @@ angular.module("tde.goto-box", [])
 			return item;
 		}
 		
-		$scope.getIconClass = Asset.getIconClass
+		$scope.getTypeIconClass = Asset.getTypeIconClass
 		
 		element.find("input").keydown(function(event)
 		{

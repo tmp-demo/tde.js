@@ -16,7 +16,7 @@ angular.module("tde.project.asset-list", [])
       return ""
   }
   
-  $scope.getIconClass = Asset.getIconClass
+  $scope.getTypeIconClass = Asset.getTypeIconClass
   
   $scope.selectAsset = function(asset)
   {
