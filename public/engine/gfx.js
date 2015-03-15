@@ -43,11 +43,6 @@ function gl_init() {
     }
   }
   // #debug}}
-
-  canvas_2d = document.createElement("canvas");
-  canvas_2d.width = canvas_2d.height = 2048;
-  ctx_2d = canvas_2d.getContext("2d");
-  //minify_context(ctx_2d);
 }
 
 var _enums = _enums = { }; // #debug

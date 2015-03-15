@@ -3,7 +3,7 @@ function text_init() {
   canvas_2d = document.createElement("canvas");
   canvas_2d.width = canvas_2d.height = 2048;
   ctx_2d = canvas_2d.getContext("2d");
-  minify_context(ctx_2d);
+  //minify_context(ctx_2d);
   ctx_2d.textAlign = "center";
   ctx_2d.fillStyle = "#fff";
 }
