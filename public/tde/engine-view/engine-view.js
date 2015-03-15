@@ -140,6 +140,78 @@ angular.module("tde.engine-view", [])
         }
       })
 
+      var oldX = 0
+      var oldY = 0
+      function onMouseMove(event)
+      {
+        var diffX = event.clientX - oldX
+        var diffY = event.clientY - oldY
+        oldX = event.clientX
+        oldY = event.clientY
+        $scope.driver.rotateEditorCamera(diffX, diffY)
+      }
+
+      var cameraMovementUpdate;
+      canvasElement.mousedown(function(event)
+      {
+        if (event.button != 2)
+          return
+
+        $scope.driver.overrideCamera()
+        
+        oldY = event.clientX
+        oldY = event.clientY
+        $(document).on("mousemove", onMouseMove)
+
+        cameraMovementUpdate = setInterval(function() {
+          var cameraMovement = vec3.create()
+          cameraMovingForward && (cameraMovement[2] += -1);
+          cameraMovingBackward && (cameraMovement[2] += 1);
+          cameraMovingLeft && (cameraMovement[0] += -1);
+          cameraMovingRight && (cameraMovement[0] += 1);
+          $scope.driver.translateEditorCamera(cameraMovement)
+        }, 16)
+      })
+
+      $(document).mouseup(function(event)
+      {
+        $(document).off("mousemove", onMouseMove)
+        clearInterval(cameraMovementUpdate)
+      })
+
+      $(document).contextmenu(function(event)
+      {
+        // avoid built-in context menu
+        return false
+      })
+
+      var cameraMovingForward = false
+      var cameraMovingBackward = false
+      var cameraMovingLeft = false
+      var cameraMovingRight = false
+      $(document).keydown(function(event)
+      {
+        if (String.fromCharCode(event.keyCode) == 'Z') cameraMovingForward = true
+        if (String.fromCharCode(event.keyCode) == 'S') cameraMovingBackward = true
+        if (String.fromCharCode(event.keyCode) == 'Q') cameraMovingLeft = true
+        if (String.fromCharCode(event.keyCode) == 'D') cameraMovingRight = true
+        //if (String.fromCharCode(event.keyCode) == ' ') up = true
+        //if (String.fromCharCode(event.keyCode) == 'C') down = true
+      })
+
+      $(document).keyup(function(event)
+      {
+        if (event.keyCode == 27) // escape
+        {
+          $scope.driver.removeCameraOverride()
+        }
+
+        if (String.fromCharCode(event.keyCode) == 'Z') cameraMovingForward = false
+        if (String.fromCharCode(event.keyCode) == 'S') cameraMovingBackward = false
+        if (String.fromCharCode(event.keyCode) == 'Q') cameraMovingLeft = false
+        if (String.fromCharCode(event.keyCode) == 'D') cameraMovingRight = false
+      })
+
       /*var canvas_map = document.getElementById("map-view")
       map_ctx = canvas_map.getContext("2d");
       map_ctx.fillStyle = "rgb(220, 220, 220)";

@@ -11,6 +11,10 @@ var ctx_2d
 var use_texture_float = false;
 var gl_ext_half_float;
 
+// #debug{{
+var uniform_editor_overrides = {}
+// #debug}}
+
 function gl_init() {
   gl = canvas.getContext("webgl", {alpha: false});
   //minify_context(gl);
@@ -252,6 +256,14 @@ function frame_buffer(target) {
 }
 
 function set_uniforms(program, ratio) {
+
+  // allow the editor to override uniforms for debug
+  // #debug{{
+  for (var uniform_name in uniforms) {
+    uniforms[uniform_name] = uniform_editor_overrides.hasOwnProperty(uniform_name) ? uniform_editor_overrides[uniform_name] : uniforms[uniform_name]
+  }
+  // #debug}}
+
   var viewMatrix = mat4.create()
   var projectionMatrix = mat4.create()
   var viewProjectionMatrix = mat4.create()

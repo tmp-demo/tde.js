@@ -427,4 +427,65 @@ angular.module("tde.services.engine-driver", [])
     if (snd)
       snd.unmute()
   }
+
+  // camera override
+
+  this.overrideCamera = function()
+  {
+    if (!uniform_editor_overrides.hasOwnProperty("cam_pos")) {
+      uniform_editor_overrides["cam_pos"] = vec3.clone(uniforms["cam_pos"])
+      uniform_editor_overrides["cam_target"] = vec3.clone(uniforms["cam_target"])
+
+      //uniform_editor_overrides["cam_pos"] = [0, 0, 200]
+    }
+  }
+
+  this.removeCameraOverride = function() {
+    delete uniform_editor_overrides["cam_pos"]
+    delete uniform_editor_overrides["cam_target"]
+    self.drawFrame()
+  }
+
+  this.translateEditorCamera = function(localOffset)
+  {
+    var speed = 0.001
+
+    var viewMatrix = mat4.create()
+    var viewMatrixInv = mat4.create()
+    mat4.lookAtTilt(viewMatrix, uniform_editor_overrides["cam_pos"], uniform_editor_overrides["cam_target"], uniforms["cam_tilt"])
+    mat4.invert(viewMatrixInv, viewMatrix)
+    mat3.fromMat4(viewMatrixInv, viewMatrixInv)
+
+    vec3.transformMat3(localOffset, localOffset, viewMatrixInv)
+    vec3.add(uniform_editor_overrides["cam_pos"], uniform_editor_overrides["cam_pos"], localOffset)
+    vec3.add(uniform_editor_overrides["cam_target"], uniform_editor_overrides["cam_target"], localOffset)
+
+    self.drawFrame()
+  }
+
+  this.rotateEditorCamera = function(x, y)
+  {
+    var speed = 0.01
+    var rotationY = x * speed
+    var rotationX = -y * speed
+
+    var cam_dir = vec3.create()
+    vec3.subtract(cam_dir, uniform_editor_overrides["cam_target"], uniform_editor_overrides["cam_pos"])
+    console.log(rotationY, cam_dir)
+
+    var cam_right = vec3.create()
+    vec3.cross(cam_right, [0, 1, 0], cam_dir)
+    vec3.normalize(cam_right, cam_right)
+
+    var rotation = quat.create()
+    quat.setAxisAngle(rotation, [0, 1, 0], rotationY)
+    vec3.transformQuat(cam_dir, cam_dir, rotation)
+    console.log(cam_dir)
+    //quat.setAxisAngle(rotation, cam_right, rotationX)
+    //vec3.transformQuat(cam_dir, cam_dir, rotation)
+
+    vec3.add(uniform_editor_overrides["cam_target"], uniform_editor_overrides["cam_pos"], cam_dir)
+
+    self.drawFrame()
+  }
 })
