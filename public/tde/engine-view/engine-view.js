@@ -159,7 +159,7 @@ angular.module("tde.engine-view", [])
 
         $scope.driver.overrideCamera()
         
-        oldY = event.clientX
+        oldX = event.clientX
         oldY = event.clientY
         $(document).on("mousemove", onMouseMove)
 

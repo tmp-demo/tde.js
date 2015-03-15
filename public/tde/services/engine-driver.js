@@ -466,8 +466,8 @@ angular.module("tde.services.engine-driver", [])
   this.rotateEditorCamera = function(x, y)
   {
     var speed = 0.01
-    var rotationY = x * speed
-    var rotationX = -y * speed
+    var rotationY = -x * speed
+    var rotationX = y * speed
 
     var cam_dir = vec3.create()
     vec3.subtract(cam_dir, uniform_editor_overrides["cam_target"], uniform_editor_overrides["cam_pos"])
@@ -480,9 +480,8 @@ angular.module("tde.services.engine-driver", [])
     var rotation = quat.create()
     quat.setAxisAngle(rotation, [0, 1, 0], rotationY)
     vec3.transformQuat(cam_dir, cam_dir, rotation)
-    console.log(cam_dir)
-    //quat.setAxisAngle(rotation, cam_right, rotationX)
-    //vec3.transformQuat(cam_dir, cam_dir, rotation)
+    quat.setAxisAngle(rotation, cam_right, rotationX)
+    vec3.transformQuat(cam_dir, cam_dir, rotation)
 
     vec3.add(uniform_editor_overrides["cam_target"], uniform_editor_overrides["cam_pos"], cam_dir)
 
