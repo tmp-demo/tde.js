@@ -68,20 +68,14 @@ var COLOR = 3;
 var TRIANGLE_ID = 4;
 
 function gfx_init() {
-  // replace the render passes' texture arrays by actual frame buffer objects
-  // this is far from optimal...
-  for (var p=0; p<sequence.length; ++p) {
-    var pass = sequence[p];
-    if (pass.render_to) {
-      pass.fbo = frame_buffer(pass.render_to);
-    }
-  }
+
+  init_render_to_texture(sequence);
 
   uniforms["cam_pos"] = [0, 1, 0]
   uniforms["cam_target"] = [0, 0, 0]
   uniforms["cam_fov"] = 75
   uniforms["cam_tilt"] = 0
-  
+
   // hack to make the export toolchain minify attribute and uniform names
   // #debug{{
   var fakeContext = {}
@@ -90,10 +84,7 @@ function gfx_init() {
   //minify_context(fakeContext);
   // #debug}}
 
-  // edition placeholders
-  // #debug{{
-  gfx_placeholders_init();
-  // #debug}}
+  init_placeholders();
 }
 
 function make_vbo(location, buffer) {
@@ -239,23 +230,6 @@ function destroy_texture(texture) {
 
 function texture_unit(i) { return gl.TEXTURE0+i; }
 
-function frame_buffer(target) {
-  var fbo = gl.createFramebuffer();
-  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-
-  if (target.color && textures[target.color]) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[target.color].tex, 0);
-  if (target.depth && textures[target.depth]) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, textures[target.depth].tex, 0);
-
-  // #debug{{
-  var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-  if (status != gl.FRAMEBUFFER_COMPLETE) {
-    console.error(frame_buffer_error(status), "Incomplete framebuffer");
-  }
-  // #debug}}
-
-  return fbo;
-}
-
 function send_uniforms(program, uniform_list, t) {
   if (!uniform_list || !program) {
     return;
@@ -338,115 +312,29 @@ function render_pass(pass, time) {
 
       // actual render
 
-      gl.disable(gl.BLEND);
-      var texture_inputs = [];
-      if (pass.texture_inputs) {
-        for (var i=0; i<pass.texture_inputs.length; ++i) {
-          texture_inputs.push(textures[pass.texture_inputs[i]]);
-        }
-      }
+      var shader_program = get_shader_program(pass);
 
-      var shader_program = programs[pass.program]
-      //#debug{{
-      if (!shader_program) {
-        if (pass.program) {
-          console.log("Missing program "+pass.program+" (using placeholder)");
-        }
-        program = program_placeholder
-      }
-      //#debug}}
-      
       gl.useProgram(shader_program);
-      var rx = canvas.width;
-      var ry = canvas.height;
-      if (pass.render_to) {
-        rx = textures[pass.render_to.color].width;
-        ry = textures[pass.render_to.color].height;
-      }
 
-      uniforms["u_resolution"] = [rx,ry];
-      set_uniforms(shader_program, rx / ry, clip_time);
-      gl.viewport(0, 0, rx, ry);
+      var resolution = prepare_render_to_texture(pass);
 
-      gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
+      gl.viewport(0, 0, resolution[0], resolution[1]);
 
-      for (var i=0; i<texture_inputs.length; ++i) {
-        //#debug{{
-        if (!texture_inputs[i]) {
-          // TODO: should use a placeholder texture or something.
-          // This can happen in the editor if a frame is rendered
-          // while a texture is not loaded yet.
-          console.log("render_pass: missing texture "+pass.texture_inputs[i]);
-          return;
-        }
-        //#debug}}
-        var tex = texture_inputs[i].tex;
-        gl.activeTexture(texture_unit(i));
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.uniform1i(gl.getUniformLocation(shader_program,"texture_"+i), i);
-      }
+      set_uniforms(shader_program, resolution[0] / resolution[1], clip_time);
 
-      if (pass.blend) {
-        gl.enable(gl.BLEND);
-        gl.blendFunc.apply(gl, pass.blend);
-      }
-      
-      if (pass.depth_test) {
-        gl.enable(gl.DEPTH_TEST);
-      }
-      else {
-        gl.disable(gl.DEPTH_TEST);
-      }
-      
-      if (pass.clear) {
-        gl.clearColor(pass.clear[0], pass.clear[1], pass.clear[2], pass.clear[3]);
-        gl.clearDepth(1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      }
+      prepare_texture_inputs(pass, shader_program);
 
-      if (pass.scene) {
-        // A scene can be inlined in the sequence...
-        var scene = pass.scene;
-        if (typeof(scene) == "string") {
-          // ...or in its own asset
-          scene = scenes[pass.scene];
-        }
+      prepare_blending(pass);
 
-        // This allows us to inline the object list without the other members of the scene
-        // for convenience and space.
-        //    scenes: { objects: [{geometry: "quad"}] },
-        // is quivalent to:
-        //    scenes: [{geometry: "quad"}],
-        var scene_objects = scene.objects || scene;
+      prepare_depth_test(pass);
 
-        send_uniforms(shader_program, scene.uniforms, clip_time);
+      preapre_clear(pass);
 
-        for (var g = 0; g < scene_objects.length; ++g) {
-          var obj = scene_objects[g];
-          var geometry = geometries[obj.geometry];
+      render(pass, shader_program, clip_time);
 
-          //#debug{{
-          if (!geometry) {
-            console.log("Missing geometry "+obj.geometry+" (using placeholder)");
-            geometry = geometry_placeholder
-          }
-          //#debug}}
+      cleanup_render_to_texture(pass);
 
-          // this is optional, but can be a convenient info to have in the shader.
-          obj.uniforms = obj.uniforms || {};
-          obj.uniforms["u_object_id"] = g;
-
-          send_uniforms(shader_program, obj.uniforms, clip_time);
-
-          draw_geom(geometry)
-        }
-      }
-
-      // we may be able to remove this loop to loose a few bytes
-      for (var i=0; i<texture_inputs.length; ++i) {
-        gl.activeTexture(texture_unit(i));
-        gl.bindTexture(gl.TEXTURE_2D, null);
-      }
+      cleanup_texture_inputs(pass);
     }
   }
 }
