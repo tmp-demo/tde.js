@@ -398,13 +398,12 @@ function render_pass(pass, time) {
         }
         //#debug}}
 
-        draw_geom(geometry);
-        /*var instance_count = 1//pass.instance_count || 1;
+        var instance_count = pass.instance_count || 1;
         var instance_id_location = gl.getUniformLocation(shader_program, "instance_id");
         for (var k = 0; k < instance_count; k++) {
-          //gl.uniform1f(instance_id_location, k);
+          gl.uniform1f(instance_id_location, k);
           draw_geom(geometry);
-        }*/
+        }
       }
 
       // we may be able to remove this loop to loose a few bytes
