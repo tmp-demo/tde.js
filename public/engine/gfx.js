@@ -8,7 +8,7 @@ var fragment_shaders = {}
 var vertex_shaders = {}
 var ctx_2d
 
-var use_texture_float = false;
+var use_texture_float = true;
 var gl_ext_half_float;
 
 // #debug{{
@@ -318,6 +318,15 @@ function render_pass(pass, time) {
 
       // actual render
 
+      gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
+
+      if (pass.clear) {
+        console.log(pass.clear)
+        gl.clearColor(pass.clear[0], pass.clear[1], pass.clear[2], pass.clear[3]);
+        gl.clearDepth(1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      }
+
       gl.disable(gl.BLEND);
       var texture_inputs = [];
       if (pass.texture_inputs) {
@@ -332,9 +341,12 @@ function render_pass(pass, time) {
         if (pass.program) {
           console.log("Missing program "+pass.program+" (using placeholder)");
         }
-        program = program_placeholder
+        shader_program = program_placeholder
       }
       //#debug}}
+
+      if (!shader_program)
+        return;
       
       gl.useProgram(shader_program);
       var rx = canvas.width;
@@ -347,8 +359,6 @@ function render_pass(pass, time) {
       uniforms["u_resolution"] = [rx,ry];
       set_uniforms(shader_program, rx / ry);
       gl.viewport(0, 0, rx, ry);
-
-      gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
 
       for (var i=0; i<texture_inputs.length; ++i) {
         //#debug{{
@@ -377,13 +387,7 @@ function render_pass(pass, time) {
       else {
         gl.disable(gl.DEPTH_TEST);
       }
-      
-      if (pass.clear) {
-        gl.clearColor(pass.clear[0], pass.clear[1], pass.clear[2], pass.clear[3]);
-        gl.clearDepth(1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      }
-      
+
       if (pass.geometry) {
         var geometry = geometries[pass.geometry]
 
@@ -394,7 +398,13 @@ function render_pass(pass, time) {
         }
         //#debug}}
 
-        draw_geom(geometry)
+        draw_geom(geometry);
+        /*var instance_count = 1//pass.instance_count || 1;
+        var instance_id_location = gl.getUniformLocation(shader_program, "instance_id");
+        for (var k = 0; k < instance_count; k++) {
+          //gl.uniform1f(instance_id_location, k);
+          draw_geom(geometry);
+        }*/
       }
 
       // we may be able to remove this loop to loose a few bytes
