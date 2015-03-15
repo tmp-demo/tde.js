@@ -2743,6 +2743,15 @@ mat4.create = function() {
 };
 
 /**
+ * Creates a new zero-filles mat4
+ *
+ * @returns {mat4} a new 4x4 matrix
+ */
+mat4.create0 = function() {
+    return new GLMAT_ARRAY_TYPE(16);;
+};
+
+/**
  * Creates a new mat4 initialized with values from an existing matrix
  *
  * @param {mat4} a matrix to clone
@@ -3427,25 +3436,26 @@ mat4.frustum = function (out, left, right, bottom, top, near, far) {
  * @param {number} far Far bound of the frustum
  * @returns {mat4} out
  */
+ // IMPORTANT: size optims assume out was created with mat4.create0() !
 mat4.perspective = function (out, fovy, aspect, near, far) {
     var f = 1.0 / M.tan(fovy / 2),
         nf = 1 / (near - far);
     out[0] = f / aspect;
-    out[1] = 0;
+    /*out[1] = 0;
     out[2] = 0;
     out[3] = 0;
-    out[4] = 0;
+    out[4] = 0;*/
     out[5] = f;
-    out[6] = 0;
+    /*out[6] = 0;
     out[7] = 0;
     out[8] = 0;
-    out[9] = 0;
+    out[9] = 0;*/
     out[10] = (far + near) * nf;
     out[11] = -1;
-    out[12] = 0;
-    out[13] = 0;
+    /*out[12] = 0;
+    out[13] = 0;*/
     out[14] = (2 * far * near) * nf;
-    out[15] = 0;
+    /*out[15] = 0;*/
     return out;
 };
 

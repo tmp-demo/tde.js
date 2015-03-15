@@ -260,8 +260,8 @@ function set_uniforms(program, ratio) {
   // #debug}}
 
   var viewMatrix = mat4.create()
-  var projectionMatrix = mat4.create()
-  var viewProjectionMatrix = mat4.create()
+  var projectionMatrix = mat4.create0() // careful: 0 here
+  var viewProjectionMatrix = mat4.create0()
   //var viewProjectionMatrixInv = mat4.create()
   
   // derive camera matrices from simpler parameters
