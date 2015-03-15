@@ -327,12 +327,24 @@ function render_pass(pass, time) {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       }
 
-      gl.disable(gl.BLEND);
       var texture_inputs = [];
       if (pass.texture_inputs) {
         for (var i=0; i<pass.texture_inputs.length; ++i) {
           texture_inputs.push(textures[pass.texture_inputs[i]]);
         }
+      }
+
+      if (pass.blend) {
+        gl.enable(gl.BLEND);
+        gl.blendFunc.apply(gl, pass.blend);
+      } else {
+        gl.disable(gl.BLEND);
+      }
+      
+      if (pass.depth_test) {
+        gl.enable(gl.DEPTH_TEST);
+      } else {
+        gl.disable(gl.DEPTH_TEST);
       }
 
       var shader_program = programs[pass.program]
@@ -374,18 +386,6 @@ function render_pass(pass, time) {
         gl.activeTexture(texture_unit(i));
         gl.bindTexture(gl.TEXTURE_2D, tex);
         gl.uniform1i(gl.getUniformLocation(shader_program,"texture_"+i), i);
-      }
-
-      if (pass.blend) {
-        gl.enable(gl.BLEND);
-        gl.blendFunc.apply(gl, pass.blend);
-      }
-      
-      if (pass.depth_test) {
-        gl.enable(gl.DEPTH_TEST);
-      }
-      else {
-        gl.disable(gl.DEPTH_TEST);
       }
 
       if (pass.geometry) {
