@@ -471,7 +471,6 @@ angular.module("tde.services.engine-driver", [])
 
     var cam_dir = vec3.create()
     vec3.subtract(cam_dir, uniform_editor_overrides["cam_target"], uniform_editor_overrides["cam_pos"])
-    console.log(rotationY, cam_dir)
 
     var cam_right = vec3.create()
     vec3.cross(cam_right, [0, 1, 0], cam_dir)
