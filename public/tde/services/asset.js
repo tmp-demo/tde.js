@@ -9,6 +9,7 @@ angular.module("tde.services.asset", [])
     "tex",
     "geom",
     "ogg",
+    "scene",
     "seq",
     "song",
     "glsllib",
@@ -120,6 +121,7 @@ angular.module("tde.services.asset", [])
           case "tex": EngineDriver.loadTexture(name, data); break
           case "geom": EngineDriver.loadGeometry(name, data); break
           case "seq": EngineDriver.loadSequence(name, data); break
+          case "scene": EngineDriver.loadScene(name, data); break
           case "song": EngineDriver.loadSong(name, data); break
           case "ogg": EngineDriver.loadOgg(name, data); break
           case "glsllib": EngineDriver.loadShader(assetId, data); break
@@ -159,6 +161,7 @@ angular.module("tde.services.asset", [])
       case "tex": EngineDriver.unloadTexture(name); break
       case "geom": EngineDriver.unloadGeometry(name); break
       case "seq": EngineDriver.unloadSequence(name); break
+      case "scene": EngineDriver.unloadScene(name); break
       case "song": EngineDriver.unloadSong(name); break
       case "glsllib": EngineDriver.unloadShader(assetId); break
       case "glsl": EngineDriver.unloadShader(assetId); break
@@ -177,6 +180,7 @@ angular.module("tde.services.asset", [])
       case "tex": glyphicon = "picture-o"; break
       case "geom": glyphicon = "cube"; break
       case "seq": glyphicon = "film"; break
+      case "scene": glyphicon = "film"; break // TODO
       case "song": glyphicon = "music"; break
       case "glsllib": glyphicon = "database"; break
       case "glsl": glyphicon = "globe"; break

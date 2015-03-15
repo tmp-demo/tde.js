@@ -3,6 +3,7 @@ var canvas
 var textures = {}
 var uniforms = {}
 var geometries = {}
+var scenes = {}
 var programs = {}
 var fragment_shaders = {}
 var vertex_shaders = {}
@@ -75,7 +76,7 @@ function gfx_init() {
       pass.fbo = frame_buffer(pass.render_to);
     }
   }
-  
+
   uniforms["cam_pos"] = [0, 1, 0]
   uniforms["cam_target"] = [0, 0, 0]
   uniforms["cam_fov"] = 75
@@ -255,7 +256,45 @@ function frame_buffer(target) {
   return fbo;
 }
 
-function set_uniforms(program, ratio) {
+function send_uniforms(program, uniform_list, t) {
+  if (!uniform_list || !program) {
+    return;
+  }
+
+  for (var uniform_name in uniform_list) {
+    var val = uniform_list[uniform_name];
+
+    var location = gl.getUniformLocation(program, uniform_name);
+
+    if (!location) {
+      continue;
+    }
+
+    if (typeof val == "string") {
+      val = eval("_="+val);
+    }
+
+    if (typeof val == "function") {
+      val = val(t);
+    }
+
+    // if val is a bare number, make a one-element array
+    if (typeof val == "number") {
+      val = [val];
+    }
+
+    switch (val.length) {
+      case 1: gl.uniform1fv(location, val); break;
+      case 2: gl.uniform2fv(location, val); break;
+      case 3: gl.uniform3fv(location, val); break;
+      case 4: gl.uniform4fv(location, val); break;
+      case 9: gl.uniformMatrix3fv(location, 0, val); break;
+      case 16: gl.uniformMatrix4fv(location, 0, val); break;
+    }
+  }
+}
+
+function set_uniforms(program, ratio, t) {
 
   // allow the editor to override uniforms for debug
   // #debug{{
@@ -277,27 +316,8 @@ function set_uniforms(program, ratio) {
   //mat4.invert(viewProjectionMatrixInv, viewProjectionMatrix);
   uniforms["view_proj_mat"] = viewProjectionMatrix;
   //uniforms["view_proj_mat_inv"] = viewProjectionMatrixInv;
-  
-  for (var uniformName in uniforms) {
-    var val = uniforms[uniformName];
 
-    var location = gl.getUniformLocation(program, uniformName);
-    if (!location)
-      continue;
-
-    // if val is a bare number, make a one-element array
-    if (typeof val == "number")
-      val = [val];
-
-    switch (val.length) {
-      case 1: gl.uniform1fv(location, val); break;
-      case 2: gl.uniform2fv(location, val); break;
-      case 3: gl.uniform3fv(location, val); break;
-      case 4: gl.uniform4fv(location, val); break;
-      case 9: gl.uniformMatrix3fv(location, 0, val); break;
-      case 16: gl.uniformMatrix4fv(location, 0, val); break;
-    }
-  }
+  send_uniforms(program, uniforms, t);
 }
 
 function render_pass(pass, time) {
@@ -345,7 +365,7 @@ function render_pass(pass, time) {
       }
 
       uniforms["u_resolution"] = [rx,ry];
-      set_uniforms(shader_program, rx / ry);
+      set_uniforms(shader_program, rx / ry, clip_time);
       gl.viewport(0, 0, rx, ry);
 
       gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
@@ -384,17 +404,25 @@ function render_pass(pass, time) {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       }
       
-      if (pass.geometry) {
-        var geometry = geometries[pass.geometry]
+      if (pass.scenes) {
+        var scene = scenes[pass.scene];
+        send_uniforms(shader_program, scene.uniforms, clip_time);
 
-        //#debug{{
-        if (!geometry) {
-          console.log("Missing geometry "+pass.geometry+" (using placeholder)");
-          geometry = geometry_placeholder
+        for (var g = 0; g < scene.objects.length(); ++g) {
+          var obj = scene.objects[i]
+          var geometry = geometries[obj.geometry];
+
+          send_uniforms(shader_program, obj.uniforms, clip_time);
+
+          //#debug{{
+          if (!geometry) {
+            console.log("Missing geometry "+obj.geometry+" (using placeholder)");
+            geometry = geometry_placeholder
+          }
+          //#debug}}
+
+          draw_geom(geometry)
         }
-        //#debug}}
-
-        draw_geom(geometry)
       }
 
       // we may be able to remove this loop to loose a few bytes

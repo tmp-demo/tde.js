@@ -143,6 +143,25 @@ angular.module("tde.services.engine-driver", [])
     // leak everything
   }
 
+  this.loadScene = function(name, data)
+  {
+    self.logInfo("loading scene " + name)
+
+    try
+    {
+      scenes[name] = eval("___ = "+data);
+    }
+    catch (err)
+    {
+      self.logError(err.message, err.stack)
+    }
+  }
+
+  this.unloadScene = function(name, data)
+  {
+
+  }
+
   this.loadSong = function(name, data)
   {
     self.logInfo("loading song " + name)
