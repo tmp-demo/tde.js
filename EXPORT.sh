@@ -32,11 +32,6 @@ do
     ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
 done
 
-#DEMO_CONFIG=($PROJECT_ROOT/demo.config)
-#if [ -f $DEMO_CONFOG ]; then
-#  "$NODE" ./tools/export-opt-features.js $PROJECT_ROOT/demo.config >> $EXPORT_ROOT/demo.js
-#fi
-
 cat $EXPORT_ROOT/shaders/shaders.js >> $EXPORT_ROOT/demo.js
 
 echo " -- exporting texture assets"
