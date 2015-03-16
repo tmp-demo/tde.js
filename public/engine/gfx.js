@@ -1,3 +1,16 @@
+
+// The placeholders code has multiline strings that closure don't like
+// so we can't enable it in the export for now.
+var PLACEHOLDERS_ENABLED = false;
+PLACEHOLDERS_ENABLED = true; //#debug
+
+var CLEAR_ENABLED = true;
+var DEPTH_TEST_ENABLED = true;
+var BLENDING_ENABLED = true;
+var RENDER_TO_TEXTURE_ENABLED = true;
+var TEXTURE_INPUTS_ENABLED = true;
+var SCENES_ENABLED = true;
+
 var gl
 var canvas
 var textures = {}
@@ -333,9 +346,11 @@ function render_pass(pass, time) {
 
       prepare_depth_test(pass);
 
-      render(pass, shader_program, clip_time);
-
-      cleanup_render_to_texture(pass);
+      if (SCENES_ENABLED) {
+        render_with_scenes(pass, shader_program, clip_time);
+      } else {
+        render_without_scenes(pass, shader_program, clip_time);
+      }
 
       cleanup_texture_inputs(pass);
     }
@@ -349,4 +364,209 @@ function render_sequence(sequence, time) {
   sequence.map(function(pass) {
     render_pass(pass, time)
   })
+}
+
+function prepare_depth_test(pass) {
+  if (DEPTH_TEST_ENABLED) {
+    if (pass.depth_test) {
+      gl.enable(gl.DEPTH_TEST);
+    } else {
+      gl.disable(gl.DEPTH_TEST);
+    }
+  }
+}
+
+function prepare_blending(pass) {
+  if (BLENDING_ENABLED) {
+    gl.disable(gl.BLEND);
+    if (pass.blend) {
+      gl.enable(gl.BLEND);
+      gl.blendFunc.apply(gl, pass.blend);
+    }
+  }
+}
+
+function preapre_clear(pass) {
+  if (CLEAR_ENABLED) {
+    if (pass.clear) {
+      gl.clearColor(pass.clear[0], pass.clear[1], pass.clear[2], pass.clear[3]);
+      gl.clearDepth(1.0);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    }
+  }
+}
+
+function prepare_texture_inputs(pass, shader_program) {
+  if (TEXTURE_INPUTS_ENABLED) {
+    var texture_inputs = pass.texture_inputs || [];
+
+    for (var i=0; i<texture_inputs.length; ++i) {
+      var texture = textures[texture_inputs[i]];
+      //#debug{{
+      if (!texture) {
+        // TODO: should use a placeholder texture or something.
+        // This can happen in the editor if a frame is rendered
+        // while a texture is not loaded yet.
+        console.log("render_pass: missing texture "+pass.texture_inputs[i]);
+        return;
+      }
+      //#debug}}
+      var tex = texture.tex;
+      gl.activeTexture(texture_unit(i));
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.uniform1i(gl.getUniformLocation(shader_program,"texture_"+i), i);
+    }
+  }
+}
+
+function cleanup_texture_inputs(pass) {
+  if (TEXTURE_INPUTS_ENABLED) {
+    // we may be able to remove this loop to loose a few bytes
+    if (!pass.texture_inputs) { return; }
+    for (var i=0; i<pass.texture_inputs.length; ++i) {
+      gl.activeTexture(texture_unit(i));
+      gl.bindTexture(gl.TEXTURE_2D, null);
+    }
+  }
+}
+
+
+function init_render_to_texture(sequence) {
+  if (RENDER_TO_TEXTURE_ENABLED) {
+    // replace the render passes' texture arrays by actual frame buffer objects
+    // this is far from optimal...
+    for (var p=0; p<sequence.length; ++p) {
+      var pass = sequence[p];
+      if (pass.render_to) {
+        pass.fbo = frame_buffer(pass.render_to);
+      }
+    }
+  }
+}
+
+function frame_buffer(target) {
+  var fbo = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+
+  if (target.color && textures[target.color]) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[target.color].tex, 0);
+  if (target.depth && textures[target.depth]) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, textures[target.depth].tex, 0);
+
+  // #debug{{
+  var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+  if (status != gl.FRAMEBUFFER_COMPLETE) {
+    console.error(frame_buffer_error(status), "Incomplete framebuffer");
+  }
+  // #debug}}
+
+  return fbo;
+}
+
+function prepare_render_to_texture(pass) {
+  if (RENDER_TO_TEXTURE_ENABLED) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
+
+    var rx = canvas.width;
+    var ry = canvas.height;
+    if (pass.render_to) {
+      rx = textures[pass.render_to.color].width;
+      ry = textures[pass.render_to.color].height;
+    }
+
+    uniforms["u_resolution"] = [rx,ry];
+    return [rx,ry];
+  } else {
+    return [canvas.width, canvas.height];
+  }
+}
+
+function get_geometry(geometry_name) {
+  if (PLACEHOLDERS_ENABLED) {
+    if (!geometry_name) {
+      return null;
+    }
+    var geometry = geometries[geometry_name];
+
+    if (!geometry) {
+      console.log("Missing geometry "+obj.geometry+" (using placeholder)");
+      geometry = geometry_placeholder
+    }
+
+    return geometry;
+  } else {
+    return geometries[geometry_name];    
+  }
+}
+
+function get_shader_program(pass) {
+  if (PLACEHOLDERS_ENABLED) {
+    if (!pass.program) {
+      return null;
+    }
+
+    var shader_program = programs[pass.program]
+
+    if (!shader_program) {
+      if (pass.program) {
+        console.log("Missing program "+pass.program+" (using placeholder)");
+      }
+      shader_program = placeholder_program;
+    }
+    return shader_program;
+  } else {
+    return programs[pass.program];
+  }
+}
+
+function render_without_scenes(pass, shader_program, clip_time) {
+  if (pass.geometry) {
+    var geometry = geometries[pass.geometry]
+
+    //#debug{{
+    if (!geometry) {
+      console.log("Missing geometry "+pass.geometry+" (using placeholder)");
+      geometry = geometry_placeholder
+    }
+    //#debug}}
+
+    var instance_count = pass.instance_count || 1;
+    var instance_id_location = gl.getUniformLocation(shader_program, "instance_id");
+    for (var k = 0; k < instance_count; k++) {
+      gl.uniform1f(instance_id_location, k);
+      draw_geom(geometry);
+    }
+  }
+}
+
+function render_with_scenes(pass, shader_program, clip_time) {
+  if (pass.scene) {
+    // A scene can be inlined in the sequence...
+    var scene = pass.scene;
+    if (typeof scene == "string") {
+      // ...or in its own asset
+      scene = scenes[pass.scene];
+    }
+
+    // This allows us to inline the object list without the other members of the scene
+    // for convenience and space.
+    //    scenes: { objects: [{geometry: "quad"}] },
+    // is quivalent to:
+    //    scenes: [{geometry: "quad"}],
+    var scene_objects = scene.objects || scene;
+
+    send_uniforms(shader_program, scene.uniforms, clip_time);
+
+    for (var g = 0; g < scene_objects.length; ++g) {
+      var obj = scene_objects[g];
+
+      var geometry = get_geometry(obj.geometry);
+
+      // this is optional, but can be a convenient info to have in the shader.
+      obj.uniforms = obj.uniforms || {};
+      obj.uniforms["u_object_id"] = g;
+
+      send_uniforms(shader_program, obj.uniforms, clip_time);
+
+      draw_geom(geometry)
+    }
+  }
 }
