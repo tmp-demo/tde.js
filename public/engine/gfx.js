@@ -22,7 +22,7 @@ var fragment_shaders = {}
 var vertex_shaders = {}
 var ctx_2d
 
-var use_texture_float = false;
+var use_texture_float = true;
 var gl_ext_half_float;
 
 // #debug{{
@@ -57,11 +57,6 @@ function gl_init() {
     }
   }
   // #debug}}
-
-  canvas_2d = document.createElement("canvas");
-  canvas_2d.width = canvas_2d.height = 2048;
-  ctx_2d = canvas_2d.getContext("2d");
-  //minify_context(ctx_2d);
 }
 
 var _enums = _enums = { }; // #debug
@@ -291,8 +286,8 @@ function set_uniforms(program, ratio, t) {
   // #debug}}
 
   var viewMatrix = mat4.create()
-  var projectionMatrix = mat4.create()
-  var viewProjectionMatrix = mat4.create()
+  var projectionMatrix = mat4.create0() // careful: 0 here
+  var viewProjectionMatrix = mat4.create0()
   //var viewProjectionMatrixInv = mat4.create()
   
   // derive camera matrices from simpler parameters
@@ -521,12 +516,12 @@ function render_without_scenes(pass, shader_program, clip_time) {
   if (pass.geometry) {
     var geometry = geometries[pass.geometry]
 
-    //#debug{{
-    if (!geometry) {
-      console.log("Missing geometry "+pass.geometry+" (using placeholder)");
-      geometry = geometry_placeholder
+    if (PLACEHOLDERS_ENABLED) {
+      if (!geometry) {
+        console.log("Missing geometry "+pass.geometry+" (using placeholder)");
+        geometry = geometry_placeholder
+      }
     }
-    //#debug}}
 
     var instance_count = pass.instance_count || 1;
     var instance_id_location = gl.getUniformLocation(shader_program, "instance_id");
