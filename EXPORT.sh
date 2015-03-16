@@ -55,7 +55,7 @@ echo "}" >> $EXPORT_ROOT/demo.js
 echo " -- exporting scene assets"
 echo "function load_scenes() {" >> $EXPORT_ROOT/demo.js
 SCENES=($PROJECT_ROOT/*.scene)
-if [ -f $GEOMETRIES ]; then
+if [ -f $SCENES ]; then
   "$NODE" ./tools/export-scenes.js $PROJECT_ROOT/*.scene >> $EXPORT_ROOT/demo.js
 fi
 echo "}" >> $EXPORT_ROOT/demo.js
