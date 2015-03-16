@@ -26,11 +26,13 @@ do
     ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
 done
 
-echo " -- exporting optional engine features"
-for f in  ./public/engine/enabled/*.js
-do
-    ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
-done
+echo " -- checking config file"
+CONFIG=($PROJECT_ROOT/config.js)
+if [ -f $CONFIG ]; then
+  echo " -- found config file:"
+  cat $CONFIG
+  cat $CONFIG >> $EXPORT_ROOT/demo.js
+fi
 
 cat $EXPORT_ROOT/shaders/shaders.js >> $EXPORT_ROOT/demo.js
 
