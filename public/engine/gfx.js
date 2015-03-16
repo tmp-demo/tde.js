@@ -312,11 +312,16 @@ function render_pass(pass, time) {
 
       // actual render
 
+      var resolution = prepare_render_to_texture(pass);
+
+      preapre_clear(pass);
+
       var shader_program = get_shader_program(pass);
+      if (!shader_program) {
+        continue;
+      }
 
       gl.useProgram(shader_program);
-
-      var resolution = prepare_render_to_texture(pass);
 
       gl.viewport(0, 0, resolution[0], resolution[1]);
 
@@ -327,8 +332,6 @@ function render_pass(pass, time) {
       prepare_blending(pass);
 
       prepare_depth_test(pass);
-
-      preapre_clear(pass);
 
       render(pass, shader_program, clip_time);
 

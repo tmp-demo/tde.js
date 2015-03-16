@@ -26,6 +26,17 @@ do
     ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
 done
 
+echo " -- exporting optional engine features"
+for f in  ./public/engine/enabled/*.js
+do
+    ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
+done
+
+#DEMO_CONFIG=($PROJECT_ROOT/demo.config)
+#if [ -f $DEMO_CONFOG ]; then
+#  "$NODE" ./tools/export-opt-features.js $PROJECT_ROOT/demo.config >> $EXPORT_ROOT/demo.js
+#fi
+
 cat $EXPORT_ROOT/shaders/shaders.js >> $EXPORT_ROOT/demo.js
 
 echo " -- exporting texture assets"
@@ -41,6 +52,14 @@ echo "function load_geometries() {" >> $EXPORT_ROOT/demo.js
 GEOMETRIES=($PROJECT_ROOT/*.geom)
 if [ -f $GEOMETRIES ]; then
   "$NODE" ./tools/export-geometries.js $PROJECT_ROOT/*.geom >> $EXPORT_ROOT/demo.js
+fi
+echo "}" >> $EXPORT_ROOT/demo.js
+
+echo " -- exporting scene assets"
+echo "function load_scenes() {" >> $EXPORT_ROOT/demo.js
+SCENES=($PROJECT_ROOT/*.scene)
+if [ -f $GEOMETRIES ]; then
+  "$NODE" ./tools/export-scenes.js $PROJECT_ROOT/*.scene >> $EXPORT_ROOT/demo.js
 fi
 echo "}" >> $EXPORT_ROOT/demo.js
 

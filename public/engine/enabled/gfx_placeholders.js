@@ -1,5 +1,6 @@
 
 function init_placeholders() {
+//#debug{{
   geometry_placeholder = {
     buffers: [
       make_vbo(POS, [
@@ -60,9 +61,14 @@ function init_placeholders() {
   ";
 
   placeholder_program = load_program_from_source(vs_placeholder, fs_placeholder);
+
+//#debug}}
 }
 
 function get_geometry(geometry_name) {
+  if (!geometry_name) {
+    return null;
+  }
   var geometry = geometries[geometry_name];
 
   if (!geometry) {
@@ -74,6 +80,10 @@ function get_geometry(geometry_name) {
 }
 
 function get_shader_program(pass) {
+  if (!pass.program) {
+    return null;
+  }
+
   var shader_program = programs[pass.program]
 
   if (!shader_program) {

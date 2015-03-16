@@ -364,6 +364,9 @@ function SND_Ogg(name, data)
     src = name + ".ogg"
 
   var audioElement = new Audio(src)
+  // uncomment this line if you are debuggin the exported code and don't want
+  // to be bothered with the music.
+  //audioElement.volume = 0;
 
   this.p = function()
   {

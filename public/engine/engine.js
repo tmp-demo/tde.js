@@ -88,6 +88,7 @@ function main() {
 
   load_shaders();
   load_geometries();
+  load_scenes();
   load_textures();
 
   gfx_init();
