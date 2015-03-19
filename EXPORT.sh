@@ -21,18 +21,18 @@ echo " -- building shaders"
 
 echo " -- concatenating js files and stripping debug code..."
 
+echo " -- exporting config"
+CONFIG=($PROJECT_ROOT/demo.config)
+if [ ! -f $CONFIG ]; then
+  echo "Missing config file: $CONFIG"
+  exit 1
+fi
+cat $CONFIG >> $EXPORT_ROOT/demo.js
+
 for f in  ./public/engine/*.js
 do
     ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
 done
-
-echo " -- checking config file"
-CONFIG=($PROJECT_ROOT/config.js)
-if [ -f $CONFIG ]; then
-  echo " -- found config file:"
-  cat $CONFIG
-  cat $CONFIG >> $EXPORT_ROOT/demo.js
-fi
 
 cat $EXPORT_ROOT/shaders/shaders.js >> $EXPORT_ROOT/demo.js
 

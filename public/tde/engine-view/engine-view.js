@@ -1,3 +1,13 @@
+// engine config in editor
+EDITOR = true;
+PLACEHOLDERS_ENABLED = true;
+CLEAR_ENABLED = true;
+DEPTH_TEST_ENABLED = true;
+BLENDING_ENABLED = true;
+RENDER_TO_TEXTURE_ENABLED = true;
+TEXTURE_INPUTS_ENABLED = true;
+SCENES_ENABLED = false;
+
 angular.module("tde.engine-view", [])
 
 .controller("EngineViewCtrl", function($scope, EngineDriver)
@@ -6,7 +16,7 @@ angular.module("tde.engine-view", [])
   $scope.driver = EngineDriver
 })
 
-.directive("tdeEngineView", function(Asset)
+.directive("tdeEngineView", function()
 {
   return {
     restrict: "E",
