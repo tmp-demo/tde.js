@@ -29,7 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 var GLMAT_EPSILON = 0.000001;
 var GLMAT_ARRAY_TYPE = Float32Array;
-var GLMAT_RANDOM = M.random;
+var GLMAT_RANDOM = Math.random;
 
 /**
  * @class Common utilities
@@ -46,7 +46,7 @@ glMatrix.setMatrixArrayType = function(type) {
     GLMAT_ARRAY_TYPE = type;
 }
 
-var degree = M.PI / 180;
+var degree = Math.PI / 180;
 
 /**
 * Convert Degree To Radian
@@ -235,8 +235,8 @@ vec2.div = vec2.divide;
  * @returns {vec2} out
  */
 vec2.min = function(out, a, b) {
-    out[0] = M.min(a[0], b[0]);
-    out[1] = M.min(a[1], b[1]);
+    out[0] = Math.min(a[0], b[0]);
+    out[1] = Math.min(a[1], b[1]);
     return out;
 };
 
@@ -249,8 +249,8 @@ vec2.min = function(out, a, b) {
  * @returns {vec2} out
  */
 vec2.max = function(out, a, b) {
-    out[0] = M.max(a[0], b[0]);
-    out[1] = M.max(a[1], b[1]);
+    out[0] = Math.max(a[0], b[0]);
+    out[1] = Math.max(a[1], b[1]);
     return out;
 };
 
@@ -293,7 +293,7 @@ vec2.scaleAndAdd = function(out, a, b, scale) {
 vec2.distance = function(a, b) {
     var x = b[0] - a[0],
         y = b[1] - a[1];
-    return M.sqrt(x*x + y*y);
+    return Math.sqrt(x*x + y*y);
 };
 
 /**
@@ -330,7 +330,7 @@ vec2.sqrDist = vec2.squaredDistance;
 vec2.length = function (a) {
     var x = a[0],
         y = a[1];
-    return M.sqrt(x*x + y*y);
+    return Math.sqrt(x*x + y*y);
 };
 
 /**
@@ -383,7 +383,7 @@ vec2.normalize = function(out, a) {
     var len = x*x + y*y;
     if (len > 0) {
         //TODO: evaluate use of glm_invsqrt here?
-        len = 1 / M.sqrt(len);
+        len = 1 / Math.sqrt(len);
         out[0] = a[0] * len;
         out[1] = a[1] * len;
     }
@@ -443,9 +443,9 @@ vec2.lerp = function (out, a, b, t) {
  */
 vec2.random = function (out, scale) {
     scale = scale || 1.0;
-    var r = GLMAT_RANDOM() * 2.0 * M.PI;
-    out[0] = M.cos(r) * scale;
-    out[1] = M.sin(r) * scale;
+    var r = GLMAT_RANDOM() * 2.0 * Math.PI;
+    out[0] = Math.cos(r) * scale;
+    out[1] = Math.sin(r) * scale;
     return out;
 };
 
@@ -540,7 +540,7 @@ vec2.forEach = function(a, stride, offset, count, fn, arg) {
   }
   
   if(count) {
-      l = M.min((count * stride) + offset, a.length);
+      l = Math.min((count * stride) + offset, a.length);
   } else {
       l = a.length;
   }
@@ -753,9 +753,9 @@ vec3.div = vec3.divide;
  * @returns {vec3} out
  */
 vec3.min = function(out, a, b) {
-    out[0] = M.min(a[0], b[0]);
-    out[1] = M.min(a[1], b[1]);
-    out[2] = M.min(a[2], b[2]);
+    out[0] = Math.min(a[0], b[0]);
+    out[1] = Math.min(a[1], b[1]);
+    out[2] = Math.min(a[2], b[2]);
     return out;
 };
 
@@ -768,9 +768,9 @@ vec3.min = function(out, a, b) {
  * @returns {vec3} out
  */
 vec3.max = function(out, a, b) {
-    out[0] = M.max(a[0], b[0]);
-    out[1] = M.max(a[1], b[1]);
-    out[2] = M.max(a[2], b[2]);
+    out[0] = Math.max(a[0], b[0]);
+    out[1] = Math.max(a[1], b[1]);
+    out[2] = Math.max(a[2], b[2]);
     return out;
 };
 
@@ -816,7 +816,7 @@ vec3.distance = function(a, b) {
     var x = b[0] - a[0],
         y = b[1] - a[1],
         z = b[2] - a[2];
-    return M.sqrt(x*x + y*y + z*z);
+    return Math.sqrt(x*x + y*y + z*z);
 };
 
 /**
@@ -855,7 +855,7 @@ vec3.length = function (a) {
     var x = a[0],
         y = a[1],
         z = a[2];
-    return M.sqrt(x*x + y*y + z*z);
+    return Math.sqrt(x*x + y*y + z*z);
 };
 
 /**
@@ -911,7 +911,7 @@ vec3.normalize = function(out, a) {
     var len = x*x + y*y + z*z;
     if (len > 0) {
         //TODO: evaluate use of glm_invsqrt here?
-        len = 1 / M.sqrt(len);
+        len = 1 / Math.sqrt(len);
         out[0] = a[0] * len;
         out[1] = a[1] * len;
         out[2] = a[2] * len;
@@ -977,12 +977,12 @@ vec3.lerp = function (out, a, b, t) {
 vec3.random = function (out, scale) {
     scale = scale || 1.0;
 
-    var r = GLMAT_RANDOM() * 2.0 * M.PI;
+    var r = GLMAT_RANDOM() * 2.0 * Math.PI;
     var z = (GLMAT_RANDOM() * 2.0) - 1.0;
-    var zScale = M.sqrt(1.0-z*z) * scale;
+    var zScale = Math.sqrt(1.0-z*z) * scale;
 
-    out[0] = M.cos(r) * zScale;
-    out[1] = M.sin(r) * zScale;
+    out[0] = Math.cos(r) * zScale;
+    out[1] = Math.sin(r) * zScale;
     out[2] = z * scale;
     return out;
 };
@@ -1064,8 +1064,8 @@ vec3.rotateX = function(out, a, b, c){
 
     //perform rotation
     r[0] = p[0];
-    r[1] = p[1]*M.cos(c) - p[2]*M.sin(c);
-    r[2] = p[1]*M.sin(c) + p[2]*M.cos(c);
+    r[1] = p[1]*Math.cos(c) - p[2]*Math.sin(c);
+    r[2] = p[1]*Math.sin(c) + p[2]*Math.cos(c);
 
     //translate to correct position
     out[0] = r[0] + b[0];
@@ -1091,9 +1091,9 @@ vec3.rotateY = function(out, a, b, c){
     p[2] = a[2] - b[2];
   
     //perform rotation
-    r[0] = p[2]*M.sin(c) + p[0]*M.cos(c);
+    r[0] = p[2]*Math.sin(c) + p[0]*Math.cos(c);
     r[1] = p[1];
-    r[2] = p[2]*M.cos(c) - p[0]*M.sin(c);
+    r[2] = p[2]*Math.cos(c) - p[0]*Math.sin(c);
   
     //translate to correct position
     out[0] = r[0] + b[0];
@@ -1119,8 +1119,8 @@ vec3.rotateZ = function(out, a, b, c){
     p[2] = a[2] - b[2];
   
     //perform rotation
-    r[0] = p[0]*M.cos(c) - p[1]*M.sin(c);
-    r[1] = p[0]*M.sin(c) + p[1]*M.cos(c);
+    r[0] = p[0]*Math.cos(c) - p[1]*Math.sin(c);
+    r[1] = p[0]*Math.sin(c) + p[1]*Math.cos(c);
     r[2] = p[2];
   
     //translate to correct position
@@ -1155,7 +1155,7 @@ vec3.forEach = function(a, stride, offset, count, fn, arg) {
   }
   
   if(count) {
-      l = M.min((count * stride) + offset, a.length);
+      l = Math.min((count * stride) + offset, a.length);
   } else {
       l = a.length;
   }
@@ -1379,10 +1379,10 @@ vec4.div = vec4.divide;
  * @returns {vec4} out
  */
 vec4.min = function(out, a, b) {
-    out[0] = M.min(a[0], b[0]);
-    out[1] = M.min(a[1], b[1]);
-    out[2] = M.min(a[2], b[2]);
-    out[3] = M.min(a[3], b[3]);
+    out[0] = Math.min(a[0], b[0]);
+    out[1] = Math.min(a[1], b[1]);
+    out[2] = Math.min(a[2], b[2]);
+    out[3] = Math.min(a[3], b[3]);
     return out;
 };
 
@@ -1395,10 +1395,10 @@ vec4.min = function(out, a, b) {
  * @returns {vec4} out
  */
 vec4.max = function(out, a, b) {
-    out[0] = M.max(a[0], b[0]);
-    out[1] = M.max(a[1], b[1]);
-    out[2] = M.max(a[2], b[2]);
-    out[3] = M.max(a[3], b[3]);
+    out[0] = Math.max(a[0], b[0]);
+    out[1] = Math.max(a[1], b[1]);
+    out[2] = Math.max(a[2], b[2]);
+    out[3] = Math.max(a[3], b[3]);
     return out;
 };
 
@@ -1447,7 +1447,7 @@ vec4.distance = function(a, b) {
         y = b[1] - a[1],
         z = b[2] - a[2],
         w = b[3] - a[3];
-    return M.sqrt(x*x + y*y + z*z + w*w);
+    return Math.sqrt(x*x + y*y + z*z + w*w);
 };
 
 /**
@@ -1488,7 +1488,7 @@ vec4.length = function (a) {
         y = a[1],
         z = a[2],
         w = a[3];
-    return M.sqrt(x*x + y*y + z*z + w*w);
+    return Math.sqrt(x*x + y*y + z*z + w*w);
 };
 
 /**
@@ -1546,7 +1546,7 @@ vec4.normalize = function(out, a) {
         w = a[3];
     var len = x*x + y*y + z*z + w*w;
     if (len > 0) {
-        len = 1 / M.sqrt(len);
+        len = 1 / Math.sqrt(len);
         out[0] = a[0] * len;
         out[1] = a[1] * len;
         out[2] = a[2] * len;
@@ -1673,7 +1673,7 @@ vec4.forEach = function(a, stride, offset, count, fn, arg) {
   }
   
   if(count) {
-      l = M.min((count * stride) + offset, a.length);
+      l = Math.min((count * stride) + offset, a.length);
   } else {
       l = a.length;
   }
@@ -1895,8 +1895,8 @@ mat2.mul = mat2.multiply;
  */
 mat2.rotate = function (out, a, rad) {
     var a0 = a[0], a1 = a[1], a2 = a[2], a3 = a[3],
-        s = M.sin(rad),
-        c = M.cos(rad);
+        s = Math.sin(rad),
+        c = Math.cos(rad);
     out[0] = a0 *  c + a2 * s;
     out[1] = a1 *  c + a3 * s;
     out[2] = a0 * -s + a2 * c;
@@ -1939,7 +1939,7 @@ mat2.str = function (a) {
  * @returns {Number} Frobenius norm
  */
 mat2.frob = function (a) {
-    return(M.sqrt(M.pow(a[0], 2) + M.pow(a[1], 2) + M.pow(a[2], 2) + M.pow(a[3], 2)))
+    return(Math.sqrt(Math.pow(a[0], 2) + Math.pow(a[1], 2) + Math.pow(a[2], 2) + Math.pow(a[3], 2)))
 };
 
 /**
@@ -2140,8 +2140,8 @@ mat2d.mul = mat2d.multiply;
  */
 mat2d.rotate = function (out, a, rad) {
     var a0 = a[0], a1 = a[1], a2 = a[2], a3 = a[3], a4 = a[4], a5 = a[5],
-        s = M.sin(rad),
-        c = M.cos(rad);
+        s = Math.sin(rad),
+        c = Math.cos(rad);
     out[0] = a0 *  c + a2 * s;
     out[1] = a1 *  c + a3 * s;
     out[2] = a0 * -s + a2 * c;
@@ -2209,7 +2209,7 @@ mat2d.str = function (a) {
  * @returns {Number} Frobenius norm
  */
 mat2d.frob = function (a) { 
-    return(M.sqrt(M.pow(a[0], 2) + M.pow(a[1], 2) + M.pow(a[2], 2) + M.pow(a[3], 2) + M.pow(a[4], 2) + M.pow(a[5], 2) + 1))
+    return(Math.sqrt(Math.pow(a[0], 2) + Math.pow(a[1], 2) + Math.pow(a[2], 2) + Math.pow(a[3], 2) + Math.pow(a[4], 2) + Math.pow(a[5], 2) + 1))
 }; 
 
 /* Copyright (c) 2013, Brandon Jones, Colin MacKenzie IV. All rights reserved.
@@ -2523,8 +2523,8 @@ mat3.rotate = function (out, a, rad) {
         a10 = a[3], a11 = a[4], a12 = a[5],
         a20 = a[6], a21 = a[7], a22 = a[8],
 
-        s = M.sin(rad),
-        c = M.cos(rad);
+        s = Math.sin(rad),
+        c = Math.cos(rad);
 
     out[0] = c * a00 + s * a10;
     out[1] = c * a01 + s * a11;
@@ -2695,7 +2695,7 @@ mat3.str = function (a) {
  * @returns {Number} Frobenius norm
  */
 mat3.frob = function (a) {
-    return(M.sqrt(M.pow(a[0], 2) + M.pow(a[1], 2) + M.pow(a[2], 2) + M.pow(a[3], 2) + M.pow(a[4], 2) + M.pow(a[5], 2) + M.pow(a[6], 2) + M.pow(a[7], 2) + M.pow(a[8], 2)))
+    return(Math.sqrt(Math.pow(a[0], 2) + Math.pow(a[1], 2) + Math.pow(a[2], 2) + Math.pow(a[3], 2) + Math.pow(a[4], 2) + Math.pow(a[5], 2) + Math.pow(a[6], 2) + Math.pow(a[7], 2) + Math.pow(a[8], 2)))
 };
 
 
@@ -3119,7 +3119,7 @@ mat4.scale = function(out, a, v) {
  */
 mat4.rotate = function (out, a, rad, axis) {
     var x = axis[0], y = axis[1], z = axis[2],
-        len = M.sqrt(x * x + y * y + z * z),
+        len = Math.sqrt(x * x + y * y + z * z),
         s, c, t,
         a00, a01, a02, a03,
         a10, a11, a12, a13,
@@ -3128,15 +3128,15 @@ mat4.rotate = function (out, a, rad, axis) {
         b10, b11, b12,
         b20, b21, b22;
 
-    if (M.abs(len) < GLMAT_EPSILON) { return null; }
+    if (Math.abs(len) < GLMAT_EPSILON) { return null; }
     
     len = 1 / len;
     x *= len;
     y *= len;
     z *= len;
 
-    s = M.sin(rad);
-    c = M.cos(rad);
+    s = Math.sin(rad);
+    c = Math.cos(rad);
     t = 1 - c;
 
     a00 = a[0]; a01 = a[1]; a02 = a[2]; a03 = a[3];
@@ -3180,8 +3180,8 @@ mat4.rotate = function (out, a, rad, axis) {
  * @returns {mat4} out
  */
 mat4.rotateX = function (out, a, rad) {
-    var s = M.sin(rad),
-        c = M.cos(rad),
+    var s = Math.sin(rad),
+        c = Math.cos(rad),
         a10 = a[4],
         a11 = a[5],
         a12 = a[6],
@@ -3223,8 +3223,8 @@ mat4.rotateX = function (out, a, rad) {
  * @returns {mat4} out
  */
 mat4.rotateY = function (out, a, rad) {
-    var s = M.sin(rad),
-        c = M.cos(rad),
+    var s = Math.sin(rad),
+        c = Math.cos(rad),
         a00 = a[0],
         a01 = a[1],
         a02 = a[2],
@@ -3266,8 +3266,8 @@ mat4.rotateY = function (out, a, rad) {
  * @returns {mat4} out
  */
 mat4.rotateZ = function (out, a, rad) {
-    var s = M.sin(rad),
-        c = M.cos(rad),
+    var s = Math.sin(rad),
+        c = Math.cos(rad),
         a00 = a[0],
         a01 = a[1],
         a02 = a[2],
@@ -3438,7 +3438,7 @@ mat4.frustum = function (out, left, right, bottom, top, near, far) {
  */
  // IMPORTANT: size optims assume out was created with mat4.create0() !
 mat4.perspective = function (out, fovy, aspect, near, far) {
-    var f = 1.0 / M.tan(fovy / 2),
+    var f = 1.0 / Math.tan(fovy / 2),
         nf = 1 / (near - far);
     out[0] = f / aspect;
     /*out[1] = 0;
@@ -3553,8 +3553,8 @@ mat4.lookAtTilt = function (out, eye, center, tilt) {
     vec3.cross(x, [0,1,0], z);
     vec3.normalize(x, x);
     vec3.cross(y, z, x);
-    vec3.scale(y, y, M.cos(tilt))
-    vec3.scaleAndAdd(y, y, x, M.sin(tilt));
+    vec3.scale(y, y, Math.cos(tilt))
+    vec3.scaleAndAdd(y, y, x, Math.sin(tilt));
     vec3.cross(x, y, z);
 
     out[0] = x[0];
@@ -3597,7 +3597,7 @@ mat4.str = function (a) {
  * @returns {Number} Frobenius norm
  */
 mat4.frob = function (a) {
-    return(M.sqrt(M.pow(a[0], 2) + M.pow(a[1], 2) + M.pow(a[2], 2) + M.pow(a[3], 2) + M.pow(a[4], 2) + M.pow(a[5], 2) + M.pow(a[6], 2) + M.pow(a[6], 2) + M.pow(a[7], 2) + M.pow(a[8], 2) + M.pow(a[9], 2) + M.pow(a[10], 2) + M.pow(a[11], 2) + M.pow(a[12], 2) + M.pow(a[13], 2) + M.pow(a[14], 2) + M.pow(a[15], 2) ))
+    return(Math.sqrt(Math.pow(a[0], 2) + Math.pow(a[1], 2) + Math.pow(a[2], 2) + Math.pow(a[3], 2) + Math.pow(a[4], 2) + Math.pow(a[5], 2) + Math.pow(a[6], 2) + Math.pow(a[6], 2) + Math.pow(a[7], 2) + Math.pow(a[8], 2) + Math.pow(a[9], 2) + Math.pow(a[10], 2) + Math.pow(a[11], 2) + Math.pow(a[12], 2) + Math.pow(a[13], 2) + Math.pow(a[14], 2) + Math.pow(a[15], 2) ))
 };
 
 
@@ -3663,7 +3663,7 @@ quat.rotationTo = function(out, a, b) {
       if (vec3.length(tmpvec3) < 0.000001)
           vec3.cross(tmpvec3, [0,1,0], a);
       vec3.normalize(tmpvec3, tmpvec3);
-      quat.setAxisAngle(out, tmpvec3, M.PI);
+      quat.setAxisAngle(out, tmpvec3, Math.PI);
       return out;
   } else if (dot > 0.999999) {
       out[0] = 0;
@@ -3777,11 +3777,11 @@ quat.identity = function(out) {
  **/
 quat.setAxisAngle = function(out, axis, rad) {
     rad = rad * 0.5;
-    var s = M.sin(rad);
+    var s = Math.sin(rad);
     out[0] = s * axis[0];
     out[1] = s * axis[1];
     out[2] = s * axis[2];
-    out[3] = M.cos(rad);
+    out[3] = Math.cos(rad);
     return out;
 };
 
@@ -3844,7 +3844,7 @@ quat.rotateX = function (out, a, rad) {
     rad *= 0.5; 
 
     var ax = a[0], ay = a[1], az = a[2], aw = a[3],
-        bx = M.sin(rad), bw = M.cos(rad);
+        bx = Math.sin(rad), bw = Math.cos(rad);
 
     out[0] = ax * bw + aw * bx;
     out[1] = ay * bw + az * bx;
@@ -3865,7 +3865,7 @@ quat.rotateY = function (out, a, rad) {
     rad *= 0.5; 
 
     var ax = a[0], ay = a[1], az = a[2], aw = a[3],
-        by = M.sin(rad), bw = M.cos(rad);
+        by = Math.sin(rad), bw = Math.cos(rad);
 
     out[0] = ax * bw - az * by;
     out[1] = ay * bw + aw * by;
@@ -3886,7 +3886,7 @@ quat.rotateZ = function (out, a, rad) {
     rad *= 0.5; 
 
     var ax = a[0], ay = a[1], az = a[2], aw = a[3],
-        bz = M.sin(rad), bw = M.cos(rad);
+        bz = Math.sin(rad), bw = Math.cos(rad);
 
     out[0] = ax * bw + ay * bz;
     out[1] = ay * bw - ax * bz;
@@ -3910,7 +3910,7 @@ quat.calculateW = function (out, a) {
     out[0] = x;
     out[1] = y;
     out[2] = z;
-    out[3] = -M.sqrt(M.abs(1.0 - x * x - y * y - z * z));
+    out[3] = -Math.sqrt(Math.abs(1.0 - x * x - y * y - z * z));
     return out;
 };
 
@@ -3967,10 +3967,10 @@ quat.slerp = function (out, a, b, t) {
     // calculate coefficients
     if ( (1.0 - cosom) > 0.000001 ) {
         // standard case (slerp)
-        omega  = M.acos(cosom);
-        sinom  = M.sin(omega);
-        scale0 = M.sin((1.0 - t) * omega) / sinom;
-        scale1 = M.sin(t * omega) / sinom;
+        omega  = Math.acos(cosom);
+        sinom  = Math.sin(omega);
+        scale0 = Math.sin((1.0 - t) * omega) / sinom;
+        scale1 = Math.sin(t * omega) / sinom;
     } else {        
         // "from" and "to" quaternions are very close 
         //  ... so we can do a linear interpolation
@@ -4082,7 +4082,7 @@ quat.fromMat3 = function(out, m) {
 
     if ( fTrace > 0.0 ) {
         // |w| > 1/2, may as well choose w > 1/2
-        fRoot = M.sqrt(fTrace + 1.0);  // 2w
+        fRoot = Math.sqrt(fTrace + 1.0);  // 2w
         out[3] = 0.5 * fRoot;
         fRoot = 0.5/fRoot;  // 1/(4w)
         out[0] = (m[7]-m[5])*fRoot;
@@ -4098,7 +4098,7 @@ quat.fromMat3 = function(out, m) {
         var j = (i+1)%3;
         var k = (i+2)%3;
         
-        fRoot = M.sqrt(m[i*3+i]-m[j*3+j]-m[k*3+k] + 1.0);
+        fRoot = Math.sqrt(m[i*3+i]-m[j*3+j]-m[k*3+k] + 1.0);
         out[i] = 0.5 * fRoot;
         fRoot = 0.5 / fRoot;
         out[3] = (m[k*3+j] - m[j*3+k]) * fRoot;

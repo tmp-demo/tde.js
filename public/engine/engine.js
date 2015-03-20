@@ -1,6 +1,5 @@
 var sequence = [];
 var snd;
-var M = Math;
 
 if (EDITOR) {
   var symbolMap = {}

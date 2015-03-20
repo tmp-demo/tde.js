@@ -51,8 +51,8 @@ function paris_subdivision(path, sub_id) {
 
         b2 = (b1+1) % path_length;
 
-        var f1 = 0.5 + (0.5 - M.abs(seedable_random() - 0.5)) * 0.2;
-        var f2 = 0.5 + (0.5 - M.abs(seedable_random() - 0.5)) * 0.2;
+        var f1 = 0.5 + (0.5 - Math.abs(seedable_random() - 0.5)) * 0.2;
+        var f2 = 0.5 + (0.5 - Math.abs(seedable_random() - 0.5)) * 0.2;
 
         var p_a3_1 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), subdiv: sub_id};
         var p_a3_2 = { '0': path[a1][0]*f1 + path[a2][0]*(1.0-f1), '1': path[a1][1]*f1 + path[a2][1]*(1-f1), subdiv: path[a1].subdiv};

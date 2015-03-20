@@ -4,7 +4,7 @@
   }
   function editing() { return false; }
   function n2f(n) {
-    return M.pow(2, (n - 69) / 12) * 440;
+    return Math.pow(2, (n - 69) / 12) * 440;
   }
 
   AudioNode.prototype.c = AudioNode.prototype.connect;
@@ -41,7 +41,7 @@
       SND._noisebuffer = ac.createBuffer(1, ac.sampleRate * 0.5, ac.sampleRate / 2);
       var cdata = SND._noisebuffer.getChannelData(0);
       for(i=0,l=cdata.length;i<l;i++) {
-        cdata[i] = M.random() * 2.0 - 1.0;
+        cdata[i] = Math.random() * 2.0 - 1.0;
       }
     }
     return SND._noisebuffer;
@@ -51,19 +51,19 @@
     var len = ac.sampleRate * opts.l
     var buffer = ac.createBuffer(2, len, ac.sampleRate)
     for(i=0,l=buffer.length;i<l;i++) {
-      var s =  M.pow(1 - i / len, opts.d);
-      buffer.getChannelData(0)[i] = (M.random() * 2 - 1)*2;
-      buffer.getChannelData(1)[i] = (M.random() * 2 - 1)*2;
+      var s =  Math.pow(1 - i / len, opts.d);
+      buffer.getChannelData(0)[i] = (Math.random() * 2 - 1)*2;
+      buffer.getChannelData(1)[i] = (Math.random() * 2 - 1)*2;
     }
     return buffer;
   }
 
   SND.DistCurve = function(k) {
     var c = new Float32Array(ac.sampleRate);
-    var deg = M.PI / 180;
+    var deg = Math.PI / 180;
     for (var i = 0; i < c.length; i++) {
       var x = i * 2 / c.length - 1;
-      c[i] = (3 + k) * x * 20 * deg / (M.PI + k * M.abs(x));
+      c[i] = (3 + k) * x * 20 * deg / (Math.PI + k * Math.abs(x));
     }
     return c;
   }
@@ -335,10 +335,10 @@
       sources[i].buffer = noise;
       sources[i].loop = true;
       sources[i].loopStart = 0;
-      sources[i].loopEnd = M.random() * 0.05;
+      sources[i].loopEnd = Math.random() * 0.05;
       sources[i].start(t);
-      t += M.random() * 0.5;
-      t = M.min(t, end);
+      t += Math.random() * 0.5;
+      t = Math.min(t, end);
       sources[i].stop(t);
       sources[i].c(sink);
       i++;

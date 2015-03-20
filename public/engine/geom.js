@@ -364,7 +364,7 @@ function join_rings(geom, r1, r2, triangle_fn, quad_fn) {
 }
 
 function rand_int(max) {
-    return M.floor(seedable_random() * max);
+    return Math.floor(seedable_random() * max);
 }
 
 function mod(a, m) {
@@ -470,8 +470,8 @@ function circle_path(center, radius, n_points) {
     var path = []
     for (i = 0; i < n_points; ++i) {
         path.push([
-            center[0] + -M.cos(i/n_points * 2 * M.PI) * radius,
-            center[1] + M.sin(i/n_points * 2 * M.PI) * radius
+            center[0] + -Math.cos(i/n_points * 2 * Math.PI) * radius,
+            center[1] + Math.sin(i/n_points * 2 * Math.PI) * radius
         ]);
     }
     return path;
@@ -481,9 +481,9 @@ function circle_path_vec3(center, radius, n_points) {
     var path = [] 
     for (i = 0; i < n_points; ++i) {
         path.push([
-            center[0] + -M.cos(i/n_points * 2 * M.PI) * radius,
+            center[0] + -Math.cos(i/n_points * 2 * Math.PI) * radius,
             center[1],
-            center[2] + M.sin(i/n_points * 2 * M.PI) * radius
+            center[2] + Math.sin(i/n_points * 2 * Math.PI) * radius
         ]);
     }
     return path;
