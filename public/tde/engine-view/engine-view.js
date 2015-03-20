@@ -1,6 +1,5 @@
 // engine config in editor
 EDITOR = true;
-PLACEHOLDERS_ENABLED = true;
 CLEAR_ENABLED = true;
 DEPTH_TEST_ENABLED = true;
 BLENDING_ENABLED = true;

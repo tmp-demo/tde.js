@@ -83,7 +83,9 @@ function gfx_init() {
   //minify_context(fakeContext);
   // #debug}}
 
-  init_placeholders();
+  if (EDITOR) {
+    init_placeholders();
+  }
 }
 
 function make_vbo(location, buffer) {
@@ -466,7 +468,7 @@ function prepare_render_to_texture(pass) {
 }
 
 function get_geometry(geometry_name) {
-  if (PLACEHOLDERS_ENABLED) {
+  if (EDITOR) {
     if (!geometry_name) {
       return null;
     }
@@ -484,7 +486,7 @@ function get_geometry(geometry_name) {
 }
 
 function get_shader_program(pass) {
-  if (PLACEHOLDERS_ENABLED) {
+  if (EDITOR) {
     if (!pass.program) {
       return null;
     }
@@ -507,7 +509,7 @@ function render_without_scenes(pass, shader_program, clip_time) {
   if (pass.geometry) {
     var geometry = geometries[pass.geometry]
 
-    if (PLACEHOLDERS_ENABLED) {
+    if (EDITOR) {
       if (!geometry) {
         console.log("Missing geometry "+pass.geometry+" (using placeholder)");
         geometry = geometry_placeholder
