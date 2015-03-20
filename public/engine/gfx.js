@@ -95,7 +95,7 @@ function gfx_init() {
       "cam_fov",
       "glitch"
     ];
-    
+
     var fakeContext = {}
     for (var i in _locations) fakeContext["shader_" + _locations[i]] = 42;
     for (var i in _uniforms) fakeContext["shader_" + _uniforms[i]] = 42;
@@ -123,14 +123,19 @@ function destroy_geom(geom) {
 }
 
 // actually renders
-function draw_geom(data) {
+function draw_geom(data, instance_count, instance_id_location) {
   for (var i in data.buffers) {
     var buffer = data.buffers[i];
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer.vbo);
     gl.enableVertexAttribArray(buffer.location);
     gl.vertexAttribPointer(buffer.location, buffer.length / data.vertex_count, gl.FLOAT, false, 0, 0);
   }
-  gl.drawArrays(data.mode, 0, data.vertex_count);
+
+  instance_count = instance_count || 1;
+  for (var i = 0; i < instance_count; i++) {
+    gl.uniform1f(instance_id_location, i);
+    gl.drawArrays(data.mode, 0, data.vertex_count);
+  }
 }
 
 // type: gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
@@ -540,12 +545,8 @@ function render_without_scenes(pass, shader_program, clip_time) {
       }
     }
 
-    var instance_count = pass.instance_count || 1;
     var instance_id_location = gl.getUniformLocation(shader_program, "instance_id");
-    for (var k = 0; k < instance_count; k++) {
-      gl.uniform1f(instance_id_location, k);
-      draw_geom(geometry);
-    }
+    draw_geom(geometry, pass.instance_count, instance_id_location);
   }
 }
 
