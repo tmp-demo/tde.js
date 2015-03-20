@@ -46,7 +46,6 @@ angular.module("tde.code-editor", [])
       {
         if (code != editor.getValue())
         {
-          console.log("setValue!!!")
           editor.setValue(code, -1)
         }
       })

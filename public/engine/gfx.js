@@ -340,8 +340,10 @@ function render_pass(pass, time) {
       // actual render
 
       var resolution = prepare_render_to_texture(pass);
-
-      preapre_clear(pass);
+      gl.viewport(0, 0, resolution[0], resolution[1]);
+      uniforms["u_resolution"] = resolution;
+      
+      prepare_clear(pass);
 
       var shader_program = get_shader_program(pass);
       if (!shader_program) {
@@ -349,8 +351,6 @@ function render_pass(pass, time) {
       }
 
       gl.useProgram(shader_program);
-
-      gl.viewport(0, 0, resolution[0], resolution[1]);
 
       set_uniforms(shader_program, resolution[0] / resolution[1], clip_time);
 
@@ -403,7 +403,7 @@ function prepare_blending(pass) {
   }
 }
 
-function preapre_clear(pass) {
+function prepare_clear(pass) {
   if (CLEAR_ENABLED) {
     if (pass.clear) {
       gl.clearColor(pass.clear[0], pass.clear[1], pass.clear[2], pass.clear[3]);
@@ -482,15 +482,8 @@ function prepare_render_to_texture(pass) {
   if (RENDER_TO_TEXTURE_ENABLED) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
 
-    var rx = canvas.width;
-    var ry = canvas.height;
-    if (pass.render_to) {
-      rx = textures[pass.render_to.color].width;
-      ry = textures[pass.render_to.color].height;
-    }
-
-    uniforms["u_resolution"] = [rx,ry];
-    return [rx,ry];
+    var target = pass.render_to ? textures[pass.render_to.color] : canvas;
+    return [target.width, target.height]
   } else {
     return [canvas.width, canvas.height];
   }
@@ -535,19 +528,17 @@ function get_shader_program(pass) {
 }
 
 function render_without_scenes(pass, shader_program, clip_time) {
-  if (pass.geometry) {
-    var geometry = geometries[pass.geometry]
+  var geometry = geometries[pass.geometry]
 
-    if (EDITOR) {
-      if (!geometry) {
-        console.log("Missing geometry "+pass.geometry+" (using placeholder)");
-        geometry = geometry_placeholder
-      }
+  if (EDITOR) {
+    if (!geometry) {
+      console.log("Missing geometry " + pass.geometry + " (using placeholder)");
+      geometry = geometry_placeholder
     }
-
-    var instance_id_location = gl.getUniformLocation(shader_program, "instance_id");
-    draw_geom(geometry, pass.instance_count, instance_id_location);
   }
+
+  var instance_id_location = gl.getUniformLocation(shader_program, "instance_id");
+  draw_geom(geometry, pass.instance_count, instance_id_location);
 }
 
 function render_with_scenes(pass, shader_program, clip_time) {
