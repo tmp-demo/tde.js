@@ -129,13 +129,14 @@ angular.module("tde.services.engine-driver", [])
     try
     {
       sequence = eval("___ = "+data);
-      gfx_init()
-      engine_render(self.currentTime)
     }
     catch (err)
     {
       self.logError(err.message, err.stack)
     }
+
+    gfx_init()
+    engine_render(self.currentTime)
   }
 
   this.unloadSequence = function(name)
@@ -378,7 +379,7 @@ angular.module("tde.services.engine-driver", [])
 
   this.logError = function(message, details)
   {
-    //toastr.error(details, message);
+    toastr.error(details, message);
     console.error(message)
     // var group = console.groupCollapsed || console.group;
     // group.call(console)

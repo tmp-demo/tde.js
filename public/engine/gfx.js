@@ -24,6 +24,15 @@ function gl_init() {
   gl = canvas.getContext("webgl", {alpha: false});
   //minify_context(gl);
 
+  if (GL_DEBUG) {
+    function logGLCall(functionName, args) {
+      if (GL_DEBUG_TRACE) {
+        console.log("gl." + functionName + "(" + WebGLDebugUtils["glFunctionArgsToString"](functionName, args) + ")");
+      }
+    }
+    gl = WebGLDebugUtils["makeDebugContext"](gl, undefined, logGLCall);
+  }
+
   var depthTextureExtension = gl.getExtension("WEBGL_depth_texture");
   // #debug{{
   if (!depthTextureExtension) {
@@ -296,6 +305,10 @@ function set_uniforms(program, ratio, t) {
 }
 
 function render_pass(pass, time) {
+    if (GL_DEBUG && GL_DEBUG_TRACE) {
+    console.log("== PASS ==", pass);
+  }
+
   for (var j = 0; j < pass.clips.length; j++) {
     var clip = pass.clips[j]
 
@@ -346,12 +359,15 @@ function render_pass(pass, time) {
 }
 
 function render_sequence(sequence, time) {
-  /*for (var i = 0; i < sequence.length; i++) {
-    render_pass(sequence[i], time)
-  }*/
+  if (GL_DEBUG && GL_DEBUG_TRACE) {
+    console.log("== FRAME START ==");
+  }
   sequence.map(function(pass) {
     render_pass(pass, time)
   })
+  if (GL_DEBUG && GL_DEBUG_TRACE) {
+    console.log("== FRAME END ==");
+  }
 }
 
 function prepare_depth_test(pass) {
@@ -439,12 +455,12 @@ function frame_buffer(target) {
   if (target.color && textures[target.color]) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[target.color].tex, 0);
   if (target.depth && textures[target.depth]) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, textures[target.depth].tex, 0);
 
-  // #debug{{
-  var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-  if (status != gl.FRAMEBUFFER_COMPLETE) {
-    console.error(frame_buffer_error(status), "Incomplete framebuffer");
+  if (GL_DEBUG) {
+    var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    if (status != gl.FRAMEBUFFER_COMPLETE) {
+      console.error("Incomplete framebuffer", WebGLDebugUtils["glEnumToString"](status));
+    }
   }
-  // #debug}}
 
   return fbo;
 }

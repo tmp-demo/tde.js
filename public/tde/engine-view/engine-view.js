@@ -8,6 +8,7 @@ TEXTURE_INPUTS_ENABLED = true;
 SCENES_ENABLED = false;
 TEXT_ENABLED = true;
 GL_DEBUG = true;
+GL_DEBUG_TRACE = false;
 
 angular.module("tde.engine-view", [])
 
