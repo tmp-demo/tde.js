@@ -31,7 +31,7 @@ cat $CONFIG >> $EXPORT_ROOT/demo.js
 
 for f in  ./public/engine/*.js
 do
-    ./tools/opt.py $f >> $EXPORT_ROOT/demo.js
+    cat $f >> $EXPORT_ROOT/demo.js
 done
 
 cat $EXPORT_ROOT/shaders/shaders.js >> $EXPORT_ROOT/demo.js
@@ -71,7 +71,7 @@ cp $PROJECT_ROOT/*.ogg $EXPORT_ROOT
 
 # for f in  $PROJECT_ROOT/*.song
 # do
-#     ./tools/opt.py $f | sed "s/'\\(SND\\.[A-Za-z]*\\)'/\\1/g" >> $EXPORT_ROOT/demo.js
+#     cat $f | sed "s/'\\(SND\\.[A-Za-z]*\\)'/\\1/g" >> $EXPORT_ROOT/demo.js
 # done
 
 #cat $PROJECT_ROOT/song.song >> $EXPORT_ROOT/demo.js

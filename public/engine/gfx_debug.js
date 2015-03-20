@@ -1,24 +1,3 @@
-var _uniforms = [
-  "cam_pos",
-  "world_mat",
-  "view_proj_mat",
-  "view_proj_mat_inv",
-  "resolution",
-  "focus",
-  "light",
-  /*"texture_0",
-  "texture_1",
-  "texture_2",
-  "texture_3",
-  "texture_4",*/
-  "clip_time",
-  "text_params",
-  "mask",
-  "cam_target",
-  "cam_fov",
-  "glitch"
-];
-
 function init_placeholders() {
   geometry_placeholder = {
     buffers: [

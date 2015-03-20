@@ -2,29 +2,31 @@ var sequence = [];
 var snd;
 var M = Math;
 
-var symbolMap = {} // #debug
+if (EDITOR) {
+  var symbolMap = {}
+}
 
 function minify_context(ctx)
 {
   Object.keys(ctx).sort().forEach(function(name) {
-    // #debug{{
-    var shader = false
-    if (name.match(/^shader_/))
-    {
-      shader = true;
-      name = name.substr(7);
+    if (EDITOR) {
+      var shader = false
+      if (name.match(/^shader_/))
+      {
+        shader = true;
+        name = name.substr(7);
+      }
     }
-    // #debug}}
-    
+      
     var m, newName = "";  
     var re = (name.match(/[a-z]/) ? /(^[a-z]|[A-Z0-9])[a-z]*/g : /([A-Z0-9])[A-Z]*_?/g);
     while (m = re.exec(name)) newName += m[1];
     
     // add an underscore to shader variables, to avoid conflict with glsl-unit minification
-    // #debug{{
-    if (shader)
-      newName = "_" + newName;
-    // #debug}}
+    if (EDITOR) {
+      if (shader)
+        newName = "_" + newName;
+    }
     
     if (newName in ctx)
     {
@@ -35,32 +37,33 @@ function minify_context(ctx)
     
     ctx[newName] = ctx[name];
     
-    // #debug{{
-    // don't minify properties that are neither objects nor constants (or that map to strings)
-    var preservedNames = ["canvas", "currentTime", "destination", "font", "fillStyle", "globalCompositeOperation", "lineWidth"]
-    if (preservedNames.indexOf(name) !== -1)
-      return;
-    
-    if (name in symbolMap)
-    {
-      if (symbolMap[name] != newName)
+    if (EDITOR) {
+      // don't minify properties that are neither objects nor constants (or that map to strings)
+      var preservedNames = ["canvas", "currentTime", "destination", "font", "fillStyle", "globalCompositeOperation", "lineWidth"]
+      if (preservedNames.indexOf(name) !== -1)
+        return;
+      
+      if (name in symbolMap)
       {
-        alert("Symbol " + name + " packed differently for multiple contexts (" + symbolMap[name] + ", " + newName + ")");
+        if (symbolMap[name] != newName)
+        {
+          alert("Symbol " + name + " packed differently for multiple contexts (" + symbolMap[name] + ", " + newName + ")");
+        }
       }
+      symbolMap[name] = newName;
     }
-    symbolMap[name] = newName;
-    // #debug}}
   })
 }
 
 // export for minifcation tools
-// #debug{{
 function dump_symbol_map()
 {
+  if (!EDITOR)
+    return;
+  
   console.log(symbolMap);
   $(document.body).text(JSON.stringify(symbolMap));
 }
-// #debug}}
 
 function engine_render(current_time)
 {

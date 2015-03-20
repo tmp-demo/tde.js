@@ -16,9 +16,9 @@ var ctx_2d
 var use_texture_float = true;
 var gl_ext_half_float;
 
-// #debug{{
-var uniform_editor_overrides = {}
-// #debug}}
+if (EDITOR) {
+  var uniform_editor_overrides = {}
+}
 
 function gl_init() {
   gl = canvas.getContext("webgl", {alpha: false});
@@ -34,11 +34,11 @@ function gl_init() {
   }
 
   var depthTextureExtension = gl.getExtension("WEBGL_depth_texture");
-  // #debug{{
-  if (!depthTextureExtension) {
-    alert("Failed to load WEBGL_depth_texture");
+  if (GL_DEBUG) {
+    if (!depthTextureExtension) {
+      alert("Failed to load WEBGL_depth_texture");
+    }
   }
-  // #debug}}
 
   if (use_texture_float) {
     gl_ext_half_float = gl.getExtension("OES_texture_half_float");
@@ -48,18 +48,7 @@ function gl_init() {
   }
 
   gl.viewport(0, 0, canvas.width, canvas.height);
-
-  // get readable strings for error enum values
-  // #debug{{
-  for (var propertyName in gl) {
-    if (typeof gl[propertyName] == 'number') {
-      _enums[gl[propertyName]] = propertyName;
-    }
-  }
-  // #debug}}
 }
-
-var _enums = _enums = { }; // #debug
 
 var _locations = [
   "a_position",
@@ -85,12 +74,33 @@ function gfx_init() {
   uniforms["cam_tilt"] = 0
 
   // hack to make the export toolchain minify attribute and uniform names
-  // #debug{{
-  var fakeContext = {}
-  for (var i in _locations) fakeContext["shader_" + _locations[i]] = 42;
-  for (var i in _uniforms) fakeContext["shader_" + _uniforms[i]] = 42;
-  //minify_context(fakeContext);
-  // #debug}}
+  if (EDITOR) {
+    var _uniforms = [
+      "cam_pos",
+      "world_mat",
+      "view_proj_mat",
+      "view_proj_mat_inv",
+      "resolution",
+      "focus",
+      "light",
+      /*"texture_0",
+      "texture_1",
+      "texture_2",
+      "texture_3",
+      "texture_4",*/
+      "clip_time",
+      "text_params",
+      "mask",
+      "cam_target",
+      "cam_fov",
+      "glitch"
+    ];
+    
+    var fakeContext = {}
+    for (var i in _locations) fakeContext["shader_" + _locations[i]] = 42;
+    for (var i in _uniforms) fakeContext["shader_" + _uniforms[i]] = 42;
+    //minify_context(fakeContext);
+  }
 
   if (EDITOR) {
     init_placeholders();
@@ -104,15 +114,13 @@ function make_vbo(location, buffer) {
   return {location: location, vbo: vbo, length: buffer.length};
 }
 
-// editor only
-// #debug{{
+// editor only (will be stripped)
 function destroy_geom(geom) {
   for (var i in geom.buffers) {
     var buffer = geom.buffers[i];
     gl.deleteBuffer(buffer.vbo);
   }
 }
-// #debug}}
 
 // actually renders
 function draw_geom(data) {
@@ -130,11 +138,11 @@ function compile_shader(txt_src, type) {
   var shader = gl.createShader(type);
   gl.shaderSource(shader, txt_src);
   gl.compileShader(shader);
-  // #debug{{
-  if ( !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    console.error(gl.getShaderInfoLog(shader), txt_src);
+  if (GL_DEBUG) {
+    if ( !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error(gl.getShaderInfoLog(shader), txt_src);
+    }
   }
-  // #debug}}
   return shader;
 }
 
@@ -150,15 +158,15 @@ function load_shader_program(vs_entry_point, fs_entry_point) {
   }
 
   gl.linkProgram(program);
-  // #debug{{
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    console.error(gl.getProgramInfoLog(program), "Program link error");
+  if (GL_DEBUG) {
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error(gl.getProgramInfoLog(program), "Program link error");
+    }
   }
-  // #debug}}
   return program;
 }
 
-// #debug{{
+// editor support
 function load_program_from_source(vs_source, fs_source)
 {
   var program = gl.createProgram();
@@ -178,6 +186,7 @@ function load_program_from_source(vs_source, fs_source)
   return program;
 }
 
+// editor support
 function destroy_shader_program(name)
 {
   var program = programs[name]
@@ -186,20 +195,19 @@ function destroy_shader_program(name)
     delete programs[name]
   }
 }
-// #debug}}
 
 function create_texture(width, height, format, data, allow_repeat, linear_filtering, mipmaps, float_tex) {
-  //debug{{
-  if (float_tex && data) {
-    // wouldn't be hard to add, but we haven't needed it yet.
-    console.log("!!! We don't support uploading data to float textures, something may be busted.");
-  }
+  if (EDITOR) {
+    if (float_tex && data) {
+      // wouldn't be hard to add, but we haven't needed it yet.
+      console.log("!!! We don't support uploading data to float textures, something may be busted.");
+    }
 
-  if ((format == gl.DEPTH_COMPONENT) && (linear_filtering || mipmaps || float_tex)) {
-    // bug somewhere
-    console.log("!!! Creating a depth texture with broken parameters, it won't work.");
+    if ((format == gl.DEPTH_COMPONENT) && (linear_filtering || mipmaps || float_tex)) {
+      // bug somewhere
+      console.log("!!! Creating a depth texture with broken parameters, it won't work.");
+    }
   }
-  //debug}}
 
   var format = format || gl.RGBA;
   var width = width || canvas.width;
@@ -281,11 +289,11 @@ function send_uniforms(program, uniform_list, t) {
 function set_uniforms(program, ratio, t) {
 
   // allow the editor to override uniforms for debug
-  // #debug{{
-  for (var uniform_name in uniforms) {
-    uniforms[uniform_name] = uniform_editor_overrides.hasOwnProperty(uniform_name) ? uniform_editor_overrides[uniform_name] : uniforms[uniform_name]
+  if (EDITOR) {
+    for (var uniform_name in uniforms) {
+      uniforms[uniform_name] = uniform_editor_overrides.hasOwnProperty(uniform_name) ? uniform_editor_overrides[uniform_name] : uniforms[uniform_name]
+    }
   }
-  // #debug}}
 
   var viewMatrix = mat4.create()
   var projectionMatrix = mat4.create0() // careful: 0 here
@@ -406,15 +414,15 @@ function prepare_texture_inputs(pass, shader_program) {
 
     for (var i=0; i<texture_inputs.length; ++i) {
       var texture = textures[texture_inputs[i]];
-      //#debug{{
-      if (!texture) {
-        // TODO: should use a placeholder texture or something.
-        // This can happen in the editor if a frame is rendered
-        // while a texture is not loaded yet.
-        console.log("render_pass: missing texture "+pass.texture_inputs[i]);
-        return;
+      if (EDITOR) {
+        if (!texture) {
+          // TODO: should use a placeholder texture or something.
+          // This can happen in the editor if a frame is rendered
+          // while a texture is not loaded yet.
+          console.log("render_pass: missing texture "+pass.texture_inputs[i]);
+          return;
+        }
       }
-      //#debug}}
       var tex = texture.tex;
       gl.activeTexture(texture_unit(i));
       gl.bindTexture(gl.TEXTURE_2D, tex);
