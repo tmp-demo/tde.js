@@ -7,6 +7,7 @@ BLENDING_ENABLED = true;
 RENDER_TO_TEXTURE_ENABLED = true;
 TEXTURE_INPUTS_ENABLED = true;
 SCENES_ENABLED = false;
+TEXT_ENABLED = true;
 
 angular.module("tde.engine-view", [])
 

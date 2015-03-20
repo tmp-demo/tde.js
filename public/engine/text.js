@@ -1,5 +1,8 @@
 
 function text_init() {
+  if (!TEXT_ENABLED)
+    return;
+  
   canvas_2d = document.createElement("canvas");
   canvas_2d.width = canvas_2d.height = 2048;
   ctx_2d = canvas_2d.getContext("2d");
