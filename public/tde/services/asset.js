@@ -118,6 +118,7 @@ angular.module("tde.services.asset", [])
         var type = parts[1]
         switch (type)
         {
+          case "config": EngineDriver.loadConfig(name, data); break
           case "tex": EngineDriver.loadTexture(name, data); break
           case "geom": EngineDriver.loadGeometry(name, data); break
           case "seq": EngineDriver.loadSequence(name, data); break
@@ -158,6 +159,7 @@ angular.module("tde.services.asset", [])
     var type = parts[1]
     switch (type)
     {
+      case "config": EngineDriver.unloadConfig(name); break
       case "tex": EngineDriver.unloadTexture(name); break
       case "geom": EngineDriver.unloadGeometry(name); break
       case "seq": EngineDriver.unloadSequence(name); break

@@ -27,7 +27,7 @@ if [ ! -f $CONFIG ]; then
   echo "Missing config file: $CONFIG"
   exit 1
 fi
-cat $CONFIG >> $EXPORT_ROOT/demo.js
+"$NODE" ./tools/export-config.js $PROJECT_ROOT/demo.config >> $EXPORT_ROOT/demo.js
 
 for f in  ./public/engine/*.js
 do
