@@ -32,10 +32,12 @@ function gl_init() {
     gl = WebGLDebugUtils["makeDebugContext"](gl, undefined, logGLCall);
   }
 
-  var depthTextureExtension = gl.getExtension("WEBGL_depth_texture");
-  if (GL_DEBUG) {
-    if (!depthTextureExtension) {
-      alert("Failed to load WEBGL_depth_texture");
+  if (DEPTH_TEXTURE_ENABLED) {
+    var depthTextureExtension = gl.getExtension("WEBGL_depth_texture");
+    if (GL_DEBUG) {
+      if (!depthTextureExtension) {
+        alert("Failed to load WEBGL_depth_texture");
+      }
     }
   }
 
@@ -67,10 +69,12 @@ function gfx_init() {
 
   init_render_to_texture(sequence);
 
-  uniforms["cam_pos"] = [0, 1, 0]
-  uniforms["cam_target"] = [0, 0, 0]
-  uniforms["cam_fov"] = 75
-  uniforms["cam_tilt"] = 0
+  if (CAM_UNIFORMS_ENABLED) {
+    uniforms["cam_pos"] = [0, 1, 0]
+    uniforms["cam_target"] = [0, 0, 0]
+    uniforms["cam_fov"] = 75
+    uniforms["cam_tilt"] = 0
+  }
 
   // hack to make the export toolchain minify attribute and uniform names
   if (EDITOR) {
@@ -247,19 +251,20 @@ function set_uniforms(program, ratio, t) {
     }
   }
 
-  var viewMatrix = mat4.create()
-  var projectionMatrix = mat4.create0() // careful: 0 here
-  var viewProjectionMatrix = mat4.create0()
-  //var viewProjectionMatrixInv = mat4.create()
-  
-  // derive camera matrices from simpler parameters
-  //mat4.lookAt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], [0.0, 1.0, 0.0]);
-  mat4.lookAtTilt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], uniforms["cam_tilt"]);
-  mat4.perspective(projectionMatrix, uniforms["cam_fov"] * Math.PI / 180.0, ratio, 2.0, 10000.0)
-  mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-  //mat4.invert(viewProjectionMatrixInv, viewProjectionMatrix);
-  uniforms["view_proj_mat"] = viewProjectionMatrix;
-  //uniforms["view_proj_mat_inv"] = viewProjectionMatrixInv;
+  if (CAM_UNIFORMS_ENABLED) {
+    var viewMatrix = mat4.create()
+    var projectionMatrix = mat4.create0() // careful: 0 here
+    var viewProjectionMatrix = mat4.create0()
+    //var viewProjectionMatrixInv = mat4.create()
+    // derive camera matrices from simpler parameters
+    //mat4.lookAt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], [0.0, 1.0, 0.0]);
+    mat4.lookAtTilt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], uniforms["cam_tilt"]);
+    mat4.perspective(projectionMatrix, uniforms["cam_fov"] * Math.PI / 180.0, ratio, 2.0, 10000.0)
+    mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
+    //mat4.invert(viewProjectionMatrixInv, viewProjectionMatrix);
+    uniforms["view_proj_mat"] = viewProjectionMatrix;
+    //uniforms["view_proj_mat_inv"] = viewProjectionMatrixInv;
+  }
 
   send_uniforms(program, uniforms, t);
 }
