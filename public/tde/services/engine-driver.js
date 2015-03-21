@@ -12,6 +12,16 @@ angular.module("tde.services.engine-driver", [])
   this.loadConfig = function(name, data)
   {
     var asset = eval("___ = "+data);
+    for (var ac in asset.define) {
+      if (config[ac] == undefined) {
+        toastr.info("Unsupported config option ", ac);
+      }
+    }
+    for (var ec in config) {
+      if (asset.define[ec] == undefined) {
+        toastr.info("Missing config option ", ec);
+      }
+    }
   }
 
   this.unloadConfig = function(name, data) {
