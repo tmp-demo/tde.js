@@ -411,6 +411,12 @@ angular.module("tde.services.engine-driver", [])
     engine_render(this.currentTime)
   }
   
+  this.drawFrameIfNotPlaying = function()
+  {
+    if (!self.playing)
+      engine_render(this.currentTime)
+  }
+  
   this.play = function()
   {
     this.playing = true
@@ -532,11 +538,11 @@ angular.module("tde.services.engine-driver", [])
   
   this.overrideUniform = function(name, value) {
     uniform_editor_overrides[name] = value
-    self.drawFrame()
+    // self.drawFrameIfNotPlaying()
   }
   
   this.removeUniformOverride = function(name) {
     delete uniform_editor_overrides[name]
-    self.drawFrame()
+    // self.drawFrameIfNotPlaying()
   }
 })
