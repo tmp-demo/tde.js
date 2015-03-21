@@ -5,6 +5,7 @@ angular.module("tde.goto-box", [])
   return {
     restrict: "E",
     templateUrl: "/tde/goto-box/goto-box.html",
+    scope: true,
     link: function($scope, element, attrs)
     {
     	$scope.listData = []

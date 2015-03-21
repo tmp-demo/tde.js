@@ -2,6 +2,7 @@ angular.module("tde", [
   "ngAnimate",
   "ngRoute",
   "ngSanitize",
+  "tde.blender-box",
   "tde.code-editor",
   "tde.engine-view",
   "tde.goto-box",
@@ -9,6 +10,7 @@ angular.module("tde", [
   "tde.navbar",
   "tde.project",
   "tde.services.asset",
+  "tde.services.blender",
   "tde.services.engine-driver",
   "tde.services.project",
   "tde.services.user"

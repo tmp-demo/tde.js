@@ -1,27 +1,30 @@
 <!DOCTYPE html>
 <html ng-app="tde">
-	<head>
-		<meta charset="UTF-8">
-		<title>tde</title>
-		
-		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-		
-		<link rel="stylesheet" href="/lib/bootstrap/bootstrap.min.css" />
-		<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css" type="text/css" />
-		<link rel="stylesheet" href="/lib/jquery/jquery.mCustomScrollbar.css" />
-		<link rel="stylesheet" href="/lib/toastr/toastr.min.css" type="text/css" />
-		
-		<link rel="stylesheet" href="/tde/tde.css" />
-		<link rel="stylesheet" href="/tde/code-editor/code-editor.css" />
-		<link rel="stylesheet" href="/tde/engine-view/engine-view.css" />
-		<link rel="stylesheet" href="/tde/goto-box/goto-box.css" />
-		<link rel="stylesheet" href="/tde/home/home.css" />
-		<link rel="stylesheet" href="/tde/navbar/navbar.css" />
-		<link rel="stylesheet" href="/tde/project/project.css" />
-		<link rel="stylesheet" href="/tde/project/asset-list/asset-list.css" />
-	</head>
-	<body ng-controller="ApplicationCtrl">
-		<tde-navbar></tde-navbar>
+  <head>
+    <meta charset="UTF-8">
+    <title>tde</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    
+    <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css' />
+    
+    <link rel="stylesheet" href="/lib/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/lib/jquery/jquery.mCustomScrollbar.css" />
+    <link rel="stylesheet" href="/lib/toastr/toastr.min.css" type="text/css" />
+    
+    <link rel="stylesheet" href="/tde/tde.css" />
+    <link rel="stylesheet" href="/tde/blender-box/blender-box.css" />
+    <link rel="stylesheet" href="/tde/code-editor/code-editor.css" />
+    <link rel="stylesheet" href="/tde/engine-view/engine-view.css" />
+    <link rel="stylesheet" href="/tde/goto-box/goto-box.css" />
+    <link rel="stylesheet" href="/tde/home/home.css" />
+    <link rel="stylesheet" href="/tde/navbar/navbar.css" />
+    <link rel="stylesheet" href="/tde/project/project.css" />
+    <link rel="stylesheet" href="/tde/project/asset-list/asset-list.css" />
+  </head>
+  <body ng-controller="ApplicationCtrl">
+    <tde-navbar></tde-navbar>
     <div id="leftPane" ng-view></div>
     <div id="rightPane">
       <tde-engine-view></tde-engine-view>
@@ -29,8 +32,9 @@
         passes and keyframes...
       </div>
     </div>
-	
-	<tde-goto-box></tde-goto-box>
+  
+    <tde-goto-box></tde-goto-box>
+    <tde-blender-box></tde-blender-box>
 
     <div class="modal fade" id="loginBox" ng-controller="NavbarCtrl">
       <div class="modal-dialog">
@@ -63,50 +67,55 @@
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
     
-		<script src="/lib/jquery/jquery.min.js"></script>
-		<script src="/lib/jquery/jquery.mousewheel.min.js"></script>
-		<script src="/lib/jquery/jquery.mCustomScrollbar.concat.min.js"></script>
-		
-		<script src="/lib/angular/angular.min.js"></script>
-		<script src="/lib/angular/angular-animate.min.js"></script>
-		<script src="/lib/angular/angular-route.min.js"></script>
-		<script src="/lib/angular/angular-sanitize.min.js"></script>
-		
-		<script src="/lib/bootstrap/bootstrap.min.js"></script>
-		
-		<script src="/lib/ace/ace.js"></script>
-		<script src="/lib/ace/ext-searchbox.js"></script>
-		<script src="/lib/ace/mode-glsl.js"></script>
-		<script src="/lib/ace/mode-javascript.js"></script>
-		<script src="/lib/ace/worker-javascript.js"></script>
-		<script src="/lib/ace/theme-monokai.js"></script>
-		
-		<script src="/lib/toastr/toastr.min.js"></script>
-		
-        <script src="/tde/editor-config.js"></script>
-		<script src="/tde/tde.js"></script>
-		<script src="/tde/code-editor/code-editor.js"></script>
-		<script src="/tde/engine-view/engine-view.js"></script>
-		<script src="/tde/goto-box/goto-box.js"></script>
-		<script src="/tde/home/home.js"></script>
-		<script src="/tde/navbar/navbar.js"></script>
-		<script src="/tde/project/project.js"></script>
-		<script src="/tde/project/asset-list/asset-list.js"></script>
-		<script src="/tde/services/asset.js"></script>
-		<script src="/tde/services/engine-driver.js"></script>
-		<script src="/tde/services/project.js"></script>
-		<script src="/tde/services/user.js"></script>
-		
-		<script src="/engine/anim.js"></script>
-		<script src="/engine/engine.js"></script>
-        <script src="/engine/geom.js"></script>
-        <script src="/engine/gfx.js"></script>
-        <script src="/engine/gfx_debug.js"></script>
-        <script src="/engine/gl-matrix-custom.js"></script>
-        <script src="/engine/paris.js"></script>
-        <script src="/engine/text.js"></script>
-        <script src="/engine/texture.js"></script>
-        <script src="/engine/tmpsnd.js"></script>
-        <script src="/engine/webgl-debug-custom.js"></script>
-	</body>
+    <script src="/lib/jquery/jquery.min.js"></script>
+    <script src="/lib/jquery/jquery.mousewheel.min.js"></script>
+    <script src="/lib/jquery/jquery.mCustomScrollbar.concat.min.js"></script>
+    
+    <script src="/lib/angular/angular.min.js"></script>
+    <script src="/lib/angular/angular-animate.min.js"></script>
+    <script src="/lib/angular/angular-route.min.js"></script>
+    <script src="/lib/angular/angular-sanitize.min.js"></script>
+    
+    <script src="/lib/bootstrap/bootstrap.min.js"></script>
+    
+    <script src="/lib/ace/ace.js"></script>
+    <script src="/lib/ace/ext-searchbox.js"></script>
+    <script src="/lib/ace/mode-glsl.js"></script>
+    <script src="/lib/ace/mode-javascript.js"></script>
+    <script src="/lib/ace/worker-javascript.js"></script>
+    <script src="/lib/ace/theme-monokai.js"></script>
+    
+    <script src="/lib/toastr/toastr.min.js"></script>
+    
+    <script src="/lib/websocket-server-for-blender/blender-websocket.js"></script>
+    
+    <script src="/tde/editor-config.js"></script>
+    
+    <script src="/tde/tde.js"></script>
+    <script src="/tde/blender-box/blender-box.js"></script>
+    <script src="/tde/code-editor/code-editor.js"></script>
+    <script src="/tde/engine-view/engine-view.js"></script>
+    <script src="/tde/goto-box/goto-box.js"></script>
+    <script src="/tde/home/home.js"></script>
+    <script src="/tde/navbar/navbar.js"></script>
+    <script src="/tde/project/project.js"></script>
+    <script src="/tde/project/asset-list/asset-list.js"></script>
+    <script src="/tde/services/asset.js"></script>
+    <script src="/tde/services/blender.js"></script>
+    <script src="/tde/services/engine-driver.js"></script>
+    <script src="/tde/services/project.js"></script>
+    <script src="/tde/services/user.js"></script>
+    
+    <script src="/engine/anim.js"></script>
+    <script src="/engine/engine.js"></script>
+    <script src="/engine/geom.js"></script>
+    <script src="/engine/gfx.js"></script>
+    <script src="/engine/gfx_debug.js"></script>
+    <script src="/engine/gl-matrix-custom.js"></script>
+    <script src="/engine/paris.js"></script>
+    <script src="/engine/text.js"></script>
+    <script src="/engine/texture.js"></script>
+    <script src="/engine/tmpsnd.js"></script>
+    <script src="/engine/webgl-debug-custom.js"></script>
+  </body>
 </html>
