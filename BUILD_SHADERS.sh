@@ -21,10 +21,13 @@ do
     cp $f $SHADER_EXPORT_ROOT
 done
 
+USED_SHADER_PROGRAMS=`"$NODE" ./tools/parse-sequence-dependencies $PROJECT_ROOT/demo.seq`
+
 # programs
-for f in  $PROJECT_ROOT/*.glsl
+for f in  $USED_SHADER_PROGRAMS
 do
-    cat $f >> $SHADER_EXPORT_ROOT/all.glsl
+    echo $f
+    cat $PROJECT_ROOT/$f >> $SHADER_EXPORT_ROOT/all.glsl
 done
 
 # uncomment when working on the minifier
