@@ -95,8 +95,8 @@ echo " -- packing expensive symbols"
 #cat $EXPORT_ROOT/demo.min.js | egrep -o '[a-zA-Z0-9]{2,}' | sort | uniq -c | sort -nr > $EXPORT_ROOT/word_frequencies
 
 #echo " -- packing in a png..."
-#"$NODE" tools/png.js $EXPORT_ROOT/demo.min.js $EXPORT_ROOT/demo.png.html
-ruby tools/pnginator.rb $EXPORT_ROOT/demo.min.js $EXPORT_ROOT/demo.png.html
+"$NODE" tools/png.js $EXPORT_ROOT/demo.min.js $EXPORT_ROOT/demo.pngremi.html
+ruby tools/pnginator.rb $EXPORT_ROOT/demo.min.js $EXPORT_ROOT/demo.pnginator.html
 
 echo " -- creating runner"
 echo "<script src='demo.min.js'></script>" > $EXPORT_ROOT/demo.min.html
@@ -106,4 +106,5 @@ echo " -- done."
 wc -c *.js $EXPORT_ROOT/shaders/shaders.js
 wc -c $EXPORT_ROOT/demo.js
 wc -c $EXPORT_ROOT/demo.min.js
-wc -c $EXPORT_ROOT/demo.png.html
+wc -c $EXPORT_ROOT/demo.pngremi.html
+wc -c $EXPORT_ROOT/demo.pnginator.html
