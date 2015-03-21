@@ -85,7 +85,7 @@ if [ ! -f tools/compiler.jar ]; then
 fi
 
 echo " -- running the closure compiler..."
-java -jar tools/compiler.jar --js=$EXPORT_ROOT/demo.js --js_output_file=$EXPORT_ROOT/demo.min.js --create_source_map $EXPORT_ROOT/demo.min.js.map --compilation_level=ADVANCED_OPTIMIZATIONS --externs ./externs/w3c_audio.js
+java -jar tools/compiler.jar --js=$EXPORT_ROOT/demo.js --js_output_file=$EXPORT_ROOT/demo.min.js --create_source_map $EXPORT_ROOT/demo.min.js.map --compilation_level=ADVANCED_OPTIMIZATIONS --language_in=ECMASCRIPT5 --language_out=ECMASCRIPT5 --externs ./externs/w3c_audio.js
 "$NODE" ./tools/unminify-from-source-map.js $EXPORT_ROOT/demo.min.js.map > $EXPORT_ROOT/demo.unmin.js
 
 echo " -- packing expensive symbols"
