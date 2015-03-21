@@ -1,0 +1,64 @@
+<div class="blender-box" ng-show="visible">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="h3 text-center">Blender</div>
+      
+      <div class="form-group">
+        <label for="blender-url" class="sr-only">URL</label>
+        <input type="text" class="form-control" id="blender-url" ng-model="prefs.blenderUrl">
+      </div>
+      
+      <div class="form-group">
+        <div class="text-center">
+          <div ng-if="!blender.mustConnect">Disconnected</div>
+          <div ng-if="blender.mustConnect && !blender.connected">Connecting...</div>
+          <div ng-if="blender.mustConnect && blender.connected">Connected</div>
+        </div>
+        
+        <button type="button" class="btn btn-primary" ng-click="blender.open()" ng-if="!blender.mustConnect">Connect</button>
+        <button type="button" class="btn btn-danger" ng-click="blender.close()" ng-if="blender.mustConnect">Disconnect</button>
+      </div>
+      
+      <button type="button" class="btn btn-primary" ng-click="prefs.blenderOverride = true" ng-if="!prefs.blenderOverride">Override uniforms</button>
+      <button type="button" class="btn btn-danger" ng-click="prefs.blenderOverride = false" ng-if="prefs.blenderOverride">Release uniforms</button>
+      
+      <div class="form-group">
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" ng-model="prefs.blenderPlay"> Play in sync with following scene
+          </label>
+        </div>
+      
+        <label for="blender-play-scene" class="sr-only">Scene to play in sync</label>
+        <input type="text" class="form-control" id="blender-play-scene" ng-model="prefs.blenderPlayScene" placeholder="Scene to play in sync"/>
+      </div>
+      
+      <div>
+        <a href="https://github.com/Bloutiouf/websocket-server-for-blender"><span class="glyphicon glyphicon-link"></span> Download Blender add-on</a>
+      </div>
+    </div>
+    
+    <div class="col-md-8">
+      <div class="row">
+        <div class="col-md-4">Uniform</div>
+        <div class="col-md-7">Expression</div>
+      </div>
+      <form class="form-horizontal" ng-repeat="uniform in prefs.blenderUniforms">
+        <div class="form-group" ng-class="uniform.valid ? 'has-success' : 'has-error'">
+          <div class="col-md-4">
+            <input type="text" class="form-control" ng-model="uniform.name" ng-focus="editUniformName(uniform)" ng-blur="blurUniform(uniform)" ng-keypress="autoComplete($event, uniform, 'name')"/>
+          </div>
+          <div class="col-md-7">
+            <input type="text" class="form-control" ng-model="uniform.expression" ng-focus="editUniformPath(uniform)" ng-blur="blurUniform(uniform)" ng-keypress="autoComplete($event, uniform, 'expression')"/>
+          </div>
+          <div class="col-md-1">
+            <a href="" ng-click="removeUniform($index)" ng-if="uniform.name || uniform.expression"><span class="fa fa-remove"></span></a>
+          </div>
+        </div>
+      </form>
+      <div ng-if="hints">
+        <span class="hint" ng-repeat="hint in hints">{{hint}}</span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -7,9 +7,21 @@ angular.module("tde.services.user", [])
 
   this.loadPrefs = function()
   {
-    var prefs = localStorage["prefs"] || "{}"
-    self.prefs = JSON.parse(prefs)
-    self.prefs.mute = self.prefs.mute || false
+    self.prefs = {
+      blenderOverride: false,
+      blenderPlay: false,
+      blenderPlayScene: "Scene",
+      blenderUniforms: [],
+      blenderUrl: "ws://localhost:8137/",
+      mute: false
+    }
+    
+    try {
+      angular.extend(self.prefs, JSON.parse(localStorage["prefs"]))
+    } catch (err) {
+      console.error(err);
+    }
+    
     self.applyPrefs()
   }
 
@@ -52,7 +64,15 @@ angular.module("tde.services.user", [])
     else
       delete localStorage["email"]
 
-    localStorage["prefs"] = JSON.stringify(self.prefs)
+    var prefs = angular.extend({}, self.prefs)
+    prefs.blenderUniforms = prefs.blenderUniforms.map(function(uniform) {
+      return {
+        name: uniform.name,
+        expression: uniform.expression
+      }
+    })
+    
+    localStorage["prefs"] = JSON.stringify(prefs)
   }
   
   this.currentUser = {

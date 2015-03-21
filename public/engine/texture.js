@@ -1,5 +1,5 @@
 function create_texture(width, height, format, data, allow_repeat, linear_filtering, mipmaps, float_tex) {
-  if (EDITOR) {
+  if (config.EDITOR) {
     if (float_tex && data) {
       // wouldn't be hard to add, but we haven't needed it yet.
       console.log("!!! We don't support uploading data to float textures, something may be busted.");
@@ -30,7 +30,7 @@ function create_texture(width, height, format, data, allow_repeat, linear_filter
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, mag_filtering);
   gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0,
                 format,
-                (TEXTURE_FLOAT_ENABLED && float_tex) ? gl_ext_half_float.HALF_FLOAT_OES
+                (config.TEXTURE_FLOAT_ENABLED && float_tex) ? gl_ext_half_float.HALF_FLOAT_OES
                           : (format == gl.DEPTH_COMPONENT) ? gl.UNSIGNED_SHORT
                                                            : gl.UNSIGNED_BYTE,
                 data ? new Uint8Array(data, 0, 0) : null);
@@ -51,12 +51,12 @@ function destroy_texture(texture) {
 function texture_unit(i) { return gl.TEXTURE0+i; }
 
 function prepare_texture_inputs(pass, shader_program) {
-  if (TEXTURE_INPUTS_ENABLED) {
+  if (config.TEXTURE_INPUTS_ENABLED) {
     var texture_inputs = pass.texture_inputs || [];
 
     for (var i=0; i<texture_inputs.length; ++i) {
       var texture = textures[texture_inputs[i]];
-      if (EDITOR) {
+      if (config.EDITOR) {
         if (!texture) {
           // TODO: should use a placeholder texture or something.
           // This can happen in the editor if a frame is rendered
@@ -74,7 +74,7 @@ function prepare_texture_inputs(pass, shader_program) {
 }
 
 function cleanup_texture_inputs(pass) {
-  if (TEXTURE_INPUTS_ENABLED) {
+  if (config.TEXTURE_INPUTS_ENABLED) {
     // we may be able to remove this loop to loose a few bytes
     if (!pass.texture_inputs) { return; }
     for (var i=0; i<pass.texture_inputs.length; ++i) {

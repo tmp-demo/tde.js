@@ -15,7 +15,7 @@ var ctx_2d
 
 var gl_ext_half_float;
 
-if (EDITOR) {
+if (config.EDITOR) {
   var uniform_editor_overrides = {}
 }
 
@@ -23,25 +23,25 @@ function gl_init() {
   gl = canvas.getContext("webgl", {alpha: false});
   //minify_context(gl);
 
-  if (GL_DEBUG) {
+  if (config.GL_DEBUG) {
     function logGLCall(functionName, args) {
-      if (GL_DEBUG_TRACE) {
+      if (config.GL_DEBUG_TRACE) {
         console.log("gl." + functionName + "(" + WebGLDebugUtils["glFunctionArgsToString"](functionName, args) + ")");
       }
     }
     gl = WebGLDebugUtils["makeDebugContext"](gl, undefined, logGLCall);
   }
 
-  if (DEPTH_TEXTURE_ENABLED) {
+  if (config.DEPTH_TEXTURE_ENABLED) {
     var depthTextureExtension = gl.getExtension("WEBGL_depth_texture");
-    if (GL_DEBUG) {
+    if (config.GL_DEBUG) {
       if (!depthTextureExtension) {
         alert("Failed to load WEBGL_depth_texture");
       }
     }
   }
 
-  if (TEXTURE_FLOAT_ENABLED) {
+  if (config.TEXTURE_FLOAT_ENABLED) {
     gl_ext_half_float = gl.getExtension("OES_texture_half_float");
     gl.getExtension("OES_texture_half_float_linear");
     gl.getExtension("EXT_color_buffer_half_float");
@@ -69,7 +69,7 @@ function gfx_init() {
 
   init_render_to_texture(sequence);
 
-  if (CAM_UNIFORMS_ENABLED) {
+  if (config.CAM_UNIFORMS_ENABLED) {
     uniforms["cam_pos"] = [0, 1, 0]
     uniforms["cam_target"] = [0, 0, 0]
     uniforms["cam_fov"] = 75
@@ -77,7 +77,7 @@ function gfx_init() {
   }
 
   // hack to make the export toolchain minify attribute and uniform names
-  if (EDITOR) {
+  if (config.EDITOR) {
     var _uniforms = [
       "cam_pos",
       "world_mat",
@@ -105,7 +105,7 @@ function gfx_init() {
     //minify_context(fakeContext);
   }
 
-  if (EDITOR) {
+  if (config.EDITOR) {
     init_placeholders();
   }
 }
@@ -146,7 +146,7 @@ function compile_shader(txt_src, type) {
   var shader = gl.createShader(type);
   gl.shaderSource(shader, txt_src);
   gl.compileShader(shader);
-  if (GL_DEBUG) {
+  if (config.GL_DEBUG) {
     if ( !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
       console.error(gl.getShaderInfoLog(shader), txt_src);
     }
@@ -166,7 +166,7 @@ function load_shader_program(vs_entry_point, fs_entry_point) {
   }
 
   gl.linkProgram(program);
-  if (GL_DEBUG) {
+  if (config.GL_DEBUG) {
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       console.error(gl.getProgramInfoLog(program), "Program link error");
     }
@@ -201,6 +201,9 @@ function destroy_shader_program(name)
   if (program) {
     gl.deleteProgram(program)
     delete programs[name]
+  }
+  if (!config.EDITOR) {
+    console.log("function destroy_shader_program should not be exported!");
   }
 }
 
@@ -245,13 +248,13 @@ function send_uniforms(program, uniform_list, t) {
 function set_uniforms(program, ratio, t) {
 
   // allow the editor to override uniforms for debug
-  if (EDITOR) {
+  if (config.EDITOR) {
     for (var uniform_name in uniforms) {
       uniforms[uniform_name] = uniform_editor_overrides.hasOwnProperty(uniform_name) ? uniform_editor_overrides[uniform_name] : uniforms[uniform_name]
     }
   }
 
-  if (CAM_UNIFORMS_ENABLED) {
+  if (config.CAM_UNIFORMS_ENABLED) {
     var viewMatrix = mat4.create()
     var projectionMatrix = mat4.create0() // careful: 0 here
     var viewProjectionMatrix = mat4.create0()
@@ -270,7 +273,7 @@ function set_uniforms(program, ratio, t) {
 }
 
 function render_pass(pass, time) {
-    if (GL_DEBUG && GL_DEBUG_TRACE) {
+    if (config.GL_DEBUG && config.GL_DEBUG_TRACE) {
     console.log("== PASS ==", pass);
   }
 
@@ -312,7 +315,7 @@ function render_pass(pass, time) {
 
       prepare_depth_test(pass);
 
-      if (SCENES_ENABLED && pass.scene) {
+      if (config.SCENES_ENABLED && pass.scene) {
         render_with_scenes(pass, shader_program, clip_time);
       } else {
         render_without_scenes(pass, shader_program, clip_time);
@@ -324,19 +327,19 @@ function render_pass(pass, time) {
 }
 
 function render_sequence(sequence, time) {
-  if (GL_DEBUG && GL_DEBUG_TRACE) {
+  if (config.GL_DEBUG && config.GL_DEBUG_TRACE) {
     console.log("== FRAME START ==");
   }
   sequence.map(function(pass) {
     render_pass(pass, time)
   })
-  if (GL_DEBUG && GL_DEBUG_TRACE) {
+  if (config.GL_DEBUG && config.GL_DEBUG_TRACE) {
     console.log("== FRAME END ==");
   }
 }
 
 function prepare_depth_test(pass) {
-  if (DEPTH_TEST_ENABLED) {
+  if (config.DEPTH_TEST_ENABLED) {
     if (pass.depth_test) {
       gl.enable(gl.DEPTH_TEST);
     } else {
@@ -346,7 +349,7 @@ function prepare_depth_test(pass) {
 }
 
 function prepare_blending(pass) {
-  if (BLENDING_ENABLED) {
+  if (config.BLENDING_ENABLED) {
     gl.disable(gl.BLEND);
     if (pass.blend) {
       gl.enable(gl.BLEND);
@@ -356,7 +359,7 @@ function prepare_blending(pass) {
 }
 
 function prepare_clear(pass) {
-  if (CLEAR_ENABLED) {
+  if (config.CLEAR_ENABLED) {
     if (pass.clear) {
       gl.clearColor(pass.clear[0], pass.clear[1], pass.clear[2], pass.clear[3]);
       gl.clearDepth(1.0);
@@ -366,7 +369,7 @@ function prepare_clear(pass) {
 }
 
 function init_render_to_texture(sequence) {
-  if (RENDER_TO_TEXTURE_ENABLED) {
+  if (config.RENDER_TO_TEXTURE_ENABLED) {
     // replace the render passes' texture arrays by actual frame buffer objects
     // this is far from optimal...
     for (var p=0; p<sequence.length; ++p) {
@@ -385,7 +388,7 @@ function frame_buffer(target) {
   if (target.color && textures[target.color]) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[target.color].tex, 0);
   if (target.depth && textures[target.depth]) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, textures[target.depth].tex, 0);
 
-  if (GL_DEBUG) {
+  if (config.GL_DEBUG) {
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
       console.error("Incomplete framebuffer", WebGLDebugUtils["glEnumToString"](status));
@@ -396,7 +399,7 @@ function frame_buffer(target) {
 }
 
 function prepare_render_to_texture(pass) {
-  if (RENDER_TO_TEXTURE_ENABLED) {
+  if (config.RENDER_TO_TEXTURE_ENABLED) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
 
     var target = pass.render_to ? textures[pass.render_to.color] : canvas;
@@ -407,7 +410,7 @@ function prepare_render_to_texture(pass) {
 }
 
 function get_geometry(geometry_name) {
-  if (EDITOR) {
+  if (config.EDITOR) {
     if (!geometry_name) {
       return null;
     }
@@ -420,12 +423,12 @@ function get_geometry(geometry_name) {
 
     return geometry;
   } else {
-    return geometries[geometry_name];    
+    return geometries[geometry_name];
   }
 }
 
 function get_shader_program(pass) {
-  if (EDITOR) {
+  if (config.EDITOR) {
     if (!pass.program) {
       return null;
     }
@@ -447,7 +450,7 @@ function get_shader_program(pass) {
 function render_without_scenes(pass, shader_program, clip_time) {
   var geometry = geometries[pass.geometry]
 
-  if (EDITOR) {
+  if (config.EDITOR) {
     if (!geometry) {
       console.log("Missing geometry " + pass.geometry + " (using placeholder)");
       geometry = geometry_placeholder

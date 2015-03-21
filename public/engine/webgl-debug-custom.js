@@ -23,7 +23,7 @@
 
 // Various functions for helping debug WebGL apps.
 
-if (GL_DEBUG) {
+if (config.GL_DEBUG) {
 
 WebGLDebugUtils = function() {
 
@@ -946,4 +946,4 @@ return {
 
 }();
 
-} // GL_DEBUG
+} // config.GL_DEBUG
