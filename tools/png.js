@@ -2,9 +2,16 @@ var fs = require("fs")
 var crc32 = require("buffer-crc32")
 var zlib = require("zlib")
 
-var js = "alert('plop!')"
-var imageData = new Buffer(js)
+if (process.argv.length < 4) {
+    console.log("Usage: node png.js <js input> <png output>")
+    process.exit(1)
+}
+
+//var js = "alert('plop!')"
 //var imageData = new Buffer([0x50, 0xff, 0x0, 0x80])
+
+var js = fs.readFileSync(process.argv[2])
+var imageData = new Buffer(js)
 
 // first working version
 var bootstrap = "<canvas id=C><img src=# onload=$=C.width=" + imageData.length + ";c=C.getContext('2d');c.drawImage(this,0,0);s='';for(i=0;i<$;i++)s+=String.fromCharCode(c.getImageData(i,0,1,1).data[0]);eval(s)>"
@@ -49,7 +56,7 @@ zlib.deflate(idat, function(err, idat)
     var idatChunk = makeChunk("IDAT", idat, true)
     var png = Buffer.concat([header, ihdrChunk, idatChunk, new Buffer(bootstrap)])
 
-    fs.writeFile("plop.html", png, function(err) {
+    fs.writeFile(process.argv[3], png, function(err) {
         if (err) throw err
     })
 })
