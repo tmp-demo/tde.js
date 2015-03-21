@@ -221,8 +221,11 @@ function send_uniforms(program, uniform_list, t) {
       continue;
     }
 
-    if (typeof val == "string") {
-      val = eval("_="+val);
+    if (config.EDITOR) {
+      // export-sequences.js takes care of de-stringifying the uniforms
+      if (typeof val == "string") {
+        val = eval("_="+val);
+      }
     }
 
     if (typeof val == "function") {
@@ -288,7 +291,16 @@ function render_pass(pass, time) {
       // uniform animation
       if (clip.uniforms) {
         for (var uniform_name in clip.uniforms) {
-          uniforms[uniform_name] = animate(deep_clone(clip.uniforms[uniform_name]), clip_time)
+          if (config.UNIFORM_INTERPOLATION_ENABLED) {
+            var clip_uniform = clip.uniforms[uniform_name];
+            if (typeof clip_uniform == "function") {
+              uniforms[uniform_name] = clip.uniforms[uniform_name](clip_time);
+            } else {
+              uniforms[uniform_name] = animate(deep_clone(clip_uniform), clip_time);
+            }
+          } else {
+            uniforms[uniform_name] = clip.uniforms[uniform_name];
+          }
         }
       }
 

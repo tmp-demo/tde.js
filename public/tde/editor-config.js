@@ -8,6 +8,7 @@ config = {
     TEXTURE_FLOAT_ENABLED: true,
     DEPTH_TEXTURE_ENABLED: true,
     CAM_UNIFORMS_ENABLED: true,
+    UNIFORM_INTERPOLATION_ENABLED: true,
     SCENES_ENABLED: true,
     TEXT_ENABLED: true,
     GL_DEBUG: true,

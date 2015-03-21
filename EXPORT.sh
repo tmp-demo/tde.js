@@ -99,7 +99,9 @@ echo " -- packing expensive symbols"
 ruby tools/pnginator.rb $EXPORT_ROOT/demo.min.js $EXPORT_ROOT/demo.png.html
 
 echo " -- creating runner"
+echo "<script src='demo.js'></script>" > $EXPORT_ROOT/demo.html
 echo "<script src='demo.min.js'></script>" > $EXPORT_ROOT/demo.min.html
+echo "<script src='demo.unmin.js'></script>" > $EXPORT_ROOT/demo.unmin.html
 
 echo " -- done."
 
