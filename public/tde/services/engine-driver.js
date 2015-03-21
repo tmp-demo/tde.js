@@ -12,17 +12,6 @@ angular.module("tde.services.engine-driver", [])
   this.loadConfig = function(name, data)
   {
     var asset = eval("___ = "+data);
-      EDITOR = true;
-      CLEAR_ENABLED = asset.define.CLEAR_ENABLED;
-      DEPTH_TEST_ENABLED = asset.define.DEPTH_TEST_ENABLED;
-      BLENDING_ENABLED = asset.define.BLENDING_ENABLED;
-      RENDER_TO_TEXTURE_ENABLED = asset.define.RENDER_TO_TEXTURE_ENABLED;
-      TEXTURE_INPUTS_ENABLED = asset.define.TEXTURE_INPUTS_ENABLED;
-      TEXTURE_FLOAT_ENABLED = asset.define.TEXTURE_FLOAT_ENABLED;
-      SCENES_ENABLED = asset.define.SCENES_ENABLED;
-      TEXT_ENABLED = asset.define.TEXT_ENABLED;
-      GL_DEBUG = asset.define.GL_DEBUG;
-      GL_DEBUG_TRACE = asset.define.GL_DEBUG_TRACE;
   }
 
   this.unloadConfig = function(name, data) {
