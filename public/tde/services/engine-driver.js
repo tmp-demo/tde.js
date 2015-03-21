@@ -538,11 +538,11 @@ angular.module("tde.services.engine-driver", [])
   
   this.overrideUniform = function(name, value) {
     uniform_editor_overrides[name] = value
-    // self.drawFrameIfNotPlaying()
+    self.drawFrameIfNotPlaying()
   }
   
   this.removeUniformOverride = function(name) {
     delete uniform_editor_overrides[name]
-    // self.drawFrameIfNotPlaying()
+    self.drawFrameIfNotPlaying()
   }
 })
