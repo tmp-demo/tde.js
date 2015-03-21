@@ -1,6 +1,6 @@
 
 function text_init() {
-  if (!TEXT_ENABLED)
+  if (!config.TEXT_ENABLED)
     return;
   
   canvas_2d = document.createElement("canvas");

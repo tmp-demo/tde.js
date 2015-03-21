@@ -331,7 +331,7 @@ function pack_vertices(to, v) {
 }
 
 function join_rings(geom, r1, r2, triangle_fn, quad_fn) {
-    if (EDITOR) {
+    if (config.EDITOR) {
         if (r1.length != r2.length) {
             console.log(r1);
             console.log(r2);

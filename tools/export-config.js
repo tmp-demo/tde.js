@@ -12,9 +12,12 @@ for (var i = 2; i < process.argv.length; ++i) {
             var asset_name = file_name[0];
             var SEP = ", "
 
+            console.log("/* @const */ var config = {");
             for (var f in asset.define) {
-                console.log("/* @const */ var", f, "=", asset.define[f]);
+                console.log("/* @const */", f, ":", asset.define[f],",");
             }
+            console.log("/* @const */EXPORT: true");
+            console.log("}");
         });
     })(file);
 }

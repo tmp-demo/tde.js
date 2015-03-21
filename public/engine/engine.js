@@ -1,14 +1,14 @@
 var sequence = [];
 var snd;
 
-if (EDITOR) {
+if (config.EDITOR) {
   var symbolMap = {}
 }
 
 function minify_context(ctx)
 {
   Object.keys(ctx).sort().forEach(function(name) {
-    if (EDITOR) {
+    if (config.EDITOR) {
       var shader = false
       if (name.match(/^shader_/))
       {
@@ -22,7 +22,7 @@ function minify_context(ctx)
     while (m = re.exec(name)) newName += m[1];
     
     // add an underscore to shader variables, to avoid conflict with glsl-unit minification
-    if (EDITOR) {
+    if (config.EDITOR) {
       if (shader)
         newName = "_" + newName;
     }
@@ -36,7 +36,7 @@ function minify_context(ctx)
     
     ctx[newName] = ctx[name];
     
-    if (EDITOR) {
+    if (config.EDITOR) {
       // don't minify properties that are neither objects nor constants (or that map to strings)
       var preservedNames = ["canvas", "currentTime", "destination", "font", "fillStyle", "globalCompositeOperation", "lineWidth"]
       if (preservedNames.indexOf(name) !== -1)
@@ -57,7 +57,7 @@ function minify_context(ctx)
 // export for minifcation tools
 function dump_symbol_map()
 {
-  if (!EDITOR)
+  if (!config.EDITOR)
     return;
   
   console.log(symbolMap);
