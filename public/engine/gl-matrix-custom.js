@@ -51,7 +51,7 @@ var degree = Math.PI / 180;
 /**
 * Convert Degree To Radian
 *
-* @param {Number} Angle in Degrees
+* param {Number} Angle in Degrees
 */
 glMatrix.toRadian = function(a){
      return a * degree;
@@ -557,7 +557,7 @@ vec2.forEach = function(a, stride, offset, count, fn, arg) {
 /**
  * Returns a string representation of a vector
  *
- * @param {vec2} vec vector to represent as a string
+ * param {vec2} vec vector to represent as a string
  * @returns {String} string representation of the vector
  */
 vec2.str = function (a) {
@@ -1172,7 +1172,7 @@ vec3.forEach = function(a, stride, offset, count, fn, arg) {
 /**
  * Returns a string representation of a vector
  *
- * @param {vec3} vec vector to represent as a string
+ * param {vec3} vec vector to represent as a string
  * @returns {String} string representation of the vector
  */
 vec3.str = function (a) {
@@ -1690,7 +1690,7 @@ vec4.forEach = function(a, stride, offset, count, fn, arg) {
 /**
  * Returns a string representation of a vector
  *
- * @param {vec4} vec vector to represent as a string
+ * param {vec4} vec vector to represent as a string
  * @returns {String} string representation of the vector
  */
 vec4.str = function (a) {
@@ -1925,7 +1925,7 @@ mat2.scale = function(out, a, v) {
 /**
  * Returns a string representation of a mat2
  *
- * @param {mat2} mat matrix to represent as a string
+ * param {mat2} mat matrix to represent as a string
  * @returns {String} string representation of the matrix
  */
 mat2.str = function (a) {
@@ -2194,7 +2194,7 @@ mat2d.translate = function(out, a, v) {
 /**
  * Returns a string representation of a mat2d
  *
- * @param {mat2d} a matrix to represent as a string
+ * param {mat2d} a matrix to represent as a string
  * @returns {String} string representation of the matrix
  */
 mat2d.str = function (a) {
@@ -2679,7 +2679,7 @@ mat3.normalFromMat4 = function (out, a) {
 /**
  * Returns a string representation of a mat3
  *
- * @param {mat3} mat matrix to represent as a string
+ * param {mat3} mat matrix to represent as a string
  * @returns {String} string representation of the matrix
  */
 mat3.str = function (a) {
@@ -3580,7 +3580,7 @@ mat4.lookAtTilt = function (out, eye, center, tilt) {
 /**
  * Returns a string representation of a mat4
  *
- * @param {mat4} mat matrix to represent as a string
+ * param {mat4} mat matrix to represent as a string
  * @returns {String} string representation of the matrix
  */
 mat4.str = function (a) {
@@ -4112,7 +4112,7 @@ quat.fromMat3 = function(out, m) {
 /**
  * Returns a string representation of a quatenion
  *
- * @param {quat} vec vector to represent as a string
+ * param {quat} vec vector to represent as a string
  * @returns {String} string representation of the vector
  */
 quat.str = function (a) {

@@ -12,11 +12,20 @@ if (process.argv.length < 4) {
 
 var js = fs.readFileSync(process.argv[2])
 var imageData = new Buffer(js)
+var filteredImageData = new Buffer(imageData.length)
+
+// no filtering
+imageData.copy(filteredImageData)
+
+// delta filter
+/*filteredImageData[0] = imageData[0]
+for (var i = 1; i < imageData.length; i++)
+    filteredImageData[i] = imageData[i] - imageData[i - 1]*/
 
 // first working version
-var bootstrap = "<canvas id=C><img src=# onload=$=C.width=" + imageData.length + ";c=C.getContext('2d');c.drawImage(this,0,0);s='';for(i=0;i<$;i++)s+=String.fromCharCode(c.getImageData(i,0,1,1).data[0]);eval(s)>"
+var bootstrap = "<canvas id=C><img src=# onload=$=C.width=" + filteredImageData.length + ";c=C.getContext('2d');c.drawImage(this,0,0);s='';for(i=0;i<$;i++)s+=String.fromCharCode(c.getImageData(i,0,1,1).data[0]);eval(s)>"
 
-var width = imageData.length
+var width = filteredImageData.length
 var height = 1
 
 function makeChunk(signature, data, appendCRC) {
@@ -47,8 +56,12 @@ ihdr.writeUInt8(0 /* compression method (deflate) */, 10)
 ihdr.writeUInt8(0 /* filter method */, 11)
 ihdr.writeUInt8(0 /* no interlace */, 12)
 
-var idat = Buffer.concat([new Buffer([0x0]), imageData])
-zlib.deflate(idat, function(err, idat)
+var idat = Buffer.concat([new Buffer([0x0]), filteredImageData])
+var options = {
+    level: zlib.Z_BEST_COMPRESSION,
+    windowBits: 15
+}
+zlib.deflate(idat, options, function(err, idat)
 {
     if (err) throw err
     

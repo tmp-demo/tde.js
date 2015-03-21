@@ -95,6 +95,7 @@ echo " -- packing expensive symbols"
 #cat $EXPORT_ROOT/demo.min.js | egrep -o '[a-zA-Z0-9]{2,}' | sort | uniq -c | sort -nr > $EXPORT_ROOT/word_frequencies
 
 #echo " -- packing in a png..."
+#"$NODE" tools/png.js $EXPORT_ROOT/demo.min.js $EXPORT_ROOT/demo.png.html
 ruby tools/pnginator.rb $EXPORT_ROOT/demo.min.js $EXPORT_ROOT/demo.png.html
 
 echo " -- creating runner"

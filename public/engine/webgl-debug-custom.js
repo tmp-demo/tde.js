@@ -228,7 +228,7 @@ function glEnumToString(value) {
  * Attempts to convert enum arguments to strings.
  * @param {string} functionName the name of the WebGL function.
  * @param {number} numArgs the number of arguments passed to the function.
- * @param {number} argumentIndx the index of the argument.
+ * @param {number} argumentIndex the index of the argument.
  * @param {*} value The value of the argument.
  * @return {string} The value as a string.
  */
