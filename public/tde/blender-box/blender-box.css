@@ -1,0 +1,22 @@
+.blender-box
+{
+  position: absolute;
+  left: 50%;
+  width: 800px;
+  margin: 0px -400px;
+  padding: 10px;
+  background-color: #222;
+  box-shadow: 0px 0px 2px #222;
+  z-index: 100;
+}
+
+.blender-box button
+{
+	width: 100%;
+}
+
+.blender-box .hint
+{
+	display: inline-block;
+	margin: 5px 10px;
+}

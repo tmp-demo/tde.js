@@ -17,16 +17,6 @@ angular.module("tde.engine-view", [])
     {
       editor_main()
 
-      var seeker = element.find(".seeker")
-      seeker.on("input", function()
-      {
-        $scope.driver.seek(this.value / 1000)
-      })
-
-      var time = sessionStorage.getItem("engineViewTime");
-      if (time)
-        $scope.driver.seek(parseFloat(time));
-
       /*subdiv_slider = element.find(".subdiv_param");
       //subdiv_slider.value = num_subdivs;
       subdiv_slider.on("input", function() {
@@ -70,14 +60,10 @@ angular.module("tde.engine-view", [])
         $scope.driver.drawFrame();
       })*/
 
-      setInterval(function()
+      $scope.$on("currentTime", function(event, currentTime)
       {
-        seeker.val($scope.driver.currentTime * 1000)
+        sessionStorage.setItem("engineViewTime", currentTime);
         
-        $scope.$apply(function() {
-          sessionStorage.setItem("engineViewTime", $scope.driver.currentTime);
-        });
-
         // compute start time for each scene
         /*var time_sum = 0
         for (var s=0;s<scenes.length;++s)
@@ -87,7 +73,19 @@ angular.module("tde.engine-view", [])
         }*/
         time_sum = 64
         seeker.attr("max", time_sum * 1000)
-      }, 50)
+        
+        seeker.val(currentTime * 1000)
+      })
+
+      var seeker = element.find(".seeker")
+      seeker.on("input", function()
+      {
+        $scope.driver.seek(this.value / 1000)
+      })
+
+      var time = sessionStorage.getItem("engineViewTime");
+      if (time)
+        $scope.driver.seek(parseFloat(time));
 
       function togglePlayState()
       {

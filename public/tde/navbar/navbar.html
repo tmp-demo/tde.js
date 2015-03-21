@@ -4,6 +4,8 @@
   <ul class="menu">
     <li>
       <a href="" ng-click="toggleMute()"><span class="glyphicon" ng-class="{'glyphicon-volume-off': prefs.mute, 'glyphicon-volume-up': !prefs.mute}"></span></a>
+    </li>
+    <li>
       <a href="/export/{{projectId}}" target="_blank" ng-show="projectId"><span class="glyphicon glyphicon-cog"></span> Export</a>
     </li>
     <!--<li class="dropdown">

@@ -1,6 +1,6 @@
 angular.module("tde.services.engine-driver", [])
 
-.service("EngineDriver", function()
+.service("EngineDriver", function($rootScope)
 {
   var self = this
 
@@ -411,6 +411,12 @@ angular.module("tde.services.engine-driver", [])
     engine_render(this.currentTime)
   }
   
+  this.drawFrameIfNotPlaying = function()
+  {
+    if (!self.playing)
+      engine_render(this.currentTime)
+  }
+  
   this.play = function()
   {
     this.playing = true
@@ -425,6 +431,8 @@ angular.module("tde.services.engine-driver", [])
         self.currentTime = snd.t()
       else
         self.currentTime = 0;
+      
+      $rootScope.$broadcast("currentTime", self.currentTime);
       
       self.drawFrame()
       
@@ -449,6 +457,8 @@ angular.module("tde.services.engine-driver", [])
       //snd.startTime = ac.currentTime - time * (60 / 125) // tempo is 125
       snd.seek(time)
 
+    $rootScope.$broadcast("currentTime", self.currentTime);
+    
     if (!this.playing)
       engine_render(self.currentTime)
   }
@@ -524,5 +534,15 @@ angular.module("tde.services.engine-driver", [])
     vec3.add(uniform_editor_overrides["cam_target"], uniform_editor_overrides["cam_pos"], cam_dir)
 
     self.drawFrame()
+  }
+  
+  this.overrideUniform = function(name, value) {
+    uniform_editor_overrides[name] = value
+    self.drawFrameIfNotPlaying()
+  }
+  
+  this.removeUniformOverride = function(name) {
+    delete uniform_editor_overrides[name]
+    self.drawFrameIfNotPlaying()
   }
 })
