@@ -11,6 +11,7 @@
     "cookies": "~0.4.1",
     "source-map": "~0.1.40",
     "falafel": "~0.3.1",
-    "js-beautify": "~1.5.4"
+    "js-beautify": "~1.5.4",
+    "buffer-crc32": "~0.2.5"
   }
 }
