@@ -307,7 +307,7 @@ function render_pass(pass, time) {
 
       prepare_depth_test(pass);
 
-      if (SCENES_ENABLED) {
+      if (SCENES_ENABLED && pass.scene) {
         render_with_scenes(pass, shader_program, clip_time);
       } else {
         render_without_scenes(pass, shader_program, clip_time);
@@ -454,35 +454,33 @@ function render_without_scenes(pass, shader_program, clip_time) {
 }
 
 function render_with_scenes(pass, shader_program, clip_time) {
-  if (pass.scene) {
-    // A scene can be inlined in the sequence...
-    var scene = pass.scene;
-    if (typeof scene == "string") {
-      // ...or in its own asset
-      scene = scenes[pass.scene];
-    }
+  // A scene can be inlined in the sequence...
+  var scene = pass.scene;
+  if (typeof scene == "string") {
+    // ...or in its own asset
+    scene = scenes[pass.scene];
+  }
 
-    // This allows us to inline the object list without the other members of the scene
-    // for convenience and space.
-    //    scenes: { objects: [{geometry: "quad"}] },
-    // is quivalent to:
-    //    scenes: [{geometry: "quad"}],
-    var scene_objects = scene.objects || scene;
+  // This allows us to inline the object list without the other members of the scene
+  // for convenience and space.
+  //    scenes: { objects: [{geometry: "quad"}] },
+  // is quivalent to:
+  //    scenes: [{geometry: "quad"}],
+  var scene_objects = scene.objects || scene;
 
-    send_uniforms(shader_program, scene.uniforms, clip_time);
+  send_uniforms(shader_program, scene.uniforms, clip_time);
 
-    for (var g = 0; g < scene_objects.length; ++g) {
-      var obj = scene_objects[g];
+  for (var g = 0; g < scene_objects.length; ++g) {
+    var obj = scene_objects[g];
 
-      var geometry = get_geometry(obj.geometry);
+    var geometry = get_geometry(obj.geometry);
 
-      // this is optional, but can be a convenient info to have in the shader.
-      obj.uniforms = obj.uniforms || {};
-      obj.uniforms["u_object_id"] = g;
+    // this is optional, but can be a convenient info to have in the shader.
+    obj.uniforms = obj.uniforms || {};
+    obj.uniforms["u_object_id"] = g;
 
-      send_uniforms(shader_program, obj.uniforms, clip_time);
+    send_uniforms(shader_program, obj.uniforms, clip_time);
 
-      draw_geom(geometry)
-    }
+    draw_geom(geometry)
   }
 }
