@@ -5,13 +5,14 @@ angular.module("tde.blender-box", [])
   return {
     restrict: "E",
     templateUrl: "/tde/blender-box/blender-box.html",
-    scope: true,
+    scope: {
+      visible: "="
+    },
     link: function($scope, element, attrs)
     {
       $scope.blender = Blender
       var prefs = $scope.prefs = User.prefs
       var uniformOverrides = prefs.blenderUniforms
-      $scope.visible = false
 
       function refreshOverrides() {
         var context = Blender.context;
@@ -131,22 +132,6 @@ angular.module("tde.blender-box", [])
           }
         }
       }
-      
-      $(window).keydown(function(event)
-      {
-        $scope.$apply(function()
-        {
-          if (event.ctrlKey && event.keyCode == 66 /* b */) {
-            event.preventDefault();
-            $scope.visible = !$scope.visible;
-          }
-
-          if (event.keyCode == 27 /* Esc */) {
-            event.preventDefault();
-            $scope.visible = false;
-          }
-        })
-      })
     }
   }
 })

@@ -55,4 +55,32 @@ angular.module("tde", [
   })
   
   $scope.currentUser = User.currentUser
+  
+  $(window).keydown(function(event)
+  {
+    function toggle(boxName) {
+      if ($scope.visibleBox === boxName)
+        $scope.visibleBox = null;
+      else
+        $scope.visibleBox = boxName;
+    }
+    
+    $scope.$apply(function()
+    {
+      if (event.ctrlKey && event.keyCode == 66 /* b */) {
+        event.preventDefault();
+        toggle("blender-box");
+      }
+
+      if (event.ctrlKey && event.keyCode == 80 /* p */) {
+        event.preventDefault();
+        toggle("goto-box");
+      }
+
+      if (event.keyCode == 27 /* Esc */) {
+        event.preventDefault();
+        $scope.visibleBox = null;
+      }
+    })
+  })
 })
