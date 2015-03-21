@@ -202,6 +202,9 @@ function destroy_shader_program(name)
     gl.deleteProgram(program)
     delete programs[name]
   }
+  if (!EDITOR) {
+    console.log("function destroy_shader_program should not be exported!");
+  }
 }
 
 function send_uniforms(program, uniform_list, t) {
@@ -420,7 +423,7 @@ function get_geometry(geometry_name) {
 
     return geometry;
   } else {
-    return geometries[geometry_name];    
+    return geometries[geometry_name];
   }
 }
 

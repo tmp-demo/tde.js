@@ -1,17 +1,3 @@
-// engine config in editor
-EDITOR = true;
-CLEAR_ENABLED = true;
-DEPTH_TEST_ENABLED = true;
-BLENDING_ENABLED = true;
-RENDER_TO_TEXTURE_ENABLED = true;
-TEXTURE_INPUTS_ENABLED = true;
-TEXTURE_FLOAT_ENABLED = true;
-DEPTH_TEXTURE_ENABLED = true;
-CAM_UNIFORMS_ENABLED = true;
-SCENES_ENABLED = true;
-TEXT_ENABLED = true;
-GL_DEBUG = true;
-GL_DEBUG_TRACE = false;
 
 angular.module("tde.engine-view", [])
 
