@@ -1,5 +1,7 @@
-var sequence = [];
-var snd;
+if (config.EDITOR) {
+  var sequence = [];
+  var snd;
+}
 
 if (config.EDITOR) {
   var symbolMap = {}

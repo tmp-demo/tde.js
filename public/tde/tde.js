@@ -56,6 +56,11 @@ angular.module("tde", [
   
   $scope.currentUser = User.currentUser
   
+  $scope.$on("hideBox", function(event)
+  {
+    $scope.visibleBox = null;
+  })
+  
   $(window).keydown(function(event)
   {
     function toggle(boxName) {

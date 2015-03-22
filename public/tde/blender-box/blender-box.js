@@ -14,57 +14,64 @@ angular.module("tde.blender-box", [])
       var prefs = $scope.prefs = User.prefs
       var uniformOverrides = prefs.blenderUniforms
 
+      var refreshTimeoutId;
       function refreshOverrides() {
-        var context = Blender.context;
-        var data = Blender.data;
-        var scenes = Blender.scenes;
-        var value;
-        
-        uniformOverrides.forEach(function(uniform) {
-          if (uniform.editingName) {
-            $scope.hints = Object.keys(uniforms).filter(function(name) {
-              return name.indexOf(uniform.name) !== -1;
-            });
-            return;
-          }
+        if (refreshTimeoutId)
+          clearTimeout(refreshTimeoutId);
+        refreshTimeoutId = setTimeout(function() {
+          refreshTimeoutId = null;
+          
+          var context = Blender.context;
+          var data = Blender.data;
+          var scenes = Blender.scenes;
+          var value;
+          
+          uniformOverrides.forEach(function(uniform) {
+            if (uniform.editingName) {
+              $scope.hints = Object.keys(uniforms).filter(function(name) {
+                return name.indexOf(uniform.name) !== -1;
+              });
+              return;
+            }
 
-          if (!uniform.name)
-            return;
-          
-          if (uniform.editingPath) {
-            value = {
-              context: context,
-              data: data,
-              scenes: scenes
-            };
-            if (uniform.expression) {
-              var expression = uniform.expression.split(".");
-              for (var i = 0, n = expression.length; i < n; ++i) {
-                var fragment = expression[i];
-                if (!value.hasOwnProperty(fragment)) {
-                  $scope.hints = Object.keys(value).filter(function(name) {
-                    return name.indexOf(fragment) === 0;
-                  });
-                  break;
+            if (!uniform.name)
+              return;
+            
+            if (uniform.editingPath) {
+              value = {
+                context: context,
+                data: data,
+                scenes: scenes
+              };
+              if (uniform.expression) {
+                var expression = uniform.expression.split(".");
+                for (var i = 0, n = expression.length; i < n; ++i) {
+                  var fragment = expression[i];
+                  if (!value.hasOwnProperty(fragment)) {
+                    $scope.hints = Object.keys(value).filter(function(name) {
+                      return name.indexOf(fragment) === 0;
+                    });
+                    break;
+                  }
+                  value = value[fragment];
                 }
-                value = value[fragment];
-              }
-            } else
-              $scope.hints = Object.keys(value);
-          }
-          
-          try {
-            value = eval(uniform.expression);
-            uniform.valid = (typeof value !== "undefined");
-          } catch(err) {
-            uniform.valid = false;
-          }
-          
-          if (prefs.blenderOverride && uniform.valid)
-            EngineDriver.overrideUniform(uniform.name, value);
-          else
-            EngineDriver.removeUniformOverride(uniform.name);
-        });
+              } else
+                $scope.hints = Object.keys(value);
+            }
+            
+            try {
+              value = eval(uniform.expression);
+              uniform.valid = (typeof value !== "undefined");
+            } catch(err) {
+              uniform.valid = false;
+            }
+            
+            if (prefs.blenderOverride && uniform.valid)
+              EngineDriver.overrideUniform(uniform.name, value);
+            else
+              EngineDriver.removeUniformOverride(uniform.name);
+          });
+        }, 10);
       }
       
       Blender.addListener("close", refreshOverrides);
