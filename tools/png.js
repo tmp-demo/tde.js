@@ -1,6 +1,8 @@
 var fs = require("fs")
 var crc32 = require("buffer-crc32")
 var zlib = require("zlib")
+var path = require("path")
+var os = require("os")
 
 var MAX_CANVAS_WIDTH=2048
 
@@ -62,6 +64,29 @@ function makeChunk(signature, data, appendCRC) {
     return chunk
 }
 
+// zlib deflate
+/*function deflate(data, callback) {
+    var options = {
+        level: zlib.Z_BEST_COMPRESSION,
+        windowBits: 15,
+        memLevel: 9
+    }
+    zlib.deflate(idat, options, callback)
+}*/
+
+// 7-zip deflate
+function deflate(data, callback) {
+    var inPath = path.join(os.tmpdir(), "imagedata-filtered")
+    var outPath = path.join(os.tmpdir(), "imagedata-deflated")
+    fs.writeFileSync(inPath, data)
+    require("child_process").exec("node tools\\deflate-7z " + inPath + " " + outPath, function(err, stdout, stderr) {
+        if (err) throw err
+
+        var deflatedData = fs.readFileSync(outPath)
+        callback(null, deflatedData)
+    })
+}
+
 var header = new Buffer([/* %PNG */ 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 
 var ihdr = new Buffer(13)
@@ -74,11 +99,8 @@ ihdr.writeUInt8(0 /* filter method */, 11)
 ihdr.writeUInt8(0 /* no interlace */, 12)
 
 var idat = imageData
-var options = {
-    level: zlib.Z_BEST_COMPRESSION,
-    windowBits: 15
-}
-zlib.deflate(idat, options, function(err, idat)
+
+deflate(idat, function(err, idat)
 {
     if (err) throw err
     
