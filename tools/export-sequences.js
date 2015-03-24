@@ -66,6 +66,8 @@ function export_geometry(pass) {
         return;
     }
 
+    if (pass.instance_count)
+        console.log("instance_count: '"+pass.instance_count+"',");
     console.log("geometry: '"+pass.geometry+"',");
 }
 
