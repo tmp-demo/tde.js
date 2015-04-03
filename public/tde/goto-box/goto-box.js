@@ -32,9 +32,8 @@ angular.module("tde.goto-box", [])
       })
 
       $scope.selectItem = function(item) {
-        $scope.visible = false;
-
         $scope.$emit("gotoBoxItemSelected", item);
+        $scope.$emit("hideBox");
       }
       
       $scope.highlight = function(item) {

@@ -10,6 +10,7 @@ function export_pass(pass) {
     export_depth_test(pass);
     export_clear(pass);
     export_scene(pass);
+    export_geometry(pass);
     export_program(pass);
     export_clips(pass);
 
@@ -45,8 +46,8 @@ function export_clear(pass) {
         return;
     }
 
-    if (typeof pass.clear == "array") {
-        console.log("clear: [", pass.clear[0], ", ", pass.clear[1], ", ", pass.clear[2], ", ", pass.clear[3], "],")
+    if (typeof pass.clear == "object") {
+        console.log("clear: [", pass.clear.toString(), "],")
     } else {
         console.log("clear: "+pass.clear+",");
     }
@@ -58,6 +59,16 @@ function export_depth_test(pass) {
     }
 
     console.log("depth_test: ", pass.depth_test, ",");
+}
+
+function export_geometry(pass) {
+    if (!pass.geometry) {
+        return;
+    }
+
+    if (pass.instance_count)
+        console.log("instance_count: '"+pass.instance_count+"',");
+    console.log("geometry: '"+pass.geometry+"',");
 }
 
 function export_program(pass) {
