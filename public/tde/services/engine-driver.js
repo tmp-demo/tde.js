@@ -148,6 +148,22 @@ angular.module("tde.services.engine-driver", [])
     try
     {
       sequence = eval("___ = "+data);
+
+      // patch the sequence
+      for (var p in sequence) {
+        var pass = sequence[p];
+        for (var c in pass.clips) {
+          var clip = pass.clips[c];
+          for (var u in clip.uniforms) {
+            var uniform = clip.uniforms[u];
+            if (typeof uniform == "string") {
+              clip.uniforms[u] = eval("_="+
+                "function(t) { return " + uniform + "; }"
+              );
+            }
+          }
+        }
+      }
     }
     catch (err)
     {
