@@ -1,4 +1,37 @@
 
+var canvas_overlay_text = {
+  enabled: true,
+  time: 0,
+  enable: function() {
+    canvas_overlay_text.enabled = true;
+    update_canvas_overlay_text();
+  },
+  disable: function() {
+    if (canvas_overlay_text.enabled) {
+      canvas_overlay_text.enabled = false;
+      dom_overlay_text().innerHTML = "";
+    }
+  },
+  update: function() {
+    if (!canvas_overlay_text.enabled) {
+      return;
+    }
+
+    if (snd) {
+      var time = Math.floor(snd.t())
+      if (time != canvas_overlay_text.time && !isNaN(time)) {
+        dom_overlay_text().innerHTML = "time: " +  time;
+        canvas_overlay_text.time = time;
+      }
+    }
+  }
+}
+
+function dom_overlay_text() {
+  return document.getElementById("canvas-overlay-text");
+}
+
+
 angular.module("tde.engine-view", [])
 
 .controller("EngineViewCtrl", function($scope, EngineDriver)
@@ -71,7 +104,7 @@ angular.module("tde.engine-view", [])
           scenes[s].start_time = time_sum
           time_sum += scenes[s].duration
         }*/
-        time_sum = 64
+        time_sum = 64 // LOL
         seeker.attr("max", time_sum * 1000)
         
         seeker.val(currentTime * 1000)

@@ -69,6 +69,9 @@ function dump_symbol_map()
 function engine_render(current_time)
 {
   render_sequence(sequence, current_time)
+  if (config.EDITOR) {
+    canvas_overlay_text.update();
+  }
 }
 
 function main_loop() {
