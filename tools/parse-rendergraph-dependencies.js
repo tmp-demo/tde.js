@@ -9,10 +9,12 @@ for (var i = 2; i < process.argv.length; ++i) {
         fs.readFile(file.name, function(err, asset) {
             var passes = eval("____ = " + asset)
             var programs = []
-            passes.forEach(function(pass) {
-                if (pass.program)
+            for (var p in passes) {
+                var pass = passes[p];
+                if (pass.program) {
                     programs.push(pass.program + ".glsl")
-            })
+                }
+            }
             console.log(programs.join(" "))
         });
     })(file);
