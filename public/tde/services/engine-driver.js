@@ -183,6 +183,8 @@ angular.module("tde.services.engine-driver", [])
           }
         }
       }
+
+      init_editor_timeline();
     }
     catch (err)
     {
