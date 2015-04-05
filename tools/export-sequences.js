@@ -4,14 +4,14 @@ function last(array) { return array[array.length - 1]; }
 
 function export_clip(clip) {
     console.log("{");
-    if (clip.start) {
+    if (clip.start != undefined) {
         console.log("start: ", clip.start,",");
     }
-    if (clip.duration) {
+    if (clip.duration != undefined) {
         console.log("duration: ", clip.duration, ",");
     }
     var animation = clip.animation;
-    if (animation) {
+    if (animation != undefined) {
         if (typeof animation == "string") {
             console.log("animation: function(t) { return "+animation+"},");
         } else {

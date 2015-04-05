@@ -39,16 +39,16 @@ for (var i = 2; i < process.argv.length; ++i) {
                 case "buffers": {
                     console.log('geometries["'+asset_name+'"] = {');
                     console.log("  buffers: [")
-                    if (asset.positions) {
+                    if (asset.positions != undefined) {
                       console.log("     make_vbo(POS,", JSON.stringify(asset.positions), ")");
                     }
-                    if (asset.normals) {
+                    if (asset.normals != undefined) {
                       console.log("   , make_vbo(NORMAL,", JSON.stringify(asset.normals), ")");
                     }
-                    if (asset.uvs) {
+                    if (asset.uvs != undefined) {
                       console.log("   , make_vbo(UV,", JSON.stringify(asset.uvs), ")");
                     }
-                    if (asset.colors) {
+                    if (asset.colors != undefined) {
                       console.log("   , make_vbo(COLOR,", JSON.stringify(asset.colors), ")");
                     }
                     console.log("  ],");

@@ -62,7 +62,7 @@ function export_clear(pass) {
 }
 
 function export_depth_test(pass) {
-    if (!pass.depth_test) {
+    if (pass.depth_test == undefined) {
         return;
     }
 
@@ -70,17 +70,18 @@ function export_depth_test(pass) {
 }
 
 function export_geometry(pass) {
-    if (!pass.geometry) {
+    if (pass.geometry == undefined) {
         return;
     }
 
-    if (pass.instance_count)
+    if (pass.instance_count != undefined) {
         console.log("instance_count: '"+pass.instance_count+"',");
+    }
     console.log("geometry: '"+pass.geometry+"',");
 }
 
 function export_program(pass) {
-    if (!pass.program) {
+    if (pass.program == undefined) {
         return;
     }
 
@@ -88,7 +89,7 @@ function export_program(pass) {
 }
 
 function export_scene(pass) {
-    if (!pass.scene) {
+    if (pass.scene == undefined) {
         return;
     }
 
