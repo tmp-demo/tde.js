@@ -1,5 +1,6 @@
 if (config.EDITOR) {
   var sequence = [];
+  var render_passes = [];
   var snd;
 }
 

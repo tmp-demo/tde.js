@@ -13,7 +13,8 @@ angular.module("tde.services.asset", [])
     "seq",
     "song",
     "glsllib",
-    "glsl"
+    "glsl",
+    "rg",
   ]
   
   function assetParts(assetId) {
@@ -46,9 +47,11 @@ angular.module("tde.services.asset", [])
       $http.get("/data/project/" + $routeParams.projectId + "/assets").success(function(assetList) {
         self.gRemainingAssets = assetList.length;
         assetList.sort(assetsOrderCompare).forEach(function(assetId) {
-          console.log("loading asset " + assetId)
-          if (assetId !== "demo.seq") {
+          if (assetId !== "demo.rg") {
+            console.log("loading asset " + assetId)
             self.loadAsset(assetId)
+          } else {
+            console.log("postponed loading asset " + assetId)
           }
         })
       })
@@ -122,6 +125,7 @@ angular.module("tde.services.asset", [])
           case "tex": EngineDriver.loadTexture(name, data); break
           case "geom": EngineDriver.loadGeometry(name, data); break
           case "seq": EngineDriver.loadSequence(name, data); break
+          case "rg": EngineDriver.loadRenderGraph(name, data); break
           case "scene": EngineDriver.loadScene(name, data); break
           case "song": EngineDriver.loadSong(name, data); break
           case "ogg": EngineDriver.loadOgg(name, data); break
@@ -137,9 +141,10 @@ angular.module("tde.services.asset", [])
         }
         self.gRemainingAssets--;
         if (self.gRemainingAssets == 1) {
-            // TODO!
-            // demo.seq needs to be loaded last until we fix the framebuffer dependencies
-            self.loadAsset("demo.seq");
+          console.log("Loading asset demo.rg");
+          // TODO!
+          // demo.rg needs to be loaded last until we fix the framebuffer dependencies
+          self.loadAsset("demo.rg");
         }
       }).
       error(function(error)
@@ -163,6 +168,7 @@ angular.module("tde.services.asset", [])
       case "tex": EngineDriver.unloadTexture(name); break
       case "geom": EngineDriver.unloadGeometry(name); break
       case "seq": EngineDriver.unloadSequence(name); break
+      case "rg": EngineDriver.unloadRenderGraph(name); break
       case "scene": EngineDriver.unloadScene(name); break
       case "song": EngineDriver.unloadSong(name); break
       case "glsllib": EngineDriver.unloadShader(assetId); break
@@ -186,6 +192,7 @@ angular.module("tde.services.asset", [])
       case "song": glyphicon = "music"; break
       case "glsllib": glyphicon = "database"; break
       case "glsl": glyphicon = "globe"; break
+      case "rg": glyphicon = "film"; break // TODO
     }
     
     return "fa fa-" + glyphicon

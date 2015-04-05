@@ -66,6 +66,12 @@ if [ -f $SEQUENCES ]; then
   "$NODE" ./tools/export-sequences.js $PROJECT_ROOT/*.seq >> $EXPORT_ROOT/demo.js
 fi
 
+echo " -- exporting the render graph"
+RENDER_GRAPHS=($PROJECT_ROOT/*.rg)
+if [ -f $RENDER_GRAPHS ]; then
+  "$NODE" ./tools/export-rendergraph.js $PROJECT_ROOT/*.rg >> $EXPORT_ROOT/demo.js
+fi
+
 echo " -- exporting ogg tracks"
 cp $PROJECT_ROOT/*.ogg $EXPORT_ROOT
 

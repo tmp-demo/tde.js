@@ -141,29 +141,13 @@ angular.module("tde.services.engine-driver", [])
     }
   }
 
-  this.loadSequence = function(name, data)
+  this.loadRenderGraph = function(name, data)
   {
-    self.logInfo("loading sequence " + name)
+    self.logInfo("loading render passes " + name)
 
     try
     {
-      sequence = eval("___ = "+data);
-
-      // patch the sequence
-      for (var p in sequence) {
-        var pass = sequence[p];
-        for (var c in pass.clips) {
-          var clip = pass.clips[c];
-          for (var u in clip.uniforms) {
-            var uniform = clip.uniforms[u];
-            if (typeof uniform == "string") {
-              clip.uniforms[u] = eval("_="+
-                "function(t) { return " + uniform + "; }"
-              );
-            }
-          }
-        }
-      }
+      render_passes = eval("___ = "+data);
     }
     catch (err)
     {
@@ -174,9 +158,43 @@ angular.module("tde.services.engine-driver", [])
     engine_render(self.currentTime)
   }
 
-  this.unloadSequence = function(name)
+  this.unloadRenderGraph = function(name)
   {
     // leak everything
+  }
+
+  this.loadSequence = function(name, data)
+  {
+    self.logInfo("loading sequence " + name)
+
+    try
+    {
+      sequence = eval("___ = "+data);
+
+      // patch the sequence
+      for (var u in sequence) {
+        var uniform = sequence[u];
+        for (var c in uniform) {
+          var clip = uniform[c];
+          if (typeof clip.animation == "string") {
+            var function_str = "function(t) { return " + clip.animation + "; }";
+            console.log("patching uniform "+u+" animation: ", function_str);
+            clip.animation = eval("_="+function_str);
+          }
+        }
+      }
+    }
+    catch (err)
+    {
+      self.logError(err.message, err.stack)
+    }
+
+    self.drawFrame();
+  }
+
+  this.unloadSequence = function(name)
+  {
+    sequence = null;
   }
 
   this.loadScene = function(name, data)
@@ -424,7 +442,9 @@ angular.module("tde.services.engine-driver", [])
 
   this.drawFrame = function()
   {
-    engine_render(this.currentTime)
+    if (render_passes) {
+      engine_render(this.currentTime)
+    }
   }
   
   this.drawFrameIfNotPlaying = function()
