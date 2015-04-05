@@ -8,10 +8,9 @@ angular.module("tde.services.asset", [])
   var assetsOrder = [
     "tex",
     "geom",
-    "ogg",
     "scene",
     "seq",
-    "song",
+    "snd",
     "glsllib",
     "glsl"
   ]
@@ -113,6 +112,7 @@ angular.module("tde.services.asset", [])
       {
         self.assets[assetId] = data
         
+        var staticPath = "/data/project/" + $routeParams.projectId + "/static-asset";
         var parts = assetParts(assetId)
         var name = parts[0]
         var type = parts[1]
@@ -123,8 +123,7 @@ angular.module("tde.services.asset", [])
           case "geom": EngineDriver.loadGeometry(name, data); break
           case "seq": EngineDriver.loadSequence(name, data); break
           case "scene": EngineDriver.loadScene(name, data); break
-          case "song": EngineDriver.loadSong(name, data); break
-          case "ogg": EngineDriver.loadOgg(name, data); break
+          case "snd": EngineDriver.loadSoundtrack(name, data, staticPath); break
           case "glsllib": EngineDriver.loadShader(assetId, data); break
           case "glsl": EngineDriver.loadShader(assetId, data); break
           default: toastr.warning(type, "Unknown asset type"); break
@@ -164,7 +163,7 @@ angular.module("tde.services.asset", [])
       case "geom": EngineDriver.unloadGeometry(name); break
       case "seq": EngineDriver.unloadSequence(name); break
       case "scene": EngineDriver.unloadScene(name); break
-      case "song": EngineDriver.unloadSong(name); break
+      case "snd": EngineDriver.unloadSoundtrack(name); break
       case "glsllib": EngineDriver.unloadShader(assetId); break
       case "glsl": EngineDriver.unloadShader(assetId); break
       default: toastr.warning(type, "Unknown asset type"); break
@@ -183,7 +182,7 @@ angular.module("tde.services.asset", [])
       case "geom": glyphicon = "cube"; break
       case "seq": glyphicon = "film"; break
       case "scene": glyphicon = "film"; break // TODO
-      case "song": glyphicon = "music"; break
+      case "soundtrack": glyphicon = "music"; break
       case "glsllib": glyphicon = "database"; break
       case "glsl": glyphicon = "globe"; break
     }
