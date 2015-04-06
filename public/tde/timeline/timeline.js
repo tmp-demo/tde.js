@@ -2,7 +2,7 @@ var sequence = {
   "u_global_time": [
       { start:0, duration:64, animation:"[t]" }
   ],
-  "cam_pos": [
+  "u_cam_pos": [
     {
       start: 0,
       duration: 32,

@@ -251,11 +251,11 @@ angular.module("tde.engine-view", [])
 
       element.find("#map-view").mousemove(function(e)
       {
-        if (!("cam_pos" in uniforms))
+        if (!("u_cam_pos" in uniforms))
           return;
 
-        //uniforms["cam_pos"][0] = (e.pageX - $("#map-view").offset().left - 150) * 5;
-        //uniforms["cam_pos"][2] = (e.pageY - $("#map-view").offset().top - 150) * 5;
+        //uniforms["u_cam_pos"][0] = (e.pageX - $("#map-view").offset().left - 150) * 5;
+        //uniforms["u_cam_pos"][2] = (e.pageY - $("#map-view").offset().top - 150) * 5;
         
         var mapX = 0, mapY = 0;
         mouseX = e.pageX - $("#map-view").offset().left;

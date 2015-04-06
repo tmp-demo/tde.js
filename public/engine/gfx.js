@@ -70,30 +70,29 @@ function gfx_init() {
   init_render_to_texture(sequence);
 
   if (config.CAM_UNIFORMS_ENABLED) {
-    uniforms["cam_pos"] = [0, 1, 0]
-    uniforms["cam_target"] = [0, 0, 0]
-    uniforms["cam_fov"] = 75
-    uniforms["cam_tilt"] = 0
+    uniforms["u_cam_pos"] = [0, 1, 0]
+    uniforms["u_cam_target"] = [0, 0, 0]
+    uniforms["u_cam_fov"] = 75
+    uniforms["u_cam_tilt"] = 0
   }
 
   // hack to make the export toolchain minify attribute and uniform names
   if (config.EDITOR) {
     var _uniforms = [
-      "cam_pos",
+      "u_cam_pos",
+      "u_cam_target",
       "world_mat",
-      "view_proj_mat",
-      "view_proj_mat_inv",
-      "resolution",
+      "u_view_proj_mat",
+      "u_view_proj_mat_inv",
+      "u_resolution",
       "focus",
       "light",
-      /*"texture_0",
-      "texture_1",
-      "texture_2",
-      "texture_3",
-      "texture_4",*/
-      "text_params",
+      /*"u_texture_0",
+      "u_texture_1",
+      "u_texture_2",
+      "u_texture_3",
+      "u_texture_4",*/
       "mask",
-      "cam_target",
       "cam_fov",
       "glitch"
     ];
@@ -247,13 +246,26 @@ function prepare_builtin_uniforms(program, ratio) {
     var viewProjectionMatrix = mat4.create0()
     //var viewProjectionMatrixInv = mat4.create()
     // derive camera matrices from simpler parameters
-    //mat4.lookAt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], [0.0, 1.0, 0.0]);
-    mat4.lookAtTilt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], uniforms["cam_tilt"]);
-    mat4.perspective(projectionMatrix, uniforms["cam_fov"] * Math.PI / 180.0, ratio, 2.0, 10000.0)
+    //mat4.lookAt(viewMatrix, uniforms["u_cam_pos"], uniforms["u_cam_target"], [0.0, 1.0, 0.0]);
+    mat4.lookAtTilt(viewMatrix, uniforms["u_cam_pos"], uniforms["u_cam_target"], uniforms["u_cam_tilt"]);
+    mat4.perspective(projectionMatrix, uniforms["u_cam_fov"] * Math.PI / 180.0, ratio, 2.0, 10000.0)
     mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
     //mat4.invert(viewProjectionMatrixInv, viewProjectionMatrix);
-    uniforms["view_proj_mat"] = viewProjectionMatrix;
-    //uniforms["view_proj_mat_inv"] = viewProjectionMatrixInv;
+    uniforms["u_view_proj_mat"] = viewProjectionMatrix;
+    //uniforms["u_view_proj_mat_inv"] = viewProjectionMatrixInv;
+  }
+}
+
+function editor_assert_valid_uniform(val) {
+  if (config.EDITOR) {
+    if (val == undefined || val == 0 || val == 1) {
+      // undefined/0 means inactive track
+      return;
+    }
+
+    if (val.length == undefined) {
+      console.log("Warning! expected uniform to be an array, got", val, "of type", typeof val);
+    }
   }
 }
 
@@ -283,19 +295,7 @@ function resolve_animation_clip(clip, clip_time) {
   }
 }
 
-function editor_assert_valid_uniform(val) {
-  if (config.EDITOR) {
-    if (typeof val == "undefined") {
-      return;
-    }
-
-    if (val.length == undefined) {
-      console.log("Warning! expected uniform to be an array, got", val, "of type", typeof val);
-    }
-  }
-}
-
-function resole_animation_track(track, time) {
+function resolve_animation_track(track, time) {
   for (var c in track) {
     var clip = track[c];
 
@@ -316,7 +316,7 @@ function resole_animation_track(track, time) {
 
 function resolve_animations(time) {
   for (track in sequence) {
-    uniforms[track] = resole_animation_track(sequence[track], time);
+    uniforms[track] = resolve_animation_track(sequence[track], time);
   }
 }
 
@@ -497,7 +497,7 @@ function render_without_scenes(pass, shader_program) {
     }
   }
 
-  var instance_id_location = gl.getUniformLocation(shader_program, "instance_id");
+  var instance_id_location = gl.getUniformLocation(shader_program, "u_instance_id");
   draw_geom(geometry, pass.instance_count, instance_id_location);
 }
 

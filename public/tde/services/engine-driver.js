@@ -521,17 +521,18 @@ angular.module("tde.services.engine-driver", [])
 
   this.overrideCamera = function()
   {
-    if (!uniform_editor_overrides.hasOwnProperty("cam_pos")) {
-      uniform_editor_overrides["cam_pos"] = vec3.clone(uniforms["cam_pos"])
-      uniform_editor_overrides["cam_target"] = vec3.clone(uniforms["cam_target"])
+    if (!uniform_editor_overrides.hasOwnProperty("u_cam_pos")) {
+      uniform_editor_overrides["u_cam_pos"] = vec3.clone(uniforms["u_cam_pos"])
+      uniform_editor_overrides["u_cam_target"] = vec3.clone(uniforms["u_cam_target"])
 
-      //uniform_editor_overrides["cam_pos"] = [0, 0, 200]
+      //uniform_editor_overrides["u_cam_pos"] = [0, 0, 200]
     }
   }
 
   this.removeCameraOverride = function() {
-    delete uniform_editor_overrides["cam_pos"]
-    delete uniform_editor_overrides["cam_target"]
+    console.log("Removing camera override");
+    delete uniform_editor_overrides["u_cam_pos"]
+    delete uniform_editor_overrides["u_cam_target"]
     self.drawFrame()
   }
 
@@ -541,13 +542,13 @@ angular.module("tde.services.engine-driver", [])
 
     var viewMatrix = mat4.create()
     var viewMatrixInv = mat4.create()
-    mat4.lookAtTilt(viewMatrix, uniform_editor_overrides["cam_pos"], uniform_editor_overrides["cam_target"], uniforms["cam_tilt"])
+    mat4.lookAtTilt(viewMatrix, uniform_editor_overrides["u_cam_pos"], uniform_editor_overrides["u_cam_target"], uniforms["cam_tilt"])
     mat4.invert(viewMatrixInv, viewMatrix)
     mat3.fromMat4(viewMatrixInv, viewMatrixInv)
 
     vec3.transformMat3(localOffset, localOffset, viewMatrixInv)
-    vec3.add(uniform_editor_overrides["cam_pos"], uniform_editor_overrides["cam_pos"], localOffset)
-    vec3.add(uniform_editor_overrides["cam_target"], uniform_editor_overrides["cam_target"], localOffset)
+    vec3.add(uniform_editor_overrides["u_cam_pos"], uniform_editor_overrides["u_cam_pos"], localOffset)
+    vec3.add(uniform_editor_overrides["u_cam_target"], uniform_editor_overrides["u_cam_target"], localOffset)
 
     self.drawFrame()
   }
@@ -559,7 +560,7 @@ angular.module("tde.services.engine-driver", [])
     var rotationX = y * speed
 
     var cam_dir = vec3.create()
-    vec3.subtract(cam_dir, uniform_editor_overrides["cam_target"], uniform_editor_overrides["cam_pos"])
+    vec3.subtract(cam_dir, uniform_editor_overrides["u_cam_target"], uniform_editor_overrides["u_cam_pos"])
 
     var cam_right = vec3.create()
     vec3.cross(cam_right, [0, 1, 0], cam_dir)
@@ -571,7 +572,7 @@ angular.module("tde.services.engine-driver", [])
     quat.setAxisAngle(rotation, cam_right, rotationX)
     vec3.transformQuat(cam_dir, cam_dir, rotation)
 
-    vec3.add(uniform_editor_overrides["cam_target"], uniform_editor_overrides["cam_pos"], cam_dir)
+    vec3.add(uniform_editor_overrides["u_cam_target"], uniform_editor_overrides["u_cam_pos"], cam_dir)
 
     self.drawFrame()
   }
