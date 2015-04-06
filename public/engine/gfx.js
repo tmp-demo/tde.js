@@ -291,11 +291,23 @@ function resolve_animation_clip(clip, time) {
   // put 0 in the uniforms rather than undefined.
 }
 
+function editor_assert_valid_uniform(val) {
+  if (config.EDITOR) {
+    if (typeof val == "undefined") {
+      return;
+    }
+
+    if (val.length == undefined) {
+      console.log("Warning! expected uniform to be an array, got", val, "of type", typeof val);
+    }
+  }
+}
+
 function resole_animation_track(track, time) {
-  var val;
   for (var c in track) {
     var clip = track[c];
-    val = resolve_animation_clip(clip, time)
+    var val = resolve_animation_clip(clip, time)
+    editor_assert_valid_uniform(val);
     if (val) {
       return val;
     }
@@ -514,7 +526,7 @@ function render_with_scenes(pass, shader_program) {
 
     // this is optional, but can be a convenient info to have in the shader.
     obj.uniforms = obj.uniforms || {};
-    obj.uniforms["u_object_id"] = g;
+    obj.uniforms["u_object_id"] = [g];
 
     send_uniforms(shader_program, obj.uniforms);
 

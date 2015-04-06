@@ -333,8 +333,8 @@ function pack_vertices(to, v) {
 function join_rings(geom, r1, r2, triangle_fn, quad_fn) {
     if (config.EDITOR) {
         if (r1.length != r2.length) {
-            console.log(r1);
-            console.log(r2);
+            //console.log(r1);
+            //console.log(r2);
             alert("rings of incompatible sizes: "+r1.length+" "+r2.length);
         }
     }
