@@ -95,8 +95,6 @@ function clear_editor_timeline() {
 }
 
 function timline_update_dom_clips() {
-    console.log("timline_update_dom_clips");
-
     var scroll_bar = document.querySelector("#xscrollbar");
     var x_scroll = -parseFloat(scroll_bar.value);
 
