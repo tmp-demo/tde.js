@@ -50,8 +50,8 @@ for (var i = 2; i < process.argv.length; ++i) {
             var asset_name = file_name[0];
             asset = eval("___ = "+asset.toString());
             console.log("var sequence = {");
-            for (var track_name in asset) {
-                var track = asset[track_name];
+            for (var track_name in asset.animations) {
+                var track = asset.animations[track_name];
                 export_track(track_name, track);
             }
             console.log("}");

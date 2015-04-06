@@ -169,7 +169,8 @@ angular.module("tde.services.engine-driver", [])
 
     try
     {
-      sequence = eval("___ = "+data);
+      var asset = sequence = eval("___ = "+data);
+      sequence = asset.animations;
 
       // patch the sequence
       for (var u in sequence) {
