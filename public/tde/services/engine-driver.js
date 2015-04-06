@@ -184,6 +184,7 @@ angular.module("tde.services.engine-driver", [])
         }
       }
 
+      clear_editor_timeline();
       init_editor_timeline();
     }
     catch (err)

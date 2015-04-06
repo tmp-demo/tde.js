@@ -88,11 +88,17 @@ function init_editor_timeline() {
     document.querySelector("#xzoombar").addEventListener("input", timline_update_dom_clips);
 }
 
+function clear_editor_timeline() {
+  dom_tracks = {}
+  var dom_track_container = document.querySelector("#timeline-content");
+  dom_track_container.innerHTML = '';
+}
+
 function timline_update_dom_clips() {
     console.log("timline_update_dom_clips");
 
     var scroll_bar = document.querySelector("#xscrollbar");
-    var x_scroll = parseFloat(scroll_bar.value);
+    var x_scroll = -parseFloat(scroll_bar.value);
 
     var zoom_bar = document.querySelector("#xzoombar");
     var x_scale = parseFloat(zoom_bar.value);
