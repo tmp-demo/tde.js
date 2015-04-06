@@ -231,7 +231,7 @@ function send_uniforms(program, uniform_list) {
   }
 }
 
-function set_uniforms(program, ratio) {
+function prepare_builtin_uniforms(program, ratio) {
 
   // allow the editor to override uniforms for debug
   if (config.EDITOR) {
@@ -255,40 +255,32 @@ function set_uniforms(program, ratio) {
     uniforms["view_proj_mat"] = viewProjectionMatrix;
     //uniforms["view_proj_mat_inv"] = viewProjectionMatrixInv;
   }
-
-  send_uniforms(program, uniforms);
 }
 
-function resolve_animation_clip(clip, time) {
-  var clip_time = time - clip.start;
-  is_active = (clip_time >= 0 && clip_time <= clip.duration);
-  if (is_active) {
-    var anim = clip.animation;
-    // Careful here: if anim is set to zero, it'll mean that the tract is
-    // inactive which may not be the intension. use [0] if you want to inline
-    // constants.
-    // TODO: perhaps we should just have EVERY unform passed as an array or
-    // a function returning an array. This would save some checks and simplify
-    // things a bit.
-    if (!anim) {
-      // no anim means the meaningful animation is that the track is active
-      // in which case it's value is 1.
-      return 1;
-    }
-    if (typeof anim == "function") {
-      return anim(clip_time);
-    }
-    if (config.UNIFORM_INTERPOLATION_ENABLED) {
-      //console.log("animate weith clip time", clip_time);
-      return animate(deep_clone(anim), clip_time);
-    } else {
-      // TODO we should just do linear interpolation if we want to save space.
-      // I don't think that only having constants here is useful.
-      return anim;
-    }
+function resolve_animation_clip(clip, clip_time) {
+  var anim = clip.animation;
+  // Careful here: if anim is set to zero, it'll mean that the tract is
+  // inactive which may not be the intension. use [0] if you want to inline
+  // constants.
+  // TODO: perhaps we should just have EVERY unform passed as an array or
+  // a function returning an array. This would save some checks and simplify
+  // things a bit.
+  if (!anim) {
+    // no anim means the meaningful animation is that the track is active
+    // in which case it's value is 1.
+    return 1;
   }
-  // Inactive track. Return undefined here, but resole_animation_track will
-  // put 0 in the uniforms rather than undefined.
+  if (typeof anim == "function") {
+    return anim(clip_time);
+  }
+  if (config.UNIFORM_INTERPOLATION_ENABLED) {
+    //console.log("animate weith clip time", clip_time);
+    return animate(deep_clone(anim), clip_time);
+  } else {
+    // TODO we should just do linear interpolation if we want to save space.
+    // I don't think that only having constants here is useful.
+    return anim;
+  }
 }
 
 function editor_assert_valid_uniform(val) {
@@ -306,10 +298,16 @@ function editor_assert_valid_uniform(val) {
 function resole_animation_track(track, time) {
   for (var c in track) {
     var clip = track[c];
-    var val = resolve_animation_clip(clip, time)
-    editor_assert_valid_uniform(val);
-    if (val) {
-      return val;
+
+    var clip_time = time - clip.start;
+    is_active = (clip_time >= 0 && clip_time <= clip.duration);
+
+    if (is_active) {
+      var val = resolve_animation_clip(clip, clip_time)
+      editor_assert_valid_uniform(val);
+      if (val) {
+        return val;
+      }
     }
   }
   // Inactive track (resolve_animation_clip returned undefined for all clips)
@@ -348,7 +346,9 @@ function render_pass(pass, time) {
 
   gl.useProgram(shader_program);
 
-  set_uniforms(shader_program, resolution[0] / resolution[1]);
+  prepare_builtin_uniforms(shader_program, resolution[0] / resolution[1]);
+
+  send_uniforms(shader_program, uniforms);
 
   prepare_texture_inputs(pass, shader_program);
 
