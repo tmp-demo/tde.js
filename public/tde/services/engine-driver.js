@@ -220,34 +220,34 @@ angular.module("tde.services.engine-driver", [])
 
   }
 
-  this.loadSong = function(name, data)
+  this.loadSoundtrack = function(name, data, staticPath)
   {
-    self.logInfo("loading song " + name)
+    self.logInfo("loading track" + name);
+    self.logInfo(data);
 
-    try
-    {
-      eval(data)
-      snd = new SND()
-      if (self.isMute)
-        snd.mute()
-    }
-    catch (err)
-    {
-      self.logError(err.message, err.stack)
+    var sndData = JSON.parse(data);
+
+    if (sndData.type == "streaming") {
+      snd = SNDStreaming(staticPath + "/" + sndData.path, sndData.bpm);
+    } else {
+      try
+      {
+        snd = new SND(sndData);
+        if (self.isMute) {
+          snd.mute();
+        }
+      }
+      catch (err)
+      {
+       self.logError(err.message, err.stack);
+      }
     }
   }
 
-  this.unloadSong = function(name)
+  this.unloadSoundtrack = function(name)
   {
     if (snd)
       snd.playing = false
-  }
-
-  this.loadOgg = function(name, data)
-  {
-    snd = new SND_Ogg(name, data)
-    if (self.isMute)
-      snd.mute()
   }
 
   this.loadShader = function(name, data)
@@ -460,7 +460,7 @@ angular.module("tde.services.engine-driver", [])
   this.play = function()
   {
     this.playing = true
-    this.seek(this.currentTime)
+    this.seek(this.currentTime);
     if (snd) {
       snd.p()
     }
