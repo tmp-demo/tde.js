@@ -83,7 +83,22 @@ module.exports.init = function(app)
       res.send(200, assetData)
     })
   })
-  
+
+  app.get("/data/project/:projectId/static-asset/:assetId", function(req, res, next)
+  {
+    var projectId = req.params.projectId
+    var assetId = req.params.assetId
+
+    var assetPath = app.get("dataRoot") + projectId + "/static/" + assetId
+    fs.readFile(assetPath, function(err, assetData)
+    {
+      if (err) return next(err)
+
+      res.send(200, assetData)
+    })
+  })
+
+
   app.put("/data/project/:projectId/asset/:assetId", function(req, res, next)
   {
     var projectId = req.params.projectId

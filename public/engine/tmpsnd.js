@@ -354,47 +354,43 @@
 ////////////////// Audio tag implementation
 
 /** @constructor */
-function SND_Ogg(name, data)
+function SNDStreaming(path, bpm)
 {
-  var src, audioElement;
+   var element = new Audio(path);
 
-  if (data)
-    src = "/data/project/tdf15/asset/" + name + ".ogg"
-  else
-    src = name + ".ogg"
-
-  var audioElement = new Audio(src)
   // uncomment this line if you are debuggin the exported code and don't want
   // to be bothered with the music.
-  //audioElement.volume = 0;
+  //this.element.volume = 0;
 
   this.p = function()
   {
-    audioElement.play();
+    element.play();
   }
 
   this.s = function()
   {
-    audioElement.pause();
+    element.pause();
   }
 
   this.t = function()
   {
-    return audioElement.currentTime * (173.43 / 60);
+    return element.currentTime * (bpm / 60);
   }
 
   this.seek = function(beat)
   {
-    audioElement.currentTime = beat * 60 / 173.43
+    element.currentTime = beat * 60 / bpm;
   }
 
   this.mute = function()
   {
-    audioElement.volume = 0
+    element.volume = 0
   }
 
   this.unmute = function()
   {
-    audioElement.volume = 1
+    element.volume = 1
   }
+
+  return this;
 }
