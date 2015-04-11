@@ -1,0 +1,32 @@
+//! COMMON
+
+/** IMPORTANT **/
+/** Please maintain the lists in gfx.js if you update this file **/
+
+precision lowp float;
+
+uniform float u_global_time;
+uniform float u_object_id;
+uniform float u_instance_id;
+uniform vec3 u_cam_pos;
+uniform mat4 u_view_proj_mat;
+uniform vec2 u_resolution;
+uniform sampler2D u_texture_0;
+uniform sampler2D u_texture_1;
+uniform sampler2D u_texture_2;
+uniform sampler2D u_texture_3;
+uniform sampler2D u_texture_4;
+
+varying vec3 v_position;
+varying vec3 v_normal;
+varying vec2 v_uv;
+
+
+uniform float u_glitch;
+
+
+//! VERTEX
+attribute vec3 a_position;
+attribute vec3 a_normal;
+attribute vec2 a_uv;
+
