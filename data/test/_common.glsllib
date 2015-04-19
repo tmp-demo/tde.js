@@ -19,6 +19,7 @@ uniform sampler2D u_texture_4;
 
 varying vec3 v_position;
 varying vec3 v_normal;
+varying vec3 v_color;
 varying vec2 v_uv;
 
 

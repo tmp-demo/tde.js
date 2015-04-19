@@ -7,8 +7,14 @@
     {
         render_to: {color: "texture_1", depth: "texture_depth"},
         depth_test: true,
-        scene: "five_spheres",
+        scene: [{ geometry: "sphere"}],
         program: "explode",
+    },
+    {
+        render_to: {color: "texture_1", depth: "texture_depth"},
+        scene: [{ geometry: "lines"}],
+        program: "lines",
+        depth_test: true,
     },
     {
         clear: true,
@@ -24,5 +30,5 @@
         texture_inputs: ["texture_1"],
         scene: [{ geometry: "quad"}],
         program: "postfx2",
-    }
+    },
 ]
