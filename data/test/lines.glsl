@@ -39,7 +39,12 @@ void main_vs_lines() {
   vec2 s2 = p2.xy/p2.w;
   s1.x *= aspect;
   s2.x *= aspect;
-  vec2 dir = normalize(s2 - s1);
+
+  vec2 dir =
+  // constant thickness in screen space
+  //          normalize(s2 - s1);
+  // thickness that accounts for the depth
+              (s2 - s1) * 100.0;
 
   // compute the normal
   vec2 n = vec2(-dir.y, dir.x);
