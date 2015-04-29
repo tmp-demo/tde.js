@@ -4,7 +4,7 @@
     var num_chunks = 64;
     var positions = [];
     var stride = 1;
-    var num_lines = 12;
+    var num_lines = 22;
     for (var i = 0; i < num_lines; ++i) {
       for (var j = 0; j < num_chunks; ++j) {
           var step = 1/num_chunks;

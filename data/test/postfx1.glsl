@@ -34,16 +34,16 @@ void main_fs_postfx1() {
   vec2 uv2 = uv;//floor(uv * 5.0 + vec2(offset0 * 2.0 * glitchFactor, 0.0) * floor(glitch * 20.0) / 100.0) / 5.0;
   float offset1 = floor(rand2(uv2 + floor(u_global_time * 10.0))) / 2.0;
   float offset2 = floor(uv.y * 20.0 + rand2(uv2) * 100.0) / 100.0;
-  vec3 color = texture2D(u_texture_0, uv).rgb;
-  
+  vec3 color = texture2D(u_texture_0, uv);
+
   // noise
-  color += vec3(rand2(uv + u_global_time)) * u_glitch * 0.3;
+  color.rgb += vec3(rand2(uv + u_global_time)) * u_glitch * 0.3;
   
   // vignette
-  color *= 1.0 - pow(length(uv - 0.5) * 1.2, 4.0);
+  color.rgb *= 1.0 - pow(length(uv - 0.5) * 1.2, 4.0);
   
   // gamma
-  //color = sqrt(color);
+  //color.rgb = sqrt(color.rgb);
   
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragColor = color;
 }

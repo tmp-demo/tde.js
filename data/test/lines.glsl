@@ -28,7 +28,7 @@ void main_vs_lines() {
 
   float aspect = u_resolution.x / u_resolution.y;
 
-  float thickness = 0.015;
+  float thickness = 0.055;
 
   // compute the position on the path and d and d+epsion
   vec4 p1 = u_view_proj_mat * vec4(line_pos(d, side, line_id, u_global_time), 1.0);

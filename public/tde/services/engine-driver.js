@@ -147,7 +147,8 @@ angular.module("tde.services.engine-driver", [])
 
     try
     {
-      render_passes = eval("___ = "+data);
+      var asset = eval("___ = "+data);
+      render_passes = asset.render_passes;
     }
     catch (err)
     {

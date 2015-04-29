@@ -32,10 +32,8 @@
         ],
       },
     ],
-    "pass_effect1": [
-        { start:0, duration:50 }
-    ],
-    "pass_effect2": [
+    "no_aquapaints": [
+        { start:10, duration:6 },
         { start:50, duration:14 }
     ],
   },
