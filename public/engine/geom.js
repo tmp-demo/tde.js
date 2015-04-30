@@ -81,6 +81,23 @@ function make_sphere(radius, num_subdivs) {
     return buffer;
 }
 
+function make_grid( num_subdivs, ratio) {
+    var ratio_x = ratio;
+    var ratio_y = 1 / ratio;
+
+    var buffer =  [
+      -ratio_x, -ratio_y, 0,  -ratio_x,  ratio_y, 0,   ratio_x, -ratio_y, 0,
+      -ratio_x,  ratio_y, 0,   ratio_x, -ratio_y, 0,   ratio_x,  ratio_y, 0  ];
+    while (--num_subdivs > 0) {
+        buffer = subdivide(buffer);
+    }
+
+    console.log('make_grid generated a grid with that many triangles : ' + (buffer.length / 3));
+    return buffer;
+}
+
+
+
 // TODO: it's sorta convenient to have this for prototyping but I assume we'll
 // have to not use this in the shipping demos and always generate from unpacked
 // geometry rather than packing and unpacking to re-pack afterwards like

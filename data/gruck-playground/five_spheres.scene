@@ -1,0 +1,17 @@
+{
+    objects: [
+        {
+            geometry: "sphere",
+            uniforms: {
+                "u_model_mat": "(t) => { return op_translate(t, 0, 0); }"
+            }
+        },
+        { geometry: "sphere" },
+        { geometry: "sphere" },
+        { geometry: "sphere" },
+        { geometry: "sphere" }
+    ],
+    uniforms: {
+        "u_foo": "[0,0,0]"
+    }
+}

@@ -28,7 +28,7 @@ angular.module("tde.services.engine-driver", [])
     // nothing to do
   }
 
-  this.loadTexture = function(name, data)
+  this.loadTexture = function(name, data, staticPath, callback)
   {
     self.logInfo("loading texture "+ name);
     var asset = eval("___ = "+data);
@@ -59,6 +59,12 @@ angular.module("tde.services.engine-driver", [])
           var item = asset.data[i];
           textures[item.id] = ((asset.vertical || item.vertical) ? create_vertical_text_texture : create_text_texture)(item.size, item.text);
         }
+        break;
+      }
+      case "jpg": {
+        // A texture initialized from filesystem image
+        textures[name] = create_img_texture(staticPath + "/" + asset.filename,callback);
+       
         break;
       }
       default: {

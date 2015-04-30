@@ -1,0 +1,8 @@
+{
+    objects: [
+        { geometry: "grid" }
+    ],
+    uniforms: {
+        "u_foo": "[0,0,0]"
+    }
+}

@@ -119,23 +119,44 @@ angular.module("tde.services.asset", [])
         var parts = assetParts(assetId)
         var name = parts[0]
         var type = parts[1]
+
+        var is_async_loading_asset = false;
         switch (type)
         {
-          case "config": EngineDriver.loadConfig(name, data); break
-          case "tex": EngineDriver.loadTexture(name, data); break
-          case "geom": EngineDriver.loadGeometry(name, data); break
-          case "seq": EngineDriver.loadSequence(name, data); break
-          case "rg": EngineDriver.loadRenderGraph(name, data); break
-          case "scene": EngineDriver.loadScene(name, data); break
-          case "snd": EngineDriver.loadSoundtrack(name, data, staticPath); break
-          case "glsllib": EngineDriver.loadShader(assetId, data); break
-          case "glsl": EngineDriver.loadShader(assetId, data); break
+          case "config":  {
+            EngineDriver.loadConfig(name, data); break;
+          }
+          case "tex":     {
+            is_async_loading_asset = true;
+            EngineDriver.loadTexture(name, data, staticPath, callback ? callback : function(){}); break;
+          }
+          case "geom":    {
+            EngineDriver.loadGeometry(name, data); break;
+          }
+          case "seq":     {
+            EngineDriver.loadSequence(name, data); break;
+          }
+          case "rg":      {
+            EngineDriver.loadRenderGraph(name, data); break;
+          }
+          case "scene":   {
+            EngineDriver.loadScene(name, data); break;
+          }
+          case "snd":     {
+            EngineDriver.loadSoundtrack(name, data, staticPath); break;
+          }
+          case "glsllib": {
+            EngineDriver.loadShader(assetId, data); break;
+          }
+          case "glsl":    {
+            EngineDriver.loadShader(assetId, data); break;
+          }
           default: toastr.warning(type, "Unknown asset type"); break
         }
         
         $rootScope.$broadcast("assetListChanged")
         $rootScope.$broadcast("assetLoaded", assetId)
-        if (callback) {
+        if (callback & !is_async_loading_asset) {
           callback(null)
         }
         self.gRemainingAssets--;
