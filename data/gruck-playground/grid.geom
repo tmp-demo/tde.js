@@ -1,7 +1,7 @@
 {
   type: "js",
   generator: function() {
-    var positions = make_grid( 0, 1/ (3/2 / 16*9));
+    var positions = make_grid( 4);
     var normals = map_triangles(positions, flat_normal);
     var triangle_ids = map_triangles(positions, triangle_index);
     return {
