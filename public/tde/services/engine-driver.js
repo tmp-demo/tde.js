@@ -187,7 +187,7 @@ angular.module("tde.services.engine-driver", [])
     self.logInfo("loading track" + name);
     self.logInfo(data);
 
-    var sndData = JSON.parse(data);
+    var sndData = eval(data);
 
     if (sndData.type == "streaming") {
       snd = SNDStreaming(staticPath + "/" + sndData.path, sndData.bpm);
