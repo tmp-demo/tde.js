@@ -1,4 +1,37 @@
 
+var canvas_overlay_text = {
+  enabled: true,
+  time: 0,
+  enable: function() {
+    canvas_overlay_text.enabled = true;
+    update_canvas_overlay_text();
+  },
+  disable: function() {
+    if (canvas_overlay_text.enabled) {
+      canvas_overlay_text.enabled = false;
+      dom_overlay_text().innerHTML = "";
+    }
+  },
+  update: function() {
+    if (!canvas_overlay_text.enabled) {
+      return;
+    }
+
+    if (snd) {
+      var time = Math.floor(snd.t())
+      if (time != canvas_overlay_text.time && !isNaN(time)) {
+        dom_overlay_text().innerHTML = "time: " +  time;
+        canvas_overlay_text.time = time;
+      }
+    }
+  }
+}
+
+function dom_overlay_text() {
+  return document.getElementById("canvas-overlay-text");
+}
+
+
 angular.module("tde.engine-view", [])
 
 .controller("EngineViewCtrl", function($scope, EngineDriver)
@@ -71,7 +104,7 @@ angular.module("tde.engine-view", [])
           scenes[s].start_time = time_sum
           time_sum += scenes[s].duration
         }*/
-        time_sum = 64
+        time_sum = 64 // LOL
         seeker.attr("max", time_sum * 1000)
         
         seeker.val(currentTime * 1000)
@@ -218,11 +251,11 @@ angular.module("tde.engine-view", [])
 
       element.find("#map-view").mousemove(function(e)
       {
-        if (!("cam_pos" in uniforms))
+        if (!("u_cam_pos" in uniforms))
           return;
 
-        //uniforms["cam_pos"][0] = (e.pageX - $("#map-view").offset().left - 150) * 5;
-        //uniforms["cam_pos"][2] = (e.pageY - $("#map-view").offset().top - 150) * 5;
+        //uniforms["u_cam_pos"][0] = (e.pageX - $("#map-view").offset().left - 150) * 5;
+        //uniforms["u_cam_pos"][2] = (e.pageY - $("#map-view").offset().top - 150) * 5;
         
         var mapX = 0, mapY = 0;
         mouseX = e.pageX - $("#map-view").offset().left;

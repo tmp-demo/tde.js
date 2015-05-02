@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="/tde/blender-box/blender-box.css" />
     <link rel="stylesheet" href="/tde/code-editor/code-editor.css" />
     <link rel="stylesheet" href="/tde/engine-view/engine-view.css" />
+    <link rel="stylesheet" href="/tde/timeline/timeline.css" />
     <link rel="stylesheet" href="/tde/goto-box/goto-box.css" />
     <link rel="stylesheet" href="/tde/home/home.css" />
     <link rel="stylesheet" href="/tde/navbar/navbar.css" />
@@ -28,9 +29,18 @@
     <div id="leftPane" ng-view></div>
     <div id="rightPane">
       <tde-engine-view></tde-engine-view>
-      <div id="timeline">
-        passes and keyframes...
-      </div>
+        <div id="timeline" class="border">
+            <div id="timelinde-header" class=""></div>
+
+            <div id="timeline-content" class="border">
+                <!-- js generated stuff will go in here -->
+            </div>
+
+            <div id="timeline-footer" class="">
+                <input id="xscrollbar" type="range" min="0" max="100" step="1" value="0" oninput: "timeline_update_dom_clips()"> </input>
+                <input id="xzoombar" type="range" min="0.5" max="10.0" step="0.1" value="1.0" oninput: "timeline_update_dom_clips()"> </input>
+            </div>
+        </div>
     </div>
   
     <tde-blender-box visible="visibleBox === 'blender-box'"></tde-blender-box>
@@ -95,6 +105,7 @@
     <script src="/tde/blender-box/blender-box.js"></script>
     <script src="/tde/code-editor/code-editor.js"></script>
     <script src="/tde/engine-view/engine-view.js"></script>
+    <script src="/tde/timeline/timeline.js"></script>
     <script src="/tde/goto-box/goto-box.js"></script>
     <script src="/tde/home/home.js"></script>
     <script src="/tde/navbar/navbar.js"></script>
@@ -114,6 +125,7 @@
     <script src="/engine/gl-matrix-custom.js"></script>
     <script src="/engine/paris.js"></script>
     <script src="/engine/text.js"></script>
+    <script src="/engine/img_texture.js"></script>
     <script src="/engine/texture.js"></script>
     <script src="/engine/tmpsnd.js"></script>
     <script src="/engine/webgl-debug-custom.js"></script>

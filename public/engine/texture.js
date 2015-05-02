@@ -68,7 +68,7 @@ function prepare_texture_inputs(pass, shader_program) {
       var tex = texture.tex;
       gl.activeTexture(texture_unit(i));
       gl.bindTexture(gl.TEXTURE_2D, tex);
-      gl.uniform1i(gl.getUniformLocation(shader_program,"texture_"+i), i);
+      gl.uniform1i(gl.getUniformLocation(shader_program,"u_texture_"+i), i);
     }
   }
 }

@@ -28,7 +28,7 @@ angular.module("tde.services.engine-driver", [])
     // nothing to do
   }
 
-  this.loadTexture = function(name, data)
+  this.loadTexture = function(name, data, staticPath, callback)
   {
     self.logInfo("loading texture "+ name);
     var asset = eval("___ = "+data);
@@ -59,6 +59,12 @@ angular.module("tde.services.engine-driver", [])
           var item = asset.data[i];
           textures[item.id] = ((asset.vertical || item.vertical) ? create_vertical_text_texture : create_text_texture)(item.size, item.text);
         }
+        break;
+      }
+      case "jpg": {
+        // A texture initialized from filesystem image
+        textures[name] = create_img_texture(staticPath + "/" + asset.filename,callback);
+       
         break;
       }
       default: {
@@ -141,13 +147,14 @@ angular.module("tde.services.engine-driver", [])
     }
   }
 
-  this.loadSequence = function(name, data)
+  this.loadRenderGraph = function(name, data)
   {
-    self.logInfo("loading sequence " + name)
+    self.logInfo("loading render passes " + name)
 
     try
     {
-      sequence = eval("___ = "+data);
+      var asset = eval("___ = "+data);
+      render_passes = asset.render_passes;
     }
     catch (err)
     {
@@ -158,9 +165,47 @@ angular.module("tde.services.engine-driver", [])
     engine_render(self.currentTime)
   }
 
-  this.unloadSequence = function(name)
+  this.unloadRenderGraph = function(name)
   {
     // leak everything
+  }
+
+  this.loadSequence = function(name, data)
+  {
+    self.logInfo("loading sequence " + name)
+
+    try
+    {
+      var asset = sequence = eval("___ = "+data);
+      sequence = asset.animations;
+
+      // patch the sequence
+      for (var u in sequence) {
+        var uniform = sequence[u];
+        for (var c in uniform) {
+          var clip = uniform[c];
+          if (typeof clip.animation == "string") {
+            var function_str = "function(t) { return " + clip.animation + "; }";
+            console.log("patching uniform "+u+" animation: ", function_str);
+            clip.animation = eval("_="+function_str);
+          }
+        }
+      }
+
+      clear_editor_timeline();
+      init_editor_timeline();
+    }
+    catch (err)
+    {
+      self.logError(err.message, err.stack)
+    }
+
+    self.drawFrame();
+  }
+
+  this.unloadSequence = function(name)
+  {
+    sequence = null;
   }
 
   this.loadScene = function(name, data)
@@ -408,7 +453,9 @@ angular.module("tde.services.engine-driver", [])
 
   this.drawFrame = function()
   {
-    engine_render(this.currentTime)
+    if (render_passes) {
+      engine_render(this.currentTime)
+    }
   }
   
   this.drawFrameIfNotPlaying = function()
@@ -481,17 +528,18 @@ angular.module("tde.services.engine-driver", [])
 
   this.overrideCamera = function()
   {
-    if (!uniform_editor_overrides.hasOwnProperty("cam_pos")) {
-      uniform_editor_overrides["cam_pos"] = vec3.clone(uniforms["cam_pos"])
-      uniform_editor_overrides["cam_target"] = vec3.clone(uniforms["cam_target"])
+    if (!uniform_editor_overrides.hasOwnProperty("u_cam_pos")) {
+      uniform_editor_overrides["u_cam_pos"] = vec3.clone(uniforms["u_cam_pos"])
+      uniform_editor_overrides["u_cam_target"] = vec3.clone(uniforms["u_cam_target"])
 
-      //uniform_editor_overrides["cam_pos"] = [0, 0, 200]
+      //uniform_editor_overrides["u_cam_pos"] = [0, 0, 200]
     }
   }
 
   this.removeCameraOverride = function() {
-    delete uniform_editor_overrides["cam_pos"]
-    delete uniform_editor_overrides["cam_target"]
+    console.log("Removing camera override");
+    delete uniform_editor_overrides["u_cam_pos"]
+    delete uniform_editor_overrides["u_cam_target"]
     self.drawFrame()
   }
 
@@ -501,13 +549,13 @@ angular.module("tde.services.engine-driver", [])
 
     var viewMatrix = mat4.create()
     var viewMatrixInv = mat4.create()
-    mat4.lookAtTilt(viewMatrix, uniform_editor_overrides["cam_pos"], uniform_editor_overrides["cam_target"], uniforms["cam_tilt"])
+    mat4.lookAtTilt(viewMatrix, uniform_editor_overrides["u_cam_pos"], uniform_editor_overrides["u_cam_target"], uniforms["cam_tilt"])
     mat4.invert(viewMatrixInv, viewMatrix)
     mat3.fromMat4(viewMatrixInv, viewMatrixInv)
 
     vec3.transformMat3(localOffset, localOffset, viewMatrixInv)
-    vec3.add(uniform_editor_overrides["cam_pos"], uniform_editor_overrides["cam_pos"], localOffset)
-    vec3.add(uniform_editor_overrides["cam_target"], uniform_editor_overrides["cam_target"], localOffset)
+    vec3.add(uniform_editor_overrides["u_cam_pos"], uniform_editor_overrides["u_cam_pos"], localOffset)
+    vec3.add(uniform_editor_overrides["u_cam_target"], uniform_editor_overrides["u_cam_target"], localOffset)
 
     self.drawFrame()
   }
@@ -519,7 +567,7 @@ angular.module("tde.services.engine-driver", [])
     var rotationX = y * speed
 
     var cam_dir = vec3.create()
-    vec3.subtract(cam_dir, uniform_editor_overrides["cam_target"], uniform_editor_overrides["cam_pos"])
+    vec3.subtract(cam_dir, uniform_editor_overrides["u_cam_target"], uniform_editor_overrides["u_cam_pos"])
 
     var cam_right = vec3.create()
     vec3.cross(cam_right, [0, 1, 0], cam_dir)
@@ -531,7 +579,7 @@ angular.module("tde.services.engine-driver", [])
     quat.setAxisAngle(rotation, cam_right, rotationX)
     vec3.transformQuat(cam_dir, cam_dir, rotation)
 
-    vec3.add(uniform_editor_overrides["cam_target"], uniform_editor_overrides["cam_pos"], cam_dir)
+    vec3.add(uniform_editor_overrides["u_cam_target"], uniform_editor_overrides["u_cam_pos"], cam_dir)
 
     self.drawFrame()
   }

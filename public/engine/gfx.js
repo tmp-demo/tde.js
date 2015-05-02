@@ -70,31 +70,29 @@ function gfx_init() {
   init_render_to_texture(sequence);
 
   if (config.CAM_UNIFORMS_ENABLED) {
-    uniforms["cam_pos"] = [0, 1, 0]
-    uniforms["cam_target"] = [0, 0, 0]
-    uniforms["cam_fov"] = 75
-    uniforms["cam_tilt"] = 0
+    uniforms["u_cam_pos"] = [0, 1, 0]
+    uniforms["u_cam_target"] = [0, 0, 0]
+    uniforms["u_cam_fov"] = 75
+    uniforms["u_cam_tilt"] = 0
   }
 
   // hack to make the export toolchain minify attribute and uniform names
   if (config.EDITOR) {
     var _uniforms = [
-      "cam_pos",
+      "u_cam_pos",
+      "u_cam_target",
       "world_mat",
-      "view_proj_mat",
-      "view_proj_mat_inv",
-      "resolution",
+      "u_view_proj_mat",
+      "u_view_proj_mat_inv",
+      "u_resolution",
       "focus",
       "light",
-      /*"texture_0",
-      "texture_1",
-      "texture_2",
-      "texture_3",
-      "texture_4",*/
-      "clip_time",
-      "text_params",
+      /*"u_texture_0",
+      "u_texture_1",
+      "u_texture_2",
+      "u_texture_3",
+      "u_texture_4",*/
       "mask",
-      "cam_target",
       "cam_fov",
       "glitch"
     ];
@@ -207,35 +205,19 @@ function destroy_shader_program(name)
   }
 }
 
-function send_uniforms(program, uniform_list, t) {
+function send_uniforms(program, uniform_list) {
   if (!uniform_list || !program) {
     return;
   }
 
   for (var uniform_name in uniform_list) {
-    var val = uniform_list[uniform_name];
-
     var location = gl.getUniformLocation(program, uniform_name);
 
     if (!location) {
       continue;
     }
 
-    if (config.EDITOR) {
-      // export-sequences.js takes care of de-stringifying the uniforms
-      if (typeof val == "string") {
-        val = eval("_="+val);
-      }
-    }
-
-    if (typeof val == "function") {
-      val = val(t);
-    }
-
-    // if val is a bare number, make a one-element array
-    if (typeof val == "number") {
-      val = [val];
-    }
+    var val = uniform_list[uniform_name];
 
     switch (val.length) {
       case 1: gl.uniform1fv(location, val); break;
@@ -248,12 +230,13 @@ function send_uniforms(program, uniform_list, t) {
   }
 }
 
-function set_uniforms(program, ratio, t) {
+function prepare_builtin_uniforms(program, ratio) {
 
   // allow the editor to override uniforms for debug
   if (config.EDITOR) {
     for (var uniform_name in uniforms) {
-      uniforms[uniform_name] = uniform_editor_overrides.hasOwnProperty(uniform_name) ? uniform_editor_overrides[uniform_name] : uniforms[uniform_name]
+      uniforms[uniform_name] = uniform_editor_overrides.hasOwnProperty(uniform_name) ? uniform_editor_overrides[uniform_name]
+                                                                                     : uniforms[uniform_name]
     }
   }
 
@@ -263,88 +246,133 @@ function set_uniforms(program, ratio, t) {
     var viewProjectionMatrix = mat4.create0()
     //var viewProjectionMatrixInv = mat4.create()
     // derive camera matrices from simpler parameters
-    //mat4.lookAt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], [0.0, 1.0, 0.0]);
-    mat4.lookAtTilt(viewMatrix, uniforms["cam_pos"], uniforms["cam_target"], uniforms["cam_tilt"]);
-    mat4.perspective(projectionMatrix, uniforms["cam_fov"] * Math.PI / 180.0, ratio, 2.0, 10000.0)
+    //mat4.lookAt(viewMatrix, uniforms["u_cam_pos"], uniforms["u_cam_target"], [0.0, 1.0, 0.0]);
+    mat4.lookAtTilt(viewMatrix, uniforms["u_cam_pos"], uniforms["u_cam_target"], uniforms["u_cam_tilt"]);
+    mat4.perspective(projectionMatrix, uniforms["u_cam_fov"] * Math.PI / 180.0, ratio, 2.0, 10000.0)
     mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
     //mat4.invert(viewProjectionMatrixInv, viewProjectionMatrix);
-    uniforms["view_proj_mat"] = viewProjectionMatrix;
-    //uniforms["view_proj_mat_inv"] = viewProjectionMatrixInv;
+    uniforms["u_view_proj_mat"] = viewProjectionMatrix;
+    //uniforms["u_view_proj_mat_inv"] = viewProjectionMatrixInv;
   }
+}
 
-  send_uniforms(program, uniforms, t);
+function editor_assert_valid_uniform(val) {
+  if (config.EDITOR) {
+    if (val == undefined || val == 0 || val == 1) {
+      // undefined/0 means inactive track
+      return;
+    }
+
+    if (val.length == undefined) {
+      console.log("Warning! expected uniform to be an array, got", val, "of type", typeof val);
+    }
+  }
+}
+
+function resolve_animation_clip(clip, clip_time) {
+  var anim = clip.animation;
+  // Careful here: if anim is set to zero, it'll mean that the tract is
+  // inactive which may not be the intension. use [0] if you want to inline
+  // constants.
+  // TODO: perhaps we should just have EVERY unform passed as an array or
+  // a function returning an array. This would save some checks and simplify
+  // things a bit.
+  if (!anim) {
+    // no anim means the meaningful animation is that the track is active
+    // in which case it's value is 1.
+    return 1;
+  }
+  if (typeof anim == "function") {
+    return anim(clip_time);
+  }
+  if (config.UNIFORM_INTERPOLATION_ENABLED) {
+    //console.log("animate weith clip time", clip_time);
+    return animate(deep_clone(anim), clip_time);
+  } else {
+    // TODO we should just do linear interpolation if we want to save space.
+    // I don't think that only having constants here is useful.
+    return anim;
+  }
+}
+
+function resolve_animation_track(track, time) {
+  for (var c in track) {
+    var clip = track[c];
+
+    var clip_time = time - clip.start;
+    is_active = (clip_time >= 0 && clip_time <= clip.duration);
+
+    if (is_active) {
+      var val = resolve_animation_clip(clip, clip_time)
+      editor_assert_valid_uniform(val);
+      if (val) {
+        return val;
+      }
+    }
+  }
+  // Inactive track (resolve_animation_clip returned undefined for all clips)
+  return 0;
+}
+
+function resolve_animations(time) {
+  for (track in sequence) {
+    uniforms[track] = resolve_animation_track(sequence[track], time);
+  }
 }
 
 function render_pass(pass, time) {
-    if (config.GL_DEBUG && config.GL_DEBUG_TRACE) {
+  if (pass.enabled) {
+    if (!uniforms[pass.enabled]) {
+      return;
+    }
+  }
+
+  if (config.GL_DEBUG && config.GL_DEBUG_TRACE) {
     console.log("== PASS ==", pass);
   }
 
-  for (var j = 0; j < pass.clips.length; j++) {
-    var clip = pass.clips[j]
+  // actual render
 
-    var clip_time = time - clip.start
-    if ((clip_time >= 0) && (clip_time < clip.duration)) {
-      // if needed, clip_time_norm = clip_time / clip.duration
-      uniforms["clip_time"] = clip_time;
+  var resolution = prepare_render_to_texture(pass);
+  gl.viewport(0, 0, resolution[0], resolution[1]);
+  uniforms["u_resolution"] = resolution;
 
-      // uniform animation
-      if (clip.uniforms) {
-        for (var uniform_name in clip.uniforms) {
-          if (config.UNIFORM_INTERPOLATION_ENABLED) {
-            var clip_uniform = clip.uniforms[uniform_name];
-            if (typeof clip_uniform == "function") {
-              uniforms[uniform_name] = clip.uniforms[uniform_name](clip_time);
-            } else {
-              uniforms[uniform_name] = animate(deep_clone(clip_uniform), clip_time);
-            }
-          } else {
-            uniforms[uniform_name] = clip.uniforms[uniform_name];
-          }
-        }
-      }
+  prepare_clear(pass);
 
-      // actual render
-
-      var resolution = prepare_render_to_texture(pass);
-      gl.viewport(0, 0, resolution[0], resolution[1]);
-      uniforms["u_resolution"] = resolution;
-
-      prepare_clear(pass);
-
-      var shader_program = get_shader_program(pass);
-      if (!shader_program) {
-        continue;
-      }
-
-      gl.useProgram(shader_program);
-
-      set_uniforms(shader_program, resolution[0] / resolution[1], clip_time);
-
-      prepare_texture_inputs(pass, shader_program);
-
-      prepare_blending(pass);
-
-      prepare_depth_test(pass);
-
-      if (config.SCENES_ENABLED && pass.scene) {
-        render_with_scenes(pass, shader_program, clip_time);
-      } else {
-        render_without_scenes(pass, shader_program, clip_time);
-      }
-
-      cleanup_texture_inputs(pass);
-    }
+  var shader_program = get_shader_program(pass);
+  if (!shader_program) {
+    return;
   }
+
+  gl.useProgram(shader_program);
+
+  prepare_builtin_uniforms(shader_program, resolution[0] / resolution[1]);
+
+  send_uniforms(shader_program, uniforms);
+
+  prepare_texture_inputs(pass, shader_program);
+
+  prepare_blending(pass);
+
+  prepare_depth_test(pass);
+
+  if (config.SCENES_ENABLED && pass.scene) {
+    render_with_scenes(pass, shader_program);
+  } else {
+    render_without_scenes(pass, shader_program);
+  }
+
+  cleanup_texture_inputs(pass);
 }
 
 function render_sequence(sequence, time) {
   if (config.GL_DEBUG && config.GL_DEBUG_TRACE) {
     console.log("== FRAME START ==");
   }
-  sequence.map(function(pass) {
+  resolve_animations(time);
+  render_passes.map(function(pass) {
     render_pass(pass, time)
-  })
+  });
   if (config.GL_DEBUG && config.GL_DEBUG_TRACE) {
     console.log("== FRAME END ==");
   }
@@ -384,8 +412,8 @@ function init_render_to_texture(sequence) {
   if (config.RENDER_TO_TEXTURE_ENABLED) {
     // replace the render passes' texture arrays by actual frame buffer objects
     // this is far from optimal...
-    for (var p=0; p<sequence.length; ++p) {
-      var pass = sequence[p];
+    for (var p in render_passes) {
+      var pass = render_passes[p];
       if (pass.render_to) {
         pass.fbo = frame_buffer(pass.render_to);
       }
@@ -459,7 +487,7 @@ function get_shader_program(pass) {
   }
 }
 
-function render_without_scenes(pass, shader_program, clip_time) {
+function render_without_scenes(pass, shader_program) {
   var geometry = geometries[pass.geometry]
 
   if (config.EDITOR) {
@@ -469,11 +497,11 @@ function render_without_scenes(pass, shader_program, clip_time) {
     }
   }
 
-  var instance_id_location = gl.getUniformLocation(shader_program, "instance_id");
+  var instance_id_location = gl.getUniformLocation(shader_program, "u_instance_id");
   draw_geom(geometry, pass.instance_count, instance_id_location);
 }
 
-function render_with_scenes(pass, shader_program, clip_time) {
+function render_with_scenes(pass, shader_program) {
   // A scene can be inlined in the sequence...
   var scene = pass.scene;
   if (typeof scene == "string") {
@@ -488,7 +516,8 @@ function render_with_scenes(pass, shader_program, clip_time) {
   //    scenes: [{geometry: "quad"}],
   var scene_objects = scene.objects || scene;
 
-  send_uniforms(shader_program, scene.uniforms, clip_time);
+  // TODO[nical] do we want this?
+  // send_uniforms(shader_program, scene.uniforms, clip_time);
 
   for (var g = 0; g < scene_objects.length; ++g) {
     var obj = scene_objects[g];
@@ -497,9 +526,9 @@ function render_with_scenes(pass, shader_program, clip_time) {
 
     // this is optional, but can be a convenient info to have in the shader.
     obj.uniforms = obj.uniforms || {};
-    obj.uniforms["u_object_id"] = g;
+    obj.uniforms["u_object_id"] = [g];
 
-    send_uniforms(shader_program, obj.uniforms, clip_time);
+    send_uniforms(shader_program, obj.uniforms);
 
     draw_geom(geometry)
   }

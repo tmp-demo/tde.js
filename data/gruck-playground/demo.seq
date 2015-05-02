@@ -1,0 +1,33 @@
+{
+  animations: {
+    "u_global_time": [
+        { start:0, duration:64, animation:"[t]" }
+    ],
+    "u_cam_pos": [
+      {
+        start: 0,
+        duration: 64,
+        animation: [
+          [0, [0, 0, 2]]
+        ],
+      }
+    ],
+    "u_glitch": [
+      {
+        start: 0,
+        duration: 64,
+        animation: [
+          [0, [0.5]],
+          [64, [1]],
+        ],
+      },
+    ],
+    "move_stuff": [
+        { start:10, duration:6 },
+        { start:20, duration:6 },
+        { start:30, duration:6 },
+        { start:40, duration:6 },
+    ],
+  },
+  annotations: [],
+}

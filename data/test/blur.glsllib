@@ -1,0 +1,17 @@
+vec4 directional_blur(sampler2D texture, vec2 uv, vec2 dir) {
+  vec4 sum = vec4(0.0);
+
+  float blur_weights[6];
+  blur_weights[0] = 0.16;
+  blur_weights[1] = 0.15;
+  blur_weights[2] = 0.12;
+  blur_weights[3] = 0.09;
+  blur_weights[4] = 0.05;
+  blur_weights[5] = 0.01;
+
+  for (int i = -5; i <= 5; ++i) {
+    sum += texture2D(texture, uv + float(i) * dir) * blur_weights[i > 0 ? i : -i];
+  }
+
+  return sum;
+}

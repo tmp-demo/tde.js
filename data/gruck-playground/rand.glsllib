@@ -1,0 +1,27 @@
+float rand(float n) {
+  return fract(sin(n)*43758.5453123);
+}
+
+float rand2(vec2 co) {
+  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+float noise( in vec2 x )
+{
+    vec2 p = floor(x);
+    vec2 f = fract(x);
+
+    f = f*f*(3.0-2.0*f);
+
+    float n = p.x + p.y*57.0;
+
+    float res = mix(mix( rand(n+  0.0), rand(n+  1.0),f.x),
+                    mix( rand(n+ 57.0), rand(n+ 58.0),f.x),f.y);
+
+    return res;
+}
+
+vec3 noise3(vec2 uv)
+{
+  return vec3(noise(uv), noise(uv + 2.7), noise(uv + 5.8));
+}

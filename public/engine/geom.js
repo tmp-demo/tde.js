@@ -81,6 +81,22 @@ function make_sphere(radius, num_subdivs) {
     return buffer;
 }
 
+function make_grid( num_subdivs ) {
+    
+
+    var buffer =  [
+      -1, -1, 0,  -1,  1, 0,   1, -1, 0,
+      -1,  1, 0,   1, -1, 0,   1,  1, 0  ];
+    while (--num_subdivs > 0) {
+        buffer = subdivide(buffer);
+    }
+
+    console.log('make_grid generated a grid with that many triangles : ' + (buffer.length / 9));
+    return buffer;
+}
+
+
+
 // TODO: it's sorta convenient to have this for prototyping but I assume we'll
 // have to not use this in the shipping demos and always generate from unpacked
 // geometry rather than packing and unpacking to re-pack afterwards like
@@ -333,8 +349,8 @@ function pack_vertices(to, v) {
 function join_rings(geom, r1, r2, triangle_fn, quad_fn) {
     if (config.EDITOR) {
         if (r1.length != r2.length) {
-            console.log(r1);
-            console.log(r2);
+            //console.log(r1);
+            //console.log(r2);
             alert("rings of incompatible sizes: "+r1.length+" "+r2.length);
         }
     }

@@ -12,7 +12,8 @@ angular.module("tde.services.asset", [])
     "seq",
     "snd",
     "glsllib",
-    "glsl"
+    "glsl",
+    "rg",
   ]
   
   function assetParts(assetId) {
@@ -45,9 +46,11 @@ angular.module("tde.services.asset", [])
       $http.get("/data/project/" + $routeParams.projectId + "/assets").success(function(assetList) {
         self.gRemainingAssets = assetList.length;
         assetList.sort(assetsOrderCompare).forEach(function(assetId) {
-          console.log("loading asset " + assetId)
-          if (assetId !== "demo.seq") {
+          if (assetId !== "demo.rg") {
+            console.log("loading asset " + assetId)
             self.loadAsset(assetId)
+          } else {
+            console.log("postponed loading asset " + assetId)
           }
         })
       })
@@ -116,29 +119,52 @@ angular.module("tde.services.asset", [])
         var parts = assetParts(assetId)
         var name = parts[0]
         var type = parts[1]
+
+        var is_async_loading_asset = false;
         switch (type)
         {
-          case "config": EngineDriver.loadConfig(name, data); break
-          case "tex": EngineDriver.loadTexture(name, data); break
-          case "geom": EngineDriver.loadGeometry(name, data); break
-          case "seq": EngineDriver.loadSequence(name, data); break
-          case "scene": EngineDriver.loadScene(name, data); break
-          case "snd": EngineDriver.loadSoundtrack(name, data, staticPath); break
-          case "glsllib": EngineDriver.loadShader(assetId, data); break
-          case "glsl": EngineDriver.loadShader(assetId, data); break
+          case "config":  {
+            EngineDriver.loadConfig(name, data); break;
+          }
+          case "tex":     {
+            is_async_loading_asset = true;
+            EngineDriver.loadTexture(name, data, staticPath, callback ? callback : function(){}); break;
+          }
+          case "geom":    {
+            EngineDriver.loadGeometry(name, data); break;
+          }
+          case "seq":     {
+            EngineDriver.loadSequence(name, data); break;
+          }
+          case "rg":      {
+            EngineDriver.loadRenderGraph(name, data); break;
+          }
+          case "scene":   {
+            EngineDriver.loadScene(name, data); break;
+          }
+          case "snd":     {
+            EngineDriver.loadSoundtrack(name, data, staticPath); break;
+          }
+          case "glsllib": {
+            EngineDriver.loadShader(assetId, data); break;
+          }
+          case "glsl":    {
+            EngineDriver.loadShader(assetId, data); break;
+          }
           default: toastr.warning(type, "Unknown asset type"); break
         }
         
         $rootScope.$broadcast("assetListChanged")
         $rootScope.$broadcast("assetLoaded", assetId)
-        if (callback) {
+        if (callback & !is_async_loading_asset) {
           callback(null)
         }
         self.gRemainingAssets--;
         if (self.gRemainingAssets == 1) {
-            // TODO!
-            // demo.seq needs to be loaded last until we fix the framebuffer dependencies
-            self.loadAsset("demo.seq");
+          console.log("Loading asset demo.rg");
+          // TODO!
+          // demo.rg needs to be loaded last until we fix the framebuffer dependencies
+          self.loadAsset("demo.rg");
         }
       }).
       error(function(error)
@@ -162,6 +188,7 @@ angular.module("tde.services.asset", [])
       case "tex": EngineDriver.unloadTexture(name); break
       case "geom": EngineDriver.unloadGeometry(name); break
       case "seq": EngineDriver.unloadSequence(name); break
+      case "rg": EngineDriver.unloadRenderGraph(name); break
       case "scene": EngineDriver.unloadScene(name); break
       case "snd": EngineDriver.unloadSoundtrack(name); break
       case "glsllib": EngineDriver.unloadShader(assetId); break
@@ -185,6 +212,7 @@ angular.module("tde.services.asset", [])
       case "soundtrack": glyphicon = "music"; break
       case "glsllib": glyphicon = "database"; break
       case "glsl": glyphicon = "globe"; break
+      case "rg": glyphicon = "film"; break // TODO
     }
     
     return "fa fa-" + glyphicon

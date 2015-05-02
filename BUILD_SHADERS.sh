@@ -21,7 +21,7 @@ do
     cp $f $SHADER_EXPORT_ROOT
 done
 
-USED_SHADER_PROGRAMS=`"$NODE" ./tools/parse-sequence-dependencies $PROJECT_ROOT/demo.seq`
+USED_SHADER_PROGRAMS=`"$NODE" ./tools/parse-rendergraph-dependencies $PROJECT_ROOT/demo.rg`
 
 # programs
 for f in  $USED_SHADER_PROGRAMS

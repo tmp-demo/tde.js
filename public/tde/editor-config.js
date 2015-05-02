@@ -11,6 +11,7 @@ config = {
     UNIFORM_INTERPOLATION_ENABLED: true,
     SCENES_ENABLED: true,
     TEXT_ENABLED: true,
+    IMG_TEXTURE_ENABLED: true,
     GL_DEBUG: true,
     GL_DEBUG_TRACE: false,
 }
