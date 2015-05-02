@@ -30,6 +30,8 @@ angular.module("tde", [
     templateUrl: function($routeParams) {
       var assetType = $routeParams.assetType
       if (assetType == "glsllib") assetType = "glsl"
+      // hack to edit the track until we have a proper snd edito
+      if (assetType == "snd") assetType = "seq"
       return "/tde/project/" + assetType + "-editor/" + assetType + "-editor.html"
     },
     controller: "ProjectCtrl",

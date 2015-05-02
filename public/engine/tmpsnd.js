@@ -10,12 +10,17 @@
   AudioNode.prototype.c = AudioNode.prototype.connect;
 
   ac = new AudioContext();
+  master = ac.createGain();
+  master.c(ac.destination);
   //minify_context(ac);
 
   /** @constructor */
-  function SND() {
+  function SND(data) {
     log('SND.constr', this);
     this.playing = false;
+    SONG = data.SONG;
+    instruments = data.instruments;
+    sends = data.sends;
   };
   
   SND.AD = function(p/*aram*/, l/*start*/, u/*end*/, t/*startTime*/, a/*attack*/, d/*decay*/) {
@@ -80,6 +85,22 @@
   SND.prototype.t = function() {
     return (ac.currentTime - this.startTime) * (125/ 60);
   }
+
+  SND.prototype.seek = function(beat)
+  {
+    // todo
+  }
+
+  SND.prototype.mute = function()
+  {
+    master.gain.setTargetAtTime(0.0, ac.currentTime, 0.03);
+  }
+
+  SND.prototype.unmute = function()
+  {
+    master.gain.setTargetAtTime(1.0, ac.currentTime, 0.03);
+  }
+
 
   SND.prototype.p = function() {
     if (this.playing == true) return;
@@ -153,7 +174,7 @@
     delay.c(flt);
     flt.c(fb);
     fb.c(delay);
-    mix.c(ac.destination);
+    mix.c(master);
     return delay;
   }
   
@@ -165,7 +186,7 @@
     cnv.buffer = SND.ReverbBuffer({l: 2, d: opts.d});
     mix.gain.value = opts.m;
     cnv.c(mix);
-    mix.c(ac.destination);
+    mix.c(master);
     return cnv;
   }
 
@@ -176,7 +197,7 @@
     ws.curve = SND.DistCurve(50);
     mix.gain.value = 0.5;
     ws.c(mix);
-    mix.c(ac.destination);
+    mix.c(master);
     return ws;
   }
   
@@ -206,7 +227,7 @@
     smp.buffer = noise;
     smp.c(amp);
     SND.setSends([0.3], amp);
-    amp.c(ac.destination);
+    amp.c(master);
     smp.start(t);smp.stop(t + 0.06);
   }
   
@@ -225,7 +246,7 @@
       var amp = ac.createGain();
       o.c(amp);
       SND.D(amp.gain, t, 1.3, e);
-      amp.c(ac.destination);
+      amp.c(master);
     }
 
     d(osc, 0.03)
@@ -269,7 +290,7 @@
     amposc.c(fl);
 
     SND.setSends([0.3, 0.2], fl);
-    fl.c(ac.destination);
+    fl.c(master);
   }
   
   SND.Synth = function(t, stepTime, data) {
@@ -282,7 +303,7 @@
     osc.c(flt);
     var amp = SND.DCA(flt, data[1].v || 0.1, t, 0.01, len);
     SND.setSends([0.5, 0.6], amp);
-    amp.c(ac.destination);
+    amp.c(master);
     SND.AD(flt.frequency, 200, 2000, t, 0.01, len / 2);
     osc.start(t);osc.stop(t + len);
   }
@@ -293,7 +314,7 @@
     len = stepTime * data[1].l;
     // len = stepTime * (data[1].l || 1);
     var amp = SND.DCA(osc, 0.6, t, 0.05, len);
-    amp.c(ac.destination);
+    amp.c(master);
     osc.start(t);osc.stop(t + len);
   }
 
@@ -318,7 +339,7 @@
       o.c(flt);
       o.start(t);o.stop(t+len);
     }
-    amp.c(ac.destination)
+    amp.c(master)
     SND.setSends([0,0.4,1], amp);
   }
 
@@ -343,7 +364,7 @@
       sources[i].c(sink);
       i++;
     }
-    sink.c(ac.destination);
+    sink.c(master);
     SND.setSends([0.3, 0.8], sink);
   }
 
