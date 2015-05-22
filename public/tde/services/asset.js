@@ -157,9 +157,10 @@ angular.module("tde.services.asset", [])
         $rootScope.$broadcast("assetListChanged")
         $rootScope.$broadcast("assetLoaded", assetId)
         if (callback & !is_async_loading_asset) {
-          callback(null)
+          callback(null);
         }
         self.gRemainingAssets--;
+        console.log("remaining assets ", self.gRemainingAssets );
         if (self.gRemainingAssets == 1) {
           console.log("Loading asset demo.rg");
           // TODO!
@@ -196,6 +197,7 @@ angular.module("tde.services.asset", [])
       default: toastr.warning(type, "Unknown asset type"); break
     }
     
+    self.gRemainingAssets++;
     $rootScope.$broadcast("assetListChanged")
     $rootScope.$broadcast("assetUnloaded", assetId)
   }
