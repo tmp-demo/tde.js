@@ -352,7 +352,7 @@ function render_to(dest) {
   if (config.RENDER_TO_TEXTURE_ENABLED) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, dest.fbo);
 
-    var target = dest.color ? textures[dest.color] : canvas;
+    var target = dest.color ? dest.color : canvas;
     resolution = [target.width, target.height]
   } else {
     resolution = [canvas.width, canvas.height];
@@ -456,7 +456,7 @@ function set_blending(blend) {
       gl.blendFunc.apply(gl, blend);
     }
   }
-} 
+}
 
 
 function prepare_clear(pass) {
@@ -474,18 +474,18 @@ function init_render_to_texture(sequence) {
     for (var p in render_passes) {
       var pass = render_passes[p];
       if (pass.render_to) {
-        pass.fbo = create_framebuffer(pass.render_to);
+        pass.render_to = create_render_target(pass.render_to);
       }
     }
   }
 }
 
-function create_framebuffer(target) {
-  var fbo = gl.createFramebuffer();
-  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+function create_render_target(target) {
+  target.fbo = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, target.fbo);
 
-  if (target.color && textures[target.color]) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[target.color].tex, 0);
-  if (target.depth && textures[target.depth]) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, textures[target.depth].tex, 0);
+  if (target.color) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, target.color.tex, 0);
+  if (target.depth) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, target.depth.tex, 0);
 
   if (config.GL_DEBUG) {
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
@@ -494,16 +494,14 @@ function create_framebuffer(target) {
     }
   }
 
-  target.fbo = fbo;
-
-  return fbo;
+  return target;
 }
 
 function prepare_render_to_texture(pass) {
   if (config.RENDER_TO_TEXTURE_ENABLED) {
-    gl.bindFramebuffer(gl.FRAMEBUFFER, pass.fbo);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, pass.render_to ? pass.render_to.fbo : null);
 
-    var target = pass.render_to ? textures[pass.render_to.color] : canvas;
+    var target = pass.render_to ? pass.render_to.color : canvas;
     return [target.width, target.height]
   } else {
     return [canvas.width, canvas.height];

@@ -167,6 +167,15 @@ angular.module("tde.services.engine-driver", [])
     {
       var asset = eval("___ = "+data);
       render_passes = asset.render_passes;
+      for (var p in render_passes) {
+        var pass = render_passes[p];
+        if (pass.render_to) {
+          for (var tex_name in pass.render_to) {
+            // replace string names by actual textures
+            pass.render_to[tex_name] = textures[pass.render_to[tex_name]];
+          }
+        }
+      }
     }
     catch (err)
     {

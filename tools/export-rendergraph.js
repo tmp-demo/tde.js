@@ -32,7 +32,7 @@ function export_render_to(pass) {
 
     console.log("render_to: {");
     for (var target in pass.render_to) {
-        console.log(target, ": '"+ pass.render_to[target] +"',");
+        console.log(target, ": textures."+ pass.render_to[target] +",");
     }
     console.log("},");
 }
