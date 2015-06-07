@@ -24,7 +24,7 @@ function handle_img_texture_loaded(image, texture) {
 function create_img_texture(filename, callback) {
 
   
-  imgTexture = gl.createTexture();
+  var imgTexture = gl.createTexture();
 
   img_textures_data[filename] = {
     tex: imgTexture,
@@ -33,14 +33,14 @@ function create_img_texture(filename, callback) {
   };
 
 
-  image = new Image();
+  var image = new Image();
   image.onload = function() { 
     //retrieve width and height of the texture
-    img_textures_data[filename].width = this.width;
-    img_textures_data[filename].height = this.height;
+    img_textures_data[filename].width = image.width;
+    img_textures_data[filename].height = image.height;
 
     handle_img_texture_loaded(image, imgTexture); 
-    callback(null); //cf enginedriver callback
+    callback(); //cf enginedriver callback
   }
 
   image.src = filename;

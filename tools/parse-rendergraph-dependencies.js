@@ -7,14 +7,13 @@ for (var i = 2; i < process.argv.length; ++i) {
     var file = { index: i, name: process.argv[i] };
     (function(file) {
         fs.readFile(file.name, function(err, asset) {
-            var passes = eval("____ = " + asset)
+            var rg = eval("____ = " + asset)
             var programs = []
-            for (var p in passes) {
-                var pass = passes[p];
+            rg.render_passes.forEach(function(pass) {
                 if (pass.program) {
                     programs.push(pass.program + ".glsl")
                 }
-            }
+            })
             console.log(programs.join(" "))
         });
     })(file);

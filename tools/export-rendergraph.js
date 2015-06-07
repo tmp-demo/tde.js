@@ -120,9 +120,7 @@ for (var i = 2; i < process.argv.length; ++i) {
             var asset_name = file_name[0];
             asset = eval("___ = "+asset.toString());
             console.log("var render_passes = [");
-            for (var pass in asset.render_passes) {
-                export_pass(asset[pass]);
-            }
+            asset.render_passes.forEach(export_pass);
             console.log("]");
             console.log("");
             //console.log('var sequence = ', asset, ';');

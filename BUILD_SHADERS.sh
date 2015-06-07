@@ -27,6 +27,7 @@ USED_SHADER_PROGRAMS=`"$NODE" ./tools/parse-rendergraph-dependencies $PROJECT_RO
 for f in  $USED_SHADER_PROGRAMS
 do
     echo $f
+    echo "//" $f >> $SHADER_EXPORT_ROOT/all.glsl
     cat $PROJECT_ROOT/$f >> $SHADER_EXPORT_ROOT/all.glsl
 done
 
