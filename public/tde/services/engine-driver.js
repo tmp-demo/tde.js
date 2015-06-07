@@ -175,6 +175,12 @@ angular.module("tde.services.engine-driver", [])
             pass.render_to[tex_name] = textures[pass.render_to[tex_name]];
           }
         }
+        if (pass.texture_inputs) {
+          for (var i in pass.texture_inputs) {
+            // replace string names by actual textures
+            pass.texture_inputs[i] = textures[pass.texture_inputs[i]];
+          }
+        }
       }
     }
     catch (err)

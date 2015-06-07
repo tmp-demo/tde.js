@@ -55,13 +55,13 @@ function prepare_texture_inputs(shader_program, texture_inputs) {
     texture_inputs = texture_inputs || [];
 
     for (var i=0; i<texture_inputs.length; ++i) {
-      var texture = textures[texture_inputs[i]];
+      var texture = texture_inputs[i];
       if (config.EDITOR) {
         if (!texture) {
           // TODO: should use a placeholder texture or something.
           // This can happen in the editor if a frame is rendered
           // while a texture is not loaded yet.
-          console.log("render: missing texture "+texture_inputs[i]);
+          console.log("render: missing texture");
           return;
         }
       }

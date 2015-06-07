@@ -44,7 +44,7 @@ function export_texture_inputs(pass) {
 
     console.log("texture_inputs: [");
     for (var i in pass.texture_inputs) {
-        console.log("'"+pass.texture_inputs[i]+"',");
+        console.log("textures."+pass.texture_inputs[i]+",");
     }
     console.log("],")
 }
