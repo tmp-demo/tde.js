@@ -1,175 +1,157 @@
-//var git = require("gift")
-var fs = require("fs")
-var Cookies = require("cookies")
+var async = require("async");
+var Cookies = require("cookies");
+var fs = require("fs");
+var git = require("gift");
+var path = require("path");
 
-module.exports.init = function(app)
-{
-  app.get("/data/project/:projectId/assets", function(req, res, next)
-  {
-    var projectName = req.params.projectId
-    
-    fs.readdir(app.get("dataRoot") + projectName, function(err, files)
-    {
-      if (err) return next(err)
-      
-      var assets = files.filter(function(file)
-      {
-        var stats = fs.statSync(app.get("dataRoot") + projectName + "/" + file)
-        return stats.isFile()
-      })
-      
-      res.json(assets)
-    })
-  })
+var assetNameRegexp = /^[-\w]+$/;
 
-  app.post("/data/project/:projectId/assets", function(req, res, next)
-  {
-    var projectName = req.params.projectId
-    var assetName = req.body.name
-    var assetType = req.body.type
-    
-    if (/^[-\w.]+$/.test(assetName) == false)
-    {
-      return next(new Error("Asset names should match /^[-\\w.]+$/"))
-    }
-    
-    var templatePath = __dirname + "/data_templates/" + assetType + ".tpl"
-    var assetPath = app.get("dataRoot") + projectName + "/" + assetName + "." + assetType
-    
-    fs.exists(assetPath, function(exists)
-    {
-      if (exists) return next(new Error("Asset already exists"))
+exports.init = function(options, app) {
+
+  app.get("/data/projects/:projectId/assets", function(req, res, next) {
+    var projectId = req.params.projectId;
+
+    return fs.readdir(path.resolve(options.data, projectId), function(err, files) {
+      if (err) return next(err);
       
-      fs.readFile(templatePath, function(err, templateData)
-      {
-        if (err) return next(err)
+      return async.filter(files, function(file, callback) {
+        return fs.stat(path.resolve(options.data, projectId, file), function(err, stats) {
+          if (err) return callback(false);
+          return callback(stats.isFile());
+        });
+
+      }, function(assets) {
+        return res.json(assets);
+      });
+    });
+  });
+
+  app.post("/data/projects/:projectId/assets", function(req, res, next) {
+    var projectId = req.params.projectId;
+    var assetName = req.body.name;
+    var assetType = req.body.type;
+    
+    if (!assetNameRegexp.test(assetName))
+      return next(new Error("Asset names should match " + assetNameRegexp.source));
+    
+    var templatePath = path.resolve(options.templates, assetType + ".tpl");
+    var assetPath = path.resolve(options.data, projectId, assetName + "." + assetType);
+    
+    return fs.exists(assetPath, function(exists) {
+      if (exists) return next(new Error("Asset already exists"));
+      
+      return fs.readFile(templatePath, function(err, templateData) {
+        if (err) return next(err);
         
-        fs.writeFile(assetPath, templateData, function(err)
-        {
-          if (err) return next(err)
+        return fs.writeFile(assetPath, templateData, function(err) {
+          if (err) return next(err);
           
-          /*var repo = git(app.get("dataRoot") + projectName)
-          repo.add(assetName + "." + assetType, function(err)
-          {
-            if (err) return next(err)
-            
-            var cookies = new Cookies(req, res)
-            var authorString = cookies.get("name") + " <" + cookies.get("email") + ">"
-            repo.commit("added new " + assetType, {author: authorString}, function(err)
-            {
-              if (err) return next(err)
+          if (options.git) {
+            var repo = git(path.resolve(options.data, projectId));
+            return repo.add(assetName + "." + assetType, function(err) {
+              if (err) return next(err);
               
-              res.send(200, "Asset created")
-            })
-          })*/
+              var cookies = new Cookies(req, res);
+              var authorString = cookies.get("name") + " <" + cookies.get("email") + ">";
+              return repo.commit("Add " + assetName + " as new " + assetType, {author: authorString}, function(err) {
+                if (err) return next(err);
+                return res.status(201).send("Asset created");
+              });
+            });
+          }
           
-          res.send(200, "Asset created")
-        })
-      })
-    })
-  })
+          return res.status(201).send("Asset created");
+        });
+      });
+    });
+  });
 
-  app.get("/data/project/:projectId/asset/:assetId", function(req, res, next)
-  {
-    var projectId = req.params.projectId
-    var assetId = req.params.assetId
+  app.get("/data/projects/:projectId/assets/:assetId", function(req, res, next) {
+    var projectId = req.params.projectId;
+    var assetId = req.params.assetId;
     
-    var assetPath = app.get("dataRoot") + projectId + "/" + assetId
-    fs.readFile(assetPath, function(err, assetData)
-    {
-      if (err) return next(err)
-      
-      res.type("text/plain")
-      res.send(200, assetData)
-    })
-  })
+    var assetPath = path.resolve(options.data, projectId, assetId);
+    return fs.readFile(assetPath, function(err, assetData) {
+      if (err) return next(err);
+      res.type("text/plain").send(assetData);
+    });
+  });
 
-  app.get("/data/project/:projectId/static-asset/:assetId", function(req, res, next)
-  {
-    var projectId = req.params.projectId
-    var assetId = req.params.assetId
+  app.get("/data/projects/:projectId/static-assets/:assetId", function(req, res, next) {
+    var projectId = req.params.projectId;
+    var assetId = req.params.assetId;
 
-    var assetPath = app.get("dataRoot") + projectId + "/static/" + assetId
-    fs.readFile(assetPath, function(err, assetData)
-    {
-      if (err) return next(err)
+    var assetPath = path.resolve(options.data, projectId, "static", assetId);
+    return fs.readFile(assetPath, function(err, assetData) {
+      if (err) return next(err);
+      res.type("text/plain").send(assetData);
+    });
+  });
 
-      res.send(200, assetData)
-    })
-  })
-
-
-  app.put("/data/project/:projectId/asset/:assetId", function(req, res, next)
-  {
-    var projectId = req.params.projectId
-    var assetId = req.params.assetId
+  app.put("/data/projects/:projectId/assets/:assetId", function(req, res, next) {
+    var projectId = req.params.projectId;
+    var assetId = req.params.assetId;
     
-    var assetPath = app.get("dataRoot") + projectId + "/" + assetId
-    fs.writeFile(assetPath, req.body.assetData, function(err)
-    {
-      if (err) return next(err)
+    var assetPath = path.resolve(options.data, projectId, assetId);
+    return fs.writeFile(assetPath, req.body.assetData, function(err) {
+      if (err) return next(err);
       
-      /*var repo = git(app.get("dataRoot") + projectId)
-      repo.add(assetPath, function(err)
-      {
-        if (err) return next(err)
-        
-        var cookies = new Cookies(req, res)
-        var authorString = cookies.get("name") + " <" + cookies.get("email") + ">"
-        repo.commit("updated " + assetId, {author: authorString}, function(err)
-        {
-          if (err) return next(err)
+      if (options.git) {
+        var repo = git(path.resolve(options.data, projectId));
+        return repo.add(assetPath, function(err) {
+          if (err) return next(err);
           
-          res.send(200, "Asset udpated")
-        })
-      })*/
+          var cookies = new Cookies(req, res);
+          var authorString = cookies.get("name") + " <" + cookies.get("email") + ">";
+
+          repo.commit("Update " + assetId, {author: authorString}, function(err) {
+            if (err) return next(err);
+            return res.send("Asset udpated");
+          });
+        });
+      }
       
-      res.send(200, "Asset updated")
-    })
-  })
+      return res.send("Asset updated");
+    });
+  });
   
-  app.post("/data/project/:projectId/asset/:assetId", function(req, res, next)
-  {
-    var projectId = req.params.projectId
-    var assetId = req.params.assetId
+  app.post("/data/projects/:projectId/assets/:assetId", function(req, res, next) {
+    var projectId = req.params.projectId;
+    var assetId = req.params.assetId;
     
-    if (typeof(req.body.rename) !== "string") return next(new Error("Unsupported operation"))
+    if (typeof(req.body.rename) !== "string") return next(new Error("Unsupported operation"));
     
-    if (/^[-\w.]+$/.test(req.body.rename) == false)
-    {
-      return next(new Error("Asset names should match /^[-\\w.]+$/"))
-    }
+    if (!assetNameRegexp.test(req.body.rename))
+      return next(new Error("Asset names should match " + assetNameRegexp.source));
     
-    var assetPath = app.get("dataRoot") + projectId + "/" + assetId
-    var newAssetPath = app.get("dataRoot") + projectId + "/" + req.body.rename
+    var assetPath = path.resolve(options.data, projectId, assetId);
+    var newAssetPath = path.resolve(options.data, projectId, req.body.rename);
     
-    if (assetPath == newAssetPath) return next(new Error("New name is the same as old name"))
+    if (assetPath === newAssetPath) return next(new Error("New name is the same as old name"));
     
-    fs.rename(assetPath, newAssetPath, function(err)
-    {
-      if (err) return next(err)
+    return fs.rename(assetPath, newAssetPath, function(err) {
+      if (err) return next(err);
       
-      /*var repo = git(app.get("dataRoot") + projectId)
-      repo.add(newAssetPath, function(err)
-      {
-        if (err) return next(err)
-        
-        repo.remove(assetPath, function(err)
-        {
-          if (err) return next(err)
+      if (options.git) {
+        var repo = git(path.resolve(options.data, projectId));
+        return repo.add(newAssetPath, function(err) {
+          if (err) return next(err);
           
-          var cookies = new Cookies(req, res)
-          var authorString = cookies.get("name") + " <" + cookies.get("email") + ">"
-          repo.commit("renamed " + assetId + " to " + req.body.rename, {author: authorString}, function(err)
-          {
-            if (err) return next(err)
+          return repo.remove(assetPath, function(err) {
+            if (err) return next(err);
             
-            res.send(200, "Asset renamed")
-          })
-        })
-      })*/
+            var cookies = new Cookies(req, res);
+            var authorString = cookies.get("name") + " <" + cookies.get("email") + ">";
+
+            return repo.commit("Rename " + assetId + " to " + req.body.rename, {author: authorString}, function(err) {
+              if (err) return next(err);
+              return res.send("Asset renamed");
+            });
+          });
+        });
+      }
       
-      res.send(200, "Asset renamed")
-    })
-  })
-}
+      return res.send("Asset renamed");
+    });
+  });
+};

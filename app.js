@@ -1,23 +1,60 @@
-var express = require("express")
-var bodyParser = require("body-parser")
-var errorHandler = require("errorhandler")
-var http = require("http")
+var bodyParser = require("body-parser");
+var errorHandler = require("errorhandler");
+var express = require("express");
+var path = require("path");
+var yargs = require("yargs");
 
-var app = express()
-var server = http.createServer(app)
+module.exports = function(options, callback) {
+	var app = express();
 
-app.set("dataRoot", __dirname + "/data/")
-app.set("port", process.env.PORT || 8084)
+	app.use(bodyParser.json());
 
-app.use(bodyParser.json())
+	require("./project").init(options, app);
+	require("./asset").init(options, app);
 
-require("./project").init(app)
-require("./asset").init(app)
+	app.use(express.static(__dirname + "/public"));
 
-app.use(express.static(__dirname + "/public"))
+	app.use(errorHandler());
 
-app.use(errorHandler())
+	return callback(null, app);
+};
 
-server.listen(app.get("port"), function() {
-	console.log("Server listening on port %d in mode %s.", app.get("port"), app.get("env"))
-})
+if (require.main === module) {
+	var options = yargs
+		.option("d", {
+			alias: "data",
+			default: path.resolve(__dirname, "data"),
+			describe: "Data repertory",
+		})
+		.option("e", {
+			alias: "export",
+			default: path.resolve(__dirname, "export"),
+			describe: "Export repertory",
+		})
+		.option("g", {
+			alias: "git",
+			default: false,
+			describe: "Commit changes automatically",
+		})
+		.option("p", {
+			alias: "port",
+			default: process.env.PORT || 8084,
+			describe: "Port to listen to",
+		})
+		.option("t", {
+			alias: "templates",
+			default: path.resolve(__dirname, "data_templates"),
+			describe: "Data templates repertory",
+		})
+		.help("help")
+		.alias("h", "help")
+		.argv;
+
+	module.exports(options, function(err, app) {
+		if (err) throw err;
+
+		app.listen(options.port, function() {
+			console.log("Server listening on port %d in mode %s.", options.port, app.get("env"));
+		});
+	});
+}
