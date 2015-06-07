@@ -77,7 +77,7 @@ function export_geometry(pass) {
     if (pass.instance_count != undefined) {
         console.log("instance_count: '"+pass.instance_count+"',");
     }
-    console.log("geometry: '"+pass.geometry+"',");
+    console.log("geometry: geometries."+pass.geometry+",");
 }
 
 function export_program(pass) {
@@ -101,7 +101,7 @@ function export_scene(pass) {
         console.log("scene: [");
         for (var o in pass.scene) {
             var obj = pass.scene[o];
-            console.log("{ geometry: '"+obj.geometry+"',");
+            console.log("{ geometry: geometries."+obj.geometry+",");
             // TODO[nical]
             //export_uniforms(obj.uniforms);
             console.log("},")

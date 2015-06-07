@@ -12,9 +12,17 @@ for (var i = 2; i < process.argv.length; ++i) {
             if (asset == undefined) {
                 return;
             }
+            asset = asset.toString();
             // TODO: rather than just output the asset, we can parse it and de-stringify
             // as much as possible to save space.
-            console.log("scenes['"+asset_name+"'] = ", asset.toString());
+            console.log("scenes."+asset_name+" = {");
+            console.log("objects: [");
+            for (var o in asset.objects) {
+                var obj = asset.objects[o];
+                console.log("{ geometry: geometries."+obj.geometry+" },");
+            }
+            console.log("],");
+            console.log("};");
         });
     })(file);
 }

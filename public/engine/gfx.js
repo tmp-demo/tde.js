@@ -508,22 +508,15 @@ function prepare_render_to_texture(pass) {
   }
 }
 
-function get_geometry(geometry_name) {
+function get_geometry(geometry) {
   if (config.EDITOR) {
-    if (!geometry_name) {
-      return null;
-    }
-    var geometry = geometries[geometry_name];
-
     if (!geometry) {
-      console.log("Missing geometry "+geometry_name+" (using placeholder)");
-      geometry = geometry_placeholder
+      console.log("Missing geometry");
+      return geometry_placeholder
     }
-
-    return geometry;
-  } else {
-    return geometries[geometry_name];
   }
+
+  return geometry;
 }
 
 function get_shader_program(pass) {
@@ -547,15 +540,7 @@ function get_shader_program(pass) {
 }
 
 function render_without_scenes(pass, shader_program) {
-  var geometry = geometries[pass.geometry]
-
-  if (config.EDITOR) {
-    if (!geometry) {
-      console.log("Missing geometry " + pass.geometry + " (using placeholder)");
-      geometry = geometry_placeholder
-    }
-  }
-
+  var geometry = get_geometry(pass.geometry);
   var instance_id_location = gl.getUniformLocation(shader_program, "u_instance_id");
   draw_geom_instanced(geometry, pass.instance_count, instance_id_location);
 }

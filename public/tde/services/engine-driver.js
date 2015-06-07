@@ -181,6 +181,15 @@ angular.module("tde.services.engine-driver", [])
             pass.texture_inputs[i] = textures[pass.texture_inputs[i]];
           }
         }
+        if (pass.geometry) {
+          pass.geometry = geometries[pass.geometry];
+        }
+        if (pass.scene) {
+          for (var s in pass.scene) {
+            var obj = pass.scene[s];
+            obj.geometry = geometries[obj.geometry];
+          }
+        }
       }
     }
     catch (err)
