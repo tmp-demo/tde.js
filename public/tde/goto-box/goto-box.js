@@ -12,7 +12,6 @@ angular.module("tde.goto-box", [])
     {
     	$scope.listData = []
     	$scope.selectedIndex = null
-      console.log($scope);
 
       var scrollables = element.find(".scrollable")
       scrollables.mCustomScrollbar()

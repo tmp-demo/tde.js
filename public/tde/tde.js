@@ -1,3 +1,5 @@
+NodeList.prototype.forEach = Array.prototype.forEach;
+
 angular.module("tde", [
   "ngAnimate",
   "ngRoute",

@@ -101,9 +101,9 @@ function timline_update_dom_clips() {
     var zoom_bar = document.querySelector("#xzoombar");
     var x_scale = parseFloat(zoom_bar.value);
 
-    for (var elt of document.querySelectorAll(".clip")) {
+    document.querySelectorAll(".clip").forEach(function(elt) {
         var t = "translateX("+ (elt.model.start+x_scroll)*x_scale +"px)";
         elt.style.transform = t;
         elt.style.width = ""+(elt.model.duration*x_scale)+"px";
-    }
+    })
 }

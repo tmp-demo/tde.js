@@ -82,7 +82,7 @@ function main_loop() {
 }
 
 function main() {
-  var body = document.body
+  var body = document.body;
   body.innerHTML = "";
   canvas = document.createElement("canvas");
   body.appendChild(canvas);

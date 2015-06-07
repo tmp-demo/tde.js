@@ -29,7 +29,7 @@ function animate(keyframes, time)
   var h3 = t * t * t - 2 * t * t + t;         // calculate basis function 3
   var h4 = t * t * t - t * t;
   
-  var out = []
+  var out = [];
   for (var i = 0; i < k1[1].length; i++) {
     var t1 = (k2[1][i] - k0[1][i]) / 4;
     var t2 = (k3[1][i] - k1[1][i]) / 4;

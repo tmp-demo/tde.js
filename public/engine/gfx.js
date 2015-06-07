@@ -16,7 +16,7 @@ var ctx_2d
 var gl_ext_half_float;
 
 if (config.EDITOR) {
-  var uniform_editor_overrides = {}
+  var uniform_editor_overrides = {};
 }
 
 function gl_init() {
