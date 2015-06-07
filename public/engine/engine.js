@@ -67,9 +67,16 @@ function dump_symbol_map()
   $(document.body).text(JSON.stringify(symbolMap));
 }
 
+var engine = {};
+
 function engine_render(current_time)
 {
-  render_sequence(sequence, current_time)
+  if (config.EDITOR) {
+    if (document.__gfx_init == undefined) {
+      return;
+    }
+  }
+  render_frame(current_time);
   if (config.EDITOR) {
     canvas_overlay_text.update();
   }
@@ -101,8 +108,8 @@ function main() {
 
   gfx_init();
 
-  //snd = new SND(SONG);
-  snd = new SND_Ogg("tdf15_master3")
+  snd = new SND({});
+  //snd = new SND_Ogg("tdf15_master3")
   // If you want to shut the music up comment this out and also comment
   // out the equivalent line in engine-driver.js:~100
   snd.p();

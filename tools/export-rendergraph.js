@@ -122,6 +122,7 @@ for (var i = 2; i < process.argv.length; ++i) {
             console.log("var render_passes = [");
             asset.render_passes.forEach(export_pass);
             console.log("]");
+            console.log("engine.render = render_rg;");
             console.log("");
             //console.log('var sequence = ', asset, ';');
         });

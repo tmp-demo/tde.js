@@ -20,6 +20,10 @@ if (config.EDITOR) {
 }
 
 function gl_init() {
+  if (config.EDITOR) {
+    console.log("gl_init");
+  }
+
   gl = canvas.getContext("webgl", {alpha: false});
   //minify_context(gl);
 
@@ -48,6 +52,7 @@ function gl_init() {
     //minify_context(gl_ext_half_float);
   }
 
+  gl.depthFunc(gl.LEQUAL);
   gl.viewport(0, 0, canvas.width, canvas.height);
 }
 
@@ -66,6 +71,9 @@ var COLOR = 3;
 var TRIANGLE_ID = 4;
 
 function gfx_init() {
+  if (config.EDITOR) {
+    console.log("gfx_init");
+  }
 
   init_render_to_texture(sequence);
 
@@ -105,6 +113,9 @@ function gfx_init() {
 
   if (config.EDITOR) {
     init_placeholders();
+    // TODO: the editor tries to render each time something is loaded, before gfx_init
+    // this is a quick workaround but we should do something better.
+    document.__gfx_init = true;
   }
 }
 
@@ -124,7 +135,22 @@ function destroy_geom(geom) {
 }
 
 // actually renders
-function draw_geom(data, instance_count, instance_id_location) {
+function draw_geoms(geoms, instance_id_location) {
+  for (var i = 0; i < geoms.length; ++i) {
+    var geom = geoms[i];
+    for (var i in geom.buffers) {
+      var buffer = geom.buffers[i];
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer.vbo);
+      gl.enableVertexAttribArray(buffer.location);
+      gl.vertexAttribPointer(buffer.location, buffer.length / geom.vertex_count, gl.FLOAT, false, 0, 0);
+    }
+
+    send_uniforms({"u_object_id": [i]});
+    gl.drawArrays(geom.mode, 0, geom.vertex_count);
+  }
+}
+
+function draw_geom_instanced(data, instance_count, instance_id_location) {
   for (var i in data.buffers) {
     var buffer = data.buffers[i];
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer.vbo);
@@ -230,7 +256,7 @@ function send_uniforms(program, uniform_list) {
   }
 }
 
-function prepare_builtin_uniforms(program, ratio) {
+function prepare_builtin_uniforms() {
 
   // allow the editor to override uniforms for debug
   if (config.EDITOR) {
@@ -241,6 +267,7 @@ function prepare_builtin_uniforms(program, ratio) {
   }
 
   if (config.CAM_UNIFORMS_ENABLED) {
+    var ratio = canvas.width/canvas.height;
     var viewMatrix = mat4.create()
     var projectionMatrix = mat4.create0() // careful: 0 here
     var viewProjectionMatrix = mat4.create0()
@@ -320,6 +347,35 @@ function resolve_animations(time) {
   }
 }
 
+function render_to(dest) {
+  var resolution;
+  if (config.RENDER_TO_TEXTURE_ENABLED) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, dest.fbo);
+
+    var target = dest.color ? textures[dest.color] : canvas;
+    resolution = [target.width, target.height]
+  } else {
+    resolution = [canvas.width, canvas.height];
+  }
+  gl.viewport(0, 0, resolution[0], resolution[1]);
+  uniforms["u_resolution"] = resolution;
+}
+
+function clear(color) {
+  gl.clearColor(color[0], color[1], color[2], color[3]);
+  gl.clearDepth(1.0);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+}
+
+function use_shader(shader_program, texture_inputs, extra_uniforms) {
+  gl.useProgram(shader_program);
+
+  send_uniforms(shader_program, uniforms);
+  send_uniforms(shader_program, extra_uniforms);
+
+  prepare_texture_inputs(shader_program, texture_inputs);
+}
+
 function render_pass(pass, time) {
   if (pass.enabled) {
     if (!uniforms[pass.enabled]) {
@@ -340,24 +396,19 @@ function render_pass(pass, time) {
   prepare_clear(pass);
 
   var shader_program = get_shader_program(pass);
+
   if (!shader_program) {
     return;
   }
 
-  gl.useProgram(shader_program);
+  use_shader(shader_program, pass.texture_inputs, {});
 
-  prepare_builtin_uniforms(shader_program, resolution[0] / resolution[1]);
+  set_blending(pass.blend);
 
-  send_uniforms(shader_program, uniforms);
-
-  prepare_texture_inputs(pass, shader_program);
-
-  prepare_blending(pass);
-
-  prepare_depth_test(pass);
+  set_depth_test(pass.depth_test);
 
   if (config.SCENES_ENABLED && pass.scene) {
-    render_with_scenes(pass, shader_program);
+    render_scene(pass.scene, shader_program);
   } else {
     render_without_scenes(pass, shader_program);
   }
@@ -365,22 +416,31 @@ function render_pass(pass, time) {
   cleanup_texture_inputs(pass);
 }
 
-function render_sequence(sequence, time) {
-  if (config.GL_DEBUG && config.GL_DEBUG_TRACE) {
-    console.log("== FRAME START ==");
-  }
-  resolve_animations(time);
+function render_rg(time) {
   render_passes.map(function(pass) {
     render_pass(pass, time)
   });
+}
+
+function render_frame(time) {
+  if (config.GL_DEBUG && config.GL_DEBUG_TRACE) {
+    console.log("== FRAME START ==");
+  }
+
+  resolve_animations(time);
+
+  prepare_builtin_uniforms();
+
+  engine.render(time);
+
   if (config.GL_DEBUG && config.GL_DEBUG_TRACE) {
     console.log("== FRAME END ==");
   }
 }
 
-function prepare_depth_test(pass) {
+function set_depth_test(cond) {
   if (config.DEPTH_TEST_ENABLED) {
-    if (pass.depth_test) {
+    if (cond) {
       gl.enable(gl.DEPTH_TEST);
     } else {
       gl.disable(gl.DEPTH_TEST);
@@ -388,22 +448,21 @@ function prepare_depth_test(pass) {
   }
 }
 
-function prepare_blending(pass) {
+function set_blending(blend) {
   if (config.BLENDING_ENABLED) {
     gl.disable(gl.BLEND);
-    if (pass.blend) {
+    if (blend) {
       gl.enable(gl.BLEND);
-      gl.blendFunc.apply(gl, pass.blend);
+      gl.blendFunc.apply(gl, blend);
     }
   }
-}
+} 
+
 
 function prepare_clear(pass) {
   if (config.CLEAR_ENABLED) {
     if (pass.clear) {
-      gl.clearColor(pass.clear[0], pass.clear[1], pass.clear[2], pass.clear[3]);
-      gl.clearDepth(1.0);
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      clear(pass.clear);
     }
   }
 }
@@ -415,13 +474,13 @@ function init_render_to_texture(sequence) {
     for (var p in render_passes) {
       var pass = render_passes[p];
       if (pass.render_to) {
-        pass.fbo = frame_buffer(pass.render_to);
+        pass.fbo = create_framebuffer(pass.render_to);
       }
     }
   }
 }
 
-function frame_buffer(target) {
+function create_framebuffer(target) {
   var fbo = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 
@@ -434,6 +493,8 @@ function frame_buffer(target) {
       console.error("Incomplete framebuffer", WebGLDebugUtils["glEnumToString"](status));
     }
   }
+
+  target.fbo = fbo;
 
   return fbo;
 }
@@ -457,7 +518,7 @@ function get_geometry(geometry_name) {
     var geometry = geometries[geometry_name];
 
     if (!geometry) {
-      console.log("Missing geometry "+obj.geometry+" (using placeholder)");
+      console.log("Missing geometry "+geometry_name+" (using placeholder)");
       geometry = geometry_placeholder
     }
 
@@ -498,15 +559,14 @@ function render_without_scenes(pass, shader_program) {
   }
 
   var instance_id_location = gl.getUniformLocation(shader_program, "u_instance_id");
-  draw_geom(geometry, pass.instance_count, instance_id_location);
+  draw_geom_instanced(geometry, pass.instance_count, instance_id_location);
 }
 
-function render_with_scenes(pass, shader_program) {
+function render_scene(scene, shader_program) {
   // A scene can be inlined in the sequence...
-  var scene = pass.scene;
   if (typeof scene == "string") {
     // ...or in its own asset
-    scene = scenes[pass.scene];
+    scene = scenes[scene];
   }
 
   // This allows us to inline the object list without the other members of the scene
@@ -530,6 +590,7 @@ function render_with_scenes(pass, shader_program) {
 
     send_uniforms(shader_program, obj.uniforms);
 
-    draw_geom(geometry)
+    draw_geom_instanced(geometry)
   }
 }
+

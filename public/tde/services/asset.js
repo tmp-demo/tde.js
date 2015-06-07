@@ -4,8 +4,14 @@ angular.module("tde.services.asset", [])
 {
   this.assets = {}
   this.currentProjectId = ""
-  
+
+  // These asset types will always be loaded after the ones that are not in this list.
+  var postponedAssetTypes = [
+    "rg",
+  ]
+
   var assetsOrder = [
+    "js",
     "tex",
     "geom",
     "scene",
@@ -15,7 +21,7 @@ angular.module("tde.services.asset", [])
     "glsl",
     "rg",
   ]
-  
+
   function assetParts(assetId) {
     var index = assetId.lastIndexOf(".")
     return (index === -1 ? [assetId, ""] : [assetId.substr(0, index), assetId.substr(index + 1)])
@@ -37,26 +43,37 @@ angular.module("tde.services.asset", [])
     
     return nameA.localeCompare(nameB)
   }
-  
+
   var self = this
   this.refreshAssetList = function()
   {
     if ($routeParams.projectId)
     {
       $http.get("/data/project/" + $routeParams.projectId + "/assets").success(function(assetList) {
-        self.gRemainingAssets = assetList.length;
+        // number of assets to load before loading the postponed ones
+        self.gRemainingAssets = 0;
+        // number of assets to load before initializing gfx
+        self.gAllRemainingAssets = assetList.length;
+
         assetList.sort(assetsOrderCompare).forEach(function(assetId) {
-          if (assetId !== "demo.rg") {
-            console.log("loading asset " + assetId)
-            self.loadAsset(assetId)
+          var nameSplit = assetId.split(".");
+          var assetType = nameSplit[nameSplit.length-1];
+
+          var shouldPostpone = (postponedAssetTypes.indexOf(assetType) >= 0);
+
+          if (shouldPostpone) {
+            self.postponedAssets = self.postponedAssets || [];
+            self.postponedAssets.push(assetId);
           } else {
-            console.log("postponed loading asset " + assetId)
+            console.log("loading asset " + assetId);
+            self.loadAsset(assetId);
+            self.gRemainingAssets++;
           }
         })
       })
     }
   }
-  
+
   this.createAsset = function(type, callback)
   {
     var name = type + Date.now()
@@ -107,14 +124,14 @@ angular.module("tde.services.asset", [])
           callback(error)
       })
   }
-  
+
   this.loadAsset = function(assetId, callback)
   {
     $http.get("/data/project/" + $routeParams.projectId + "/asset/" + assetId, {transformResponse: function(data) {return data;} }).
       success(function(data)
       {
         self.assets[assetId] = data
-        
+
         var staticPath = "/data/project/" + $routeParams.projectId + "/static-asset";
         var parts = assetParts(assetId)
         var name = parts[0]
@@ -123,6 +140,9 @@ angular.module("tde.services.asset", [])
         var is_async_loading_asset = false;
         switch (type)
         {
+          case "js":  {
+            EngineDriver.loadScript(name, data); break;
+          }
           case "config":  {
             EngineDriver.loadConfig(name, data); break;
           }
@@ -153,19 +173,29 @@ angular.module("tde.services.asset", [])
           }
           default: toastr.warning(type, "Unknown asset type"); break
         }
-        
+
         $rootScope.$broadcast("assetListChanged")
         $rootScope.$broadcast("assetLoaded", assetId)
         if (callback & !is_async_loading_asset) {
           callback(null);
         }
         self.gRemainingAssets--;
+        self.gAllRemainingAssets--;
         console.log("remaining assets ", self.gRemainingAssets );
-        if (self.gRemainingAssets == 1) {
-          console.log("Loading asset demo.rg");
-          // TODO!
-          // demo.rg needs to be loaded last until we fix the framebuffer dependencies
-          self.loadAsset("demo.rg");
+        if (self.gRemainingAssets == 0) {
+          console.log("Loading postponed assets");
+          for (var i in self.postponedAssets) {
+            self.loadAsset(self.postponedAssets[i]);
+          }
+          self.postponedAssets = [];
+        }
+
+        if (self.gAllRemainingAssets == 0) {
+          // init gfx after everything has been loaded
+          gfx_init();
+          engine_render(snd.t());
+          // make sure that gAllRemainingAssets will never be 0 again even if we ++ or -- it.
+          self.gAllRemainingAssets = NaN;
         }
       }).
       error(function(error)
@@ -174,17 +204,18 @@ angular.module("tde.services.asset", [])
           callback(error)
       })
   }
-  
+
   this.unloadAsset = function(assetId)
   {
     if (!(assetId in self.assets))
       return
-    
+
     var parts = assetParts(assetId)
     var name = parts[0]
     var type = parts[1]
     switch (type)
     {
+      case "js": EngineDriver.unloadScript(name); break
       case "config": EngineDriver.unloadConfig(name); break
       case "tex": EngineDriver.unloadTexture(name); break
       case "geom": EngineDriver.unloadGeometry(name); break
@@ -196,12 +227,12 @@ angular.module("tde.services.asset", [])
       case "glsl": EngineDriver.unloadShader(assetId); break
       default: toastr.warning(type, "Unknown asset type"); break
     }
-    
+
     self.gRemainingAssets++;
     $rootScope.$broadcast("assetListChanged")
     $rootScope.$broadcast("assetUnloaded", assetId)
   }
-  
+
   this.getTypeIconClass = function(assetId)
   {
     var glyphicon = "file-o"

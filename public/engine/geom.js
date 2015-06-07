@@ -56,6 +56,37 @@ function subdivide(prev_buffer) {
     return output;
 }
 
+// TODO: There has to be a clever and compact way to express this:
+function make_cube() {
+    return [
+         0, 0, 0,   1, 1, 0,   1, 0, 0,    0, 0, 0,   0, 1, 0,   1, 1, 0,  //0x4c32
+         0, 0, 0,   0, 1, 1,   0, 1, 0,    0, 0, 0,   0, 0, 1,   0, 1, 1,  //0x2619
+         0, 0, 0,   1, 0, 1,   0, 0, 1,    0, 0, 0,   1, 0, 0,   1, 0, 1,  //0x6700
+         1, 1, 1,   0, 0, 1,   1, 0, 1,    1, 1, 1,   0, 1, 1,   0, 0, 1,  //0x3d3cb
+         1, 1, 1,   1, 0, 0,   1, 1, 0,    1, 1, 1,   1, 0, 1,   1, 0, 0,  //0x3e9e5
+         1, 1, 1,   0, 1, 0,   0, 1, 1,    1, 1, 1,   1, 1, 0,   0, 1, 0,  //0x3d5b6
+    ];
+}
+
+function apply_op_range(buf, op, param, from, to) {
+    var stride = param.length;
+    for (var i = from; i < to; i += stride) {
+        for (var p = 0; p < stride; ++p) {
+            buf[i+p] = op(buf[i+p],param[p]);
+        }
+    }
+}
+
+function apply_op(buf, op, param) {
+    apply_op_range(buf, op, param, 0, buf.length);
+}
+
+function op_add(a, b) { return a + b }
+function op_mul(a, b) { return a * b }
+
+function apply_scale(buf, s) { apply_op(buf, op_mul, s) }
+function apply_translation(buf, s) { apply_op(buf, op_add, s) }
+
 //  a          b          c           d
 // (1, 1, 1), (1,-1,-1), (-1, 1,-1), (-1,-1, 1)
 function make_tetrahedron() {
@@ -63,7 +94,7 @@ function make_tetrahedron() {
          1, 1, 1,   1,-1,-1,  -1, 1,-1,  // abc
         -1,-1, 1,   1,-1,-1,   1, 1, 1,  // dba
         -1,-1, 1,  -1, 1,-1,   1,-1,-1,  // dcb
-        -1,-1, 1,   1, 1, 1,  -1, 1,-1   // dac
+        -1,-1, 1,   1, 1, 1,  -1, 1,-1,  // dac
     ];
 }
 

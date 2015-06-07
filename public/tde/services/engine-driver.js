@@ -28,6 +28,18 @@ angular.module("tde.services.engine-driver", [])
     // nothing to do
   }
 
+  this.loadScript = function(name, data) {
+    self.logInfo("loading script " + name);
+    // create a global object named after the asset, only the content of this
+    // object will be unloaded.
+    eval(name.split(".")[0]+"={}");
+    eval(data);
+  }
+
+  this.unloadScript = function(name, data) {
+    eval(name.split(".")[0]+"={}");
+  }
+
   this.loadTexture = function(name, data, staticPath, callback)
   {
     self.logInfo("loading texture "+ name);
@@ -160,6 +172,8 @@ angular.module("tde.services.engine-driver", [])
     {
       self.logError(err.message, err.stack)
     }
+
+    engine.render = render_rg;
 
     gfx_init()
     engine_render(self.currentTime)

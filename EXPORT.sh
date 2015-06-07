@@ -72,6 +72,12 @@ if [ -f $RENDER_GRAPHS ]; then
   "$NODE" ./tools/export-rendergraph.js $PROJECT_ROOT/*.rg >> $EXPORT_ROOT/demo.js
 fi
 
+echo " -- exporting scripts"
+SCRIPTS=($PROJECT_ROOT/*.js)
+if [ -f $SCRIPTS ]; then
+  "$NODE" ./tools/export-script.js $PROJECT_ROOT/*.js >> $EXPORT_ROOT/demo.js
+fi
+
 echo " -- exporting ogg tracks"
 cp $PROJECT_ROOT/*.ogg $EXPORT_ROOT
 

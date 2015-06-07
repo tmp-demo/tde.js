@@ -21,7 +21,12 @@ do
     cp $f $SHADER_EXPORT_ROOT
 done
 
-USED_SHADER_PROGRAMS=`"$NODE" ./tools/parse-rendergraph-dependencies $PROJECT_ROOT/demo.rg`
+cd $PROJECT_ROOT
+USED_SHADER_PROGRAMS=`ls *.glsl`
+cd -
+if [ -f $PROJECT_ROOT/demo.rg ]; then
+    USED_SHADER_PROGRAMS=`"$NODE" ./tools/parse-rendergraph-dependencies $PROJECT_ROOT/demo.rg`
+fi
 
 # programs
 for f in  $USED_SHADER_PROGRAMS

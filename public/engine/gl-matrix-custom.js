@@ -2748,7 +2748,7 @@ mat4.create = function() {
  * @returns {mat4} a new 4x4 matrix
  */
 mat4.create0 = function() {
-    return new GLMAT_ARRAY_TYPE(16);;
+    return new GLMAT_ARRAY_TYPE(16);
 };
 
 /**

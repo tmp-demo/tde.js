@@ -50,9 +50,9 @@ function destroy_texture(texture) {
 
 function texture_unit(i) { return gl.TEXTURE0+i; }
 
-function prepare_texture_inputs(pass, shader_program) {
+function prepare_texture_inputs(shader_program, texture_inputs) {
   if (config.TEXTURE_INPUTS_ENABLED) {
-    var texture_inputs = pass.texture_inputs || [];
+    texture_inputs = texture_inputs || [];
 
     for (var i=0; i<texture_inputs.length; ++i) {
       var texture = textures[texture_inputs[i]];
@@ -61,7 +61,7 @@ function prepare_texture_inputs(pass, shader_program) {
           // TODO: should use a placeholder texture or something.
           // This can happen in the editor if a frame is rendered
           // while a texture is not loaded yet.
-          console.log("render_pass: missing texture "+pass.texture_inputs[i]);
+          console.log("render: missing texture "+texture_inputs[i]);
           return;
         }
       }
