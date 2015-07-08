@@ -19,7 +19,7 @@
           ]);
       }
     }
-    console.log(positions);
+    //console.log(positions);
     return {
       buffers: [ make_vbo(POS, positions) ],
       mode: gl.TRIANGLES,

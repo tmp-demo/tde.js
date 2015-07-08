@@ -16,7 +16,7 @@ for (var i = 2; i < process.argv.length; ++i) {
                     // TODO[minification], we don't need to pass the last N params
                     // if they are undefined.
                     console.log(
-                        'textures["'+asset_name+'"] = create_texture(',
+                        'textures.'+asset_name+' = create_texture(',
                         asset.width || undefined, SEP,
                         asset.height || undefined, SEP,
                         asset.format || undefined, SEP,
@@ -33,7 +33,7 @@ for (var i = 2; i < process.argv.length; ++i) {
                     for (var t = 0; t < asset.data.length; ++t) {
 						var item = asset.data[t];
                         console.log(
-                            "textures[%s] = %s(%d, %s);",
+                            "textures.%s = %s(%d, %s);",
 							JSON.stringify(item.id),
 							(asset.vertical || item.vertical) ? "create_vertical_text_texture" : "create_text_texture",
 							item.size,
@@ -44,7 +44,7 @@ for (var i = 2; i < process.argv.length; ++i) {
                 }
                 case "js": {
                     console.log("var generator = ", asset.generator.toString());
-                    console.log('textures["'+asset_name+'"] = generator();');
+                    console.log('textures.'+asset_name+' = generator();');
                     break
                 }
             }

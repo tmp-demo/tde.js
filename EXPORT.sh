@@ -79,14 +79,19 @@ if [ -f $SCRIPTS ]; then
 fi
 
 echo " -- exporting ogg tracks"
-cp $PROJECT_ROOT/*.ogg $EXPORT_ROOT
+OGGS=($PROJECT_ROOT/static/*.ogg)
+if [ -f $OGGS ]; then
+  cp $OGGS $EXPORT_ROOT
+fi
 
-# for f in  $PROJECT_ROOT/*.song
-# do
-#     cat $f | sed "s/'\\(SND\\.[A-Za-z]*\\)'/\\1/g" >> $EXPORT_ROOT/demo.js
-# done
+echo " -- exporting tmpsnd tracks"
+SONGS=($PROJECT_ROOT/*.song)
+if [ -f $SONGS ]; then
+  cat $SONGS >> $EXPORT_ROOT/demo.js
+fi
 
-#cat $PROJECT_ROOT/song.song >> $EXPORT_ROOT/demo.js
+echo " -- exporting soundtrack"
+"$NODE" ./tools/export-soundtrack.js $PROJECT_ROOT/sound.snd >> $EXPORT_ROOT/demo.js
 
 echo "onload=main;" >> $EXPORT_ROOT/demo.js
 

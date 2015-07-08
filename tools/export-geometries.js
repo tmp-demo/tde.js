@@ -37,7 +37,7 @@ for (var i = 2; i < process.argv.length; ++i) {
             var SEP = ", "
             switch (asset.type) {
                 case "buffers": {
-                    console.log('geometries["'+asset_name+'"] = {');
+                    console.log('geometries.'+asset_name+' = {');
                     console.log("  buffers: [")
                     if (asset.positions != undefined) {
                       console.log("     make_vbo(POS,", JSON.stringify(asset.positions), ")");
@@ -58,7 +58,7 @@ for (var i = 2; i < process.argv.length; ++i) {
                     break;
                 }
                 case "generated": {
-                    console.log('geometries["'+asset_name+'"] = create_geom_from_cmd_list([');
+                    console.log('geometries.'+asset_name+' = create_geom_from_cmd_list([');
                     for (var cmd = 0; cmd < asset.commands.length; ++cmd) {
                         console.log("{")
                         var command = asset.commands[cmd];
@@ -75,8 +75,7 @@ for (var i = 2; i < process.argv.length; ++i) {
                     break;
                 }
                 case "js": {
-                    console.log("var generator = ", asset.generator.toString());
-                    console.log('geometries["'+asset_name+'"] = generator();');
+                    console.log('geometries.'+asset_name+' = ' + asset.generator.toString() + '();');
                     break
                 }
             }
