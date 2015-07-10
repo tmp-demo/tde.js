@@ -10,6 +10,9 @@ function export_clip(clip) {
     if (clip.duration != undefined) {
         console.log("duration: ", clip.duration, ",");
     }
+    if (clip.easing) {
+        console.log("easing: ease_"+clip.easing, ",");
+    }
     var animation = clip.animation;
     if (animation != undefined) {
         if (typeof animation == "string") {

@@ -1,3 +1,5 @@
+var global_scope = this;
+
 angular.module("tde.services.engine-driver", [])
 
 .service("EngineDriver", function($rootScope)
@@ -5,7 +7,7 @@ angular.module("tde.services.engine-driver", [])
   var self = this
 
   this.currentTime = 0
-  
+
   // metadata used for dependency tracking and automatic rebuild of dependent shaders
   this.shaders = {}
 
@@ -34,6 +36,7 @@ angular.module("tde.services.engine-driver", [])
     // object will be unloaded.
     eval(name.split(".")[0]+"={}");
     eval(data);
+    engine_render(self.currentTime)
   }
 
   this.unloadScript = function(name, data) {
@@ -76,7 +79,7 @@ angular.module("tde.services.engine-driver", [])
       case "jpg": {
         // A texture initialized from filesystem image
         textures[name] = create_img_texture(staticPath + "/" + asset.filename,callback);
-       
+
         break;
       }
       default: {
@@ -226,6 +229,11 @@ angular.module("tde.services.engine-driver", [])
             var function_str = "function(t) { return " + clip.animation + "; }";
             console.log("patching uniform "+u+" animation: ", function_str);
             clip.animation = eval("_="+function_str);
+          }
+          //clip.easing = ease_linear;// clip.easing ? eval("_= ease_"+clip.easing) : undefined;
+          if (clip.easing) {
+            var eval_str = "ease_" + clip.easing;
+            clip.easing = global_scope[eval_str];
           }
         }
       }

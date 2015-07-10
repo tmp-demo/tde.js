@@ -296,6 +296,12 @@ function editor_assert_valid_uniform(val) {
   }
 }
 
+function ease_linear(t) { return t; }
+function ease_square(t) { return t*t; }
+function ease_cubic(t) { return t*t*t; }
+function ease_inv_square(t) { return 1.0 - ease_square(1.0-t); }
+function ease_inv_cubic(t) { return 1.0 - ease_square(1.0-t); }
+
 function resolve_animation_clip(clip, clip_time) {
   var anim = clip.animation;
   // Careful here: if anim is set to zero, it'll mean that the tract is
@@ -309,12 +315,16 @@ function resolve_animation_clip(clip, clip_time) {
     // in which case it's value is 1.
     return 1;
   }
+
+  var easing = clip.easing || ease_cubic;
+  var t = easing(clip_time/clip.duration) * clip.duration;
+
   if (typeof anim == "function") {
-    return anim(clip_time);
+    return anim(t);
   }
   if (config.UNIFORM_INTERPOLATION_ENABLED) {
     //console.log("animate weith clip time", clip_time);
-    return animate(deep_clone(anim), clip_time);
+    return animate(deep_clone(anim), t);
   } else {
     // TODO we should just do linear interpolation if we want to save space.
     // I don't think that only having constants here is useful.

@@ -83,6 +83,7 @@ function apply_op(buf, op, param) {
 
 function op_add(a, b) { return a + b }
 function op_mul(a, b) { return a * b }
+function op_set(a, b) { return a * b }
 
 function apply_scale(buf, s) { apply_op(buf, op_mul, s) }
 function apply_translation(buf, s) { apply_op(buf, op_add, s) }
