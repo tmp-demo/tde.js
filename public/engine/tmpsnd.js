@@ -18,7 +18,7 @@
   function SND(data) {
     log('SND.constr', this);
     this.playing = false;
-    SONG = data.SONG;
+    SONG = data ? data.SONG : SONG;
     instruments = data.instruments;
     sends = data.sends;
   };

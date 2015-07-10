@@ -11,7 +11,9 @@ for (var i = 2; i < process.argv.length; ++i) {
             var programs = []
             rg.render_passes.forEach(function(pass) {
                 if (pass.program) {
-                    programs.push(pass.program + ".glsl")
+                    var filename = pass.program + ".glsl"
+                    if (programs.indexOf(filename) == -1)
+                        programs.push(filename)
                 }
             })
             console.log(programs.join(" "))

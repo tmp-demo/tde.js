@@ -105,13 +105,11 @@ function main() {
   load_geometries();
   load_scenes();
   load_textures();
+  load_render_graph();
 
   gfx_init();
 
-  snd = new SND({});
-  //snd = new SND_Ogg("tdf15_master3")
-  // If you want to shut the music up comment this out and also comment
-  // out the equivalent line in engine-driver.js:~100
+  snd_init();
   snd.p();
 
   main_loop();

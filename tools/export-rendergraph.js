@@ -119,12 +119,13 @@ for (var i = 2; i < process.argv.length; ++i) {
             file_name = last(file.name.split('/')).split('.');
             var asset_name = file_name[0];
             asset = eval("___ = "+asset.toString());
-            console.log("var render_passes = [");
+
+            console.log("function load_render_graph() {");
+            console.log("render_passes = [");
             asset.render_passes.forEach(export_pass);
             console.log("]");
             console.log("engine.render = render_rg;");
-            console.log("");
-            //console.log('var sequence = ', asset, ';');
+            console.log("}");
         });
     })(file);
 }
