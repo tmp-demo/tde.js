@@ -104,7 +104,17 @@ angular.module("tde.engine-view", [])
           scenes[s].start_time = time_sum
           time_sum += scenes[s].duration
         }*/
-        time_sum = 64 // LOL
+
+        var time_sum = 0.0
+        if (sequence) {
+          Object.keys(sequence).forEach(function(name) {
+            var track = sequence[name]
+            track.forEach(function(clip) {
+              time_sum = Math.max(time_sum, clip.start + clip.duration)
+            })
+          })
+        }
+
         seeker.attr("max", time_sum * 1000)
         
         seeker.val(currentTime * 1000)
