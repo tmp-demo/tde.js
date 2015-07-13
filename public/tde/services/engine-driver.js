@@ -170,6 +170,7 @@ angular.module("tde.services.engine-driver", [])
     {
       var asset = eval("___ = "+data);
       render_passes = asset.render_passes;
+      init_rg(asset);
       for (var p in render_passes) {
         var pass = render_passes[p];
         if (pass.render_to) {

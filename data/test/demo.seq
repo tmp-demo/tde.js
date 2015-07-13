@@ -3,6 +3,13 @@
     "u_global_time": [
         { start:0, duration:64, animation:"[t]" }
     ],
+    "foobar": [
+      {
+        start: 0,
+        duration: 32,
+        animation:"[2*t]"
+      }
+    ],
     "u_cam_pos": [
       {
         start: 0,

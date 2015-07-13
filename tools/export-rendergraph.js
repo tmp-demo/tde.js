@@ -13,8 +13,28 @@ function export_pass(pass) {
     export_scene(pass);
     export_geometry(pass);
     export_program(pass);
-
+    export_local_unifroms(pass);
     console.log("},");
+}
+
+function export_local_unifroms(pass) {
+    if (!pass.uniforms) {
+        return;
+    }
+
+    console.log("uniforms: [");
+    for (var i = 0; i < pass.uniforms.length; ++i) {
+        var uniform = pass.uniforms[i];
+        console.log("{ name: '"+uniform.name+"', ");
+        if (uniform.track) {
+            console.log("track: '"+uniform.track+"',");
+        }
+        if (uniform.value) {
+            console.log("value: ", uniform.value, ",");
+        }
+        console.log("},");
+    }
+    console.log("],");
 }
 
 function export_enabled(pass) {
@@ -30,11 +50,7 @@ function export_render_to(pass) {
         return;
     }
 
-    console.log("render_to: {");
-    for (var target in pass.render_to) {
-        console.log(target, ": textures."+ pass.render_to[target] +",");
-    }
-    console.log("},");
+    console.log('render_to: "'+pass.render_to+'",');
 }
 
 function export_texture_inputs(pass) {
@@ -119,8 +135,33 @@ for (var i = 2; i < process.argv.length; ++i) {
             file_name = last(file.name.split('/')).split('.');
             var asset_name = file_name[0];
             asset = eval("___ = "+asset.toString());
-
+            console.log("var rg_targets = {}");
             console.log("function load_render_graph() {");
+            for (var tex_name in asset.textures) {
+                var desc = asset.textures[tex_name];
+                console.log(
+                    'textures.'+tex_name+' = create_texture(',
+                    desc.width || 0, ",",
+                    desc.height || 0, ",",
+                    desc.format || 0, ",",
+                    "0, ",
+                    desc.allow_repeat || 0, ",",
+                    desc.linear_filtering || 0, ",",
+                    desc.mipmaps || 0, ",",
+                    desc.float_texture || 0,
+                    ");"
+                );
+            };
+            for (var target_name in asset.render_targets) {
+                var desc = asset.render_targets[target_name];
+                console.log(
+                    "rg_targets['"+target_name+"'] = create_render_target({",
+                        desc.color ? 'color: textures.'+ desc.color+',' : "/*no color*/",
+                        desc.depth ? 'depth: textures.'+ desc.depth+',' : "/*no depth*/",
+                    "});"
+                );
+            }
+
             console.log("render_passes = [");
             asset.render_passes.forEach(export_pass);
             console.log("]");

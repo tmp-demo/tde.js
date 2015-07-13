@@ -7,6 +7,7 @@
         {
             render_to: { color: "texture_1", depth: "texture_depth" },
             scene: [{ geometry: "lines"}],
+            uniforms: [{ name: "u_global_time", track: "foobar"}],
             program: "lines",
             depth_test: true,
         },

@@ -105,7 +105,9 @@ function main() {
   load_geometries();
   load_scenes();
   load_textures();
-  load_render_graph();
+  if (this.load_render_graph) {
+    load_render_graph();
+  }
 
   gfx_init();
 

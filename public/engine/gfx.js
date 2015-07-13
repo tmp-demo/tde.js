@@ -24,7 +24,7 @@ function gl_init() {
     console.log("gl_init");
   }
 
-  gl = canvas.getContext("webgl", {alpha: false});
+  gl = canvas.getContext("webgl", {alpha: false, antialias:true});
   //minify_context(gl);
 
   if (config.GL_DEBUG) {
@@ -411,7 +411,15 @@ function render_pass(pass, time) {
     return;
   }
 
-  use_shader(shader_program, pass.texture_inputs, {});
+  var local_uniforms = {};
+  if (pass.uniforms) {
+    for (var u in pass.uniforms) {
+      var item = pass.uniforms[u]
+      local_uniforms[item.name] = item.track ? uniforms[item.track] : item.value;
+    }
+  }
+
+  use_shader(shader_program, pass.texture_inputs, local_uniforms);
 
   set_blending(pass.blend);
 
@@ -424,6 +432,35 @@ function render_pass(pass, time) {
   }
 
   cleanup_texture_inputs(pass);
+}
+
+// TODO, let's make it global for now for simplicity but this is tied to a specific
+// render graph.
+var rg_targets = {};
+
+function init_rg(render_graph) {
+  for (var tex_name in render_graph.textures) {
+    var tex_desc = render_graph.textures[tex_name];
+    // TODO
+    textures[tex_name] = create_texture(
+      0, 0,
+      eval(tex_desc.format || "undefined"),
+      null, // no data
+      0,
+      eval(tex_desc.linear_filtering || "undefined"),
+      0,
+      eval(tex_desc.float_texture || "undefined")
+    );
+  }
+  var targets = render_graph.render_targets;
+  for (var target_name in targets) {
+    var target = targets[target_name];
+    for (var tex_type in target) {
+      target[tex_type] = textures[target[tex_type]];
+    }
+    create_render_target(target);
+  }
+  rg_targets = render_graph.render_targets;
 }
 
 function render_rg(time) {
@@ -478,16 +515,16 @@ function prepare_clear(pass) {
 }
 
 function init_render_to_texture(sequence) {
-  if (config.RENDER_TO_TEXTURE_ENABLED) {
-    // replace the render passes' texture arrays by actual frame buffer objects
-    // this is far from optimal...
-    for (var p in render_passes) {
-      var pass = render_passes[p];
-      if (pass.render_to) {
-        pass.render_to = create_render_target(pass.render_to);
-      }
-    }
-  }
+//  if (config.RENDER_TO_TEXTURE_ENABLED) {
+//    // replace the render passes' texture arrays by actual frame buffer objects
+//    // this is far from optimal...
+//    for (var p in render_passes) {
+//      var pass = render_passes[p];
+//      if (pass.render_to) {
+//        pass.render_to = create_render_target(pass.render_to);
+//      }
+//    }
+//  }
 }
 
 function create_render_target(target) {
@@ -509,10 +546,11 @@ function create_render_target(target) {
 
 function prepare_render_to_texture(pass) {
   if (config.RENDER_TO_TEXTURE_ENABLED) {
-    gl.bindFramebuffer(gl.FRAMEBUFFER, pass.render_to ? pass.render_to.fbo : null);
+    var target = pass.render_to ? rg_targets[pass.render_to] : null;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, target ? target.fbo : null);
 
-    var target = pass.render_to ? pass.render_to.color : canvas;
-    return [target.width, target.height]
+    var size = target ? target.color : canvas;
+    return [size.width, size.height]
   } else {
     return [canvas.width, canvas.height];
   }
