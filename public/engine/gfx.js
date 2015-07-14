@@ -12,6 +12,7 @@ var programs = {}
 var fragment_shaders = {}
 var vertex_shaders = {}
 var ctx_2d
+var render_passes = [];
 
 var gl_ext_half_float;
 
@@ -74,8 +75,6 @@ function gfx_init() {
   if (config.EDITOR) {
     console.log("gfx_init");
   }
-
-  init_render_to_texture(sequence);
 
   if (config.CAM_UNIFORMS_ENABLED) {
     uniforms["u_cam_pos"] = [0, 1, 0]
@@ -425,11 +424,7 @@ function render_pass(pass, time) {
 
   set_depth_test(pass.depth_test);
 
-  if (config.SCENES_ENABLED && pass.scene) {
-    render_scene(pass.scene, shader_program);
-  } else {
-    render_without_scenes(pass, shader_program);
-  }
+  render_geometries(pass, shader_program);
 
   cleanup_texture_inputs(pass);
 }
@@ -478,7 +473,7 @@ function render_frame(time) {
 
   prepare_builtin_uniforms();
 
-  engine.render(time);
+  render_rg(time);
 
   if (config.GL_DEBUG && config.GL_DEBUG_TRACE) {
     console.log("== FRAME END ==");
@@ -514,19 +509,6 @@ function prepare_clear(pass) {
   }
 }
 
-function init_render_to_texture(sequence) {
-//  if (config.RENDER_TO_TEXTURE_ENABLED) {
-//    // replace the render passes' texture arrays by actual frame buffer objects
-//    // this is far from optimal...
-//    for (var p in render_passes) {
-//      var pass = render_passes[p];
-//      if (pass.render_to) {
-//        pass.render_to = create_render_target(pass.render_to);
-//      }
-//    }
-//  }
-}
-
 function create_render_target(target) {
   target.fbo = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, target.fbo);
@@ -556,15 +538,22 @@ function prepare_render_to_texture(pass) {
   }
 }
 
-function get_geometry(geometry) {
+function get_geometry(geometry_descriptor) {
   if (config.EDITOR) {
-    if (!geometry) {
+    if (!geometry_descriptor || !geometry_descriptor[0]) {
       console.log("Missing geometry");
       return geometry_placeholder
     }
+    if (typeof(geometry_descriptor[0]) == "string" ) {
+      return geometries[geometry_descriptor[0]];
+    } else {
+      console.log("!! geometries should be referred to by name during eddition !!");
+      return geometry_descriptor[0];
+    }
   }
 
-  return geometry;
+  // exported geometry is passed by ref instead of name to reduce the number of strings.
+  return geometry_descriptor[0];
 }
 
 function get_shader_program(pass) {
@@ -583,45 +572,28 @@ function get_shader_program(pass) {
     }
     return shader_program;
   } else {
-    return programs[pass.program];
+    return pass.program;
   }
 }
 
-function render_without_scenes(pass, shader_program) {
-  var geometry = get_geometry(pass.geometry);
-  var instance_id_location = gl.getUniformLocation(shader_program, "u_instance_id");
-  draw_geom_instanced(geometry, pass.instance_count, instance_id_location);
-}
-
-function render_scene(scene, shader_program) {
+function render_geometries(pass, shader_program) {
+  // Let's put scene assets asside for now until we have decided their format and usefulness
   // A scene can be inlined in the sequence...
-  if (typeof scene == "string") {
-    // ...or in its own asset
-    scene = scenes[scene];
-  }
+  // if (typeof scene == "string") {
+  //   // ...or in its own asset
+  //   scene = scenes[scene];
+  // }
 
-  // This allows us to inline the object list without the other members of the scene
-  // for convenience and space.
-  //    scenes: { objects: [{geometry: "quad"}] },
-  // is quivalent to:
-  //    scenes: [{geometry: "quad"}],
-  var scene_objects = scene.objects || scene;
+  for (var g = 0; g < pass.geometry.length; ++g) {
+    // descriptor[0] is the geometry and descriptor[1] the (optional) instance count
+    var descriptor = pass.geometry[g];
+    var geometry = get_geometry(descriptor);
 
-  // TODO[nical] do we want this?
-  // send_uniforms(shader_program, scene.uniforms, clip_time);
+    // This is optional, but can be a convenient info to have in the shader.
+    send_uniforms(shader_program, {"u_object_id": [g]});
 
-  for (var g = 0; g < scene_objects.length; ++g) {
-    var obj = scene_objects[g];
-
-    var geometry = get_geometry(obj.geometry);
-
-    // this is optional, but can be a convenient info to have in the shader.
-    obj.uniforms = obj.uniforms || {};
-    obj.uniforms["u_object_id"] = [g];
-
-    send_uniforms(shader_program, obj.uniforms);
-
-    draw_geom_instanced(geometry)
+    var instance_id_location = gl.getUniformLocation(shader_program, "u_instance_id");
+    draw_geom_instanced(geometry, descriptor[1], instance_id_location);
   }
 }
 

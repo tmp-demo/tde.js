@@ -57,6 +57,10 @@ function prepare_texture_inputs(shader_program, texture_inputs) {
     for (var i=0; i<texture_inputs.length; ++i) {
       var texture = texture_inputs[i];
       if (config.EDITOR) {
+        if (typeof(texture) != "string") {
+          console.log("Texture should be passed by name in the editor");
+        }
+        texture = textures[texture];
         if (!texture) {
           // TODO: should use a placeholder texture or something.
           // This can happen in the editor if a frame is rendered

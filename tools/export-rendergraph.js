@@ -90,10 +90,19 @@ function export_geometry(pass) {
         return;
     }
 
-    if (pass.instance_count != undefined) {
-        console.log("instance_count: '"+pass.instance_count+"',");
+    console.log("geometry: [");
+
+    for (var i = 0; i < pass.geometry.length; ++i) {
+        var descriptor = pass.geometry[i];
+        // descritptor is an array of the form ["name", instance_count]
+        // we export it in the form [geometries.name, instance_count]
+        // instance_count is optional
+        var instance_count = descriptor[1];
+        var name = descriptor[0];
+        console.log("[geometries."+name, instance_count ? ", "+instance_count : "" ,"],");
     }
-    console.log("geometry: geometries."+pass.geometry+",");
+
+    console.log("],");
 }
 
 function export_program(pass) {
@@ -101,7 +110,7 @@ function export_program(pass) {
         return;
     }
 
-    console.log("program: '"+pass.program+"',");
+    console.log("program: programs."+pass.program+",");
 }
 
 function export_scene(pass) {
