@@ -202,10 +202,10 @@ angular.module("tde.services.engine-driver", [])
         var uniform = sequence[u];
         for (var c in uniform) {
           var clip = uniform[c];
-          if (typeof clip.animation == "string") {
-            var function_str = "function(t) { return " + clip.animation + "; }";
+          if (clip.evaluate) {
+            var function_str = "function(t) { return " + clip.evaluate + "; }";
             console.log("patching uniform "+u+" animation: ", function_str);
-            clip.animation = eval("_="+function_str);
+            clip.evaluate = eval("_="+function_str);
           }
           //clip.easing = ease_linear;// clip.easing ? eval("_= ease_"+clip.easing) : undefined;
           if (clip.easing) {

@@ -194,7 +194,7 @@ function load_shader_program(vs_entry_point, fs_entry_point) {
       console.error(gl.getProgramInfoLog(program), "Program link error");
     }
   }
-  return program;
+  return { handle: program };
 }
 
 // editor support
@@ -214,7 +214,7 @@ function load_program_from_source(vs_source, fs_source)
     console.error(gl.getProgramInfoLog(program), "Program link error");
   }
 
-  return program;
+  return { handle: program };
 }
 
 // editor support
@@ -309,20 +309,21 @@ function resolve_animation_clip(clip, clip_time) {
   // TODO: perhaps we should just have EVERY unform passed as an array or
   // a function returning an array. This would save some checks and simplify
   // things a bit.
-  if (!anim) {
+  if (!anim && !clip.evaluate) {
     // no anim means the meaningful animation is that the track is active
     // in which case it's value is 1.
     return 1;
   }
 
-  var easing = clip.easing || ease_cubic;
+  var easing = clip.easing || ease_linear;
   var t = easing(clip_time/clip.duration) * clip.duration;
 
-  if (typeof anim == "function") {
-    return anim(t);
+  if (clip.evaluate) {
+    return clip.evaluate(t);
   }
+
   if (config.UNIFORM_INTERPOLATION_ENABLED) {
-    //console.log("animate weith clip time", clip_time);
+    //console.log("animate with clip time", clip_time);
     return animate(deep_clone(anim), t);
   } else {
     // TODO we should just do linear interpolation if we want to save space.
@@ -558,21 +559,35 @@ function get_geometry(geometry_descriptor) {
 
 function get_shader_program(pass) {
   if (config.EDITOR) {
-    if (!pass.program) {
+
+    var name;
+    if (pass.select_program) {
+      var track = uniforms[pass.select_program];
+      if (!track) {
+        console.log("Missing animation track",pass.select_program,"to select the shader program");
+        return placeholder_program.handle;
+      }
+      console.log("using shader index", track[0], pass.select_program, track);
+      name = pass.programs[uniforms[pass.select_program][0]|0];
+    } else {
+      name = pass.program;
+    }
+
+    if (!name) {
       return null;
     }
 
-    var shader_program = programs[pass.program]
+    var shader_program = programs[name]
 
     if (!shader_program) {
-      if (pass.program) {
-        console.log("Missing program "+pass.program+" (using placeholder)");
-      }
+      console.log("Missing program "+name+" (using placeholder)");
       shader_program = placeholder_program;
     }
-    return shader_program;
+    return shader_program.handle;
   } else {
-    return pass.program;
+    var program = pass.select_program ? pass.programs[uniforms[pass.select_program][0]|0]
+                                      : pass.program;
+    return program ? program.handle : null;
   }
 }
 

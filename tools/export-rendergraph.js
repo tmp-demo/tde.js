@@ -106,11 +106,17 @@ function export_geometry(pass) {
 }
 
 function export_program(pass) {
-    if (pass.program == undefined) {
-        return;
+    if (pass.program) {
+        console.log("program: programs."+pass.program+",");
     }
-
-    console.log("program: programs."+pass.program+",");
+    if (pass.programs && pass.select_program) {
+        console.log("programs: [");
+        for (var i = 0; i < pass.programs.length; ++i) {
+            console.log("programs."+pass.programs[i]+",");
+        }
+        console.log("],");
+        console.log("select_program: '"+pass.select_program+"',");
+    }
 }
 
 function export_scene(pass) {
