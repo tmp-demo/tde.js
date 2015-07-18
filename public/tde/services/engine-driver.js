@@ -9,7 +9,8 @@ angular.module("tde.services.engine-driver", [])
   this.currentTime = 0
   this.sequenceInfo = {
     data: {},
-    name: ""
+    name: "",
+    time: 0
   }
 
   // metadata used for dependency tracking and automatic rebuild of dependent shaders
@@ -244,6 +245,7 @@ angular.module("tde.services.engine-driver", [])
 
       self.sequenceInfo.data = asset
       self.sequenceInfo.name = name
+      self.sequenceInfo.time = self.currentTime
     }
     catch (err)
     {

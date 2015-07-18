@@ -43,7 +43,7 @@ angular.module("tde", [
   $routeProvider.otherwise({redirectTo: "/"})
 }])
 
-.controller("ApplicationCtrl", function($scope, $routeParams, $location, User, EngineDriver)
+.controller("ApplicationCtrl", function($scope, $routeParams, $location, User, EngineDriver, Asset)
 {
   $scope.$on('$routeChangeSuccess', function()
   {
@@ -61,7 +61,20 @@ angular.module("tde", [
   
   $scope.currentUser = User.currentUser
   $scope.currentSequence = EngineDriver.sequenceInfo
+
+  $scope.$watch("currentSequence.time", function(time)
+  {
+    EngineDriver.seek(time)
+  })
   
+  $scope.updateSequenceData = function(data)
+  {
+    Asset.updateAsset($scope.currentSequence.name + ".seq", JSON.stringify(data), function(err)
+    {
+      if (err) throw err
+    })
+  }
+
   $scope.$on("hideBox", function(event)
   {
     $scope.visibleBox = null;

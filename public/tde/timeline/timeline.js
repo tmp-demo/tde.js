@@ -6,16 +6,20 @@ angular.module("tde.timeline", [])
     restrict: "E",
     templateUrl: "/tde/timeline/timeline.html",
     scope: {
-        sequence: "=sequence"
+        sequence: "=sequence",
+        updateSequenceData: "=updateSequenceData"
     },
     link: function($scope, element, attrs)
     {
-      var tracks = {}
-      var name = ""
-
-      var canvas = element.find("canvas").get(0)
+      var jqCanvas = element.find("canvas")
+      var canvas = jqCanvas.get(0)
       var ctx = canvas.getContext("2d")
       
+      var tracks = {}
+      var name = ""
+      var selectedClip = null
+      var hoverClip = null
+
       var HEADER_WIDTH = 100
       var RULER_HEIGHT = 20
       var TRACK_HEIGHT = 30
@@ -72,8 +76,17 @@ angular.module("tde.timeline", [])
             if (end < xToBeat(HEADER_WIDTH)) return;
             
             var gradient = ctx.createLinearGradient(0, y, 0, y + TRACK_HEIGHT)
-            gradient.addColorStop(0, "#6097A8")
-            gradient.addColorStop(1, "#526580")
+
+            if (clip == hoverClip)
+            {
+              gradient.addColorStop(0, "#B6DDF0")
+              gradient.addColorStop(1, "#9AB8DB")
+            }
+            else
+            {
+              gradient.addColorStop(0, "#6097A8")
+              gradient.addColorStop(1, "#526580")
+            }
             ctx.fillStyle = gradient
             ctx.fillRect(beatToX(clip.start) + 1, y + 1, clip.duration * scale - 2, TRACK_HEIGHT - 2)
           })
@@ -114,31 +127,97 @@ angular.module("tde.timeline", [])
       
       redraw()
       
+      function seek(time)
+      {
+        $scope.$apply(function()
+        {
+          $scope.sequence.time = time
+        })
+      }
+
+      function findClip(x, y)
+      {
+        var trackIndex = Math.floor(yToTrack(y))
+        if (trackIndex < 0) return null
+        if (trackIndex >= Object.keys(tracks).length) return null
+
+        var beat = xToBeat(x)
+        var track = tracks[Object.keys(tracks)[trackIndex]]
+        for (var i = 0; i < track.length; i++)
+        {
+          var clip = track[i]
+          var end = clip.start + clip.duration
+
+          if ((beat >= clip.start) && (beat < end))
+            return clip;
+        }
+
+        return null
+      }
+
       var panning = false
+      var seeking = false
+      var dragging = false
+      var dragStartBeat = 0
       canvas.addEventListener("mousedown", function(event)
       {
+        if (event.button == 0 /* left */)
+        {
+          selectedClip = findClip(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
+          if (selectedClip)
+          {
+            dragging = true
+            dragStartBeat = selectedClip.start
+          }
+          else
+          {
+            seeking = true
+            seek(xToBeat(event.pageX - jqCanvas.offset().left))
+          }
+        }
+
         if (event.button == 1 /* middle */)
           panning = true
       })
       
       window.addEventListener("mouseup", function(event)
       {
+        if (dragging)
+        {
+          $scope.updateSequenceData($scope.sequence.data)
+        }
+
         panning = false
+        seeking = false
+        dragging = false
+        selectedClip = false
       })
       
       window.addEventListener("mousemove", function(event)
       {
+        hoverClip = findClip(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
+
+        if (seeking)
+          seek(xToBeat(event.pageX - jqCanvas.offset().left))
+
         if (panning)
         {
           scrollX += event.movementX
           scrollY += event.movementY
-          redraw()
         }
+
+        if (dragging)
+        {
+          dragStartBeat += event.movementX / scale
+          selectedClip.start = Math.round(dragStartBeat)
+        }
+
+        redraw()
       })
       
       canvas.addEventListener("wheel", function(event)
       {
-        var localX = event.pageX - event.target.offsetWidth
+        var localX = event.pageX - jqCanvas.offset().left
         var centerBeat = xToBeat(localX)
         scale -= event.deltaY
         scale = Math.max(2, scale)
@@ -157,10 +236,10 @@ angular.module("tde.timeline", [])
       window.addEventListener("resize", resize)
       resize()
 
-      $scope.$watch("sequence", function(sequence)
+      $scope.$watch("sequence", function(newSequence, oldSequence)
       {
-        tracks = sequence.data.hasOwnProperty("animations") ? sequence.data.animations : {}
-        name = sequence.name
+        tracks = $scope.sequence.data.hasOwnProperty("animations") ? $scope.sequence.data.animations : {}
+        name = $scope.sequence.name
         redraw()
       }, true)
     }
