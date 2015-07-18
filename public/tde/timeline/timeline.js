@@ -17,7 +17,7 @@ angular.module("tde.timeline", [])
       
       var HEADER_WIDTH = 100
       var RULER_HEIGHT = 20
-      var TRACK_HEIGHT = 50
+      var TRACK_HEIGHT = 30
       
       var scrollX = 0 // px
       var scrollY = 0 // px
@@ -31,7 +31,6 @@ angular.module("tde.timeline", [])
       
       function redraw()
       {
-        console.log(tracks)
         ctx.fillStyle = "rgb(0, 0, 0)"
         ctx.fillRect(0, 0, canvas.width, canvas.height)
         
@@ -71,8 +70,11 @@ angular.module("tde.timeline", [])
             if (clip.start > xToBeat(canvas.width)) return;
             if (end < xToBeat(HEADER_WIDTH)) return;
             
-            ctx.fillStyle = "rgb(100, 150, 100)"
-            ctx.fillRect(beatToX(clip.start), y, clip.duration * scale, TRACK_HEIGHT)
+            var gradient = ctx.createLinearGradient(0, y, 0, y + TRACK_HEIGHT)
+            gradient.addColorStop(0, "#6097A8")
+            gradient.addColorStop(1, "#526580")
+            ctx.fillStyle = gradient
+            ctx.fillRect(beatToX(clip.start) + 1, y + 1, clip.duration * scale - 2, TRACK_HEIGHT - 2)
           })
           
           ctx.fillStyle = "rgb(20, 20, 20)"
@@ -126,8 +128,10 @@ angular.module("tde.timeline", [])
       
       canvas.addEventListener("wheel", function(event)
       {
-        console.log(event)
+        var localX = event.pageX - event.target.offsetWidth
+        var centerBeat = xToBeat(localX)
         scale -= event.deltaY
+        scrollX -= beatToX(centerBeat) - localX
         redraw()
       })
 
