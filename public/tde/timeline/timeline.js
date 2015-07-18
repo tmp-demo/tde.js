@@ -60,10 +60,7 @@ angular.module("tde.timeline", [])
         }
         
         // tracks
-        ctx.font = "12px sans-serif";
-        ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
-        var trackNames = Object.keys(tracks);
+        var trackNames = Object.keys(tracks)
         for (var i = Math.max(0, Math.floor(yToTrack(RULER_HEIGHT))); i < Math.min(trackNames.length, Math.ceil(yToTrack(canvas.height))); i++)
         {
           var track = tracks[trackNames[i]]
@@ -90,6 +87,15 @@ angular.module("tde.timeline", [])
             }
             ctx.fillStyle = gradient
             ctx.fillRect(beatToX(clip.start) + 1, y + 1, clip.duration * scale - 2, TRACK_HEIGHT - 2)
+
+            if (clip.evaluate)
+            {
+              ctx.font = "12px sans-serif monospace"
+              ctx.textAlign = "center"
+              ctx.textBaseline = "middle"
+              ctx.fillStyle = "#cef"
+              ctx.fillText(clip.evaluate, beatToX(clip.start + clip.duration * 0.5), y + TRACK_HEIGHT / 2, beatToX(end) - beatToX(clip.start))
+            }
           })
           
           ctx.fillStyle = "rgb(20, 20, 20)"
@@ -99,6 +105,10 @@ angular.module("tde.timeline", [])
           ctx.fillRect(0, y + 1, HEADER_WIDTH, 1)
           ctx.fillStyle = "rgb(100, 150, 200)"
           ctx.fillRect(0, y, HEADER_WIDTH, 1)
+
+          ctx.font = "12px sans-serif"
+          ctx.textAlign = "left"
+          ctx.textBaseline = "middle"
           ctx.fillText(trackNames[i], 10, y + TRACK_HEIGHT / 2, HEADER_WIDTH - 20);
         }
         
@@ -148,6 +158,9 @@ angular.module("tde.timeline", [])
 
       function findClip(x, y)
       {
+        if (x < HEADER_WIDTH) return null
+        if (y < RULER_HEIGHT) return null
+
         var trackIndex = Math.floor(yToTrack(y))
         if (trackIndex < 0) return null
         if (trackIndex >= Object.keys(tracks).length) return null
