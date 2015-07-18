@@ -535,6 +535,10 @@ angular.module("tde.services.engine-driver", [])
         self.currentTime = 0;
       
       $rootScope.$broadcast("currentTime", self.currentTime);
+      $rootScope.$apply(function()
+      {
+        self.sequenceInfo.time = self.currentTime;
+      })
       
       self.drawFrame()
       

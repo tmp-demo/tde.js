@@ -7,7 +7,8 @@ angular.module("tde.timeline", [])
     templateUrl: "/tde/timeline/timeline.html",
     scope: {
         sequence: "=sequence",
-        updateSequenceData: "=updateSequenceData"
+        updateSequenceData: "=updateSequenceData",
+        seek: "=seek"
     },
     link: function($scope, element, attrs)
     {
@@ -123,6 +124,14 @@ angular.module("tde.timeline", [])
         ctx.textBaseline = "middle";
         ctx.fillStyle = "rgb(200, 200, 200)"
         ctx.fillText("[ " + name + " ]", 10, RULER_HEIGHT / 2);
+
+        // time marker
+        var markerX = beatToX($scope.sequence.time)
+        if ((markerX >= HEADER_WIDTH) && (markerX <= canvas.width))
+        {
+          ctx.fillStyle = "rgb(200, 200, 200)"
+          ctx.fillRect(markerX - 1, RULER_HEIGHT, 2, canvas.height - RULER_HEIGHT)
+        }
       }
       
       redraw()
@@ -131,7 +140,9 @@ angular.module("tde.timeline", [])
       {
         $scope.$apply(function()
         {
+          time = Math.max(0, time)
           $scope.sequence.time = time
+          $scope.seek(time)
         })
       }
 

@@ -62,10 +62,10 @@ angular.module("tde", [
   $scope.currentUser = User.currentUser
   $scope.currentSequence = EngineDriver.sequenceInfo
 
-  $scope.$watch("currentSequence.time", function(time)
+  $scope.seek = function(time)
   {
     EngineDriver.seek(time)
-  })
+  }
   
   $scope.updateSequenceData = function(data)
   {
