@@ -11,6 +11,7 @@ angular.module("tde.timeline", [])
     link: function($scope, element, attrs)
     {
       var tracks = {}
+      var name = ""
 
       var canvas = element.find("canvas").get(0)
       var ctx = canvas.getContext("2d")
@@ -100,6 +101,15 @@ angular.module("tde.timeline", [])
           ctx.fillRect(x, RULER_HEIGHT - 5, 1, 5)
           ctx.fillText(i, x, RULER_HEIGHT - 6);
         }
+
+        // name
+        ctx.fillStyle = "rgb(40, 40, 40)"
+        ctx.fillRect(0, 0, HEADER_WIDTH, RULER_HEIGHT)
+        ctx.font = "12px sans-serif";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "rgb(200, 200, 200)"
+        ctx.fillText("[ " + name + " ]", 10, RULER_HEIGHT / 2);
       }
       
       redraw()
@@ -131,6 +141,8 @@ angular.module("tde.timeline", [])
         var localX = event.pageX - event.target.offsetWidth
         var centerBeat = xToBeat(localX)
         scale -= event.deltaY
+        scale = Math.max(2, scale)
+        scale = Math.min(100, scale)
         scrollX -= beatToX(centerBeat) - localX
         redraw()
       })
@@ -142,16 +154,14 @@ angular.module("tde.timeline", [])
         redraw()
       }
 
-      canvas.addEventListener("resize", resize)
+      window.addEventListener("resize", resize)
       resize()
 
       $scope.$watch("sequence", function(sequence)
       {
-        if (sequence.data.hasOwnProperty("animations"))
-        {
-          tracks = sequence.data.animations
-          redraw()
-        }
+        tracks = sequence.data.hasOwnProperty("animations") ? sequence.data.animations : {}
+        name = sequence.name
+        redraw()
       }, true)
     }
   }
