@@ -8,9 +8,8 @@
     ],
     "foobar": [
       {
-        start: 0,
-        duration: 32,
-        animation:"[2*t]"
+        "start": 0,
+        "duration": 32
       }
     ],
     "u_cam_pos": [
