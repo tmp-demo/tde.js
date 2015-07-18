@@ -9,7 +9,8 @@
     "foobar": [
       {
         "start": 0,
-        "duration": 32
+        "duration": 32,
+        "evaluate": "[t]"
       }
     ],
     "u_cam_pos": [
