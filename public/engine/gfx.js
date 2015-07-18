@@ -12,6 +12,7 @@ var programs = {}
 var fragment_shaders = {}
 var vertex_shaders = {}
 var ctx_2d
+var render_passes = [];
 
 var gl_ext_half_float;
 
@@ -74,8 +75,6 @@ function gfx_init() {
   if (config.EDITOR) {
     console.log("gfx_init");
   }
-
-  init_render_to_texture(sequence);
 
   if (config.CAM_UNIFORMS_ENABLED) {
     uniforms["u_cam_pos"] = [0, 1, 0]
@@ -195,7 +194,7 @@ function load_shader_program(vs_entry_point, fs_entry_point) {
       console.error(gl.getProgramInfoLog(program), "Program link error");
     }
   }
-  return program;
+  return { handle: program };
 }
 
 // editor support
@@ -215,7 +214,7 @@ function load_program_from_source(vs_source, fs_source)
     console.error(gl.getProgramInfoLog(program), "Program link error");
   }
 
-  return program;
+  return { handle: program };
 }
 
 // editor support
@@ -310,20 +309,21 @@ function resolve_animation_clip(clip, clip_time) {
   // TODO: perhaps we should just have EVERY unform passed as an array or
   // a function returning an array. This would save some checks and simplify
   // things a bit.
-  if (!anim) {
+  if (!anim && !clip.evaluate) {
     // no anim means the meaningful animation is that the track is active
     // in which case it's value is 1.
     return 1;
   }
 
-  var easing = clip.easing || ease_cubic;
+  var easing = clip.easing || ease_linear;
   var t = easing(clip_time/clip.duration) * clip.duration;
 
-  if (typeof anim == "function") {
-    return anim(t);
+  if (clip.evaluate) {
+    return clip.evaluate(t);
   }
+
   if (config.UNIFORM_INTERPOLATION_ENABLED) {
-    //console.log("animate weith clip time", clip_time);
+    //console.log("animate with clip time", clip_time);
     return animate(deep_clone(anim), t);
   } else {
     // TODO we should just do linear interpolation if we want to save space.
@@ -411,19 +411,52 @@ function render_pass(pass, time) {
     return;
   }
 
-  use_shader(shader_program, pass.texture_inputs, {});
+  var local_uniforms = {};
+  if (pass.uniforms) {
+    for (var u in pass.uniforms) {
+      var item = pass.uniforms[u]
+      local_uniforms[item.name] = item.track ? uniforms[item.track] : item.value;
+    }
+  }
+
+  use_shader(shader_program, pass.texture_inputs, local_uniforms);
 
   set_blending(pass.blend);
 
   set_depth_test(pass.depth_test);
 
-  if (config.SCENES_ENABLED && pass.scene) {
-    render_scene(pass.scene, shader_program);
-  } else {
-    render_without_scenes(pass, shader_program);
-  }
+  render_geometries(pass, shader_program);
 
   cleanup_texture_inputs(pass);
+}
+
+// TODO, let's make it global for now for simplicity but this is tied to a specific
+// render graph.
+var rg_targets = {};
+
+function init_rg(render_graph) {
+  for (var tex_name in render_graph.textures) {
+    var tex_desc = render_graph.textures[tex_name];
+    // TODO
+    textures[tex_name] = create_texture(
+      0, 0,
+      eval(tex_desc.format || "undefined"),
+      null, // no data
+      0,
+      eval(tex_desc.linear_filtering || "undefined"),
+      0,
+      eval(tex_desc.float_texture || "undefined")
+    );
+  }
+  var targets = render_graph.render_targets;
+  for (var target_name in targets) {
+    var target = targets[target_name];
+    for (var tex_type in target) {
+      target[tex_type] = textures[target[tex_type]];
+    }
+    create_render_target(target);
+  }
+  rg_targets = render_graph.render_targets;
 }
 
 function render_rg(time) {
@@ -441,7 +474,7 @@ function render_frame(time) {
 
   prepare_builtin_uniforms();
 
-  engine.render(time);
+  render_rg(time);
 
   if (config.GL_DEBUG && config.GL_DEBUG_TRACE) {
     console.log("== FRAME END ==");
@@ -477,19 +510,6 @@ function prepare_clear(pass) {
   }
 }
 
-function init_render_to_texture(sequence) {
-  if (config.RENDER_TO_TEXTURE_ENABLED) {
-    // replace the render passes' texture arrays by actual frame buffer objects
-    // this is far from optimal...
-    for (var p in render_passes) {
-      var pass = render_passes[p];
-      if (pass.render_to) {
-        pass.render_to = create_render_target(pass.render_to);
-      }
-    }
-  }
-}
-
 function create_render_target(target) {
   target.fbo = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, target.fbo);
@@ -509,81 +529,86 @@ function create_render_target(target) {
 
 function prepare_render_to_texture(pass) {
   if (config.RENDER_TO_TEXTURE_ENABLED) {
-    gl.bindFramebuffer(gl.FRAMEBUFFER, pass.render_to ? pass.render_to.fbo : null);
+    var target = pass.render_to ? rg_targets[pass.render_to] : null;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, target ? target.fbo : null);
 
-    var target = pass.render_to ? pass.render_to.color : canvas;
-    return [target.width, target.height]
+    var size = target ? target.color : canvas;
+    return [size.width, size.height]
   } else {
     return [canvas.width, canvas.height];
   }
 }
 
-function get_geometry(geometry) {
+function get_geometry(geometry_descriptor) {
   if (config.EDITOR) {
-    if (!geometry) {
+    if (!geometry_descriptor || !geometry_descriptor[0]) {
       console.log("Missing geometry");
       return geometry_placeholder
     }
+    if (typeof(geometry_descriptor[0]) == "string" ) {
+      return geometries[geometry_descriptor[0]];
+    } else {
+      console.log("!! geometries should be referred to by name during eddition !!");
+      return geometry_descriptor[0];
+    }
   }
 
-  return geometry;
+  // exported geometry is passed by ref instead of name to reduce the number of strings.
+  return geometry_descriptor[0];
 }
 
 function get_shader_program(pass) {
   if (config.EDITOR) {
-    if (!pass.program) {
+
+    var name;
+    if (pass.select_program) {
+      var track = uniforms[pass.select_program];
+      if (!track) {
+        console.log("Missing animation track",pass.select_program,"to select the shader program");
+        return placeholder_program.handle;
+      }
+      console.log("using shader index", track[0], pass.select_program, track);
+      name = pass.programs[uniforms[pass.select_program][0]|0];
+    } else {
+      name = pass.program;
+    }
+
+    if (!name) {
       return null;
     }
 
-    var shader_program = programs[pass.program]
+    var shader_program = programs[name]
 
     if (!shader_program) {
-      if (pass.program) {
-        console.log("Missing program "+pass.program+" (using placeholder)");
-      }
+      console.log("Missing program "+name+" (using placeholder)");
       shader_program = placeholder_program;
     }
-    return shader_program;
+    return shader_program.handle;
   } else {
-    return programs[pass.program];
+    var program = pass.select_program ? pass.programs[uniforms[pass.select_program][0]|0]
+                                      : pass.program;
+    return program ? program.handle : null;
   }
 }
 
-function render_without_scenes(pass, shader_program) {
-  var geometry = get_geometry(pass.geometry);
-  var instance_id_location = gl.getUniformLocation(shader_program, "u_instance_id");
-  draw_geom_instanced(geometry, pass.instance_count, instance_id_location);
-}
-
-function render_scene(scene, shader_program) {
+function render_geometries(pass, shader_program) {
+  // Let's put scene assets asside for now until we have decided their format and usefulness
   // A scene can be inlined in the sequence...
-  if (typeof scene == "string") {
-    // ...or in its own asset
-    scene = scenes[scene];
-  }
+  // if (typeof scene == "string") {
+  //   // ...or in its own asset
+  //   scene = scenes[scene];
+  // }
 
-  // This allows us to inline the object list without the other members of the scene
-  // for convenience and space.
-  //    scenes: { objects: [{geometry: "quad"}] },
-  // is quivalent to:
-  //    scenes: [{geometry: "quad"}],
-  var scene_objects = scene.objects || scene;
+  for (var g = 0; g < pass.geometry.length; ++g) {
+    // descriptor[0] is the geometry and descriptor[1] the (optional) instance count
+    var descriptor = pass.geometry[g];
+    var geometry = get_geometry(descriptor);
 
-  // TODO[nical] do we want this?
-  // send_uniforms(shader_program, scene.uniforms, clip_time);
+    // This is optional, but can be a convenient info to have in the shader.
+    send_uniforms(shader_program, {"u_object_id": [g]});
 
-  for (var g = 0; g < scene_objects.length; ++g) {
-    var obj = scene_objects[g];
-
-    var geometry = get_geometry(obj.geometry);
-
-    // this is optional, but can be a convenient info to have in the shader.
-    obj.uniforms = obj.uniforms || {};
-    obj.uniforms["u_object_id"] = [g];
-
-    send_uniforms(shader_program, obj.uniforms);
-
-    draw_geom_instanced(geometry)
+    var instance_id_location = gl.getUniformLocation(shader_program, "u_instance_id");
+    draw_geom_instanced(geometry, descriptor[1], instance_id_location);
   }
 }
 

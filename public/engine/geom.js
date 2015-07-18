@@ -83,7 +83,7 @@ function apply_op(buf, op, param) {
 
 function op_add(a, b) { return a + b }
 function op_mul(a, b) { return a * b }
-function op_set(a, b) { return a * b }
+function op_set(a, b) { return b }
 
 function apply_scale(buf, s) { apply_op(buf, op_mul, s) }
 function apply_translation(buf, s) { apply_op(buf, op_add, s) }
@@ -114,8 +114,6 @@ function make_sphere(radius, num_subdivs) {
 }
 
 function make_grid( num_subdivs ) {
-    
-
     var buffer =  [
       -1, -1, 0,  -1,  1, 0,   1, -1, 0,
       -1,  1, 0,   1, -1, 0,   1,  1, 0  ];
@@ -127,7 +125,19 @@ function make_grid( num_subdivs ) {
     return buffer;
 }
 
-
+function make_disc(center, radius, n_points) {
+    var vertices = [];
+    var step = (2.0*3.14)/ n_points;
+    for (var i=0; i < n_points; ++i) {
+        var a1 = i * step;
+        var a2 = (i+1) + step;
+        pack_vertices(vertices, [
+            center,
+            [center[0]+cos(a1)*radius, center[1]+sin(a1)*radius, center[2]],
+            [center[0]+cos(a2)*radius, center[1]+sin(a2)*radius, center[2]],
+        ]);
+    }
+}
 
 // TODO: it's sorta convenient to have this for prototyping but I assume we'll
 // have to not use this in the shipping demos and always generate from unpacked

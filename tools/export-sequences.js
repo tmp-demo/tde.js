@@ -13,24 +13,23 @@ function export_clip(clip) {
     if (clip.easing) {
         console.log("easing: ease_"+clip.easing, ",");
     }
+    if (clip.evaluate) {
+        console.log("evaluate: function(t) { return "+clip.evaluate+"},");
+    }
     var animation = clip.animation;
     if (animation != undefined) {
-        if (typeof animation == "string") {
-            console.log("animation: function(t) { return "+animation+"},");
-        } else {
-            var key_frames = animation;
-            console.log("animation: [");
-            for (var f in key_frames) {
-                var time = key_frames[f][0];
-                var value = key_frames[f][1];
-                console.log("[", time, ", [") // time
-                for (var component in value) {
-                    console.log(value[component].toString()+",");
-                }
-                console.log("]],");
+        var key_frames = animation;
+        console.log("animation: [");
+        for (var f in key_frames) {
+            var time = key_frames[f][0];
+            var value = key_frames[f][1];
+            console.log("[", time, ", [") // time
+            for (var component in value) {
+                console.log(value[component].toString()+",");
             }
-            console.log("],");
+            console.log("]],");
         }
+        console.log("],");
     }
     console.log("},");
 }
