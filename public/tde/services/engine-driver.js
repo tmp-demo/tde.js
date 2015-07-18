@@ -199,8 +199,8 @@ angular.module("tde.services.engine-driver", [])
 
     try
     {
-      var asset = sequence = eval("___ = "+data);
-      sequence = asset.animations;
+      var asset = sequence = JSON.parse(data);
+      sequence = JSON.parse(JSON.stringify(asset.animations));
 
       // patch the sequence
       for (var u in sequence) {
