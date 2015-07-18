@@ -1,19 +1,10 @@
-#engine input
-{
-  position: absolute;
-  left: 0px;
-  right: 0px;
-  height: 20px;
-  bottom: 0px;
-}
-
 #engine .canvas-container
 {
   position: absolute;
   left: 0px;
   right: 0px;
   top: 0px;
-  bottom: 20px;
+  bottom: 0px;
 }
 
 #canvas-overlay-text

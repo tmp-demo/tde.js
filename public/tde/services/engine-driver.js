@@ -6,11 +6,11 @@ angular.module("tde.services.engine-driver", [])
 {
   var self = this
 
-  this.currentTime = 0
+  this.currentTime = sessionStorage.getItem("engineViewTime");
   this.sequenceInfo = {
     data: {},
     name: "",
-    time: 0
+    time: this.currentTime
   }
 
   // metadata used for dependency tracking and automatic rebuild of dependent shaders
@@ -534,6 +534,7 @@ angular.module("tde.services.engine-driver", [])
       else
         self.currentTime = 0;
       
+      sessionStorage.setItem("engineViewTime", self.currentTime);
       $rootScope.$broadcast("currentTime", self.currentTime);
       $rootScope.$apply(function()
       {
