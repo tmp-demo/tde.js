@@ -1,41 +1,95 @@
 {
-  animations: {
+  "animations": {
     "u_global_time": [
-        { start:0, duration:64, animation:"[t]" }
+      {
+        "start": 0,
+        "duration": 64
+      }
     ],
     "u_cam_pos": [
       {
-        start: 0,
-        duration: 32,
-        animation: [
-          [0, [5, 50, -50]],
-          [16, [200, 50, -7]],
-          [32, [5, 20, -5]],
-        ],
+        "start": 0,
+        "duration": 32,
+        "animation": [
+          [
+            0,
+            [
+              5,
+              50,
+              -50
+            ]
+          ],
+          [
+            16,
+            [
+              200,
+              50,
+              -7
+            ]
+          ],
+          [
+            32,
+            [
+              5,
+              20,
+              -5
+            ]
+          ]
+        ]
       },
       {
-        start: 32,
-        duration: 32,
-        animation: [
-          [0, [5, 20, -5]],
-          [32, [5, 200, -5]],
-        ],
-      },
+        "start": 32,
+        "duration": 32,
+        "animation": [
+          [
+            0,
+            [
+              5,
+              20,
+              -5
+            ]
+          ],
+          [
+            32,
+            [
+              5,
+              200,
+              -5
+            ]
+          ]
+        ]
+      }
     ],
     "u_glitch": [
       {
-        start: 0,
-        duration: 64,
-        animation: [
-          [0, [0.5]],
-          [64, [1]],
-        ],
-      },
+        "start": 0,
+        "duration": 64,
+        "animation": [
+          [
+            0,
+            [
+              0.5
+            ]
+          ],
+          [
+            64,
+            [
+              1
+            ]
+          ]
+        ]
+      }
     ],
     "no_aquapaints": [
-        { start:10, duration:6 },
-        { start:50, duration:14 }
-    ],
+      {
+        "start": 10,
+        "duration": 6
+      },
+      {
+        "start": 50,
+        "duration": 14
+      }
+    ]
   },
-  annotations: [],
+  "annotations": []
 }
