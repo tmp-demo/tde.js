@@ -24,7 +24,7 @@ function gl_init() {
     console.log("gl_init");
   }
 
-  gl = canvas.getContext("webgl", {alpha: false});
+  gl = canvas.getContext("webgl", {alpha: false, antialias: true});
   //minify_context(gl);
 
   if (config.GL_DEBUG) {

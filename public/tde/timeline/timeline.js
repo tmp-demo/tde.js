@@ -1,109 +1,154 @@
-var sequence = {
-  "u_global_time": [
-      { start:0, duration:64, animation:"[t]" }
-  ],
-  "u_cam_pos": [
-    {
-      start: 0,
-      duration: 32,
-      animation: [
-        [0, [5, 200, -5]],
-        [16, [-5, 50, -7]],
-        [32, [5, 20, -5]],
-      ],
+angular.module("tde.timeline", [])
+
+.directive("tdeTimeline", function()
+{
+  return {
+    restrict: "E",
+    templateUrl: "/tde/timeline/timeline.html",
+    scope: {
+        sequence: "=sequence"
     },
+    link: function($scope, element, attrs)
     {
-      start: 32,
-      duration: 32,
-      animation: [
-        [0, [5, 20, -5]],
-        [32, [5, 200, -5]],
-      ],
-    },
-  ],
-  "glitch": [
-    {
-      start: 0,
-      duration: 64,
-      animation: [
-        [0, [0]],
-        [64, [1]],
-      ],
-    },
-  ],
-}
+      var tracks = {}
 
-var dom_tracks = {};
-
-function add_track(track_name) {
-    var dom_track = document.createElement("div");
-    dom_track.className = "track";
-    dom_track.name = track_name;
-
-    var dom_track_info = document.createElement("div");
-    dom_track_info.className = "track-info";
-    dom_track_info.innerHTML = track_name;
-
-    var dom_track_content = document.createElement("div");
-    dom_track_content.className = "track-content";
-
-    dom_track.appendChild(dom_track_info);
-    dom_track.appendChild(dom_track_content);
-    document.querySelector("#timeline-content").appendChild(dom_track);
-
-    return dom_track;
-}
-
-function add_clip(track_name, clip_index) {
-    var clip = sequence[track_name][clip_index];
-    var dom_clip = document.createElement("div");
-    dom_clip.className = "clip";
-    dom_clip.model = clip;
-
-    var dom_track = dom_tracks[track_name]
-    for (var elt in dom_track.children) {
-        var child = dom_track.children[elt];
-        if (child.className == "track-content") {
-            child.appendChild(dom_clip);
-            break;
+      var canvas = element.find("canvas").get(0)
+      var ctx = canvas.getContext("2d")
+      
+      var HEADER_WIDTH = 100
+      var RULER_HEIGHT = 20
+      var TRACK_HEIGHT = 50
+      
+      var scrollX = 0 // px
+      var scrollY = 0 // px
+      var scale = 10 // px/beat
+      
+      function beatToX(beat) { return HEADER_WIDTH + scale * beat + scrollX }
+      function xToBeat(x)    { return (x - scrollX - HEADER_WIDTH) / scale }
+      
+      function trackToY(track) { return RULER_HEIGHT + track * TRACK_HEIGHT + scrollY }
+      function yToTrack(y)     { return (y - scrollY - RULER_HEIGHT) / TRACK_HEIGHT }
+      
+      function redraw()
+      {
+        console.log(tracks)
+        ctx.fillStyle = "rgb(0, 0, 0)"
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        
+        ctx.fillStyle = "rgb(20, 20, 20)"
+        ctx.fillRect(0, RULER_HEIGHT, HEADER_WIDTH, canvas.height - RULER_HEIGHT)
+        
+        // grid
+        for (var i = Math.ceil(xToBeat(HEADER_WIDTH) / 16.0) * 16.0; i < Math.ceil(xToBeat(canvas.width) / 16.0) * 16.0; i += 16)
+        {
+            var x = beatToX(i)
+            ctx.fillStyle = "rgb(64, 64, 64)"
+            ctx.fillRect(x, RULER_HEIGHT, 1, canvas.height - RULER_HEIGHT)
         }
-    }
-
-    return dom_clip
-}
-
-function init_editor_timeline() {
-    for (var t in sequence) {
-        var track = sequence[t];
-        dom_tracks[t] = add_track(t);
-        for (var c in track) {
-            var clip = track[c];
-            clip.dom = add_clip(t, c);
+        
+        // track slots
+        for (var i = Math.ceil(yToTrack(RULER_HEIGHT)); i < Math.ceil(yToTrack(canvas.height)); i++)
+        {
+            var y = trackToY(i)
+            ctx.fillStyle = "rgb(32, 32, 32)"
+            ctx.fillRect(0, y, canvas.width, 1)
         }
+        
+        // tracks
+        ctx.font = "12px sans-serif";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        var trackNames = Object.keys(tracks);
+        for (var i = Math.max(0, Math.floor(yToTrack(RULER_HEIGHT))); i < Math.min(trackNames.length, Math.ceil(yToTrack(canvas.height))); i++)
+        {
+          var track = tracks[trackNames[i]]
+          var y = trackToY(i)
+          
+          // clips
+          track.forEach(function(clip)
+          {
+            var end = clip.start + clip.duration
+            if (clip.start > xToBeat(canvas.width)) return;
+            if (end < xToBeat(HEADER_WIDTH)) return;
+            
+            ctx.fillStyle = "rgb(100, 150, 100)"
+            ctx.fillRect(beatToX(clip.start), y, clip.duration * scale, TRACK_HEIGHT)
+          })
+          
+          ctx.fillStyle = "rgb(20, 20, 20)"
+          ctx.fillRect(0, y, HEADER_WIDTH, TRACK_HEIGHT)
+          
+          ctx.fillStyle = "rgb(20, 20, 64)"
+          ctx.fillRect(0, y + 1, HEADER_WIDTH, 1)
+          ctx.fillStyle = "rgb(100, 150, 200)"
+          ctx.fillRect(0, y, HEADER_WIDTH, 1)
+          ctx.fillText(trackNames[i], 10, y + TRACK_HEIGHT / 2, HEADER_WIDTH - 20);
+        }
+        
+        // time ruler
+        ctx.fillStyle = "rgb(20, 20, 20)"
+        ctx.fillRect(0, 0, canvas.width, RULER_HEIGHT)
+        ctx.font = "8px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+        for (var i = Math.ceil(xToBeat(0)); i < Math.floor(xToBeat(canvas.width)); i++)
+        {
+          var x = beatToX(i)
+          ctx.fillStyle = "rgb(200, 200, 200)"
+          ctx.fillRect(x, RULER_HEIGHT - 5, 1, 5)
+          ctx.fillText(i, x, RULER_HEIGHT - 6);
+        }
+      }
+      
+      redraw()
+      
+      var panning = false
+      canvas.addEventListener("mousedown", function(event)
+      {
+        if (event.button == 1 /* middle */)
+          panning = true
+      })
+      
+      window.addEventListener("mouseup", function(event)
+      {
+        panning = false
+      })
+      
+      window.addEventListener("mousemove", function(event)
+      {
+        if (panning)
+        {
+          scrollX += event.movementX
+          scrollY += event.movementY
+          redraw()
+        }
+      })
+      
+      canvas.addEventListener("wheel", function(event)
+      {
+        console.log(event)
+        scale -= event.deltaY
+        redraw()
+      })
+
+      function resize()
+      {
+        canvas.width = canvas.clientWidth
+        canvas.height = canvas.clientHeight
+        redraw()
+      }
+
+      canvas.addEventListener("resize", resize)
+      resize()
+
+      $scope.$watch("sequence", function(sequence)
+      {
+        if (sequence.data.hasOwnProperty("animations"))
+        {
+          tracks = sequence.data.animations
+          redraw()
+        }
+      }, true)
     }
-
-    timline_update_dom_clips();
-
-    document.querySelector("#xscrollbar").addEventListener("input", timline_update_dom_clips);
-    document.querySelector("#xzoombar").addEventListener("input", timline_update_dom_clips);
-}
-
-function clear_editor_timeline() {
-  dom_tracks = {}
-  var dom_track_container = document.querySelector("#timeline-content");
-  dom_track_container.innerHTML = '';
-}
-
-function timline_update_dom_clips() {
-    var scroll_bar = document.querySelector("#xscrollbar");
-    var x_scroll = -parseFloat(scroll_bar.value);
-
-    var zoom_bar = document.querySelector("#xzoombar");
-    var x_scale = parseFloat(zoom_bar.value);
-
-    document.querySelectorAll(".clip").forEach(function(elt) {
-        var t = "translateX("+ (elt.model.start+x_scroll)*x_scale +"px)";
-        elt.style.transform = t;
-        elt.style.width = ""+(elt.model.duration*x_scale)+"px";
-    })
-}
+  }
+})

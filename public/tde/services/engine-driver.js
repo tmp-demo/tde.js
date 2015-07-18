@@ -7,6 +7,10 @@ angular.module("tde.services.engine-driver", [])
   var self = this
 
   this.currentTime = 0
+  this.sequenceInfo = {
+    data: {},
+    name: ""
+  }
 
   // metadata used for dependency tracking and automatic rebuild of dependent shaders
   this.shaders = {}
@@ -238,8 +242,8 @@ angular.module("tde.services.engine-driver", [])
         }
       }
 
-      clear_editor_timeline();
-      init_editor_timeline();
+      self.sequenceInfo.data = asset
+      self.sequenceInfo.name = name
     }
     catch (err)
     {
@@ -252,6 +256,9 @@ angular.module("tde.services.engine-driver", [])
   this.unloadSequence = function(name)
   {
     sequence = null;
+
+    self.sequenceInfo.data = {}
+    self.sequenceInfo.name = ""
   }
 
   this.loadScene = function(name, data)

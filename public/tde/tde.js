@@ -11,6 +11,7 @@ angular.module("tde", [
   "tde.home",
   "tde.navbar",
   "tde.project",
+  "tde.timeline",
   "tde.services.asset",
   "tde.services.blender",
   "tde.services.engine-driver",
@@ -42,7 +43,7 @@ angular.module("tde", [
   $routeProvider.otherwise({redirectTo: "/"})
 }])
 
-.controller("ApplicationCtrl", function($scope, $routeParams, $location, User)
+.controller("ApplicationCtrl", function($scope, $routeParams, $location, User, EngineDriver)
 {
   $scope.$on('$routeChangeSuccess', function()
   {
@@ -59,6 +60,7 @@ angular.module("tde", [
   })
   
   $scope.currentUser = User.currentUser
+  $scope.currentSequence = EngineDriver.sequenceInfo
   
   $scope.$on("hideBox", function(event)
   {
