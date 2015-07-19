@@ -222,7 +222,7 @@ function destroy_shader_program(name)
 {
   var program = programs[name]
   if (program) {
-    gl.deleteProgram(program)
+    gl.deleteProgram(program.handle)
     delete programs[name]
   }
   if (!config.EDITOR) {
