@@ -55,7 +55,7 @@ angular.module("tde.code-editor", [])
 
       editor.commands.addCommand({
         name: "Reload code",
-        bindKey: "Ctrl+Enter",
+        bindKey: "Ctrl+S",
         exec: function(editor)
         {
           $scope.$apply(function()
