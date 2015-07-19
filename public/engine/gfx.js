@@ -445,7 +445,8 @@ function init_rg(render_graph) {
       0,
       eval(tex_desc.linear_filtering || "undefined"),
       0,
-      eval(tex_desc.float_texture || "undefined")
+      eval(tex_desc.float_texture || "undefined"),
+      tex_desc.downscale
     );
   }
   var targets = render_graph.render_targets;

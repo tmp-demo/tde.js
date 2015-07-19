@@ -163,7 +163,8 @@ for (var i = 2; i < process.argv.length; ++i) {
                     desc.allow_repeat || 0, ",",
                     desc.linear_filtering || 0, ",",
                     desc.mipmaps || 0, ",",
-                    desc.float_texture || 0,
+                    desc.float_texture || 0, ",",
+                    desc.downscale || 0,
                     ");"
                 );
             };

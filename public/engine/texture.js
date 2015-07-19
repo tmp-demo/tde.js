@@ -1,4 +1,4 @@
-function create_texture(width, height, format, data, allow_repeat, linear_filtering, mipmaps, float_tex) {
+function create_texture(width, height, format, data, allow_repeat, linear_filtering, mipmaps, float_tex, downscale) {
   if (config.EDITOR) {
     if (float_tex && data) {
       // wouldn't be hard to add, but we haven't needed it yet.
@@ -14,6 +14,10 @@ function create_texture(width, height, format, data, allow_repeat, linear_filter
   var format = format || gl.RGBA;
   var width = width || canvas.width;
   var height = height || canvas.height;
+  var downscale = downscale || 0;
+
+  width = Math.floor(width * Math.pow(0.5, downscale));
+  height = Math.floor(height * Math.pow(0.5, downscale));
 
   var wrap = allow_repeat ? gl.REPEAT : gl.CLAMP_TO_EDGE;
   var min_filtering = linear_filtering
