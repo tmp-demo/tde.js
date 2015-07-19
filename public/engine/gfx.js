@@ -25,7 +25,7 @@ function gl_init() {
     console.log("gl_init");
   }
 
-  gl = canvas.getContext("webgl", {alpha: false, antialias: true});
+  gl = canvas.getContext("webgl", {alpha: false, antialias: false});
   //minify_context(gl);
 
   if (config.GL_DEBUG) {
@@ -568,7 +568,6 @@ function get_shader_program(pass) {
         console.log("Missing animation track",pass.select_program,"to select the shader program");
         return placeholder_program.handle;
       }
-      console.log("using shader index", track[0], pass.select_program, track);
       name = pass.programs[uniforms[pass.select_program][0]|0];
     } else {
       name = pass.program;
