@@ -586,7 +586,7 @@ angular.module("tde.services.engine-driver", [])
 
     var viewMatrix = mat4.create()
     var viewMatrixInv = mat4.create()
-    mat4.lookAtTilt(viewMatrix, uniform_editor_overrides["u_cam_pos"], uniform_editor_overrides["u_cam_target"], uniforms["cam_tilt"])
+    mat4.lookAtTilt(viewMatrix, uniform_editor_overrides["u_cam_pos"], uniform_editor_overrides["u_cam_target"], uniforms["u_cam_tilt"])
     mat4.invert(viewMatrixInv, viewMatrix)
     mat3.fromMat4(viewMatrixInv, viewMatrixInv)
 

@@ -270,15 +270,15 @@ function prepare_builtin_uniforms() {
     var viewMatrix = mat4.create()
     var projectionMatrix = mat4.create0() // careful: 0 here
     var viewProjectionMatrix = mat4.create0()
-    //var viewProjectionMatrixInv = mat4.create()
+    var viewProjectionMatrixInv = mat4.create()
     // derive camera matrices from simpler parameters
     //mat4.lookAt(viewMatrix, uniforms["u_cam_pos"], uniforms["u_cam_target"], [0.0, 1.0, 0.0]);
     mat4.lookAtTilt(viewMatrix, uniforms["u_cam_pos"], uniforms["u_cam_target"], uniforms["u_cam_tilt"]);
     mat4.perspective(projectionMatrix, uniforms["u_cam_fov"] * Math.PI / 180.0, ratio, 2.0, 10000.0)
     mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-    //mat4.invert(viewProjectionMatrixInv, viewProjectionMatrix);
+    mat4.invert(viewProjectionMatrixInv, viewProjectionMatrix);
     uniforms["u_view_proj_mat"] = viewProjectionMatrix;
-    //uniforms["u_view_proj_mat_inv"] = viewProjectionMatrixInv;
+    uniforms["u_view_proj_mat_inv"] = viewProjectionMatrixInv;
   }
 }
 
