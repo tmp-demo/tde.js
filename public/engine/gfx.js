@@ -352,7 +352,7 @@ function resolve_animation_track(track, time) {
 }
 
 function resolve_animations(time) {
-  for (track in sequence) {
+  for (var track in sequence) {
     uniforms[track] = resolve_animation_track(sequence[track], time);
   }
 }
