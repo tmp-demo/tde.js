@@ -18,8 +18,7 @@ angular.module("tde.timeline", [])
       
       var tracks = {}
       var name = ""
-      var selectedClip = null
-      var hoverClip = null
+      var selectedClips = []
 
       var HEADER_WIDTH = 100
       var RULER_HEIGHT = 20
@@ -34,6 +33,8 @@ angular.module("tde.timeline", [])
       
       function trackToY(track) { return RULER_HEIGHT + track * TRACK_HEIGHT + scrollY }
       function yToTrack(y)     { return (y - scrollY - RULER_HEIGHT) / TRACK_HEIGHT }
+
+      function snap(beat) { return Math.round(beat) }
       
       function redraw()
       {
@@ -69,13 +70,19 @@ angular.module("tde.timeline", [])
           // clips
           track.forEach(function(clip)
           {
-            var end = clip.start + clip.duration
-            if (clip.start > xToBeat(canvas.width)) return;
+            var selected = selectedClips.indexOf(clip) != -1;
+
+            var start = clip.start
+            if (selected)
+              start += snap(dragOffset)
+
+            var end = start + clip.duration
+            if (start > xToBeat(canvas.width)) return;
             if (end < xToBeat(HEADER_WIDTH)) return;
             
             var gradient = ctx.createLinearGradient(0, y, 0, y + TRACK_HEIGHT)
 
-            if (clip == hoverClip)
+            if (selected)
             {
               gradient.addColorStop(0, "#B6DDF0")
               gradient.addColorStop(1, "#9AB8DB")
@@ -86,7 +93,7 @@ angular.module("tde.timeline", [])
               gradient.addColorStop(1, "#526580")
             }
             ctx.fillStyle = gradient
-            ctx.fillRect(beatToX(clip.start) + 1, y + 1, clip.duration * scale - 2, TRACK_HEIGHT - 2)
+            ctx.fillRect(beatToX(start) + 1, y + 1, clip.duration * scale - 2, TRACK_HEIGHT - 2)
 
             if (clip.evaluate)
             {
@@ -94,7 +101,7 @@ angular.module("tde.timeline", [])
               ctx.textAlign = "center"
               ctx.textBaseline = "middle"
               ctx.fillStyle = "#cef"
-              ctx.fillText(clip.evaluate, beatToX(clip.start + clip.duration * 0.5), y + TRACK_HEIGHT / 2, beatToX(end) - beatToX(clip.start))
+              ctx.fillText(clip.evaluate, beatToX(start + clip.duration * 0.5), y + TRACK_HEIGHT / 2, beatToX(end) - beatToX(start))
             }
           })
           
@@ -182,16 +189,42 @@ angular.module("tde.timeline", [])
       var panning = false
       var seeking = false
       var dragging = false
-      var dragStartBeat = 0
+      var dragOffset = 0
       canvas.addEventListener("mousedown", function(event)
       {
         if (event.button == 0 /* left */)
         {
-          selectedClip = findClip(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
-          if (selectedClip)
+          var clip = findClip(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
+
+          // replace selection
+          if (!event.shiftKey && (selectedClips.indexOf(clip) == -1))
+          {
+            if (clip)
+              selectedClips = [clip]
+            else
+              selectedClips = []
+          }
+
+          // modify selection
+          if (event.shiftKey && clip)
+          {
+            var selectedIndex = selectedClips.indexOf(clip);
+            if (selectedIndex == -1)
+            {
+              // append
+              selectedClips.push(clip)
+            }
+            else
+            {
+              // remove
+              selectedClips.splice(selectedIndex, 1)
+            }
+          }
+
+          if (selectedClips.length > 0)
           {
             dragging = true
-            dragStartBeat = selectedClip.start
+            dragOffset = 0
           }
           else
           {
@@ -208,19 +241,25 @@ angular.module("tde.timeline", [])
       {
         if (dragging)
         {
-          $scope.updateSequenceData($scope.sequence.data)
+          dragOffset = snap(dragOffset)
+          if (Math.abs(dragOffset) > 0)
+          {
+            selectedClips.forEach(function(clip)
+            {
+              clip.start += dragOffset
+            })
+            dragOffset = 0
+            $scope.updateSequenceData($scope.sequence.data)
+          }
         }
 
         panning = false
         seeking = false
         dragging = false
-        selectedClip = false
       })
       
       window.addEventListener("mousemove", function(event)
       {
-        hoverClip = findClip(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
-
         if (seeking)
           seek(xToBeat(event.pageX - jqCanvas.offset().left))
 
@@ -232,8 +271,7 @@ angular.module("tde.timeline", [])
 
         if (dragging)
         {
-          dragStartBeat += event.movementX / scale
-          selectedClip.start = Math.round(dragStartBeat)
+          dragOffset += event.movementX / scale
         }
 
         redraw()
