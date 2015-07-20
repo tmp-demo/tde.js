@@ -235,6 +235,8 @@ angular.module("tde.timeline", [])
 
         if (event.button == 1 /* middle */)
           panning = true
+
+        redraw()
       })
       
       window.addEventListener("mouseup", function(event)
@@ -256,6 +258,8 @@ angular.module("tde.timeline", [])
         panning = false
         seeking = false
         dragging = false
+
+        redraw()
       })
       
       window.addEventListener("mousemove", function(event)
