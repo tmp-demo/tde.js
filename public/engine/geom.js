@@ -382,9 +382,7 @@ function make_ring(path, y) {
 
 function pack_vertices(to, v) {
     for (var i = 0; i<v.length; ++i) {
-        for (var j = 0; j<v[i].length; ++j) {
-            to.push(v[i][j]);
-        }
+        to.push.apply(to, v[i]);
     }
 }
 
