@@ -2,34 +2,27 @@ angular.module("tde.services.project", [])
 
 .service("Project", function($rootScope, $http)
 {
-  this.projects = []
+  var self = this;
+  this.projects = [];
   
-  var self = this
-  this.refreshProjectList = function()
-  {
-    $http.get("/data/projects").success(function(data)
-    {
-      self.projects = data
-      $rootScope.$broadcast("projectListChanged")
-    })
-  }
+  this.refreshProjectList = function() {
+    $http.get("/data/projects")
+      .success(function(data) {
+        self.projects = data;
+        $rootScope.$broadcast("projectListChanged");
+      });
+  };
   
-  this.createProject = function(name, callback)
-  {
-    var self = this
-    $http.post("/data/projects", {name: name}).
-      success(function()
+  this.createProject = function(name, callback) {
+    $http.post("/data/projects", {name: name})
+      .success(function()
       {
-        self.refreshProjectList()
+        self.refreshProjectList();
         if (callback)
-          callback(null)
-      }).
-      error(function(error)
-      {
-        if (callback)
-          callback(error)
+          callback();
       })
-  }
+      .error(callback);
+  };
   
-  this.refreshProjectList()
-})
+  this.refreshProjectList();
+});

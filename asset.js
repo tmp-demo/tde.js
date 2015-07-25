@@ -3,6 +3,7 @@ var Cookies = require("cookies");
 var fs = require("fs");
 var git = require("gift");
 var path = require("path");
+var vm = require("vm");
 
 var assetNameRegexp = /^[-\w]+$/;
 
@@ -10,6 +11,7 @@ exports.init = function(options, app) {
 
   app.get("/data/projects/:projectId/assets", function(req, res, next) {
     var projectId = req.params.projectId;
+    var assetDependencies = {};
 
     return fs.readdir(path.resolve(options.data, projectId), function(err, files) {
       if (err) return next(err);
@@ -20,8 +22,63 @@ exports.init = function(options, app) {
           return callback(stats.isFile());
         });
 
-      }, function(assets) {
-        return res.json(assets);
+      }, function(assetNames) {
+        return async.each(assetNames.sort(), function(file, callback) {
+          var dependencies = [];
+          assetDependencies[file] = dependencies;
+
+          switch (path.extname(file)) {
+            case ".glsl":
+            case ".glsllib":
+              return fs.readFile(path.resolve(options.data, projectId, file), function(err, data) {
+                if (err) return callback(err);
+                var contents = data.toString();
+                var regexp = /\/\/\!\s+INCLUDE\s+(.+)$/gm;
+                var match;
+                while ((match = regexp.exec(contents))) {
+                  dependencies.push(match[1].trim());
+                }
+                return callback();
+              });
+            case ".rg":
+              return fs.readFile(path.resolve(options.data, projectId, file), function(err, data) {
+                if (err) return callback(err);
+                var contents = data.toString();
+                var sandbox = {};
+                vm.runInNewContext("_=" + contents, sandbox);
+                if (sandbox._ && sandbox._.render_passes)
+                  sandbox._.render_passes.forEach(function(pass) {
+                    if (pass.program)
+                      dependencies.push(pass.program + ".glsl");
+                    if (pass.programs)
+                      pass.programs.forEach(function(program) {
+                        dependencies.push(program + ".glsl");
+                    });
+                    if (pass.select_program)
+                      dependencies.push("demo.seq");
+                  });
+                return callback();
+              });
+            default:
+              return callback();
+          }
+        }, function(err) {
+          if (err) return next(err);
+
+          var assetNames = [];
+
+          function addAsset(name) {
+            var dependencies = assetDependencies[name];
+            if (!dependencies) return console.warn("Unresolved dependency: %s", name);
+            dependencies.forEach(addAsset);
+            if (assetNames.indexOf(name) === -1)
+              assetNames.push(name);
+          }
+
+          Object.keys(assetDependencies).forEach(addAsset);
+
+          return res.json(assetNames);
+        });
       });
     });
   });

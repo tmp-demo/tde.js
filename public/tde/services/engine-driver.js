@@ -16,9 +16,8 @@ angular.module("tde.services.engine-driver", [])
   // metadata used for dependency tracking and automatic rebuild of dependent shaders
   this.shaders = {}
 
-  this.loadConfig = function(name, data)
-  {
-    var asset = eval("___ = "+data);
+  this.loadConfig = function(options, callback) {
+    var asset = eval("___ = "+options.data);
     for (var ac in asset.define) {
       if (config[ac] == undefined) {
         self.logError("Unsupported config option " + ac);
@@ -29,34 +28,37 @@ angular.module("tde.services.engine-driver", [])
         self.logError("Missing config option " + ec);
       }
     }
+    return callback();
   }
 
-  this.unloadConfig = function(name, data) {
+  this.unloadConfig = function(options, callback) {
     // nothing to do
+    return callback();
   }
 
-  this.loadScript = function(name, data) {
-    self.logInfo("loading script " + name);
+  this.loadScript = function(options, callback) {
+    self.logInfo("loading script " + options.name);
     // create a global object named after the asset, only the content of this
     // object will be unloaded.
-    eval(name.split(".")[0]+"={}");
-    eval(data);
+    eval(options.name.split(".")[0]+"={}");
+    eval(options.data);
     engine_render(self.currentTime)
+    return callback();
   }
 
-  this.unloadScript = function(name, data) {
-    eval(name.split(".")[0]+"={}");
+  this.unloadScript = function(options, callback) {
+    eval(options.name.split(".")[0]+"={}");
+    return callback();
   }
 
-  this.loadTexture = function(name, data, staticPath, callback)
-  {
-    self.logInfo("loading texture "+ name);
-    var asset = eval("___ = "+data);
+  this.loadTexture = function(options, callback) {
+    var asset = eval("___ = "+options.data);
+    self.logInfo("loading texture "+ options.name);
     switch (asset.type) {
       case "empty": {
         // A texture allocated but with no content, typically used as a render
         // target.
-        textures[name] = create_texture(
+        textures[options.name] = create_texture(
           eval(asset.width  || "undefined"),
           eval(asset.height || "undefined"),
           eval(asset.format || "undefined"),
@@ -70,7 +72,7 @@ angular.module("tde.services.engine-driver", [])
       }
       case "js": {
         // A texture initialized from a js function
-        textures[name] = asset.generator();
+        textures[options.name] = asset.generator();
         break;
       }
       case "text": {
@@ -83,32 +85,29 @@ angular.module("tde.services.engine-driver", [])
       }
       case "jpg": {
         // A texture initialized from filesystem image
-        textures[name] = create_img_texture(staticPath + "/" + asset.filename,callback);
-
+        textures[options.name] = create_img_texture(options.staticPath + "/" + asset.filename, callback);
         break;
       }
       default: {
-        self.logInfo("unsupported texture type " + asset.type);
+        self.logInfo("Unsupported texture type " + asset.type);
       }
     }
   }
 
-  this.unloadTexture = function(name)
-  {
-    if (textures[name]) {
-      self.logInfo("unloading texture " + name);
-      destroy_texture(textures[name]);
+  this.unloadTexture = function(options, callback) {
+    if (textures[options.name]) {
+      self.logInfo("Unloading texture " + options.name);
+      destroy_texture(textures[options.name]);
     }
+    return callback();
   }
 
-  this.loadGeometry = function(name, data)
-  {
-    self.logInfo("loading geometry " + name);
-    var asset = eval("___ = "+data);
+  this.loadGeometry = function(options, callback) {
+    var asset = eval("___ = "+options.data);
     switch (asset.type) {
       case "js": {
         // A texture initialized from a js function
-        geometries[name] = asset.generator();
+        geometries[options.name] = asset.generator();
         break;
       }
       case "buffers": {
@@ -126,7 +125,7 @@ angular.module("tde.services.engine-driver", [])
           buffers.push(make_vbo(COLOR, asset.colors));
         }
 
-        geometries[name] = {
+        geometries[options.name] = {
           buffers: buffers,
           mode: eval(asset.mode),
           vertex_count: eval(asset.vertex_count)
@@ -147,7 +146,7 @@ angular.module("tde.services.engine-driver", [])
         if (asset.normals) { buffers.push(make_vbo(NORMAL, geom.normals)); }
         if (asset.uvs) { buffers.push(make_vbo(UV, geom.uvs)); }
 
-        geometries[name] = {
+        geometries[options.name] = {
           buffers: buffers,
           mode: gl.TRIANGLES,
           vertex_count: geom.positions.length / 3
@@ -156,24 +155,24 @@ angular.module("tde.services.engine-driver", [])
       }
     }
 
-    self.drawFrame();
+    // self.drawFrame();
+    return callback();
   }
 
-  this.unloadGeometry = function(name)
-  {
-    if (geometries[name]) {
-      self.logInfo("unloading geom " + name);
-      destroy_geom(geometries[name]);
+  this.unloadGeometry = function(options, callback) {
+    if (geometries[options.name]) {
+      self.logInfo("unloading geom " + options.name);
+      destroy_geom(geometries[options.name]);
     }
+    return callback();
   }
 
-  this.loadRenderGraph = function(name, data)
-  {
-    self.logInfo("loading render passes " + name)
+  this.loadRenderGraph = function(options, callback) {
+    self.logInfo("loading render passes " + options.name)
 
     try
     {
-      var asset = eval("___ = "+data);
+      var asset = eval("___ = "+options.data);
       render_passes = asset.render_passes;
       init_rg(asset);
     }
@@ -186,20 +185,18 @@ angular.module("tde.services.engine-driver", [])
 
     gfx_init()
     engine_render(self.currentTime)
+    return callback();
   }
 
-  this.unloadRenderGraph = function(name)
-  {
+  this.unloadRenderGraph = function(options, callback) {
     // leak everything
+    return callback();
   }
 
-  this.loadSequence = function(name, data)
-  {
-    self.logInfo("loading sequence " + name)
-
+  this.loadSequence = function(options, callback) {
     try
     {
-      var asset = sequence = JSON.parse(data);
+      var asset = sequence = JSON.parse(options.data);
       sequence = JSON.parse(JSON.stringify(asset.animations));
 
       // patch the sequence
@@ -230,44 +227,42 @@ angular.module("tde.services.engine-driver", [])
     }
 
     self.drawFrame();
+    return callback();
   }
 
-  this.unloadSequence = function(name)
-  {
+  this.unloadSequence = function(options, callback) {
     sequence = null;
-
     self.sequenceInfo.data = {}
     self.sequenceInfo.name = ""
+    return callback();
   }
 
-  this.loadScene = function(name, data)
-  {
-    self.logInfo("loading scene " + name)
+  this.loadScene = function(options, callback) {
+    self.logInfo("loading scene " + options.name)
 
     try
     {
-      scenes[name] = eval("___ = "+data);
+      scenes[options.name] = eval("___ = "+options.data);
     }
     catch (err)
     {
       self.logError(err.message, err.stack)
     }
+    return callback();
   }
 
-  this.unloadScene = function(name, data)
-  {
-
+  this.unloadScene = function(options, callback) {
+    return callback();
   }
 
-  this.loadSoundtrack = function(name, data, staticPath)
-  {
-    self.logInfo("loading track" + name);
-    self.logInfo(data);
+  this.loadSoundtrack = function(options, callback) {
+    self.logInfo("loading track" + options.name);
+    self.logInfo(options.data);
 
-    var sndData = eval("_=" + data);
+    var sndData = eval("_=" + options.data);
 
     if (sndData.type == "streaming") {
-      snd = SNDStreaming(staticPath + "/" + sndData.path, sndData.bpm);
+      snd = SNDStreaming(options.staticPath + "/" + sndData.path, sndData.bpm);
     } else {
       try
       {
@@ -281,34 +276,32 @@ angular.module("tde.services.engine-driver", [])
        self.logError(err.message, err.stack);
       }
     }
+
+    return callback();
   }
 
-  this.unloadSoundtrack = function(name)
-  {
+  this.unloadSoundtrack = function(options, callback) {
     if (snd)
       snd.playing = false
+    return callback();
   }
 
-  this.loadShader = function(name, data)
-  {
-    self.logInfo("loading shader " + name)
-    self.shaders[name] = self.parseShader(data)
-    //self.logInfo("depends on " + self.shaders[name].dependencies)
-    self.compileDependentShaders(name)
+  this.loadShader = function(options, callback) {
+    self.logInfo("loading shader " + options.name)
+    self.shaders[options.assetId] = self.parseShader(options.data)
+    self.compileDependentShaders(options.assetId)
     self.drawFrame()
+    return callback();
   }
 
-  this.unloadShader = function(name)
-  {
-    self.logInfo("unloading shader " + name)
-    destroy_shader_program(name.split(".")[0]);
-    delete self.shaders[name]
-    self.compileDependentShaders(name)
+  this.unloadShader = function(options, callback) {
+    self.logInfo("unloading shader " + options.name)
+    destroy_shader_program(options.name);
+    delete self.shaders[options.assetId]
     self.drawFrame()
   }
   
-  this.compileDependentShaders = function(name)
-  {
+  this.compileDependentShaders = function(name, callback) {
     var shadersToRebuild = self.findDependentShaders(name)
     
     // exclude libraries (glsllib), they are only included and never explicitely compiled
@@ -321,8 +314,7 @@ angular.module("tde.services.engine-driver", [])
     }
   }
   
-  this.rebuildShader = function(name)
-  {
+  this.rebuildShader = function(name, callback) {
     var shader = self.shaders[name]
     if (!shader) {
       return;
