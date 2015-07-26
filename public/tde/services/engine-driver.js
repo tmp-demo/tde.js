@@ -218,7 +218,7 @@ angular.module("tde.services.engine-driver", [])
       }
 
       self.sequenceInfo.data = asset
-      self.sequenceInfo.name = name
+      self.sequenceInfo.name = options.name
       self.sequenceInfo.time = self.currentTime
     }
     catch (err)
