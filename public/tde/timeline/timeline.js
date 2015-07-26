@@ -418,6 +418,39 @@ angular.module("tde.timeline", [])
         else
         {
           // create new clip
+          if (trackIndex < 0) return
+          if (trackIndex >= trackNames.length) return
+
+          var newClip = {
+            start: snap(xToBeat(event.pageX - jqCanvas.offset().left) - rulerStep * 0.5),
+            duration: 2 * rulerStep,
+          }
+
+          if (event.shiftKey)
+            newClip.evaluate = "[t]"
+          else
+            newClip.animation = []
+
+          tracks[trackNames[trackIndex]].push(newClip)
+          $scope.updateSequenceData($scope.sequence.data)
+        }
+      })
+
+      canvas.addEventListener("keyup", function(event)
+      {
+        if (event.keyCode == 46 /* del */)
+        {
+          // delete everything selected
+          for (var name in tracks)
+          {
+            var track = tracks[name]
+            tracks[name] = track.filter(function(clip)
+            {
+              return selectedClips.indexOf(clip) == -1
+            })
+          }
+          selectedClips = []
+          $scope.updateSequenceData($scope.sequence.data)
         }
       })
 
