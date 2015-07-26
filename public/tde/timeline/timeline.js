@@ -27,6 +27,7 @@ angular.module("tde.timeline", [])
       var scrollX = 0 // px
       var scrollY = 0 // px
       var scale = 10 // px/beat
+      var rulerStep = 1 // beat/unit
       
       function beatToX(beat) { return HEADER_WIDTH + scale * beat + scrollX }
       function xToBeat(x)    { return (x - scrollX - HEADER_WIDTH) / scale }
@@ -34,7 +35,7 @@ angular.module("tde.timeline", [])
       function trackToY(track) { return RULER_HEIGHT + track * TRACK_HEIGHT + scrollY }
       function yToTrack(y)     { return (y - scrollY - RULER_HEIGHT) / TRACK_HEIGHT }
 
-      function snap(beat) { return Math.round(beat) }
+      function snap(beat) { return Math.round(beat / rulerStep) * rulerStep }
       
       function redraw()
       {
@@ -45,7 +46,7 @@ angular.module("tde.timeline", [])
         ctx.fillRect(0, RULER_HEIGHT, HEADER_WIDTH, canvas.height - RULER_HEIGHT)
         
         // grid
-        for (var i = Math.ceil(xToBeat(HEADER_WIDTH) / 16.0) * 16.0; i < Math.ceil(xToBeat(canvas.width) / 16.0) * 16.0; i += 16)
+        for (var i = Math.ceil(xToBeat(HEADER_WIDTH) / rulerStep) * rulerStep; i < Math.ceil(xToBeat(canvas.width) / rulerStep) * rulerStep; i += rulerStep)
         {
             var x = beatToX(i)
             ctx.fillStyle = "rgb(64, 64, 64)"
@@ -125,7 +126,7 @@ angular.module("tde.timeline", [])
         ctx.font = "8px sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
-        for (var i = Math.ceil(xToBeat(0)); i < Math.floor(xToBeat(canvas.width)); i++)
+        for (var i = Math.ceil(snap(xToBeat(0))); i < Math.floor(snap(xToBeat(canvas.width) + rulerStep)); i += rulerStep)
         {
           var x = beatToX(i)
           ctx.fillStyle = "rgb(200, 200, 200)"
@@ -231,8 +232,8 @@ angular.module("tde.timeline", [])
             seeking = true
             seek(xToBeat(event.pageX - jqCanvas.offset().left))
           }
-        }
 
+        }
         if (event.button == 1 /* middle */)
           panning = true
 
@@ -286,8 +287,11 @@ angular.module("tde.timeline", [])
         var localX = event.pageX - jqCanvas.offset().left
         var centerBeat = xToBeat(localX)
         scale -= event.deltaY
-        scale = Math.max(2, scale)
+        scale = Math.max(1, scale)
         scale = Math.min(100, scale)
+        rulerStep = 1
+        while (scale * rulerStep < 30)
+          rulerStep *= 2
         scrollX -= beatToX(centerBeat) - localX
         redraw()
       })
