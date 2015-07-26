@@ -22,18 +22,18 @@ angular.module("tde.timeline", [])
 
       var HEADER_WIDTH = 100
       var RULER_HEIGHT = 20
-      var TRACK_HEIGHT = 30
       
       var scrollX = 0 // px
       var scrollY = 0 // px
-      var scale = 10 // px/beat
+      var scaleX = 10 // px/beat
+      var scaleY = 30 // px/track
       var rulerStep = 1 // beat/unit
       
-      function beatToX(beat) { return HEADER_WIDTH + scale * beat + scrollX }
-      function xToBeat(x)    { return (x - scrollX - HEADER_WIDTH) / scale }
+      function beatToX(beat) { return HEADER_WIDTH + scaleX * beat + scrollX }
+      function xToBeat(x)    { return (x - scrollX - HEADER_WIDTH) / scaleX }
       
-      function trackToY(track) { return RULER_HEIGHT + track * TRACK_HEIGHT + scrollY }
-      function yToTrack(y)     { return (y - scrollY - RULER_HEIGHT) / TRACK_HEIGHT }
+      function trackToY(track) { return RULER_HEIGHT + track * scaleY + scrollY }
+      function yToTrack(y)     { return (y - scrollY - RULER_HEIGHT) / scaleY }
 
       function snap(beat) { return Math.round(beat / rulerStep) * rulerStep }
       
@@ -81,7 +81,7 @@ angular.module("tde.timeline", [])
             if (start > xToBeat(canvas.width)) return;
             if (end < xToBeat(HEADER_WIDTH)) return;
             
-            var gradient = ctx.createLinearGradient(0, y, 0, y + TRACK_HEIGHT)
+            var gradient = ctx.createLinearGradient(0, y, 0, y + scaleY)
 
             if (selected)
             {
@@ -94,7 +94,7 @@ angular.module("tde.timeline", [])
               gradient.addColorStop(1, "#526580")
             }
             ctx.fillStyle = gradient
-            ctx.fillRect(beatToX(start) + 1, y + 1, clip.duration * scale - 2, TRACK_HEIGHT - 2)
+            ctx.fillRect(beatToX(start) + 1, y + 1, clip.duration * scaleX - 2, scaleY - 2)
 
             if (clip.evaluate)
             {
@@ -102,12 +102,12 @@ angular.module("tde.timeline", [])
               ctx.textAlign = "center"
               ctx.textBaseline = "middle"
               ctx.fillStyle = "#cef"
-              ctx.fillText(clip.evaluate, beatToX(start + clip.duration * 0.5), y + TRACK_HEIGHT / 2, beatToX(end) - beatToX(start))
+              ctx.fillText(clip.evaluate, beatToX(start + clip.duration * 0.5), y + scaleY / 2, beatToX(end) - beatToX(start))
             }
           })
           
           ctx.fillStyle = "rgb(20, 20, 20)"
-          ctx.fillRect(0, y, HEADER_WIDTH, TRACK_HEIGHT)
+          ctx.fillRect(0, y, HEADER_WIDTH, scaleY)
           
           ctx.fillStyle = "rgb(20, 20, 64)"
           ctx.fillRect(0, y + 1, HEADER_WIDTH, 1)
@@ -117,7 +117,7 @@ angular.module("tde.timeline", [])
           ctx.font = "12px sans-serif"
           ctx.textAlign = "left"
           ctx.textBaseline = "middle"
-          ctx.fillText(trackNames[i], 10, y + TRACK_HEIGHT / 2, HEADER_WIDTH - 20);
+          ctx.fillText(trackNames[i], 10, y + scaleY / 2, HEADER_WIDTH - 20);
         }
         
         // time ruler
@@ -191,6 +191,7 @@ angular.module("tde.timeline", [])
       var seeking = false
       var dragging = false
       var dragOffset = 0
+      var zooming = false
       canvas.addEventListener("mousedown", function(event)
       {
         if (event.button == 0 /* left */)
@@ -234,8 +235,12 @@ angular.module("tde.timeline", [])
           }
 
         }
-        if (event.button == 1 /* middle */)
-          panning = true
+        if (event.button == 1 /* middle */) {
+          if (event.ctrlKey)
+            zooming = true
+          else
+            panning = true
+        }
 
         redraw()
       })
@@ -259,6 +264,7 @@ angular.module("tde.timeline", [])
         panning = false
         seeking = false
         dragging = false
+        zooming = false
 
         redraw()
       })
@@ -276,9 +282,21 @@ angular.module("tde.timeline", [])
 
         if (dragging)
         {
-          dragOffset += event.movementX / scale
+          dragOffset += event.movementX / scaleX
         }
 
+        if (zooming)
+        {
+          var newScaleX = Math.min(Math.max(scaleX + event.movementX, 1), 100);
+          var newScaleY = Math.min(Math.max(scaleY - event.movementY, 5), 50);
+          
+          scrollX = (scrollX - canvas.width / 2) * newScaleX / scaleX + canvas.width / 2;
+          scrollY = (scrollY - canvas.height / 2) * newScaleY / scaleY + canvas.height / 2;
+          
+          scaleX = newScaleX;
+          scaleY = newScaleY;
+        }
+        
         redraw()
       })
       
@@ -286,11 +304,11 @@ angular.module("tde.timeline", [])
       {
         var localX = event.pageX - jqCanvas.offset().left
         var centerBeat = xToBeat(localX)
-        scale -= event.deltaY
-        scale = Math.max(1, scale)
-        scale = Math.min(100, scale)
+        scaleX -= event.deltaY
+        scaleX = Math.max(1, scaleX)
+        scaleX = Math.min(100, scaleX)
         rulerStep = 1
-        while (scale * rulerStep < 30)
+        while (scaleX * rulerStep < 30)
           rulerStep *= 2
         scrollX -= beatToX(centerBeat) - localX
         redraw()
