@@ -79,10 +79,9 @@ if [ -f $SCRIPTS ]; then
 fi
 
 echo " -- exporting ogg tracks"
-OGGS=($PROJECT_ROOT/static/*.ogg)
-if [ -f $OGGS ]; then
-  cp $OGGS $EXPORT_ROOT
-fi
+for i in $PROJECT_ROOT/static/*.ogg; do
+  cp $i $EXPORT_ROOT
+done
 
 echo " -- exporting tmpsnd tracks"
 SONGS=($PROJECT_ROOT/*.song)
