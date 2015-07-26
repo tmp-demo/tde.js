@@ -15,6 +15,7 @@ var ctx_2d
 var render_passes = [];
 
 var gl_ext_half_float;
+var blendings;
 
 if (config.EDITOR) {
   var uniform_editor_overrides = {};
@@ -55,6 +56,11 @@ function gl_init() {
 
   gl.depthFunc(gl.LEQUAL);
   gl.viewport(0, 0, canvas.width, canvas.height);
+  
+  blendings = {
+    add: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA]
+  };
+
 }
 
 var _locations = [
@@ -497,7 +503,7 @@ function set_blending(blend) {
     gl.disable(gl.BLEND);
     if (blend) {
       gl.enable(gl.BLEND);
-      gl.blendFunc.apply(gl, blend);
+      gl.blendFunc.apply(gl, blendings[blend] || blend);
     }
   }
 }
