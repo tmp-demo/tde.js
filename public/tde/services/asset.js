@@ -170,6 +170,7 @@ angular.module("tde.services.asset", [])
     if (!(assetId in self.assets))
       return;
     
+    var staticPath = "/data/projects/" + $routeParams.projectId + "/static-assets";
     var parts = assetParts(assetId);
     var assetType = assetTypes[parts.type];
     if (!assetType) {
