@@ -21,6 +21,12 @@ if (config.EDITOR) {
   var uniform_editor_overrides = {};
 }
 
+var textElement = document.createElement("div");
+textElement.style.position = "absolute";
+textElement.style.top = "0";
+textElement.style.font = "40px Verdana, Geneva, sans-serif";
+textElement.textContent = "<3";
+
 function gl_init() {
   if (config.EDITOR) {
     console.log("gl_init");
@@ -61,6 +67,7 @@ function gl_init() {
     add: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA]
   };
 
+  canvas.parentElement.appendChild(textElement);
 }
 
 var _locations = [
@@ -483,6 +490,8 @@ function render_frame(time) {
 
   render_rg(time);
 
+  textElement.style.transform = "translate(" + uniforms["text_pos"][0] + "px," + uniforms["text_pos"][1] + "px)";
+  
   if (config.GL_DEBUG && config.GL_DEBUG_TRACE) {
     console.log("== FRAME END ==");
   }
