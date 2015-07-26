@@ -393,6 +393,34 @@ angular.module("tde.timeline", [])
         redraw()
       })
 
+      canvas.addEventListener("dblclick", function(event)
+      {
+        var trackNames = Object.keys(tracks)
+        var trackIndex = Math.floor(yToTrack(event.pageY - jqCanvas.offset().top))
+        var clip = findClip(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
+
+        if (clip)
+        {
+          // edit clip content
+          if (clip.evaluate)
+          {
+            var newExpression = prompt("Expression", clip.evaluate)
+            if (newExpression)
+            {
+              clip.evaluate = newExpression
+              $scope.updateSequenceData($scope.sequence.data)
+            }
+          }
+          else
+          {
+          }
+        }
+        else
+        {
+          // create new clip
+        }
+      })
+
       function resize()
       {
         canvas.width = canvas.clientWidth
