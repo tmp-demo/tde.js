@@ -4,3 +4,9 @@
     width: 100%;
     height: 100%;
 }
+
+#timeline canvas:focus
+{
+    outline-style: solid;
+    outline-color: #444;
+}

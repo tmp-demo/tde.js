@@ -14,7 +14,15 @@ function export_pass(pass) {
     export_geometry(pass);
     export_program(pass);
     export_local_unifroms(pass);
+    export_blend(pass);
     console.log("},");
+}
+
+function export_blend(pass) {
+    if (!pass.blend)
+      return;
+    
+    console.log("blend: " + JSON.stringify(pass.blend) + ",");
 }
 
 function export_local_unifroms(pass) {

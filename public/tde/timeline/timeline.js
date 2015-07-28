@@ -27,7 +27,7 @@ angular.module("tde.timeline", [])
       var scrollY = 0 // px
       var scaleX = 10 // px/beat
       var scaleY = 30 // px/track
-      var rulerStep = 1 // beat/unit
+      var rulerStep = 4 // beat/unit
       
       function beatToX(beat) { return HEADER_WIDTH + scaleX * beat + scrollX }
       function xToBeat(x)    { return (x - scrollX - HEADER_WIDTH) / scaleX }
@@ -78,15 +78,15 @@ angular.module("tde.timeline", [])
               start += snap(dragOffset)
 
             var end = start + clip.duration
-            if (start > xToBeat(canvas.width)) return;
-            if (end < xToBeat(HEADER_WIDTH)) return;
+            if (start > xToBeat(canvas.width)) return
+            if (end < xToBeat(HEADER_WIDTH)) return
             
             var gradient = ctx.createLinearGradient(0, y, 0, y + scaleY)
 
             if (selected)
             {
-              gradient.addColorStop(0, "#B6DDF0")
-              gradient.addColorStop(1, "#9AB8DB")
+              gradient.addColorStop(0, "#8DACBA")
+              gradient.addColorStop(1, "#8BA6C4")
             }
             else
             {
@@ -117,31 +117,41 @@ angular.module("tde.timeline", [])
           ctx.font = "12px sans-serif"
           ctx.textAlign = "left"
           ctx.textBaseline = "middle"
-          ctx.fillText(trackNames[i], 10, y + scaleY / 2, HEADER_WIDTH - 20);
+          ctx.fillText(trackNames[i], 10, y + scaleY / 2, HEADER_WIDTH - 20)
         }
         
+        // selection square
+        if (selecting)
+        {
+          ctx.fillStyle = "rgba(200, 215, 237, 0.5)"
+          ctx.fillRect(selectionStartX, selectionStartY, selectionEndX - selectionStartX, selectionEndY - selectionStartY)
+
+          ctx.strokeStyle = "rgba(80, 125, 166, 0.8)"
+          ctx.strokeRect(selectionStartX, selectionStartY, selectionEndX - selectionStartX, selectionEndY - selectionStartY)
+        }
+
         // time ruler
         ctx.fillStyle = "rgb(20, 20, 20)"
         ctx.fillRect(0, 0, canvas.width, RULER_HEIGHT)
-        ctx.font = "8px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
+        ctx.font = "8px sans-serif"
+        ctx.textAlign = "center"
+        ctx.textBaseline = "bottom"
         for (var i = Math.ceil(snap(xToBeat(0))); i < Math.floor(snap(xToBeat(canvas.width) + rulerStep)); i += rulerStep)
         {
           var x = beatToX(i)
           ctx.fillStyle = "rgb(200, 200, 200)"
           ctx.fillRect(x, RULER_HEIGHT - 5, 1, 5)
-          ctx.fillText(i, x, RULER_HEIGHT - 6);
+          ctx.fillText(i, x, RULER_HEIGHT - 6)
         }
 
         // name
         ctx.fillStyle = "rgb(40, 40, 40)"
         ctx.fillRect(0, 0, HEADER_WIDTH, RULER_HEIGHT)
-        ctx.font = "12px sans-serif";
-        ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
+        ctx.font = "12px sans-serif"
+        ctx.textAlign = "left"
+        ctx.textBaseline = "middle"
         ctx.fillStyle = "rgb(200, 200, 200)"
-        ctx.fillText("[ " + name + " ]", 10, RULER_HEIGHT / 2);
+        ctx.fillText("[ " + name + " ]", 10, RULER_HEIGHT / 2)
 
         // time marker
         var markerX = beatToX($scope.sequence.time)
@@ -181,10 +191,52 @@ angular.module("tde.timeline", [])
           var end = clip.start + clip.duration
 
           if ((beat >= clip.start) && (beat < end))
-            return clip;
+            return clip
         }
 
         return null
+      }
+
+      function findClipsInRectangle(x1, y1, x2, y2)
+      {
+        if (x2 < x1)
+        {
+          var tmp = x1
+          x1 = x2
+          x2 = tmp
+        }
+
+        if (y2 < y1)
+        {
+          var tmp = y1
+          y1 = y2
+          y2 = tmp
+        }
+
+        var clips = []
+
+        var trackNames = Object.keys(tracks)
+        var minTrack = Math.max(Math.floor(yToTrack(y1)), 0)
+        var maxTrack = Math.min(Math.floor(yToTrack(y2)), trackNames.length - 1)
+
+        for (var i = minTrack; i <= maxTrack; i++)
+        {
+          var track = tracks[trackNames[i]]
+          track.forEach(function(clip)
+          {
+            if ((x1 < beatToX(clip.start + clip.duration)) && (x2 > beatToX(clip.start)))
+              clips.push(clip)
+          })
+        }
+
+        return clips
+      }
+
+      function updateRulerStep()
+      {
+        rulerStep = 1
+        while (scaleX * rulerStep < 30)
+          rulerStep *= 2
       }
 
       var panning = false
@@ -192,6 +244,11 @@ angular.module("tde.timeline", [])
       var dragging = false
       var dragOffset = 0
       var zooming = false
+      var selecting = false
+      var selectionStartX = 0
+      var selectionStartY = 0
+      var selectionEndX = 0
+      var selectionEndY = 0
       canvas.addEventListener("mousedown", function(event)
       {
         if (event.button == 0 /* left */)
@@ -210,7 +267,7 @@ angular.module("tde.timeline", [])
           // modify selection
           if (event.shiftKey && clip)
           {
-            var selectedIndex = selectedClips.indexOf(clip);
+            var selectedIndex = selectedClips.indexOf(clip)
             if (selectedIndex == -1)
             {
               // append
@@ -230,16 +287,26 @@ angular.module("tde.timeline", [])
           }
           else
           {
-            seeking = true
-            seek(xToBeat(event.pageX - jqCanvas.offset().left))
+            selecting = true
+            selectionStartX = event.pageX - jqCanvas.offset().left
+            selectionStartY = event.pageY - jqCanvas.offset().top
+            selectionEndX = selectionStartX
+            selectionEndY = selectionStartY
           }
-
         }
-        if (event.button == 1 /* middle */) {
+
+        if (event.button == 1 /* middle */)
+        {
           if (event.ctrlKey)
             zooming = true
           else
             panning = true
+        }
+
+        if (event.button == 2 /* right */)
+        {
+            seeking = true
+            seek(xToBeat(event.pageX - jqCanvas.offset().left))
         }
 
         redraw()
@@ -265,6 +332,7 @@ angular.module("tde.timeline", [])
         seeking = false
         dragging = false
         zooming = false
+        selecting = false
 
         redraw()
       })
@@ -287,14 +355,24 @@ angular.module("tde.timeline", [])
 
         if (zooming)
         {
-          var newScaleX = Math.min(Math.max(scaleX + event.movementX, 1), 100);
-          var newScaleY = Math.min(Math.max(scaleY - event.movementY, 5), 50);
+          var newScaleX = Math.min(Math.max(scaleX + event.movementX, 1), 100)
+          var newScaleY = Math.min(Math.max(scaleY - event.movementY, 5), 50)
           
-          scrollX = (scrollX - canvas.width / 2) * newScaleX / scaleX + canvas.width / 2;
-          scrollY = (scrollY - canvas.height / 2) * newScaleY / scaleY + canvas.height / 2;
+          scrollX = (scrollX - canvas.width / 2) * newScaleX / scaleX + canvas.width / 2
+          scrollY = (scrollY - canvas.height / 2) * newScaleY / scaleY + canvas.height / 2
           
-          scaleX = newScaleX;
-          scaleY = newScaleY;
+          scaleX = newScaleX
+          scaleY = newScaleY
+
+          updateRulerStep()
+        }
+
+        if (selecting)
+        {
+          selectionEndX = event.pageX - jqCanvas.offset().left
+          selectionEndY = event.pageY - jqCanvas.offset().top
+
+          selectedClips = findClipsInRectangle(selectionStartX, selectionStartY, selectionEndX, selectionEndY)
         }
         
         redraw()
@@ -304,14 +382,76 @@ angular.module("tde.timeline", [])
       {
         var localX = event.pageX - jqCanvas.offset().left
         var centerBeat = xToBeat(localX)
+
         scaleX -= event.deltaY
         scaleX = Math.max(1, scaleX)
         scaleX = Math.min(100, scaleX)
-        rulerStep = 1
-        while (scaleX * rulerStep < 30)
-          rulerStep *= 2
+
+        updateRulerStep()
         scrollX -= beatToX(centerBeat) - localX
+
         redraw()
+      })
+
+      canvas.addEventListener("dblclick", function(event)
+      {
+        var trackNames = Object.keys(tracks)
+        var trackIndex = Math.floor(yToTrack(event.pageY - jqCanvas.offset().top))
+        var clip = findClip(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
+
+        if (clip)
+        {
+          // edit clip content
+          if (clip.evaluate)
+          {
+            var newExpression = prompt("Expression", clip.evaluate)
+            if (newExpression)
+            {
+              clip.evaluate = newExpression
+              $scope.updateSequenceData($scope.sequence.data)
+            }
+          }
+          else
+          {
+          }
+        }
+        else
+        {
+          // create new clip
+          if (trackIndex < 0) return
+          if (trackIndex >= trackNames.length) return
+
+          var newClip = {
+            start: snap(xToBeat(event.pageX - jqCanvas.offset().left) - rulerStep * 0.5),
+            duration: 2 * rulerStep,
+          }
+
+          if (event.shiftKey)
+            newClip.evaluate = "[t]"
+          else
+            newClip.animation = []
+
+          tracks[trackNames[trackIndex]].push(newClip)
+          $scope.updateSequenceData($scope.sequence.data)
+        }
+      })
+
+      canvas.addEventListener("keyup", function(event)
+      {
+        if (event.keyCode == 46 /* del */)
+        {
+          // delete everything selected
+          for (var name in tracks)
+          {
+            var track = tracks[name]
+            tracks[name] = track.filter(function(clip)
+            {
+              return selectedClips.indexOf(clip) == -1
+            })
+          }
+          selectedClips = []
+          $scope.updateSequenceData($scope.sequence.data)
+        }
       })
 
       function resize()
