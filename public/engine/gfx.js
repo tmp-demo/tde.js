@@ -548,16 +548,11 @@ function prepare_render_to_texture(pass) {
 
 function get_geometry(geometry_descriptor) {
   if (config.EDITOR) {
-    if (!geometry_descriptor || !geometry_descriptor[0]) {
+    if (!geometry_descriptor || !geometry_descriptor[0] || !geometries[geometry_descriptor[0]]) {
       console.log("Missing geometry");
       return geometry_placeholder
     }
-    if (typeof(geometry_descriptor[0]) == "string" ) {
-      return geometries[geometry_descriptor[0]];
-    } else {
-      console.log("!! geometries should be referred to by name during eddition !!");
-      return geometry_descriptor[0];
-    }
+    return geometries[geometry_descriptor[0]];
   }
 
   // exported geometry is passed by ref instead of name to reduce the number of strings.
