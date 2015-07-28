@@ -83,10 +83,18 @@ angular.module("tde.timeline", [])
             var selected = selectedClips.indexOf(clip) != -1;
 
             var start = clip.start
-            if (selected)
-              start += snap(dragOffset)
+            var duration = clip.duration
 
-            var end = start + clip.duration
+            // movement preview
+            if (selected)
+            {
+              if (resizing)
+                duration = Math.max(rulerStep, duration + snap(dragOffset))
+              else
+                start += snap(dragOffset)
+            }
+
+            var end = start + duration
             if (start > xToBeat(canvas.width)) return
             if (end < xToBeat(HEADER_WIDTH)) return
             
@@ -103,11 +111,11 @@ angular.module("tde.timeline", [])
               gradient.addColorStop(1, "#526580")
             }
             ctx.fillStyle = gradient
-            ctx.fillRect(beatToX(start) + 1, y + 1, clip.duration * scaleX - 2, scaleY - 2)
+            ctx.fillRect(beatToX(start) + 1, y + 1, duration * scaleX - 2, scaleY - 2)
 
-            var resizeMarkerWidth = Math.min(RESIZE_MARKER_WIDTH, clip.duration * scaleX - 2)
+            var resizeMarkerWidth = Math.min(RESIZE_MARKER_WIDTH, duration * scaleX - 2)
             ctx.fillStyle = "#526580"
-            ctx.fillRect(beatToX(start) + 1 + clip.duration * scaleX - 2 - resizeMarkerWidth, y + 1, resizeMarkerWidth, scaleY - 2)
+            ctx.fillRect(beatToX(start) + 1 + duration * scaleX - 2 - resizeMarkerWidth, y + 1, resizeMarkerWidth, scaleY - 2)
 
             if (clip.evaluate)
             {
@@ -115,7 +123,7 @@ angular.module("tde.timeline", [])
               ctx.textAlign = "center"
               ctx.textBaseline = "middle"
               ctx.fillStyle = "#cef"
-              ctx.fillText(clip.evaluate, beatToX(start + clip.duration * 0.5), y + scaleY / 2, beatToX(end) - beatToX(start))
+              ctx.fillText(clip.evaluate, beatToX(start + duration * 0.5), y + scaleY / 2, beatToX(end) - beatToX(start))
             }
           })
           
@@ -256,6 +264,7 @@ angular.module("tde.timeline", [])
       var seeking = false
       var dragging = false
       var dragOffset = 0
+      var resizing = false
       var zooming = false
       var selecting = false
       var selectionStartX = 0
@@ -297,6 +306,9 @@ angular.module("tde.timeline", [])
           {
             dragging = true
             dragOffset = 0
+
+            if (clip && (beatToX(clip.start + clip.duration) - (event.pageX - jqCanvas.offset().left) < RESIZE_MARKER_WIDTH))
+              resizing = true;
           }
           else
           {
@@ -334,7 +346,10 @@ angular.module("tde.timeline", [])
           {
             selectedClips.forEach(function(clip)
             {
-              clip.start += dragOffset
+              if (resizing)
+                clip.duration = Math.max(rulerStep, clip.duration + dragOffset)
+              else
+                clip.start += dragOffset
             })
             dragOffset = 0
             $scope.updateSequenceData($scope.sequence.data)
@@ -344,6 +359,7 @@ angular.module("tde.timeline", [])
         panning = false
         seeking = false
         dragging = false
+        resizing = false
         zooming = false
         selecting = false
 
