@@ -22,6 +22,7 @@ angular.module("tde.timeline", [])
 
       var HEADER_WIDTH = 100
       var RULER_HEIGHT = 20
+      var RESIZE_MARKER_WIDTH = 10
       
       var scrollX = 0 // px
       var scrollY = 0 // px
@@ -103,6 +104,10 @@ angular.module("tde.timeline", [])
             }
             ctx.fillStyle = gradient
             ctx.fillRect(beatToX(start) + 1, y + 1, clip.duration * scaleX - 2, scaleY - 2)
+
+            var resizeMarkerWidth = Math.min(RESIZE_MARKER_WIDTH, clip.duration * scaleX - 2)
+            ctx.fillStyle = "#526580"
+            ctx.fillRect(beatToX(start) + 1 + clip.duration * scaleX - 2 - resizeMarkerWidth, y + 1, resizeMarkerWidth, scaleY - 2)
 
             if (clip.evaluate)
             {
