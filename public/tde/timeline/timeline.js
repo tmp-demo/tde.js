@@ -39,26 +39,34 @@ angular.module("tde.timeline", [])
       
       function redraw()
       {
+        // background
         ctx.fillStyle = "rgb(0, 0, 0)"
         ctx.fillRect(0, 0, canvas.width, canvas.height)
         
+        // left pane
         ctx.fillStyle = "rgb(20, 20, 20)"
         ctx.fillRect(0, RULER_HEIGHT, HEADER_WIDTH, canvas.height - RULER_HEIGHT)
         
         // grid
         for (var i = Math.ceil(xToBeat(HEADER_WIDTH) / rulerStep) * rulerStep; i < Math.ceil(xToBeat(canvas.width) / rulerStep) * rulerStep; i += rulerStep)
         {
-            var x = beatToX(i)
-            ctx.fillStyle = "rgb(64, 64, 64)"
-            ctx.fillRect(x, RULER_HEIGHT, 1, canvas.height - RULER_HEIGHT)
+          var x = beatToX(i)
+          ctx.fillStyle = "rgb(64, 64, 64)"
+          ctx.fillRect(x, RULER_HEIGHT, 1, canvas.height - RULER_HEIGHT)
         }
-        
+
+        if (beatToX(0) > HEADER_WIDTH)
+        {
+          ctx.fillStyle = "rgba(32, 32, 32, 0.5)"
+          ctx.fillRect(HEADER_WIDTH, RULER_HEIGHT, beatToX(0) - HEADER_WIDTH, canvas.height - RULER_HEIGHT)
+        }
+
         // track slots
         for (var i = Math.ceil(yToTrack(RULER_HEIGHT)); i < Math.ceil(yToTrack(canvas.height)); i++)
         {
-            var y = trackToY(i)
-            ctx.fillStyle = "rgb(32, 32, 32)"
-            ctx.fillRect(0, y, canvas.width, 1)
+          var y = trackToY(i)
+          ctx.fillStyle = "rgb(32, 32, 32)"
+          ctx.fillRect(0, y, canvas.width, 1)
         }
         
         // tracks
