@@ -428,6 +428,46 @@ angular.module("tde.timeline", [])
         var trackIndex = Math.floor(yToTrack(event.pageY - jqCanvas.offset().top))
         var clip = findClip(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
 
+        if (event.pageX - jqCanvas.offset().left <= HEADER_WIDTH)
+        {
+          if ((trackIndex < 0) || (trackIndex >= trackNames.length))
+          {
+            // create new track
+            var newTrackName = prompt("New track name", "track42")
+            if (newTrackName)
+            {
+              if (tracks.hasOwnProperty(newTrackName))
+              {
+                alert("This track name already exists!")
+                return
+              }
+
+              tracks[newTrackName] = []
+              $scope.updateSequenceData($scope.sequence.data)
+            }
+          }
+          else
+          {
+            // rename track
+            var newTrackName = prompt("Track name", trackNames[trackIndex])
+            if (newTrackName)
+            {
+              var otherIndex = trackNames.indexOf(newTrackName)
+              if ((otherIndex != -1) && (otherIndex != trackIndex))
+              {
+                alert("This track name already exists!")
+                return
+              }
+
+              tracks[newTrackName] = tracks[trackNames[trackIndex]]
+              delete tracks[trackNames[trackIndex]]
+              $scope.updateSequenceData($scope.sequence.data)
+            }
+          }
+
+          return;
+        }
+
         if (clip)
         {
           // edit clip content
