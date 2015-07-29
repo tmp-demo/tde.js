@@ -5,6 +5,7 @@ angular.module("tde", [
   "ngRoute",
   "ngSanitize",
   "tde.blender-box",
+  "tde.clip-editor",
   "tde.code-editor",
   "tde.engine-view",
   "tde.goto-box",
@@ -61,6 +62,7 @@ angular.module("tde", [
   
   $scope.currentUser = User.currentUser
   $scope.currentSequence = EngineDriver.sequenceInfo
+  $scope.currentClip = null
 
   $scope.seek = function(time)
   {
@@ -72,6 +74,22 @@ angular.module("tde", [
     Asset.updateAsset($scope.currentSequence.name + ".seq", JSON.stringify(data, null, "  "), function(err)
     {
       if (err) throw err
+    })
+  }
+
+  $scope.selectClip = function(clip)
+  {
+    $scope.$apply(function()
+    {
+      $scope.currentClip = clip
+    })
+  }
+
+  $scope.exitClip = function()
+  {
+    $scope.$apply(function()
+    {
+      $scope.currentClip = null
     })
   }
 
