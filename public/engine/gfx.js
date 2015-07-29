@@ -335,6 +335,10 @@ function resolve_animation_clip(clip, clip_time) {
     return clip.evaluate(t);
   }
 
+  if (anim.length == 0) {
+    return [0];
+  }
+
   if (config.UNIFORM_INTERPOLATION_ENABLED) {
     //console.log("animate with clip time", clip_time);
     return animate(deep_clone(anim), t);
