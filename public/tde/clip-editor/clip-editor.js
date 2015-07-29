@@ -65,6 +65,7 @@ angular.module("tde.clip-editor", [])
           ctx.fillRect(RULER_WIDTH, y, canvas.width - RULER_WIDTH, 1)
         }
 
+        // dead zones
         if (beatToX(0) > RULER_WIDTH)
         {
           ctx.fillStyle = "rgba(32, 32, 32, 0.5)"
@@ -75,6 +76,40 @@ angular.module("tde.clip-editor", [])
         {
           ctx.fillStyle = "rgba(32, 32, 32, 0.5)"
           ctx.fillRect(beatToX(clip.duration), RULER_HEIGHT, canvas.width - beatToX(clip.duration), canvas.height - RULER_HEIGHT)
+        }
+
+        function curveColor(component)
+        {
+          switch (component)
+          {
+            case 0: return "#f00"
+            case 1: return "#0f0"
+            case 2: return "#00f"
+          }
+
+          return "#fff"
+        }
+
+        var engineClip = deep_clone(clip)
+        if (engineClip.easing) {
+          var eval_str = "ease_" + engineClip.easing;
+          engineClip.easing = global_scope[eval_str];
+        }
+
+        // curves
+        for (var component = 0; component < 2; component++)
+        {
+          ctx.strokeStyle = curveColor(component)
+          ctx.beginPath()
+          for (var x = RULER_WIDTH; x < canvas.width; x += 2)
+          {
+            var y = valueToY(resolve_animation_clip(engineClip, xToBeat(x))[component])
+            if (x == RULER_WIDTH)
+              ctx.moveTo(x, y)
+            else
+              ctx.lineTo(x, y)
+          }
+          ctx.stroke()
         }
 
         // selection square
