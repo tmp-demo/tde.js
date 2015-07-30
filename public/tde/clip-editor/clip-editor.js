@@ -34,14 +34,14 @@ angular.module("tde.clip-editor", [])
       var scaleX = 10 // px/beat
       var scaleY = 10 // px/unit
       var rulerStepX = 4 // beat/unit
-      var rulerStepY = 4 // beat/unit
+      var rulerStepY = 4 // value/unit
       updateRulerSteps()
       
       function beatToX(beat) { return RULER_WIDTH + scaleX * beat + scrollX }
       function xToBeat(x)    { return (x - scrollX - RULER_WIDTH) / scaleX }
       
-      function valueToY(track) { return RULER_HEIGHT + track * scaleY + scrollY }
-      function yToValue(y)     { return (y - scrollY - RULER_HEIGHT) / scaleY }
+      function valueToY(value) { return canvas.height - (value * scaleY - scrollY) }
+      function yToValue(y)     { return ((canvas.height - y) + scrollY) / scaleY }
 
       function snapX(beat) { return Math.round(beat / rulerStepX) * rulerStepX }
       function snapY(value) { return Math.round(value / rulerStepY) * rulerStepY }
@@ -59,7 +59,7 @@ angular.module("tde.clip-editor", [])
           var x = beatToX(i)
           ctx.fillRect(x, RULER_HEIGHT, 1, canvas.height - RULER_HEIGHT)
         }
-        for (var i = Math.ceil(yToValue(RULER_HEIGHT) / rulerStepY) * rulerStepY; i < Math.ceil(yToValue(canvas.height) / rulerStepY) * rulerStepY; i += rulerStepY)
+        for (var i = Math.floor(yToValue(canvas.height) / rulerStepY) * rulerStepY; i < Math.ceil(yToValue(RULER_HEIGHT) / rulerStepY) * rulerStepY; i += rulerStepY)
         {
           var y = valueToY(i)
           ctx.fillRect(RULER_WIDTH, y, canvas.width - RULER_WIDTH, 1)
@@ -85,6 +85,7 @@ angular.module("tde.clip-editor", [])
             case 0: return "#f22"
             case 1: return "#0f0"
             case 2: return "#44f"
+            case 3: return "#ddd"
           }
 
           return "#fff"
@@ -97,7 +98,7 @@ angular.module("tde.clip-editor", [])
         }
 
         // curves
-        for (var component = 0; component < 3; component++)
+        for (var component = 0; component < clip.components; component++)
         {
           ctx.strokeStyle = curveColor(component)
           ctx.beginPath()
@@ -142,7 +143,7 @@ angular.module("tde.clip-editor", [])
         ctx.font = "8px sans-serif"
         ctx.textAlign = "right"
         ctx.textBaseline = "middle"
-        for (var i = Math.ceil(snapY(yToValue(0))); i < Math.floor(snapY(yToValue(canvas.height) + rulerStepY)); i += rulerStepY)
+        for (var i = Math.floor(snapY(yToValue(canvas.height) - rulerStepY)); i < Math.ceil(snapY(yToValue(0)) + rulerStepY); i += rulerStepY)
         {
           var y = valueToY(i)
           ctx.fillStyle = "rgb(200, 200, 200)"
@@ -270,7 +271,7 @@ angular.module("tde.clip-editor", [])
             return
           }
 
-          var clip = findClip(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
+          var clip = null; //findClip(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
 
           // replace selection
           if (!event.shiftKey && (selectedClips.indexOf(clip) == -1))
@@ -309,6 +310,9 @@ angular.module("tde.clip-editor", [])
             selectionStartY = event.pageY - jqCanvas.offset().top
             selectionEndX = selectionStartX
             selectionEndY = selectionStartY
+
+            console.log(selectionStartX, selectionStartY)
+            console.log(xToBeat(selectionStartX), yToValue(selectionStartY))
           }
         }
 
@@ -389,7 +393,7 @@ angular.module("tde.clip-editor", [])
           selectionEndX = event.pageX - jqCanvas.offset().left
           selectionEndY = event.pageY - jqCanvas.offset().top
 
-          selectedClips = findClipsInRectangle(selectionStartX, selectionStartY, selectionEndX, selectionEndY)
+          //selectedClips = findClipsInRectangle(selectionStartX, selectionStartY, selectionEndX, selectionEndY)
         }
         
         redraw()
