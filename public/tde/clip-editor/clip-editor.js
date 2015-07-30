@@ -82,9 +82,9 @@ angular.module("tde.clip-editor", [])
         {
           switch (component)
           {
-            case 0: return "#f00"
+            case 0: return "#f22"
             case 1: return "#0f0"
-            case 2: return "#00f"
+            case 2: return "#44f"
           }
 
           return "#fff"
@@ -97,7 +97,7 @@ angular.module("tde.clip-editor", [])
         }
 
         // curves
-        for (var component = 0; component < 2; component++)
+        for (var component = 0; component < 3; component++)
         {
           ctx.strokeStyle = curveColor(component)
           ctx.beginPath()

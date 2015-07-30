@@ -499,9 +499,36 @@ angular.module("tde.timeline", [])
           }
 
           if (event.shiftKey)
+          {
             newClip.evaluate = "[t]"
+          }
           else
+          {
             newClip.animation = []
+
+            // number of vector components
+            if (tracks[trackNames[trackIndex]].length > 0)
+            {
+              // try to infer the number of components from other clips on the same track
+              var otherClip = tracks[trackNames[trackIndex]][0]
+              newClip.components = otherClip.components
+            }
+            else
+            {
+              // fallback on direct user question
+              var components = NaN
+              do
+              {
+                var componentsString = prompt("Number of vector components", 3)
+                if (!componentsString)
+                  return
+
+                components = parseInt(componentsString)
+
+              } while ((components === NaN) || (components < 1) || (components > 4))
+              newClip.components = components
+            }
+          }
 
           tracks[trackNames[trackIndex]].push(newClip)
           $scope.updateSequenceData($scope.sequence.data)
