@@ -515,6 +515,11 @@ angular.module("tde.clip-editor", [])
           selectedClips = []
           $scope.updateSequenceData($scope.sequence.data)
         }
+
+        if (event.keyCode == 27 /* esc */)
+        {
+          $scope.exitClip()
+        }
       })
 
       function resize()
