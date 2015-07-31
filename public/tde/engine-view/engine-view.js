@@ -95,11 +95,11 @@ angular.module("tde.engine-view", [])
           togglePlayState()
         }
 
-        if (event.which == 70 || event.which == 102) // f
+        /*if (event.which == 70 || event.which == 102) // f
         {
           event.preventDefault()
           toggleFullscreen(canvasElement.get(0))
-        }
+        }*/
       })
 
       var oldX = 0

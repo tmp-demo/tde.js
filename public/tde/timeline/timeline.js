@@ -261,6 +261,40 @@ angular.module("tde.timeline", [])
           rulerStep *= 2
       }
 
+      // focuses everything if nothing is selected
+      function focusSelection()
+      {
+        var emptySelection = (selectedClips.length === 0)
+
+        var minBeat = 1000000
+        var maxBeat = -1000000
+        var minTrack = 1000000
+        var maxTrack = -1000000
+        for (var name in tracks)
+        {
+          var track = tracks[name]
+          var trackIndex = Object.keys(tracks).indexOf(name)
+          track.forEach(function(clip)
+          {
+            if (emptySelection || (selectedClips.indexOf(clip) != -1))
+            {
+              minBeat = Math.min(minBeat, clip.start)
+              maxBeat = Math.max(maxBeat, clip.start + clip.duration)
+              minTrack = Math.min(minTrack, trackIndex)
+              maxTrack = Math.max(maxTrack, trackIndex)
+            }
+          })
+        }
+
+        var duration = maxBeat - minBeat
+        scaleX = (canvas.width - HEADER_WIDTH - 20) / duration
+
+        scrollX -= beatToX(minBeat) - HEADER_WIDTH - 10
+        scrollY -= trackToY(minTrack) - RULER_HEIGHT - 10
+
+        redraw()
+      }
+
       var panning = false
       var seeking = false
       var dragging = false
@@ -550,6 +584,11 @@ angular.module("tde.timeline", [])
           }
           selectedClips = []
           $scope.updateSequenceData($scope.sequence.data)
+        }
+
+        if (event.keyCode == 70 /* F */)
+        {
+          focusSelection()
         }
       })
 
