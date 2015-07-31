@@ -10,7 +10,9 @@ angular.module("tde.clip-editor", [])
         sequence: "=sequence",
         updateSequenceData: "=updateSequenceData",
         exitClip: "=exitClip",
-        seek: "=seek"
+        seek: "=seek",
+        uniformName: "=uniformName",
+        engineRedraw: "=engineRedraw"
     },
     link: function($scope, element, attrs)
     {
@@ -148,7 +150,7 @@ angular.module("tde.clip-editor", [])
           var y = valueToY(i)
           ctx.fillStyle = "rgb(200, 200, 200)"
           ctx.fillRect(RULER_WIDTH - 5, y, 5, 1)
-          ctx.fillText(i, RULER_WIDTH - 6, y)
+          ctx.fillText(Math.round(i / rulerStepY) * rulerStepY, RULER_WIDTH - 6, y)
         }
 
         // back button
@@ -245,9 +247,89 @@ angular.module("tde.clip-editor", [])
         while (scaleX * rulerStepX < 20)
           rulerStepX *= 2
 
-        rulerStepY = 1
+        rulerStepY = 0.01
         while (scaleY * rulerStepY < 20)
-          rulerStepY *= 2
+          rulerStepY *= 10
+      }
+
+      // focuses everything if nothing is selected
+      function focusSelection()
+      {
+        var emptySelection = true//(selectedClips.length === 0)
+
+        // don't try to focus if there's no data
+        if (clip.animation.length === 0)
+          return
+
+        var minBeat = 1000000
+        var maxBeat = -1000000
+        var minValue = 1000000
+        var maxValue = -1000000
+        clip.animation.forEach(function(key)
+        {
+          if (emptySelection)
+          {
+            var beat = key[0]
+            minBeat = Math.min(minBeat, beat)
+            maxBeat = Math.max(maxBeat, beat)
+
+            var value = key[1]
+            for (var i = 0; i < clip.components; i++)
+            {
+              minValue = Math.min(minValue, value[i])
+              maxValue = Math.max(maxValue, value[i])
+            }
+          }
+        })
+
+        var duration = maxBeat - minBeat
+        var valueRange = maxValue - minValue
+
+        if (duration < 0.01)
+        {
+          minBeat -= 0.5
+          maxBeat += 0.5
+          duration = maxBeat - minBeat
+        }
+
+        if (valueRange < 0.01)
+        {
+          minValue -= 0.5
+          maxValue += 0.5
+          valueRange = maxValue - minValue
+        }
+
+        scaleX = (canvas.width - RULER_WIDTH - 20) / duration
+        scaleY = (canvas.height - RULER_HEIGHT - 20) / valueRange
+
+        scrollX -= beatToX(minBeat) - RULER_WIDTH - 10
+        scrollY -= valueToY(maxValue) - RULER_HEIGHT - 10
+
+        updateRulerSteps()
+
+        redraw()
+      }
+
+      function insertKeyframe()
+      {
+        var newKey = [
+          Math.max(0, $scope.sequence.time - clip.start),
+          deep_clone(uniforms[$scope.uniformName])
+        ]
+
+        clip.animation.push(newKey)
+        clip.animation.sort(function(lhs, rhs)
+        {
+          if (lhs[0] < rhs[0])
+            return -1
+
+          if (lhs[0] > rhs[0])
+            return 1
+
+          return 0
+        })
+
+        $scope.updateSequenceData($scope.sequence.data)
       }
 
       var panning = false
@@ -310,17 +392,14 @@ angular.module("tde.clip-editor", [])
             selectionStartY = event.pageY - jqCanvas.offset().top
             selectionEndX = selectionStartX
             selectionEndY = selectionStartY
-
-            console.log(selectionStartX, selectionStartY)
-            console.log(xToBeat(selectionStartX), yToValue(selectionStartY))
           }
         }
 
         if (event.button == 1 /* middle */)
         {
-          if (event.ctrlKey)
+          /*if (event.ctrlKey)
             zooming = true
-          else
+          else*/
             panning = true
         }
 
@@ -377,7 +456,7 @@ angular.module("tde.clip-editor", [])
         if (zooming)
         {
           var newScaleX = Math.min(Math.max(scaleX + event.movementX, 1), 100)
-          var newScaleY = Math.min(Math.max(scaleY - event.movementY, 5), 50)
+          var newScaleY = Math.min(Math.max(scaleY - event.movementY, 0.1), 1000)
           
           scrollX = (scrollX - canvas.width / 2) * newScaleX / scaleX + canvas.width / 2
           scrollY = (scrollY - canvas.height / 2) * newScaleY / scaleY + canvas.height / 2
@@ -401,16 +480,33 @@ angular.module("tde.clip-editor", [])
       
       canvas.addEventListener("wheel", function(event)
       {
-        var localX = event.pageX - jqCanvas.offset().left
-        var centerBeat = xToBeat(localX)
+        event.preventDefault()
+        var delta = Math.sign(event.deltaY)
 
-        scaleX -= event.deltaY
-        scaleX = Math.max(1, scaleX)
-        scaleX = Math.min(100, scaleX)
+        if (!event.ctrlKey)
+        {
+          var localX = event.pageX - jqCanvas.offset().left
+          var centerBeat = xToBeat(localX)
+
+          scaleX *= 1.0 - delta * 0.1
+          scaleX = Math.max(1, scaleX)
+          scaleX = Math.min(100, scaleX)
+
+          scrollX -= beatToX(centerBeat) - localX
+        }
+        else
+        {
+          var localY = event.pageY - jqCanvas.offset().top
+          var centerValue = yToValue(localY)
+
+          scaleY *= 1.0 - delta * 0.1
+          scaleY = Math.max(0.01, scaleY)
+          scaleY = Math.min(1000, scaleY)
+
+          scrollY -= valueToY(centerValue) - localY
+        }
 
         updateRulerSteps()
-        scrollX -= beatToX(centerBeat) - localX
-
         redraw()
       })
 
@@ -515,6 +611,21 @@ angular.module("tde.clip-editor", [])
           selectedClips = []
           $scope.updateSequenceData($scope.sequence.data)
         }
+
+        if (event.keyCode == 70 /* F */)
+        {
+          focusSelection()
+        }
+
+        if (event.keyCode == 73 /* I */)
+        {
+          insertKeyframe()
+        }
+
+        if (event.keyCode == 27 /* esc */)
+        {
+          $scope.exitClip()
+        }
       })
 
       function resize()
@@ -527,15 +638,80 @@ angular.module("tde.clip-editor", [])
       window.addEventListener("resize", resize)
       resize()
 
+      function getComponentName(component)
+      {
+        switch (component)
+        {
+          case 0: return "x"
+          case 1: return "y"
+          case 2: return "z"
+          case 3: return "w"
+        }
+
+        return "wtf"
+      }
+
+      var gui = null
+      var guiValue = null
+      var guiControllers = []
       $scope.$watch("clip", function(newClip)
       {
+        if (gui)
+        {
+          gui.destroy()
+          gui = null
+          guiValue = null
+          guiControllers = []
+        }
+
         if (newClip)
+        {
           clip = newClip
+
+          gui = new dat.GUI({
+            resizable: false,
+            hideable: false
+          })
+
+          guiValue = {}
+          var uniform = uniforms[$scope.uniformName]
+          var folder = gui.addFolder($scope.uniformName)
+          for (var i = 0; i < clip.components; i++)
+          {
+            guiValue[getComponentName(i)] = uniform[i]
+            var slider = folder.add(guiValue, getComponentName(i))
+            slider.onChange(function(component)
+            {
+              return function(newValue)
+              {
+                if (!uniform_editor_overrides[$scope.uniformName])
+                  uniform_editor_overrides[$scope.uniformName] = deep_clone(uniforms[$scope.uniformName])
+
+                uniform_editor_overrides[$scope.uniformName][component] = newValue
+                $scope.engineRedraw()
+              }
+            }(i))
+            
+            guiControllers.push(slider)
+          }
+
+          folder.open()
+        }
 
         redraw()
       }, true)
 
-      $scope.$watch("sequence.time", redraw)
+      $scope.$watch("sequence.time", function()
+      {
+        delete uniform_editor_overrides[$scope.uniformName]
+        redraw()
+
+        for (var i = 0; i < guiControllers.length; i++)
+        {
+          guiValue[getComponentName(i)] = uniforms[$scope.uniformName][i]
+          guiControllers[i].updateDisplay()
+        }
+      })
     }
   }
 })

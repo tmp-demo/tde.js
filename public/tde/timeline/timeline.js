@@ -261,6 +261,44 @@ angular.module("tde.timeline", [])
           rulerStep *= 2
       }
 
+      // focuses everything if nothing is selected
+      function focusSelection()
+      {
+        var emptySelection = (selectedClips.length === 0)
+
+        var minBeat = 1000000
+        var maxBeat = -1000000
+        var minTrack = 1000000
+        var maxTrack = -1000000
+        for (var name in tracks)
+        {
+          var track = tracks[name]
+          var trackIndex = Object.keys(tracks).indexOf(name)
+          track.forEach(function(clip)
+          {
+            if (emptySelection || (selectedClips.indexOf(clip) != -1))
+            {
+              minBeat = Math.min(minBeat, clip.start)
+              maxBeat = Math.max(maxBeat, clip.start + clip.duration)
+              minTrack = Math.min(minTrack, trackIndex)
+              maxTrack = Math.max(maxTrack, trackIndex)
+            }
+          })
+        }
+
+        var duration = maxBeat - minBeat
+        scaleX = (canvas.width - HEADER_WIDTH - 20) / duration
+        scaleY = (canvas.height - RULER_HEIGHT - 20) / (maxTrack - minTrack + 1)
+        scaleY = Math.min(50, scaleY)
+
+        scrollX -= beatToX(minBeat) - HEADER_WIDTH - 10
+        scrollY -= trackToY(minTrack) - RULER_HEIGHT - 10
+
+        updateRulerStep()
+
+        redraw()
+      }
+
       var panning = false
       var seeking = false
       var dragging = false
@@ -323,9 +361,9 @@ angular.module("tde.timeline", [])
 
         if (event.button == 1 /* middle */)
         {
-          if (event.ctrlKey)
+          /*if (event.ctrlKey)
             zooming = true
-          else
+          else*/
             panning = true
         }
 
@@ -410,16 +448,33 @@ angular.module("tde.timeline", [])
       
       canvas.addEventListener("wheel", function(event)
       {
-        var localX = event.pageX - jqCanvas.offset().left
-        var centerBeat = xToBeat(localX)
+        event.preventDefault()
+        var delta = Math.sign(event.deltaY)
 
-        scaleX -= event.deltaY
-        scaleX = Math.max(1, scaleX)
-        scaleX = Math.min(100, scaleX)
+        if (!event.ctrlKey)
+        {
+          var localX = event.pageX - jqCanvas.offset().left
+          var centerBeat = xToBeat(localX)
+
+          scaleX *= 1.0 - delta * 0.1
+          scaleX = Math.max(1, scaleX)
+          scaleX = Math.min(100, scaleX)
+
+          scrollX -= beatToX(centerBeat) - localX
+        }
+        else
+        {
+          var localY = event.pageY - jqCanvas.offset().top
+          var centerValue = yToTrack(localY)
+
+          scaleY *= 1.0 - delta * 0.1
+          scaleY = Math.max(5, scaleY)
+          scaleY = Math.min(50, scaleY)
+
+          scrollY -= trackToY(centerValue) - localY
+        }
 
         updateRulerStep()
-        scrollX -= beatToX(centerBeat) - localX
-
         redraw()
       })
 
@@ -484,7 +539,7 @@ angular.module("tde.timeline", [])
           else
           {
             // startup a dedicated clip editor
-            $scope.selectClip(clip)
+            $scope.selectClip(clip, trackNames[trackIndex])
           }
         }
         else
@@ -550,6 +605,11 @@ angular.module("tde.timeline", [])
           }
           selectedClips = []
           $scope.updateSequenceData($scope.sequence.data)
+        }
+
+        if (event.keyCode == 70 /* F */)
+        {
+          focusSelection()
         }
       })
 
