@@ -97,6 +97,7 @@ angular.module("tde.clip-editor", [])
         }
 
         var engineClip = deep_clone(clip)
+        engineClip.animation = applyDrag(engineClip.animation)
         if (engineClip.easing) {
           var eval_str = "ease_" + engineClip.easing;
           engineClip.easing = global_scope[eval_str];
@@ -119,20 +120,24 @@ angular.module("tde.clip-editor", [])
         }
 
         // keyframes
-        for (var i = 0; i < clip.animation.length; i++)
+        var animations = applyDrag(clip.animation)
+        for (var i = 0; i < animations.length; i++)
         {
-          var key = clip.animation[i]
-          var beat = key[0]
+          var key = animations[i]
           var value = key[1]
 
-          var x = beatToX(beat)
+          var beat = key[0]
           for (var component = 0; component < clip.components; component++)
           {
-            var y = valueToY(value[component])
-
             var alpha = 0.3
+            var val = value[component]
             if (selectionIndexOf([i, component]) != -1)
+            {
               alpha = 1.0
+            }
+
+            var x = beatToX(beat)
+            var y = valueToY(val)
 
             ctx.fillStyle = curveColor(component, alpha)
             ctx.fillRect(x - 5, y - 5, 10, 10)
@@ -307,6 +312,29 @@ angular.module("tde.clip-editor", [])
         return false
       }
 
+      function applyDrag(animations)
+      {
+        animations = deep_clone(animations)
+        for (var i = 0; i < animations.length; i++)
+        {
+          var key = animations[i]
+          var value = key[1]
+
+          if (isKeyIndexSelected(i))
+          {
+            key[0] += dragOffsetX
+          }
+
+          for (var component = 0; component < clip.components; component++)
+          {
+            if (selectionIndexOf([i, component]) != -1)
+              value[component] += dragOffsetY
+          }
+        }
+
+        return animations
+      }
+
       // focuses everything if nothing is selected
       function focusSelection()
       {
@@ -373,15 +401,9 @@ angular.module("tde.clip-editor", [])
         ]
 
         clip.animation.push(newKey)
-        clip.animation.sort(function(lhs, rhs)
+        clip.animation = clip.animation.sort(function(lhs, rhs)
         {
-          if (lhs[0] < rhs[0])
-            return -1
-
-          if (lhs[0] > rhs[0])
-            return 1
-
-          return 0
+          return lhs[0] - rhs[0]
         })
 
         $scope.updateSequenceData($scope.sequence.data)
@@ -473,16 +495,12 @@ angular.module("tde.clip-editor", [])
       {
         if (dragging)
         {
-          dragOffsetX = snapX(dragOffsetX)
-          if (Math.abs(dragOffsetX) > 0)
-          {
-            /*selectedKeys.forEach(function(key)
-            {
-              clip.start += dragOffsetX
-            })*/
-            dragOffsetX = 0
-            $scope.updateSequenceData($scope.sequence.data)
-          }
+          clip.animation = applyDrag(clip.animation)
+
+          dragOffsetX = 0
+          dragOffsetY = 0
+          
+          $scope.updateSequenceData($scope.sequence.data)
         }
 
         panning = false
@@ -508,7 +526,7 @@ angular.module("tde.clip-editor", [])
         if (dragging)
         {
           dragOffsetX += event.movementX / scaleX
-          dragOffsetY += event.movementY / scaleY
+          dragOffsetY -= event.movementY / scaleY
         }
 
         if (zooming)
