@@ -596,7 +596,11 @@ angular.module("tde.clip-editor", [])
         if (event.keyCode == 46 /* del */)
         {
           // delete everything selected
-          // TODO
+          for (var i = clip.animation.length - 1; i >= 0; i--)
+          {
+            if (isKeyIndexSelected(i))
+              clip.animation.splice(i, 1)
+          }
           selectedKeys = []
           $scope.updateSequenceData($scope.sequence.data)
         }
