@@ -296,6 +296,17 @@ angular.module("tde.clip-editor", [])
         return -1
       }
 
+      function isKeyIndexSelected(index)
+      {
+        for (var i = 0; i < selectedKeys.length; i++)
+        {
+          if (selectedKeys[i][0] == index)
+            return true
+        }
+
+        return false
+      }
+
       // focuses everything if nothing is selected
       function focusSelection()
       {
@@ -309,17 +320,17 @@ angular.module("tde.clip-editor", [])
         var maxBeat = -1000000
         var minValue = 1000000
         var maxValue = -1000000
-        clip.animation.forEach(function(key)
+        clip.animation.forEach(function(key, index)
         {
-          if (emptySelection)
+          var beat = key[0]
+          var value = key[1]
+          for (var i = 0; i < clip.components; i++)
           {
-            var beat = key[0]
-            minBeat = Math.min(minBeat, beat)
-            maxBeat = Math.max(maxBeat, beat)
-
-            var value = key[1]
-            for (var i = 0; i < clip.components; i++)
+            if (emptySelection || (selectionIndexOf([index, i]) != -1))
             {
+              minBeat = Math.min(minBeat, beat)
+              maxBeat = Math.max(maxBeat, beat)
+
               minValue = Math.min(minValue, value[i])
               maxValue = Math.max(maxValue, value[i])
             }
