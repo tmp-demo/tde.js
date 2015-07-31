@@ -291,6 +291,8 @@ angular.module("tde.timeline", [])
 
         scrollX -= beatToX(minBeat) - HEADER_WIDTH - 10
         scrollY -= trackToY(minTrack) - RULER_HEIGHT - 10
+        
+        updateRulerStep()
 
         redraw()
       }

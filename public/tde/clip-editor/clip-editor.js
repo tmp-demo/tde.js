@@ -148,7 +148,7 @@ angular.module("tde.clip-editor", [])
           var y = valueToY(i)
           ctx.fillStyle = "rgb(200, 200, 200)"
           ctx.fillRect(RULER_WIDTH - 5, y, 5, 1)
-          ctx.fillText(i, RULER_WIDTH - 6, y)
+          ctx.fillText(Math.round(i / rulerStepY) * rulerStepY, RULER_WIDTH - 6, y)
         }
 
         // back button
@@ -245,9 +245,67 @@ angular.module("tde.clip-editor", [])
         while (scaleX * rulerStepX < 20)
           rulerStepX *= 2
 
-        rulerStepY = 1
+        rulerStepY = 0.01
         while (scaleY * rulerStepY < 20)
-          rulerStepY *= 2
+          rulerStepY *= 10
+      }
+
+      // focuses everything if nothing is selected
+      function focusSelection()
+      {
+        var emptySelection = true//(selectedClips.length === 0)
+
+        // don't try to focus if there's no data
+        if (clip.animation.length === 0)
+          return
+
+        var minBeat = 1000000
+        var maxBeat = -1000000
+        var minValue = 1000000
+        var maxValue = -1000000
+        clip.animation.forEach(function(key)
+        {
+          if (emptySelection)
+          {
+            var beat = key[0]
+            minBeat = Math.min(minBeat, beat)
+            maxBeat = Math.max(maxBeat, beat)
+
+            var value = key[1]
+            for (var i = 0; i < clip.components; i++)
+            {
+              minValue = Math.min(minValue, value[i])
+              maxValue = Math.max(maxValue, value[i])
+            }
+          }
+        })
+
+        var duration = maxBeat - minBeat
+        var valueRange = maxValue - minValue
+
+        if (duration < 0.01)
+        {
+          minBeat -= 0.5
+          maxBeat += 0.5
+          duration = maxBeat - minBeat
+        }
+
+        if (valueRange < 0.01)
+        {
+          minValue -= 0.5
+          maxValue += 0.5
+          valueRange = maxValue - minValue
+        }
+
+        scaleX = (canvas.width - RULER_WIDTH - 20) / duration
+        scaleY = (canvas.height - RULER_HEIGHT - 20) / valueRange
+
+        scrollX -= beatToX(minBeat) - RULER_WIDTH - 10
+        scrollY -= valueToY(maxValue) - RULER_HEIGHT - 10
+
+        updateRulerSteps()
+
+        redraw()
       }
 
       var panning = false
@@ -310,9 +368,6 @@ angular.module("tde.clip-editor", [])
             selectionStartY = event.pageY - jqCanvas.offset().top
             selectionEndX = selectionStartX
             selectionEndY = selectionStartY
-
-            console.log(selectionStartX, selectionStartY)
-            console.log(xToBeat(selectionStartX), yToValue(selectionStartY))
           }
         }
 
@@ -377,7 +432,7 @@ angular.module("tde.clip-editor", [])
         if (zooming)
         {
           var newScaleX = Math.min(Math.max(scaleX + event.movementX, 1), 100)
-          var newScaleY = Math.min(Math.max(scaleY - event.movementY, 5), 50)
+          var newScaleY = Math.min(Math.max(scaleY - event.movementY, 0.1), 1000)
           
           scrollX = (scrollX - canvas.width / 2) * newScaleX / scaleX + canvas.width / 2
           scrollY = (scrollY - canvas.height / 2) * newScaleY / scaleY + canvas.height / 2
@@ -514,6 +569,11 @@ angular.module("tde.clip-editor", [])
           }
           selectedClips = []
           $scope.updateSequenceData($scope.sequence.data)
+        }
+
+        if (event.keyCode == 70 /* F */)
+        {
+          focusSelection()
         }
 
         if (event.keyCode == 27 /* esc */)
