@@ -31,7 +31,7 @@
       <tde-engine-view></tde-engine-view>
         <div id="timeline" class="border">
             <tde-timeline ng-hide="currentClip" data-sequence="currentSequence" data-update-sequence-data="updateSequenceData" data-select-clip="selectClip" data-seek="seek"></tde-timeline>
-            <tde-clip-editor ng-show="currentClip" data-sequence="currentSequence" data-update-sequence-data="updateSequenceData" data-clip="currentClip" data-exit-clip="exitClip" data-seek="seek"></tde-clip-editor>
+            <tde-clip-editor ng-show="currentClip" data-sequence="currentSequence" data-update-sequence-data="updateSequenceData" data-clip="currentClip" data-exit-clip="exitClip" data-seek="seek" data-uniform-name="uniformName" data-engine-redraw="engineRedraw"></tde-clip-editor>
         </div>
     </div>
   
@@ -87,6 +87,8 @@
     <script src="/lib/ace/worker-javascript.js"></script>
     <script src="/lib/ace/theme-monokai.js"></script>
     
+    <script src="/lib/dat.gui/dat.gui.js"></script>
+
     <script src="/lib/toastr/toastr.min.js"></script>
     
     <script src="/lib/websocket-server-for-blender/blender-websocket.js"></script>

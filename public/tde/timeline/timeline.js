@@ -539,7 +539,7 @@ angular.module("tde.timeline", [])
           else
           {
             // startup a dedicated clip editor
-            $scope.selectClip(clip)
+            $scope.selectClip(clip, trackNames[trackIndex])
           }
         }
         else

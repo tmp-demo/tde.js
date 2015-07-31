@@ -63,6 +63,7 @@ angular.module("tde", [
   $scope.currentUser = User.currentUser
   $scope.currentSequence = EngineDriver.sequenceInfo
   $scope.currentClip = null
+  $scope.uniformName = null
 
   $scope.seek = function(time)
   {
@@ -77,11 +78,12 @@ angular.module("tde", [
     })
   }
 
-  $scope.selectClip = function(clip)
+  $scope.selectClip = function(clip, trackName)
   {
     $scope.$apply(function()
     {
       $scope.currentClip = clip
+      $scope.uniformName = trackName
     })
   }
 
@@ -90,7 +92,13 @@ angular.module("tde", [
     $scope.$apply(function()
     {
       $scope.currentClip = null
+      $scope.uniformName = null
     })
+  }
+
+  $scope.engineRedraw = function()
+  {
+    EngineDriver.drawFrame()
   }
 
   $scope.$on("hideBox", function(event)

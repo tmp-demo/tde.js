@@ -10,7 +10,9 @@ angular.module("tde.clip-editor", [])
         sequence: "=sequence",
         updateSequenceData: "=updateSequenceData",
         exitClip: "=exitClip",
-        seek: "=seek"
+        seek: "=seek",
+        uniformName: "=uniformName",
+        engineRedraw: "=engineRedraw"
     },
     link: function($scope, element, attrs)
     {
@@ -609,15 +611,68 @@ angular.module("tde.clip-editor", [])
       window.addEventListener("resize", resize)
       resize()
 
+      var gui = null
+      var guiValue = null
+      var guiControllers = []
       $scope.$watch("clip", function(newClip)
       {
+        if (gui)
+        {
+          gui.destroy()
+          gui = null
+          guiValue = null
+          guiControllers = []
+        }
+
         if (newClip)
+        {
           clip = newClip
+
+          gui = new dat.GUI({
+            resizable: false,
+            hideable: false
+          })
+
+          guiValue = {}
+          var uniform = uniforms[$scope.uniformName]
+          var folder = gui.addFolder($scope.uniformName)
+          for (var i = 0; i < clip.components; i++)
+          {
+            guiValue[i] = uniform[i]
+            var slider = folder.add(guiValue, i)
+            slider.onChange(function(component)
+            {
+              return function(newValue)
+              {
+                if (!uniform_editor_overrides[$scope.uniformName])
+                  uniform_editor_overrides[$scope.uniformName] = deep_clone(uniforms[$scope.uniformName])
+
+                uniform_editor_overrides[$scope.uniformName][component] = newValue
+                $scope.engineRedraw()
+              }
+            }(i))
+            
+            guiControllers.push(slider)
+          }
+
+          folder.open()
+        }
 
         redraw()
       }, true)
 
-      $scope.$watch("sequence.time", redraw)
+      $scope.$watch("sequence.time", function()
+      {
+        delete uniform_editor_overrides[$scope.uniformName]
+        redraw()
+
+        for (var i = 0; i < guiControllers.length; i++)
+        {
+          guiValue[i] = uniforms[$scope.uniformName][i]
+          //guiControllers[i].setValue(uniforms[$scope.uniformName][i])
+          guiControllers[i].updateDisplay()
+        }
+      })
     }
   }
 })
