@@ -2,6 +2,7 @@ if (config.EDITOR) {
   var sequence = [];
   var render_passes = [];
   var snd;
+  var renderHooks = [];
 }
 
 if (config.EDITOR) {
@@ -75,6 +76,7 @@ function engine_render(current_time)
     if (document.__gfx_init == undefined) {
       return;
     }
+    window.renderHooks.forEach(function(f) { f() });
   }
   render_frame(current_time);
   if (config.EDITOR) {
