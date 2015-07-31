@@ -92,8 +92,8 @@ function gfx_init() {
   if (config.CAM_UNIFORMS_ENABLED) {
     uniforms["u_cam_pos"] = [0, 1, 0]
     uniforms["u_cam_target"] = [0, 0, 0]
-    uniforms["u_cam_fov"] = 75
-    uniforms["u_cam_tilt"] = 0
+    uniforms["u_cam_fov"] = [75]
+    uniforms["u_cam_tilt"] = [0]
   }
 
   // hack to make the export toolchain minify attribute and uniform names
