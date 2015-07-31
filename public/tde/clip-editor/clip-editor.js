@@ -80,14 +80,17 @@ angular.module("tde.clip-editor", [])
           ctx.fillRect(beatToX(clip.duration), RULER_HEIGHT, canvas.width - beatToX(clip.duration), canvas.height - RULER_HEIGHT)
         }
 
-        function curveColor(component)
+        function curveColor(component, alpha)
         {
+          if (!alpha)
+            alpha = 1.0
+
           switch (component)
           {
-            case 0: return "#f22"
-            case 1: return "#0f0"
-            case 2: return "#44f"
-            case 3: return "#ddd"
+            case 0: return "rgba(255, 34, 34, " + alpha + ")"
+            case 1: return "rgba(0, 144, 0, " + alpha + ")"
+            case 2: return "rgba(68, 68, 255, " + alpha + ")"
+            case 3: return "rgba(221, 221, 221, " + alpha + ")"
           }
 
           return "#fff"
@@ -113,6 +116,25 @@ angular.module("tde.clip-editor", [])
               ctx.lineTo(x, y)
           }
           ctx.stroke()
+        }
+
+        // keyframes
+        for (var i = 0; i < clip.animation.length; i++)
+        {
+          var key = clip.animation[i]
+          var beat = key[0]
+          var value = key[1]
+
+          var x = beatToX(beat)
+          for (var component = 0; component < clip.components; component++)
+          {
+            var y = valueToY(value[component])
+            ctx.fillStyle = curveColor(component, 0.3)
+            ctx.fillRect(x - 5, y - 5, 10, 10)
+
+            ctx.strokeStyle = curveColor(component)
+            ctx.strokeRect(x - 5, y - 5, 10, 10)
+          }
         }
 
         // selection square
