@@ -310,6 +310,28 @@ angular.module("tde.clip-editor", [])
         redraw()
       }
 
+      function insertKeyframe()
+      {
+        var newKey = [
+          Math.max(0, $scope.sequence.time - clip.start),
+          deep_clone(uniforms[$scope.uniformName])
+        ]
+
+        clip.animation.push(newKey)
+        clip.animation.sort(function(lhs, rhs)
+        {
+          if (lhs[0] < rhs[0])
+            return -1
+
+          if (lhs[0] > rhs[0])
+            return 1
+
+          return 0
+        })
+
+        $scope.updateSequenceData($scope.sequence.data)
+      }
+
       var panning = false
       var seeking = false
       var dragging = false
@@ -595,6 +617,11 @@ angular.module("tde.clip-editor", [])
           focusSelection()
         }
 
+        if (event.keyCode == 73 /* I */)
+        {
+          insertKeyframe()
+        }
+
         if (event.keyCode == 27 /* esc */)
         {
           $scope.exitClip()
@@ -610,6 +637,19 @@ angular.module("tde.clip-editor", [])
 
       window.addEventListener("resize", resize)
       resize()
+
+      function getComponentName(component)
+      {
+        switch (component)
+        {
+          case 0: return "x"
+          case 1: return "y"
+          case 2: return "z"
+          case 3: return "w"
+        }
+
+        return "wtf"
+      }
 
       var gui = null
       var guiValue = null
@@ -638,8 +678,8 @@ angular.module("tde.clip-editor", [])
           var folder = gui.addFolder($scope.uniformName)
           for (var i = 0; i < clip.components; i++)
           {
-            guiValue[i] = uniform[i]
-            var slider = folder.add(guiValue, i)
+            guiValue[getComponentName(i)] = uniform[i]
+            var slider = folder.add(guiValue, getComponentName(i))
             slider.onChange(function(component)
             {
               return function(newValue)
@@ -668,8 +708,7 @@ angular.module("tde.clip-editor", [])
 
         for (var i = 0; i < guiControllers.length; i++)
         {
-          guiValue[i] = uniforms[$scope.uniformName][i]
-          //guiControllers[i].setValue(uniforms[$scope.uniformName][i])
+          guiValue[getComponentName(i)] = uniforms[$scope.uniformName][i]
           guiControllers[i].updateDisplay()
         }
       })

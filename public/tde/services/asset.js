@@ -120,7 +120,7 @@ angular.module("tde.services.asset", [])
     $http.put("/data/projects/" + $routeParams.projectId + "/assets/" + assetId, {assetData: data}).
       success(function()
       {
-	      toastr.success(assetId, 'Saved');
+	      //toastr.success(assetId, 'Saved');
         self.unloadAsset(assetId)
         self.loadAsset(assetId, callback)
       }).

@@ -72,9 +72,12 @@ angular.module("tde", [
   
   $scope.updateSequenceData = function(data)
   {
-    Asset.updateAsset($scope.currentSequence.name + ".seq", JSON.stringify(data, null, "  "), function(err)
+    $scope.$apply(function()
     {
-      if (err) throw err
+      Asset.updateAsset($scope.currentSequence.name + ".seq", JSON.stringify(data, null, "  "), function(err)
+      {
+        if (err) throw err
+      })
     })
   }
 
