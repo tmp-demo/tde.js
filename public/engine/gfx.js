@@ -406,7 +406,10 @@ function use_shader(shader_program, texture_inputs, extra_uniforms) {
 function render_pass(pass, time) {
   if (pass.enabled) {
     if (!uniforms[pass.enabled]) {
+      //console.log(" -- pass disabled");
       return;
+    } else {
+      //console.log(" -- pass enabled");
     }
   }
 

@@ -121,3 +121,9 @@ function editor_main() {
   gl_init();
   text_init();
 }
+
+// for convenience in the timline
+function sin(x) { return Math.sin(x); }
+function cos(x) { return Math.cos(x); }
+function abs(x) { return Math.abs(x); }
+var Pi = 3.1416;
