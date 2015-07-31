@@ -373,9 +373,9 @@ angular.module("tde.clip-editor", [])
 
         if (event.button == 1 /* middle */)
         {
-          if (event.ctrlKey)
+          /*if (event.ctrlKey)
             zooming = true
-          else
+          else*/
             panning = true
         }
 
@@ -456,16 +456,33 @@ angular.module("tde.clip-editor", [])
       
       canvas.addEventListener("wheel", function(event)
       {
-        var localX = event.pageX - jqCanvas.offset().left
-        var centerBeat = xToBeat(localX)
+        event.preventDefault()
+        var delta = Math.sign(event.deltaY)
 
-        scaleX -= event.deltaY
-        scaleX = Math.max(1, scaleX)
-        scaleX = Math.min(100, scaleX)
+        if (!event.ctrlKey)
+        {
+          var localX = event.pageX - jqCanvas.offset().left
+          var centerBeat = xToBeat(localX)
+
+          scaleX *= 1.0 - delta * 0.1
+          scaleX = Math.max(1, scaleX)
+          scaleX = Math.min(100, scaleX)
+
+          scrollX -= beatToX(centerBeat) - localX
+        }
+        else
+        {
+          var localY = event.pageY - jqCanvas.offset().top
+          var centerValue = yToValue(localY)
+
+          scaleY *= 1.0 - delta * 0.1
+          scaleY = Math.max(0.01, scaleY)
+          scaleY = Math.min(1000, scaleY)
+
+          scrollY -= valueToY(centerValue) - localY
+        }
 
         updateRulerSteps()
-        scrollX -= beatToX(centerBeat) - localX
-
         redraw()
       })
 

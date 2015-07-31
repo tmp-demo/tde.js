@@ -288,10 +288,12 @@ angular.module("tde.timeline", [])
 
         var duration = maxBeat - minBeat
         scaleX = (canvas.width - HEADER_WIDTH - 20) / duration
+        scaleY = (canvas.height - RULER_HEIGHT - 20) / (maxTrack - minTrack + 1)
+        scaleY = Math.min(50, scaleY)
 
         scrollX -= beatToX(minBeat) - HEADER_WIDTH - 10
         scrollY -= trackToY(minTrack) - RULER_HEIGHT - 10
-        
+
         updateRulerStep()
 
         redraw()
@@ -359,9 +361,9 @@ angular.module("tde.timeline", [])
 
         if (event.button == 1 /* middle */)
         {
-          if (event.ctrlKey)
+          /*if (event.ctrlKey)
             zooming = true
-          else
+          else*/
             panning = true
         }
 
@@ -446,16 +448,33 @@ angular.module("tde.timeline", [])
       
       canvas.addEventListener("wheel", function(event)
       {
-        var localX = event.pageX - jqCanvas.offset().left
-        var centerBeat = xToBeat(localX)
+        event.preventDefault()
+        var delta = Math.sign(event.deltaY)
 
-        scaleX -= event.deltaY
-        scaleX = Math.max(1, scaleX)
-        scaleX = Math.min(100, scaleX)
+        if (!event.ctrlKey)
+        {
+          var localX = event.pageX - jqCanvas.offset().left
+          var centerBeat = xToBeat(localX)
+
+          scaleX *= 1.0 - delta * 0.1
+          scaleX = Math.max(1, scaleX)
+          scaleX = Math.min(100, scaleX)
+
+          scrollX -= beatToX(centerBeat) - localX
+        }
+        else
+        {
+          var localY = event.pageY - jqCanvas.offset().top
+          var centerValue = yToTrack(localY)
+
+          scaleY *= 1.0 - delta * 0.1
+          scaleY = Math.max(5, scaleY)
+          scaleY = Math.min(50, scaleY)
+
+          scrollY -= trackToY(centerValue) - localY
+        }
 
         updateRulerStep()
-        scrollX -= beatToX(centerBeat) - localX
-
         redraw()
       })
 
