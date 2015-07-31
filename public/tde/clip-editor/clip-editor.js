@@ -497,6 +497,7 @@ angular.module("tde.clip-editor", [])
         if (dragging)
         {
           dragOffsetX += event.movementX / scaleX
+          dragOffsetY += event.movementY / scaleY
         }
 
         if (zooming)
@@ -558,86 +559,24 @@ angular.module("tde.clip-editor", [])
 
       canvas.addEventListener("dblclick", function(event)
       {
-        var trackNames = Object.keys(tracks)
-        var trackIndex = Math.floor(yToValue(event.pageY - jqCanvas.offset().top))
-        var clip = findClip(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
+        var key = findKey(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
 
-        if (event.pageX - jqCanvas.offset().left <= RULER_WIDTH)
+        if (key)
         {
-          if ((trackIndex < 0) || (trackIndex >= trackNames.length))
+          // edit key value
+          var value = clip.animation[key[0]][1][key[1]]
+          var newValue = prompt("New value", value)
+          if (newValue)
           {
-            // create new track
-            var newTrackName = prompt("New track name", "track42")
-            if (newTrackName)
-            {
-              if (tracks.hasOwnProperty(newTrackName))
-              {
-                alert("This track name already exists!")
-                return
-              }
-
-              tracks[newTrackName] = []
-              $scope.updateSequenceData($scope.sequence.data)
-            }
-          }
-          else
-          {
-            // rename track
-            var newTrackName = prompt("Track name", trackNames[trackIndex])
-            if (newTrackName)
-            {
-              var otherIndex = trackNames.indexOf(newTrackName)
-              if ((otherIndex != -1) && (otherIndex != trackIndex))
-              {
-                alert("This track name already exists!")
-                return
-              }
-
-              tracks[newTrackName] = tracks[trackNames[trackIndex]]
-              delete tracks[trackNames[trackIndex]]
-              $scope.updateSequenceData($scope.sequence.data)
-            }
-          }
-
-          return;
-        }
-
-        if (clip)
-        {
-          // edit clip content
-          if (clip.evaluate)
-          {
-            var newExpression = prompt("Expression", clip.evaluate)
-            if (newExpression)
-            {
-              clip.evaluate = newExpression
-              $scope.updateSequenceData($scope.sequence.data)
-            }
-          }
-          else
-          {
-            // startup a dedicated clip editor
-            $scope.selectClip(clip)
+            clip.animation[key[0]][1][key[1]] = parseFloat(newValue)
+            $scope.updateSequenceData($scope.sequence.data)
           }
         }
         else
         {
-          // create new clip
-          if (trackIndex < 0) return
-          if (trackIndex >= trackNames.length) return
-
-          var newClip = {
-            start: snapX(xToBeat(event.pageX - jqCanvas.offset().left) - rulerStepX * 0.5),
-            duration: 2 * rulerStepX,
-          }
-
-          if (event.shiftKey)
-            newClip.evaluate = "[t]"
-          else
-            newClip.animation = []
-
-          tracks[trackNames[trackIndex]].push(newClip)
-          $scope.updateSequenceData($scope.sequence.data)
+          // create new key
+          seek(xToBeat(event.pageX - jqCanvas.offset().left))
+          insertKeyframe()
         }
       })
 
