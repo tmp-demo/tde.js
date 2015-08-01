@@ -34,7 +34,7 @@ for (var i = 2; i < process.argv.length; ++i) {
 						var item = asset.data[t];
                         console.log(
                             "textures.%s = %s(%d, %s);",
-							JSON.stringify(item.id),
+							item.id,
 							(asset.vertical || item.vertical) ? "create_vertical_text_texture" : "create_text_texture",
 							item.size,
 							JSON.stringify(item.text)
