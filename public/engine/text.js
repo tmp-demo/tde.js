@@ -25,12 +25,11 @@ function create_text_texture(fontSize, text) {
   clear_texture_canvas();
   
   fontSize *= 100;
-  ctx_2d.font = fontSize + "px Calibri";
+  ctx_2d.font = fontSize + "px Arial";
 
   var measure = ctx_2d.measureText(text);
   var width = 3 + measure.width|0,
     height = fontSize * 1.5;
-	
   ctx_2d.fillText(text, width / 2, fontSize);
   
   return create_texture(
