@@ -312,6 +312,14 @@ angular.module("tde.clip-editor", [])
         return false
       }
 
+      function makeZeros()
+      {
+        var zeros = []
+        for (var i = 0; i < clip.components; i++)
+          zeros.push(0)
+        return zeros
+      }
+
       function applyDrag(animations)
       {
         animations = deep_clone(animations)
@@ -344,10 +352,10 @@ angular.module("tde.clip-editor", [])
         if (clip.animation.length === 0)
           return
 
-        var minBeat = 1000000
-        var maxBeat = -1000000
-        var minValue = 1000000
-        var maxValue = -1000000
+        var minBeat = clip.animation[0][0]
+        var maxBeat = clip.animation[0][0]
+        var minValue = clip.animation[0][1][0]
+        var maxValue = clip.animation[0][1][0]
         clip.animation.forEach(function(key, index)
         {
           var beat = key[0]
@@ -397,11 +405,11 @@ angular.module("tde.clip-editor", [])
       {
         var newKey = [
           Math.max(0, $scope.sequence.time - clip.start),
-          deep_clone(uniforms[$scope.uniformName])
+          (uniforms[$scope.uniformName] === 0) ? makeZeros() : deep_clone(uniforms[$scope.uniformName])
         ]
 
         clip.animation.push(newKey)
-        clip.animation = clip.animation.sort(function(lhs, rhs)
+        clip.animation.sort(function(lhs, rhs)
         {
           return lhs[0] - rhs[0]
         })
@@ -605,6 +613,7 @@ angular.module("tde.clip-editor", [])
         {
           // create new key
           seek(xToBeat(event.pageX - jqCanvas.offset().left))
+          $scope.engineRedraw()
           insertKeyframe()
         }
       })
@@ -691,10 +700,7 @@ angular.module("tde.clip-editor", [])
           if (uniform === 0)
           {
             // the engine never set this uniform
-            var zeros = []
-            for (var i = 0; i < clip.components; i++)
-              zeros.push(0)
-            uniform = zeros;
+            uniform = makeZeros();
           }
           var folder = gui.addFolder($scope.uniformName)
           for (var i = 0; i < clip.components; i++)
@@ -732,7 +738,7 @@ angular.module("tde.clip-editor", [])
 
         for (var i = 0; i < guiControllers.length; i++)
         {
-          guiValue[getComponentName(i)] = uniforms[$scope.uniformName][i]
+          guiValue[getComponentName(i)] = (uniforms[$scope.uniformName] === 0) ? 0 : uniforms[$scope.uniformName][i]
           guiControllers[i].updateDisplay()
         }
       })
