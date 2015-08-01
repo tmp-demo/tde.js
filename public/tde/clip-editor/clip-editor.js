@@ -708,14 +708,6 @@ angular.module("tde.clip-editor", [])
 
           folder.open()
         }
-        else
-        {
-          clip = {
-            start: 0,
-            duration: 16,
-            animation: []
-          }
-        }
 
         redraw()
       }
