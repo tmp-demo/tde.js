@@ -206,7 +206,7 @@ angular.module("tde.services.engine-driver", [])
           var clip = uniform[c];
           if (clip.evaluate) {
             var function_str = "function(t) { return " + clip.evaluate + "; }";
-            console.log("patching uniform "+u+" animation: ", function_str);
+            //console.log("patching uniform "+u+" animation: ", function_str);
             clip.evaluate = eval("_="+function_str);
           }
           //clip.easing = ease_linear;// clip.easing ? eval("_= ease_"+clip.easing) : undefined;

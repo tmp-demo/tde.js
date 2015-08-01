@@ -16,6 +16,9 @@ function export_clip(clip) {
     if (clip.evaluate) {
         console.log("evaluate: function(t) { return "+clip.evaluate+"},");
     }
+    if (clip.components) {
+        console.log("components: " + clip.components + ",");
+    }
     var animation = clip.animation;
     if (animation != undefined) {
         var key_frames = animation;

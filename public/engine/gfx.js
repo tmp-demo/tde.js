@@ -336,7 +336,10 @@ function resolve_animation_clip(clip, clip_time) {
   }
 
   if (anim.length == 0) {
-    return [0];
+    var zeros = []
+    for (var i = 0; i < clip.components; i++)
+      zeros.push(0)
+    return zeros;
   }
 
   if (config.UNIFORM_INTERPOLATION_ENABLED) {

@@ -684,8 +684,18 @@ angular.module("tde.clip-editor", [])
             hideable: false
           })
 
+          $scope.engineRedraw()
+
           guiValue = {}
           var uniform = uniforms[$scope.uniformName]
+          if (uniform === 0)
+          {
+            // the engine never set this uniform
+            var zeros = []
+            for (var i = 0; i < clip.components; i++)
+              zeros.push(0)
+            uniform = zeros;
+          }
           var folder = gui.addFolder($scope.uniformName)
           for (var i = 0; i < clip.components; i++)
           {
