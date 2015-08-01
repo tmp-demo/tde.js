@@ -26,7 +26,7 @@ angular.module("tde.clip-editor", [])
         animation: []
       }
       var name = ""
-      var selectedClips = []
+      var selectedKeys = [] // array of [keyIndex, componentIndex]
 
       var RULER_WIDTH = 40
       var RULER_HEIGHT = 20
@@ -80,14 +80,17 @@ angular.module("tde.clip-editor", [])
           ctx.fillRect(beatToX(clip.duration), RULER_HEIGHT, canvas.width - beatToX(clip.duration), canvas.height - RULER_HEIGHT)
         }
 
-        function curveColor(component)
+        function curveColor(component, alpha)
         {
+          if (!alpha)
+            alpha = 1.0
+
           switch (component)
           {
-            case 0: return "#f22"
-            case 1: return "#0f0"
-            case 2: return "#44f"
-            case 3: return "#ddd"
+            case 0: return "rgba(255, 34, 34, " + alpha + ")"
+            case 1: return "rgba(0, 144, 0, " + alpha + ")"
+            case 2: return "rgba(68, 68, 255, " + alpha + ")"
+            case 3: return "rgba(221, 221, 221, " + alpha + ")"
           }
 
           return "#fff"
@@ -113,6 +116,30 @@ angular.module("tde.clip-editor", [])
               ctx.lineTo(x, y)
           }
           ctx.stroke()
+        }
+
+        // keyframes
+        for (var i = 0; i < clip.animation.length; i++)
+        {
+          var key = clip.animation[i]
+          var beat = key[0]
+          var value = key[1]
+
+          var x = beatToX(beat)
+          for (var component = 0; component < clip.components; component++)
+          {
+            var y = valueToY(value[component])
+
+            var alpha = 0.3
+            if (selectionIndexOf([i, component]) != -1)
+              alpha = 1.0
+
+            ctx.fillStyle = curveColor(component, alpha)
+            ctx.fillRect(x - 5, y - 5, 10, 10)
+
+            ctx.strokeStyle = curveColor(component)
+            ctx.strokeRect(x - 5, y - 5, 10, 10)
+          }
         }
 
         // selection square
@@ -183,30 +210,31 @@ angular.module("tde.clip-editor", [])
         })
       }
 
-      function findClip(x, y)
+      function findKey(x, y)
       {
         if (x < RULER_WIDTH) return null
         if (y < RULER_HEIGHT) return null
 
-        var trackIndex = Math.floor(yToValue(y))
-        if (trackIndex < 0) return null
-        if (trackIndex >= Object.keys(tracks).length) return null
-
-        var beat = xToBeat(x)
-        var track = tracks[Object.keys(tracks)[trackIndex]]
-        for (var i = 0; i < track.length; i++)
+        for (var i = 0; i < clip.animation.length; i++)
         {
-          var clip = track[i]
-          var end = clip.start + clip.duration
+          var key = clip.animation[i]
+          var beat = key[0]
+          var value = key[1]
 
-          if ((beat >= clip.start) && (beat < end))
-            return clip
+          var x2 = beatToX(beat)
+          for (var component = 0; component < clip.components; component++)
+          {
+            var y2 = valueToY(value[component])
+
+            if (Math.sqrt(Math.pow(x - x2, 2.0) + Math.pow(y - y2, 2.0)) < 15)
+              return [i, component]
+          }
         }
 
         return null
       }
 
-      function findClipsInRectangle(x1, y1, x2, y2)
+      function findKeysInRectangle(x1, y1, x2, y2)
       {
         if (x2 < x1)
         {
@@ -222,23 +250,25 @@ angular.module("tde.clip-editor", [])
           y2 = tmp
         }
 
-        var clips = []
+        var keys = []
 
-        var trackNames = Object.keys(tracks)
-        var minTrack = Math.max(Math.floor(yToValue(y1)), 0)
-        var maxTrack = Math.min(Math.floor(yToValue(y2)), trackNames.length - 1)
-
-        for (var i = minTrack; i <= maxTrack; i++)
+        for (var i = 0; i < clip.animation.length; i++)
         {
-          var track = tracks[trackNames[i]]
-          track.forEach(function(clip)
+          var key = clip.animation[i]
+          var beat = key[0]
+          var value = key[1]
+
+          var xKey = beatToX(beat)
+          for (var component = 0; component < clip.components; component++)
           {
-            if ((x1 < beatToX(clip.start + clip.duration)) && (x2 > beatToX(clip.start)))
-              clips.push(clip)
-          })
+            var yKey = valueToY(value[component])
+
+            if ((xKey + 5 >= x1) && (xKey - 5 < x2) && (yKey + 5 >= y1) && (yKey - 5 <= y2))
+              keys.push([i, component])
+          }
         }
 
-        return clips
+        return keys
       }
 
       function updateRulerSteps()
@@ -252,10 +282,35 @@ angular.module("tde.clip-editor", [])
           rulerStepY *= 10
       }
 
+      function selectionIndexOf(key)
+      {
+        if (!key)
+          return -1
+
+        for (var i = 0; i < selectedKeys.length; i++)
+        {
+          if ((selectedKeys[i][0] == key[0]) && (selectedKeys[i][1] == key[1]))
+            return i
+        }
+
+        return -1
+      }
+
+      function isKeyIndexSelected(index)
+      {
+        for (var i = 0; i < selectedKeys.length; i++)
+        {
+          if (selectedKeys[i][0] == index)
+            return true
+        }
+
+        return false
+      }
+
       // focuses everything if nothing is selected
       function focusSelection()
       {
-        var emptySelection = true//(selectedClips.length === 0)
+        var emptySelection = (selectedKeys.length === 0)
 
         // don't try to focus if there's no data
         if (clip.animation.length === 0)
@@ -265,17 +320,17 @@ angular.module("tde.clip-editor", [])
         var maxBeat = -1000000
         var minValue = 1000000
         var maxValue = -1000000
-        clip.animation.forEach(function(key)
+        clip.animation.forEach(function(key, index)
         {
-          if (emptySelection)
+          var beat = key[0]
+          var value = key[1]
+          for (var i = 0; i < clip.components; i++)
           {
-            var beat = key[0]
-            minBeat = Math.min(minBeat, beat)
-            maxBeat = Math.max(maxBeat, beat)
-
-            var value = key[1]
-            for (var i = 0; i < clip.components; i++)
+            if (emptySelection || (selectionIndexOf([index, i]) != -1))
             {
+              minBeat = Math.min(minBeat, beat)
+              maxBeat = Math.max(maxBeat, beat)
+
               minValue = Math.min(minValue, value[i])
               maxValue = Math.max(maxValue, value[i])
             }
@@ -335,7 +390,8 @@ angular.module("tde.clip-editor", [])
       var panning = false
       var seeking = false
       var dragging = false
-      var dragOffset = 0
+      var dragOffsetX = 0
+      var dragOffsetY = 0
       var zooming = false
       var selecting = false
       var selectionStartX = 0
@@ -353,37 +409,38 @@ angular.module("tde.clip-editor", [])
             return
           }
 
-          var clip = null; //findClip(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
+          var key = findKey(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
 
           // replace selection
-          if (!event.shiftKey && (selectedClips.indexOf(clip) == -1))
+          if (!event.shiftKey && (selectionIndexOf(key) == -1))
           {
-            if (clip)
-              selectedClips = [clip]
+            if (key)
+              selectedKeys = [key]
             else
-              selectedClips = []
+              selectedKeys = []
           }
 
           // modify selection
-          if (event.shiftKey && clip)
+          if (event.shiftKey && key)
           {
-            var selectedIndex = selectedClips.indexOf(clip)
+            var selectedIndex = selectionIndexOf(key)
             if (selectedIndex == -1)
             {
               // append
-              selectedClips.push(clip)
+              selectedKeys.push(key)
             }
             else
             {
               // remove
-              selectedClips.splice(selectedIndex, 1)
+              selectedKeys.splice(selectedIndex, 1)
             }
           }
 
-          if (selectedClips.length > 0)
+          if (selectedKeys.length > 0)
           {
             dragging = true
-            dragOffset = 0
+            dragOffsetX = 0
+            dragOffsetY = 0
           }
           else
           {
@@ -416,14 +473,14 @@ angular.module("tde.clip-editor", [])
       {
         if (dragging)
         {
-          dragOffset = snapX(dragOffset)
-          if (Math.abs(dragOffset) > 0)
+          dragOffsetX = snapX(dragOffsetX)
+          if (Math.abs(dragOffsetX) > 0)
           {
-            selectedClips.forEach(function(clip)
+            /*selectedKeys.forEach(function(key)
             {
-              clip.start += dragOffset
-            })
-            dragOffset = 0
+              clip.start += dragOffsetX
+            })*/
+            dragOffsetX = 0
             $scope.updateSequenceData($scope.sequence.data)
           }
         }
@@ -450,7 +507,8 @@ angular.module("tde.clip-editor", [])
 
         if (dragging)
         {
-          dragOffset += event.movementX / scaleX
+          dragOffsetX += event.movementX / scaleX
+          dragOffsetY += event.movementY / scaleY
         }
 
         if (zooming)
@@ -472,7 +530,7 @@ angular.module("tde.clip-editor", [])
           selectionEndX = event.pageX - jqCanvas.offset().left
           selectionEndY = event.pageY - jqCanvas.offset().top
 
-          //selectedClips = findClipsInRectangle(selectionStartX, selectionStartY, selectionEndX, selectionEndY)
+          selectedKeys = findKeysInRectangle(selectionStartX, selectionStartY, selectionEndX, selectionEndY)
         }
         
         redraw()
@@ -512,86 +570,24 @@ angular.module("tde.clip-editor", [])
 
       canvas.addEventListener("dblclick", function(event)
       {
-        var trackNames = Object.keys(tracks)
-        var trackIndex = Math.floor(yToValue(event.pageY - jqCanvas.offset().top))
-        var clip = findClip(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
+        var key = findKey(event.pageX - jqCanvas.offset().left, event.pageY - jqCanvas.offset().top)
 
-        if (event.pageX - jqCanvas.offset().left <= RULER_WIDTH)
+        if (key)
         {
-          if ((trackIndex < 0) || (trackIndex >= trackNames.length))
+          // edit key value
+          var value = clip.animation[key[0]][1][key[1]]
+          var newValue = prompt("New value", value)
+          if (newValue)
           {
-            // create new track
-            var newTrackName = prompt("New track name", "track42")
-            if (newTrackName)
-            {
-              if (tracks.hasOwnProperty(newTrackName))
-              {
-                alert("This track name already exists!")
-                return
-              }
-
-              tracks[newTrackName] = []
-              $scope.updateSequenceData($scope.sequence.data)
-            }
-          }
-          else
-          {
-            // rename track
-            var newTrackName = prompt("Track name", trackNames[trackIndex])
-            if (newTrackName)
-            {
-              var otherIndex = trackNames.indexOf(newTrackName)
-              if ((otherIndex != -1) && (otherIndex != trackIndex))
-              {
-                alert("This track name already exists!")
-                return
-              }
-
-              tracks[newTrackName] = tracks[trackNames[trackIndex]]
-              delete tracks[trackNames[trackIndex]]
-              $scope.updateSequenceData($scope.sequence.data)
-            }
-          }
-
-          return;
-        }
-
-        if (clip)
-        {
-          // edit clip content
-          if (clip.evaluate)
-          {
-            var newExpression = prompt("Expression", clip.evaluate)
-            if (newExpression)
-            {
-              clip.evaluate = newExpression
-              $scope.updateSequenceData($scope.sequence.data)
-            }
-          }
-          else
-          {
-            // startup a dedicated clip editor
-            $scope.selectClip(clip)
+            clip.animation[key[0]][1][key[1]] = parseFloat(newValue)
+            $scope.updateSequenceData($scope.sequence.data)
           }
         }
         else
         {
-          // create new clip
-          if (trackIndex < 0) return
-          if (trackIndex >= trackNames.length) return
-
-          var newClip = {
-            start: snapX(xToBeat(event.pageX - jqCanvas.offset().left) - rulerStepX * 0.5),
-            duration: 2 * rulerStepX,
-          }
-
-          if (event.shiftKey)
-            newClip.evaluate = "[t]"
-          else
-            newClip.animation = []
-
-          tracks[trackNames[trackIndex]].push(newClip)
-          $scope.updateSequenceData($scope.sequence.data)
+          // create new key
+          seek(xToBeat(event.pageX - jqCanvas.offset().left))
+          insertKeyframe()
         }
       })
 
@@ -600,15 +596,8 @@ angular.module("tde.clip-editor", [])
         if (event.keyCode == 46 /* del */)
         {
           // delete everything selected
-          for (var name in tracks)
-          {
-            var track = tracks[name]
-            tracks[name] = track.filter(function(clip)
-            {
-              return selectedClips.indexOf(clip) == -1
-            })
-          }
-          selectedClips = []
+          // TODO
+          selectedKeys = []
           $scope.updateSequenceData($scope.sequence.data)
         }
 
