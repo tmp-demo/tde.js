@@ -344,10 +344,10 @@ angular.module("tde.clip-editor", [])
         if (clip.animation.length === 0)
           return
 
-        var minBeat = 1000000
-        var maxBeat = -1000000
-        var minValue = 1000000
-        var maxValue = -1000000
+        var minBeat = clip.animation[0][0]
+        var maxBeat = clip.animation[0][0]
+        var minValue = clip.animation[0][1][0]
+        var maxValue = clip.animation[0][1][0]
         clip.animation.forEach(function(key, index)
         {
           var beat = key[0]
