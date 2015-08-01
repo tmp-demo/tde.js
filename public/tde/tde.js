@@ -62,7 +62,7 @@ angular.module("tde", [
   
   $scope.currentUser = User.currentUser
   $scope.currentSequence = EngineDriver.sequenceInfo
-  $scope.currentClip = null
+  $scope.currentClipIndex = -1
   $scope.uniformName = null
 
   $scope.seek = function(time)
@@ -81,20 +81,18 @@ angular.module("tde", [
     })
   }
 
-  $scope.selectClip = function(clip, trackName)
+  $scope.selectClip = function(clipIndex, trackName)
   {
-    $scope.$apply(function()
-    {
-      $scope.currentClip = clip
-      $scope.uniformName = trackName
-    })
+    console.log("clip selected: ", clipIndex, trackName)
+    $scope.currentClipIndex = clipIndex
+    $scope.uniformName = trackName
   }
 
   $scope.exitClip = function()
   {
     $scope.$apply(function()
     {
-      $scope.currentClip = null
+      $scope.currentClipIndex = -1
       $scope.uniformName = null
     })
   }

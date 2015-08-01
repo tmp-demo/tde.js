@@ -539,7 +539,10 @@ angular.module("tde.timeline", [])
           else
           {
             // startup a dedicated clip editor
-            $scope.selectClip(clip, trackNames[trackIndex])
+            $scope.$apply(function()
+            {
+              $scope.selectClip(tracks[trackNames[trackIndex]].indexOf(clip), trackNames[trackIndex])
+            })
           }
         }
         else
@@ -623,7 +626,7 @@ angular.module("tde.timeline", [])
       window.addEventListener("resize", resize)
       resize()
 
-      $scope.$watch("sequence", function(newSequence, oldSequence)
+      $scope.$watch("sequence", function()
       {
         tracks = $scope.sequence.data.hasOwnProperty("animations") ? $scope.sequence.data.animations : {}
         name = $scope.sequence.name

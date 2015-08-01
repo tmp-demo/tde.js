@@ -30,8 +30,8 @@
     <div id="rightPane">
       <tde-engine-view></tde-engine-view>
         <div id="timeline" class="border">
-            <tde-timeline ng-hide="currentClip" data-sequence="currentSequence" data-update-sequence-data="updateSequenceData" data-select-clip="selectClip" data-seek="seek"></tde-timeline>
-            <tde-clip-editor ng-show="currentClip" data-sequence="currentSequence" data-update-sequence-data="updateSequenceData" data-clip="currentClip" data-exit-clip="exitClip" data-seek="seek" data-uniform-name="uniformName" data-engine-redraw="engineRedraw"></tde-clip-editor>
+            <tde-timeline ng-hide="currentClipIndex != -1" data-sequence="currentSequence" data-update-sequence-data="updateSequenceData" data-select-clip="selectClip" data-seek="seek"></tde-timeline>
+            <tde-clip-editor ng-show="currentClipIndex != -1" data-sequence="currentSequence" data-update-sequence-data="updateSequenceData" data-clip-index="currentClipIndex" data-exit-clip="exitClip" data-seek="seek" data-uniform-name="uniformName" data-engine-redraw="engineRedraw"></tde-clip-editor>
         </div>
     </div>
   

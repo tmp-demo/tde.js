@@ -6,12 +6,12 @@ angular.module("tde.clip-editor", [])
     restrict: "E",
     templateUrl: "/tde/clip-editor/clip-editor.html",
     scope: {
-        clip: "=clip",
         sequence: "=sequence",
         updateSequenceData: "=updateSequenceData",
         exitClip: "=exitClip",
         seek: "=seek",
         uniformName: "=uniformName",
+        clipIndex: "=clipIndex",
         engineRedraw: "=engineRedraw"
     },
     link: function($scope, element, attrs)
@@ -108,7 +108,7 @@ angular.module("tde.clip-editor", [])
         {
           ctx.strokeStyle = curveColor(component)
           ctx.beginPath()
-          for (var x = RULER_WIDTH; x < canvas.width; x += 2)
+          for (var x = RULER_WIDTH; x < canvas.width; x += 10)
           {
             var y = valueToY(resolve_animation_clip(engineClip, xToBeat(x))[component])
             if (x == RULER_WIDTH)
@@ -499,7 +499,7 @@ angular.module("tde.clip-editor", [])
 
           dragOffsetX = 0
           dragOffsetY = 0
-          
+
           $scope.updateSequenceData($scope.sequence.data)
         }
 
@@ -665,7 +665,7 @@ angular.module("tde.clip-editor", [])
       var gui = null
       var guiValue = null
       var guiControllers = []
-      $scope.$watch("clip", function(newClip)
+      function updateClip()
       {
         if (gui)
         {
@@ -675,9 +675,9 @@ angular.module("tde.clip-editor", [])
           guiControllers = []
         }
 
-        if (newClip)
+        if ($scope.sequence.data && $scope.sequence.data.hasOwnProperty("animations") && ($scope.clipIndex != -1))
         {
-          clip = newClip
+          clip = $scope.sequence.data.animations[$scope.uniformName][$scope.clipIndex]
 
           gui = new dat.GUI({
             resizable: false,
@@ -708,9 +708,20 @@ angular.module("tde.clip-editor", [])
 
           folder.open()
         }
+        else
+        {
+          clip = {
+            start: 0,
+            duration: 16,
+            animation: []
+          }
+        }
 
         redraw()
-      }, true)
+      }
+
+      $scope.$watch("clipIndex", updateClip)
+      $scope.$watch("sequence.data", updateClip, true)
 
       $scope.$watch("sequence.time", function()
       {
