@@ -15,17 +15,11 @@ var ctx_2d
 var render_passes = [];
 
 var gl_ext_half_float;
-var blendings;
+var blendings = {};
 
 if (config.EDITOR) {
   var uniform_editor_overrides = {};
 }
-
-var textElement = document.createElement("div");
-textElement.style.position = "absolute";
-textElement.style.top = "0";
-textElement.style.font = "40px Verdana, Geneva, sans-serif";
-textElement.textContent = "<3";
 
 function gl_init() {
   if (config.EDITOR) {
@@ -62,12 +56,11 @@ function gl_init() {
 
   gl.depthFunc(gl.LEQUAL);
   gl.viewport(0, 0, canvas.width, canvas.height);
-  
-  blendings = {
-    add: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA]
-  };
 
-  canvas.parentElement.appendChild(textElement);
+  // TODO: would be nice to not use strings here...
+  blendings["alpha"] = [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA];
+  blendings["add"] = [gl.ONE, gl.ONE];
+  blendings["sub"] = [gl.ZERO, gl.ONE_MINUS_SRC_COLOR];
 }
 
 var _locations = [
@@ -500,8 +493,6 @@ function render_frame(time) {
 
   render_rg(time);
 
-  textElement.style.transform = "translate(" + uniforms["text_pos"][0] + "px," + uniforms["text_pos"][1] + "px)";
-  
   if (config.GL_DEBUG && config.GL_DEBUG_TRACE) {
     console.log("== FRAME END ==");
   }
@@ -522,7 +513,8 @@ function set_blending(blend) {
     gl.disable(gl.BLEND);
     if (blend) {
       gl.enable(gl.BLEND);
-      gl.blendFunc.apply(gl, blendings[blend] || blend);
+      var blend_param = blendings[blend];
+      gl.blendFunc(blend_param[0],blend_param[1]);
     }
   }
 }

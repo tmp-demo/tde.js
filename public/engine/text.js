@@ -1,3 +1,4 @@
+var ctx_2d = {};
 
 function text_init() {
   if (!config.TEXT_ENABLED)

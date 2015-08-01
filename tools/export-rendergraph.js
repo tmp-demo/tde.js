@@ -22,7 +22,7 @@ function export_blend(pass) {
     if (!pass.blend)
       return;
     
-    console.log("blend: " + JSON.stringify(pass.blend) + ",");
+    console.log("blend: '" + pass.blend + "',");
 }
 
 function export_local_unifroms(pass) {
